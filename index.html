@@ -7,7 +7,7 @@
   <meta name="description" content="A layered interactive travel guide for Taiwan Trip 2026." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -32,9 +32,10 @@
       --radius-lg: 28px;
       --radius: 22px;
       --ease: cubic-bezier(.2,.8,.2,1);
-      --font-serif: "Newsreader", "Noto Serif TC", "Noto Serif SC", serif;
-      --font-sans: "Noto Sans TC", "Noto Sans SC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: "Manrope", "Noto Sans TC", system-ui, sans-serif;
+      --font-display: "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", "Microsoft JhengHei", "Microsoft YaHei", system-ui, sans-serif;
+      --font-serif: var(--font-display);
+      --font-sans: "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", "Microsoft JhengHei", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "Manrope", "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
     }
 
     * { box-sizing: border-box; }
@@ -848,9 +849,10 @@
       --radius: 24px;
       --ease: cubic-bezier(.19, 1, .22, 1);
       --bounce: cubic-bezier(.34, 1.56, .64, 1);
-      --font-serif: "Newsreader", "Noto Serif TC", serif;
-      --font-sans: "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: "Manrope", "Noto Sans TC", system-ui, sans-serif;
+      --font-display: "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", "Microsoft JhengHei", "Microsoft YaHei", system-ui, sans-serif;
+      --font-serif: var(--font-display);
+      --font-sans: "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", "Microsoft JhengHei", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "Manrope", "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
     }
 
     body {
@@ -945,6 +947,7 @@
     .city-card h3 {
       font-family: var(--font-serif);
       font-variation-settings: normal;
+      font-weight: 700;
       letter-spacing: 0;
     }
     .chip,
@@ -988,7 +991,7 @@
       border-radius: 999px;
       box-shadow: 0 10px 24px rgba(23, 50, 77, .1), inset 0 -2px 0 rgba(23,50,77,.04);
       font-family: var(--font-mono);
-      font-weight: 800;
+      font-weight: 700;
       transition: transform .22s var(--bounce), box-shadow .22s var(--ease), background .22s var(--ease);
     }
     .btn:hover {
@@ -1207,7 +1210,7 @@
       letter-spacing: 0;
       text-transform: none;
       font-family: var(--font-mono);
-      font-weight: 800;
+      font-weight: 700;
     }
     .journey-home .journey-title {
       margin: 4px 0 0;
@@ -2530,6 +2533,65 @@
       color: #76581D;
       line-height: 1.55;
       font-size: 13px;
+    }
+
+    /* Typography polish: modern Chinese web feel, no stroke-contrast display font */
+    .serif,
+    .journey-title,
+    .hero-title,
+    .page-title,
+    .day-title-grid h1,
+    .empty-state h2,
+    .hero-trip-card h2,
+    .city-card h3,
+    .postcard-content h2,
+    .home-city-card strong,
+    .home-card-head strong,
+    .section-head h2,
+    .panel-head h2,
+    .map-card-head h2,
+    .brand-title strong,
+    .future-card strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: -0.012em;
+      font-variation-settings: normal;
+    }
+    .journey-title {
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .btn,
+    .nav-btn,
+    .tab-btn,
+    .action-btn,
+    .chip,
+    .tag,
+    .density-pill,
+    .route-node,
+    .top-actions .btn,
+    .journey-quick-row button {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+    .top-actions .btn {
+      font-size: 15px;
+    }
+    .panel-head h2,
+    .section-head h2,
+    .map-card-head h2 {
+      line-height: 1.16;
+    }
+    .timeline-time,
+    .date-chip strong,
+    .route-metric strong,
+    .route-metric span,
+    .map-stat strong,
+    .map-node-num,
+    .travel-marker span {
+      font-family: var(--font-mono);
+      font-weight: 700;
     }
 
     @keyframes heroIn {
