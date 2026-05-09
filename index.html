@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>台湾旅行 2026 · 行程规划</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+    }
+
+    /* ── HEADER ── */
+    .hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: white;
+      padding: 48px 24px 36px;
+      text-align: center;
+    }
+    .hero .flag { font-size: 48px; margin-bottom: 12px; }
+    .hero h1 { font-size: 28px; font-weight: 700; letter-spacing: 2px; margin-bottom: 6px; }
+    .hero .subtitle { font-size: 14px; opacity: 0.7; letter-spacing: 1px; }
+    .hero .dates {
+      margin-top: 20px;
+      display: inline-flex;
+      gap: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50px;
+      padding: 8px 20px;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    /* ── TRIP OVERVIEW TIMELINE ── */
+    .overview {
+      background: white;
+      padding: 28px 24px;
+      margin: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .overview h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #999;
+      margin-bottom: 20px;
+    }
+    .timeline {
+      display: flex;
+      gap: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      height: 64px;
+    }
+    .tl-seg {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      gap: 3px;
+    }
+    .tl-seg .city { font-size: 15px; font-weight: 700; }
+    .tl-seg .day  { font-size: 11px; opacity: 0.85; }
+    .tl-kaohsiung { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+    .tl-kenting   { background: linear-gradient(135deg, #00b4d8, #0077b6); }
+    .tl-taipei    { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+
+    .city-cards {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .city-badge {
+      flex: 1;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: white;
+      font-size: 12px;
+    }
+    .city-badge .name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .city-badge.k  { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+    .city-badge.kt { background: linear-gradient(135deg, #00b4d8, #0077b6); }
+    .city-badge.t  { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+
+    /* ── FLIGHT BANNER ── */
+    .flight-banner {
+      margin: 16px 16px 0;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 14px;
+      padding: 16px 20px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .flight-banner .icon { font-size: 28px; }
+    .flight-banner .info { flex: 1; }
+    .flight-banner .route { font-size: 16px; font-weight: 700; }
+    .flight-banner .detail { font-size: 12px; opacity: 0.85; margin-top: 3px; }
+    .flight-banner .time-box {
+      background: rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 6px 12px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* ── SECTION HEADERS ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 16px 8px;
+    }
+    .section-header .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .section-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .section-header .tag {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* ── DAY CARDS ── */
+    .day-card {
+      margin: 8px 16px;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+    .day-header {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+    }
+    .day-header .day-title { font-size: 16px; font-weight: 700; }
+    .day-header .day-sub   { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+    .day-header .day-badge {
+      background: rgba(255,255,255,0.25);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* ── TIMELINE ITEMS ── */
+    .timeline-list {
+      padding: 8px 0 12px;
+    }
+    .tl-item {
+      display: flex;
+      gap: 0;
+      padding: 0 18px;
+      position: relative;
+    }
+    .tl-left {
+      width: 56px;
+      flex-shrink: 0;
+      text-align: right;
+      padding-right: 14px;
+      padding-top: 12px;
+    }
+    .tl-left .time {
+      font-size: 12px;
+      font-weight: 600;
+      color: #888;
+      line-height: 1.2;
+    }
+    .tl-mid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 24px;
+      flex-shrink: 0;
+    }
+    .tl-mid .line {
+      width: 2px;
+      flex: 1;
+      min-height: 16px;
+      background: #e8eaf0;
+    }
+    .tl-mid .line.top { min-height: 12px; }
+    .tl-mid .circle {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      background: white;
+      flex-shrink: 0;
+      margin: 2px 0;
+    }
+    .tl-right {
+      flex: 1;
+      padding: 10px 0 10px 10px;
+    }
+    .tl-right .label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a2e;
+      line-height: 1.3;
+    }
+    .tl-right .desc {
+      font-size: 12px;
+      color: #888;
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+    .tl-right .tag-row {
+      display: flex;
+      gap: 5px;
+      margin-top: 5px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .chip-food     { background: #fff3e0; color: #e65100; }
+    .chip-sight    { background: #e3f2fd; color: #1565c0; }
+    .chip-shop     { background: #f3e5f5; color: #6a1b9a; }
+    .chip-night    { background: #fce4ec; color: #880e4f; }
+    .chip-transit  { background: #e8f5e9; color: #2e7d32; }
+    .chip-hotel    { background: #f5f5f5; color: #424242; }
+    .chip-alert    { background: #fff8e1; color: #f57f17; }
+    .chip-dive     { background: #e0f7fa; color: #006064; }
+    .chip-nature   { background: #e8f5e9; color: #1b5e20; }
+
+    /* ── SPECIAL BLOCKS ── */
+    .info-block {
+      margin: 8px 16px;
+      background: white;
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .info-block h3 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .coverage-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .cov-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #444;
+    }
+    .cov-item .check { font-size: 14px; }
+
+    .warn-block {
+      margin: 8px 16px;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #795548;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .warn-block .icon { font-size: 16px; flex-shrink: 0; }
+
+    .note-block {
+      margin: 8px 16px 24px;
+      background: #e3f2fd;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #1565c0;
+      display: flex;
+      gap: 8px;
+    }
+
+    /* ── HOTEL CARD ── */
+    .hotel-card {
+      margin: 8px 16px;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .hotel-header {
+      padding: 14px 16px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hotel-header .icon { font-size: 28px; }
+    .hotel-header .name { font-size: 16px; font-weight: 700; }
+    .hotel-header .stars { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+    .hotel-body {
+      background: white;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #555;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .hotel-body .stat { display: flex; align-items: center; gap: 4px; }
+
+    /* ── SEPARATOR ── */
+    .city-sep {
+      height: 8px;
+      background: #f0f2f5;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    /* Kaohsiung colors */
+    .bg-kaohsiung { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+    .dot-kaohsiung { background: #e74c3c; }
+    .tag-kaohsiung { background: #fdecea; color: #c0392b; }
+    .circle-kaohsiung { border-color: #e74c3c !important; }
+
+    /* Kenting colors */
+    .bg-kenting { background: linear-gradient(135deg, #00b4d8, #0077b6); }
+    .dot-kenting { background: #00b4d8; }
+    .tag-kenting { background: #e0f7fa; color: #0077b6; }
+    .circle-kenting { border-color: #00b4d8 !important; }
+
+    /* Taipei colors */
+    .bg-taipei { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+    .dot-taipei { background: #2ecc71; }
+    .tag-taipei { background: #e8f5e9; color: #27ae60; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<div class="hero">
+  <div class="flag">🇹🇼</div>
+  <h1>台湾旅行 2026</h1>
+  <div class="subtitle">TAIWAN · MAY 2026</div>
+  <div class="dates">✈️ &nbsp;5月11日 — 5月19日 &nbsp;·&nbsp; 9天8夜</div>
+</div>
+
+<!-- ══════════════ OVERVIEW ══════════════ -->
+<div class="overview">
+  <h2>行程总览</h2>
+  <div class="timeline">
+    <div class="tl-seg tl-kaohsiung">
+      <span class="city">高雄</span>
+      <span class="day">5/11–5/13</span>
+    </div>
+    <div class="tl-seg tl-kenting">
+      <span class="city">墾丁</span>
+      <span class="day">5/13–5/16</span>
+    </div>
+    <div class="tl-seg tl-taipei">
+      <span class="city">台北</span>
+      <span class="day">5/16–5/19</span>
+    </div>
+  </div>
+  <div class="city-cards">
+    <div class="city-badge k">
+      <div class="name">🏙 高雄</div>
+      <div>2晚 · 港湾城市</div>
+    </div>
+    <div class="city-badge kt">
+      <div class="name">🏖 墾丁</div>
+      <div>3晚 · 南国海岸</div>
+    </div>
+    <div class="city-badge t">
+      <div class="name">🌆 台北</div>
+      <div>3晚 · 首都探索</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FLIGHT ══════════════ -->
+<div class="flight-banner">
+  <div class="icon">✈️</div>
+  <div class="info">
+    <div class="route">香港 → 高雄</div>
+    <div class="detail">U0136 · 经济舱 · 小港国际机场(KHH) T1</div>
+  </div>
+  <div class="time-box">
+    <div>12:45</div>
+    <div style="font-size:10px;opacity:0.8;margin:1px 0">→</div>
+    <div>14:15</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!--           高雄 KAOHSIUNG              -->
+<!-- ══════════════════════════════════════ -->
+
+<div class="section-header">
+  <div class="dot dot-kaohsiung"></div>
+  <h2>高雄</h2>
+  <span class="chip tag-kaohsiung">5月11日 — 5月13日</span>
+</div>
+
+<!-- 高雄 酒店 -->
+<div class="hotel-card">
+  <div class="hotel-header bg-kaohsiung">
+    <div class="icon">🏨</div>
+    <div>
+      <div class="name">福容徕旅 高雄</div>
+      <div class="stars">⭐ 4.5 · 999评 · 4星级 · 已订</div>
+    </div>
+  </div>
+  <div class="hotel-body">
+    <div class="stat">🌙 入住 5/11（约16:00）</div>
+    <div class="stat">🏃 退房 5/13（10:30前）</div>
+    <div class="stat">💰 约HK$574/晚</div>
+  </div>
+</div>
+
+<!-- 高雄 DAY 1 -->
+<div class="day-card">
+  <div class="day-header bg-kaohsiung">
+    <div>
+      <div class="day-title">Day 1 · 5月11日（周一）</div>
+      <div class="day-sub">抵达日 — 机场 → 美丽岛 → 酒店</div>
+    </div>
+    <div class="day-badge">下午出发</div>
+  </div>
+  <div class="timeline-list">
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">14:15</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">✈️ 小港国际机场落地</div>
+        <div class="desc">过关取行李，约30分钟</div>
+        <div class="tag-row"><span class="chip chip-transit">入境</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">14:45</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🍜 机场吃午饭</div>
+        <div class="desc">到了先吃饭，机场1楼有多家餐厅</div>
+        <div class="tag-row"><span class="chip chip-food">饮食</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">15:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚇 搭捷运橙线去市区</div>
+        <div class="desc">小港站(O13) → 美丽岛站(O5)，约20分钟，NT$30</div>
+        <div class="tag-row"><span class="chip chip-transit">交通</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">16:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🏨 福容徒旅 check-in</div>
+        <div class="desc">放行李，稍作休息</div>
+        <div class="tag-row"><span class="chip chip-hotel">住宿</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">17:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🌈 Dome of Light 光之穹顶</div>
+        <div class="desc">美丽岛捷运站内，全球最大玻璃艺术品，17:00有光影秀！完全免费</div>
+        <div class="tag-row"><span class="chip chip-sight">景点</span><span class="chip chip-alert">免费</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">17:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🌳 高雄中央公园</div>
+        <div class="desc">美丽岛站旁，步行5分钟，热带都市绿洲，随意散步</div>
+        <div class="tag-row"><span class="chip chip-sight">景点</span><span class="chip chip-alert">24小时</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">18:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🥛 老江红茶牛奶 南台总店</div>
+        <div class="desc">高雄60年老字号，招牌红茶牛奶必喝，24小时营业</div>
+        <div class="tag-row"><span class="chip chip-food">饮食</span><span class="chip chip-alert">必打卡</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">19:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🌙 六合夜市</div>
+        <div class="desc">高雄最著名夜市，下午4:30开，晚上最热闹。各种小吃炸物</div>
+        <div class="tag-row"><span class="chip chip-food">夜市</span><span class="chip chip-night">夜间</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">21:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🏨 返回酒店休息</div>
+        <div class="tag-row"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 高雄 DAY 2 -->
+<div class="day-card">
+  <div class="day-header bg-kaohsiung">
+    <div>
+      <div class="day-title">Day 2 · 5月12日（周二）</div>
+      <div class="day-sub">全天 — 美术馆 · 购物 · 港边日落</div>
+    </div>
+    <div class="day-badge">精华全天</div>
+  </div>
+  <div class="timeline-list">
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">09:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚕 打车去高雄市立美术馆</div>
+        <div class="desc">约20分钟，车费约NT$200–250。9:30开门，周二正常营业</div>
+        <div class="tag-row"><span class="chip chip-transit">交通</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">09:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🖼 高雄市立美术馆</div>
+        <div class="desc">台湾南部最大美术馆，常设展+特展，评分4.5/11000+评</div>
+        <div class="tag-row"><span class="chip chip-sight">文艺</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">11:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚕 打车去三多商圈</div>
+        <div class="desc">约15分钟，NT$150–200</div>
+        <div class="tag-row"><span class="chip chip-transit">交通</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">12:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🍱 午饭</div>
+        <div class="desc">三多商圈附近随意找家店吃饭</div>
+        <div class="tag-row"><span class="chip chip-food">饮食</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">13:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🛍 高雄新堀江</div>
+        <div class="desc">下午1点才开门，高雄年轻人购物圣地，潮牌、服饰、配件</div>
+        <div class="tag-row"><span class="chip chip-shop">购物</span><span class="chip chip-alert">1PM开门</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">14:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚇 捷运三多商圈站</div>
+        <div class="desc">周边随意逛，搭橙线→西子湾站(O1)，约15分钟</div>
+        <div class="tag-row"><span class="chip chip-transit">交通</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">15:45</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🏛 打狗英国领事馆官邸</div>
+        <div class="desc">百年红砖古建筑，高雄最美历史遗迹。9:00–17:00，要赶在关门前到！</div>
+        <div class="tag-row"><span class="chip chip-sight">历史</span><span class="chip chip-alert">17:00关门</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">17:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🌊 西子湾</div>
+        <div class="desc">高雄最美海湾，吹海风、拍照，傍晚光线极佳</div>
+        <div class="tag-row"><span class="chip chip-sight">海景</span><span class="chip chip-alert">24小时</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">18:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🎨 驳二艺术特区</div>
+        <div class="desc">高雄文创重镇，艺术装置+创意小店，10:00–18:00</div>
+        <div class="tag-row"><span class="chip chip-sight">文艺</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">18:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🌅 驳二大义站 · 看日落</div>
+        <div class="desc">轻轨大义站旁的大桥，5月日落约18:40，高雄港最美落日</div>
+        <div class="tag-row"><span class="chip chip-sight">日落</span><span class="chip chip-alert">18:40日落</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">19:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🍽 驳二附近吃晚饭</div>
+        <div class="desc">驳二及哈玛星周边有多家餐厅可选</div>
+        <div class="tag-row"><span class="chip chip-food">饮食</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">21:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">💙 爱河之心 · 夜景打卡</div>
+        <div class="desc">搭捷运回市区途中顺路，爱河夜晚灯光很美，24小时</div>
+        <div class="tag-row"><span class="chip chip-night">夜景</span><span class="chip chip-alert">24小时</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">22:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kaohsiung"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🏨 返回酒店</div>
+        <div class="tag-row"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 高雄 警告 -->
+<div class="warn-block">
+  <div class="icon">⚠️</div>
+  <div><strong>85 Sky Tower</strong> 显示「暂停营业」，出发前请在 Google Maps 再次确认是否恢复。</div>
+</div>
+
+<!-- 高雄 景点覆盖 -->
+<div class="info-block">
+  <h3>✅ 高雄清单完成情况</h3>
+  <div class="coverage-grid">
+    <div class="cov-item"><span class="check">✅</span> Dome of Light</div>
+    <div class="cov-item"><span class="check">✅</span> 高雄中央公园</div>
+    <div class="cov-item"><span class="check">✅</span> 老江红茶牛奶</div>
+    <div class="cov-item"><span class="check">✅</span> 六合夜市</div>
+    <div class="cov-item"><span class="check">✅</span> 高雄市立美术馆</div>
+    <div class="cov-item"><span class="check">✅</span> 高雄新堀江</div>
+    <div class="cov-item"><span class="check">✅</span> 捷运三多商圈</div>
+    <div class="cov-item"><span class="check">✅</span> 打狗英国领事馆</div>
+    <div class="cov-item"><span class="check">✅</span> 西子湾</div>
+    <div class="cov-item"><span class="check">✅</span> 驳二艺术特区</div>
+    <div class="cov-item"><span class="check">✅</span> 驳二大义站日落</div>
+    <div class="cov-item"><span class="check">✅</span> 爱河之心</div>
+    <div class="cov-item"><span class="check">⚠️</span> 85 Sky Tower（暂停营业）</div>
+  </div>
+</div>
+
+<div class="city-sep"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!--           墾丁 KENTING                -->
+<!-- ══════════════════════════════════════ -->
+
+<div class="section-header">
+  <div class="dot dot-kenting"></div>
+  <h2>墾丁</h2>
+  <span class="chip tag-kenting">5月13日 — 5月16日</span>
+</div>
+
+<!-- 墾丁 酒店 -->
+<div class="hotel-card">
+  <div class="hotel-header bg-kenting">
+    <div class="icon">🌊</div>
+    <div>
+      <div class="name">日和湾居（Sunshine Liv）</div>
+      <div class="stars">🏖 南湾第一排 · 海景露台 · 纯白极简</div>
+    </div>
+  </div>
+  <div class="hotel-body">
+    <div class="stat">🌙 入住 5/13（约13:00）</div>
+    <div class="stat">🏃 退房 5/16（11:00前）</div>
+    <div class="stat">🛵 店内可租还机车</div>
+    <div class="stat">🌊 步行5min到南湾沙滩</div>
+  </div>
+</div>
+
+<!-- 墾丁 DAY 1 -->
+<div class="day-card">
+  <div class="day-header bg-kenting">
+    <div>
+      <div class="day-title">Day 3 · 5月13日（周三）</div>
+      <div class="day-sub">高雄 → 墾丁 · 抵达休闲日</div>
+    </div>
+    <div class="day-badge">移动日</div>
+  </div>
+  <div class="timeline-list">
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">10:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">⏰ 起床，退房</div>
+        <div class="desc">整理行李，福容徒旅 check-out</div>
+        <div class="tag-row"><span class="chip chip-hotel">住宿</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">10:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚇 前往高铁左营站</div>
+        <div class="desc">打车或搭捷运红线到左营，约30分钟</div>
+        <div class="tag-row"><span class="chip chip-transit">交通</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">11:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚌 搭墾丁快线 9189</div>
+        <div class="desc">高铁左营站发车，每30分钟一班，约1.5小时，NT$145</div>
+        <div class="tag-row"><span class="chip chip-transit">交通</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">12:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🏖 抵达墾丁！打车至日和湾居</div>
+        <div class="desc">从墾丁大街到南湾，约NT$150，check-in放行李</div>
+        <div class="tag-row"><span class="chip chip-transit">交通</span><span class="chip chip-hotel">住宿</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">14:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🏝 放行李，直接踩沙滩</div>
+        <div class="desc">走出酒店就是南湾沙滩，吹风、泡脚、发呆，完全放松</div>
+        <div class="tag-row"><span class="chip chip-nature">海滩</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">18:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚕 打车去墾丁大街</div>
+        <div class="desc">约10分钟，逛逛大街，感受墾丁氛围</div>
+        <div class="tag-row"><span class="chip chip-transit">交通</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">18:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🌙 墾丁大街夜市</div>
+        <div class="desc">周五–日 17:00–24:00营业，烤香肠、炸物、甜品随便吃</div>
+        <div class="tag-row"><span class="chip chip-food">夜市</span><span class="chip chip-night">夜间</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">21:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🏨 返回酒店</div>
+        <div class="tag-row"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 墾丁 DAY 2 -->
+<div class="day-card">
+  <div class="day-header bg-kenting">
+    <div>
+      <div class="day-title">Day 4 · 5月14日（周四）</div>
+      <div class="day-sub">浮潜日 — 南湾 · 日落 · 大街</div>
+    </div>
+    <div class="day-badge">🤿 浮潜</div>
+  </div>
+  <div class="timeline-list">
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">10:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">☀️ 起床，吃早餐</div>
+        <div class="desc">酒店早餐或附近随便吃</div>
+        <div class="tag-row"><span class="chip chip-food">饮食</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">12:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚕 前往 Good Dive 集合点</div>
+        <div class="desc">⚠️ 出发前需联系Good Dive确认：集合在店里还是海边？有无接送？</div>
+        <div class="tag-row"><span class="chip chip-transit">交通</span><span class="chip chip-alert">需提前确认</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">13:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🤿 浮潜体验</div>
+        <div class="desc">Good Dive · 13:00场次，含装备+教学，约2–2.5小时</div>
+        <div class="tag-row"><span class="chip chip-dive">浮潜</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">15:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚿 冲澡换衣，返回酒店</div>
+        <div class="desc">在浮潜点冲掉海水后，回酒店好好洗澡</div>
+        <div class="tag-row"><span class="chip chip-transit">返程</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">15:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">💄 回酒店 · 洗澡 · 化妆收拾</div>
+        <div class="desc">充足时间，不用赶</div>
+        <div class="tag-row"><span class="chip chip-hotel">休息</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">18:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🌅 酒店露台/沙滩看日落</div>
+        <div class="desc">日和湾居直面南湾，5月日落约18:40，不用去任何地方</div>
+        <div class="tag-row"><span class="chip chip-nature">日落</span><span class="chip chip-alert">18:40</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">19:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🌙 打车去墾丁大街吃晚饭</div>
+        <div class="desc">夜市小吃、炸物、甜品，随便逛随便吃</div>
+        <div class="tag-row"><span class="chip chip-food">饮食</span><span class="chip chip-night">夜市</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">21:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🏨 返回酒店</div>
+        <div class="tag-row"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 墾丁 DAY 3 -->
+<div class="day-card">
+  <div class="day-header bg-kenting">
+    <div>
+      <div class="day-title">Day 5 · 5月15日（周五）</div>
+      <div class="day-sub">机车环线日 — 西线 · 鵝鑾鼻 · 日落</div>
+    </div>
+    <div class="day-badge">🛵 环线</div>
+  </div>
+  <div class="timeline-list">
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">10:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">☀️ 起床，吃早午饭</div>
+        <div class="tag-row"><span class="chip chip-food">饮食</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">11:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🛵 酒店前台直接租机车</div>
+        <div class="desc">日和湾居店内可租还，125cc约NT$350–500/天，出发！</div>
+        <div class="tag-row"><span class="chip chip-transit">租车</span><span class="chip chip-alert">店内租还</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">11:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">⛵ 船帆石</div>
+        <div class="desc">南湾出发约20分钟，奇岩地貌，形似大船帆，超级出片</div>
+        <div class="tag-row"><span class="chip chip-nature">景点</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">13:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🍱 路上找小店吃午饭</div>
+        <div class="desc">环线沿途有不少小吃店</div>
+        <div class="tag-row"><span class="chip chip-food">饮食</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">14:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🗼 鵝鑾鼻公园</div>
+        <div class="desc">台湾最南端！最高灯塔（56m），壮阔海景，游览约1小时</div>
+        <div class="tag-row"><span class="chip chip-nature">景点</span><span class="chip chip-alert">最南端</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">16:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🌿 龙磐公园</div>
+        <div class="desc">悬崖上的壮阔草原，面朝太平洋，风很大，景色震撼</div>
+        <div class="tag-row"><span class="chip chip-nature">景点</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">18:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🌅 骑回南湾，等日落</div>
+        <div class="desc">在南湾沙滩或小湾看日落，5月约18:40，然后在酒店门口还车</div>
+        <div class="tag-row"><span class="chip chip-nature">日落</span><span class="chip chip-alert">18:40</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">19:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🛵 酒店门口还机车</div>
+        <div class="tag-row"><span class="chip chip-transit">还车</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">19:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🍽 附近吃晚饭</div>
+        <div class="desc">南湾周边随意找一家，或打车去大街</div>
+        <div class="tag-row"><span class="chip chip-food">饮食</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 墾丁 DAY 4（出发台北） -->
+<div class="day-card">
+  <div class="day-header bg-kenting">
+    <div>
+      <div class="day-title">Day 6 · 5月16日（周六）</div>
+      <div class="day-sub">墾丁 → 台北 · 出发日</div>
+    </div>
+    <div class="day-badge">移动日</div>
+  </div>
+  <div class="timeline-list">
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">10:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">☀️ 起床，最后看一眼海</div>
+        <div class="desc">在露台喝杯咖啡，告别南湾</div>
+        <div class="tag-row"></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">11:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🏨 退房，打车到快线站</div>
+        <div class="tag-row"><span class="chip chip-hotel">退房</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">11:30</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚌 墾丁快线 → 高铁左营</div>
+        <div class="desc">NT$145，约1.5小时到左营</div>
+        <div class="tag-row"><span class="chip chip-transit">交通</span></div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left"><div class="time">13:00</div></div>
+      <div class="tl-mid"><div class="line top"></div><div class="circle circle-kenting"></div><div class="line"></div></div>
+      <div class="tl-right">
+        <div class="label">🚄 高铁左营 → 台北</div>
+        <div class="desc">高铁约1.5小时，到台北约14:30–15:00</div>
+        <div class="tag-row"><span class="chip chip-transit">高铁</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="city-sep"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!--           台北 TAIPEI                 -->
+<!-- ══════════════════════════════════════ -->
+
+<div class="section-header">
+  <div class="dot dot-taipei"></div>
+  <h2>台北</h2>
+  <span class="chip tag-taipei">5月16日 — 5月19日</span>
+</div>
+
+<div class="info-block" style="border: 2px dashed #c8e6c9; background: #f9fff9;">
+  <h3>🌆 台北行程</h3>
+  <div style="font-size:13px;color:#555;line-height:1.7;">
+    台北段行程待规划。<br>
+    抵达台北约 <strong>14:30–15:00（5/16）</strong>，5/19 返港。<br>
+    如需规划台北详细行程，欢迎继续告知！
+  </div>
+</div>
+
+<div class="city-sep"></div>
+
+<!-- ══════════════ QUICK NOTES ══════════════ -->
+<div style="padding: 8px 16px 0;">
+  <div style="font-size:13px;font-weight:700;color:#999;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">实用提醒</div>
+</div>
+
+<div class="note-block">
+  <div>🚌</div>
+  <div><strong>墾丁快线 9189</strong> 高铁左营站发车，每30分钟一班，全程约1.5小时，NT$145。建议提前查当天班次时刻。</div>
+</div>
+<div class="note-block" style="background:#fff3e0;color:#e65100;">
+  <div>🛵</div>
+  <div><strong>机车租借</strong>：日和湾居店内可租还，无需另找租车店，当天出发前告知前台即可。</div>
+</div>
+<div class="note-block" style="background:#fce4ec;color:#880e4f;">
+  <div>🤿</div>
+  <div><strong>浮潜报名</strong>：出发前务必联系 Good Dive 确认：① 集合点在店里还是海边 ② 有无接送服务。时间固定10:00/13:00两场，选13:00场。</div>
+</div>
+<div class="note-block" style="background:#f3e5f5;color:#6a1b9a;">
+  <div>💰</div>
+  <div><strong>现金准备</strong>：墾丁大街多数摊位收现金为主，部分支持LINE Pay，建议备NT$1,000–2,000现金。</div>
+</div>
+
+<footer>
+  ✈️ Taiwan Trip 2026 &nbsp;·&nbsp; 5/11–5/19 &nbsp;·&nbsp; 规划于 2026年5月
+</footer>
+
+</body>
+</html>
