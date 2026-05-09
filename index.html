@@ -525,6 +525,65 @@
     .item-note { margin-top: 10px; padding: 10px 12px; border-radius: 16px; background: rgba(232,218,196,.36); color: #5f5146; font-size: 12px; line-height: 1.55; }
 
     .route-panel { display: grid; gap: 12px; }
+    .route-plan {
+      margin-bottom: 16px;
+      padding: 18px;
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(16,34,53,.07), rgba(127,154,128,.12));
+      border: 1px solid rgba(16,34,53,.08);
+    }
+    .route-plan-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: start;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .route-plan-head h3 { margin: 0 0 7px; font-size: 20px; }
+    .route-plan-head p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 13px; max-width: 620px; }
+    .route-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .route-metric {
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,253,248,.72);
+      border: 1px solid rgba(16,34,53,.08);
+    }
+    .route-metric strong { display: block; font-size: 17px; color: var(--navy); }
+    .route-metric span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; font-weight: 800; }
+    .route-stop-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+    .route-stop-pill {
+      display: flex;
+      gap: 9px;
+      align-items: start;
+      padding: 11px;
+      border-radius: 18px;
+      background: rgba(255,253,248,.7);
+      border: 1px solid rgba(16,34,53,.08);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .route-stop-pill b {
+      flex: 0 0 auto;
+      width: 24px;
+      height: 24px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--navy);
+      color: #fff;
+      font-size: 12px;
+    }
     .route-step {
       display: grid;
       grid-template-columns: 34px minmax(0, 1fr);
@@ -723,6 +782,7 @@
       .hero-row, .page-title-row, .day-title-grid { grid-template-columns: 1fr; display: grid; }
       .hero-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .hotel-grid, .food-grid, .budget-grid, .suggest-grid { grid-template-columns: 1fr; }
+      .route-metrics, .route-stop-grid { grid-template-columns: 1fr; }
       .timeline-item { grid-template-columns: 1fr; }
       .timeline-time { padding-top: 0; }
       .search-input { width: 100%; min-width: 0; }
@@ -837,6 +897,12 @@
         "墾丁": [
           "南湾沙滩",
           "墾丁大街夜市",
+          "西线电动车环游",
+          "后壁湖渔港",
+          "猫鼻头公园",
+          "白沙湾海滩",
+          "关山夕照 / 高山岩福德宫",
+          "恒春镇中心晚餐",
           "Good Dive 浮潜",
           "船帆石",
           "鵝鑾鼻公园",
@@ -944,24 +1010,54 @@
         cityName: "高雄 → 墾丁",
         title: "转场墾丁",
         density: "中等",
-        focus: "高雄退房、转场墾丁、南湾、墾丁大街",
+        focus: "高雄退房、转场墾丁、西线电动车环游、恒春镇中心晚餐",
         planned: true,
         timeline: [
           item("d3-1000", "10:00", "起床退房", "hotel", "福容徕旅 高雄", "高雄退房，准备转场。", "步行"),
           item("d3-1030", "10:30", "前往高铁左营站", "transport", "高铁左营站", "去搭墾丁快线。", "打车/捷运"),
           item("d3-1100", "11:00", "搭墾丁快线 9189", "transport", "高铁左营站", "前往墾丁。", "快线 9189"),
           item("d3-1230", "12:30", "抵达墾丁，打车至日和湾居", "transport", "日和湾居 Sunshine Liv", "到酒店放行李。", "打车"),
-          item("d3-1400", "14:00", "南湾沙滩", "sight", "南湾沙滩", "第一眼海景，不安排过满。", "步行/打车"),
-          item("d3-1800a", "18:00", "打车去墾丁大街", "transport", "墾丁大街", "晚饭去夜市。", "打车"),
-          item("d3-1800b", "18:00", "墾丁大街夜市", "night-market", "墾丁大街夜市", "南部夜市氛围。", "步行"),
-          item("d3-2100", "21:00", "返回酒店", "hotel", "日和湾居 Sunshine Liv", "保留海边夜晚。", "打车")
+          item("d3-1330", "13:30", "日和湾居 check-in / 租电动车", "activity", "日和湾居 Sunshine Liv", "放行李，确认电动车租借、证件、保险和还车时间。", "酒店"),
+          item("d3-1500", "15:00", "西线电动车环游出发", "activity", "日和湾居 Sunshine Liv", "3 小时压缩版西线：短停拍照，不把每站拉太久。", "电动车"),
+          item("d3-1520", "15:20", "后壁湖渔港", "sight", "后壁湖渔港", "补水、上厕所、短暂停留。", "电动车"),
+          item("d3-1555", "15:55", "猫鼻头公园", "sight", "猫鼻头公园", "海岸观景，停留拍照。", "电动车"),
+          item("d3-1640", "16:40", "白沙湾海滩", "sight", "白沙湾海滩", "日落前沙滩拍照，不作为主日落点。", "电动车"),
+          item("d3-1730", "17:30", "关山夕照 / 高山岩福德宫", "sunset", "关山夕照 / 高山岩福德宫", "正式看日落点，视野更高更开阔。", "电动车"),
+          item("d3-1830", "18:30", "恒春镇中心晚餐", "food", "恒春镇中心", "晚餐地点待定，先锁定恒春镇中心范围。", "电动车"),
+          item("d3-2100", "21:00", "返回日和湾居", "hotel", "日和湾居 Sunshine Liv", "回酒店休息，确认电动车还车。", "电动车")
         ],
-        reminders: ["出发前确认墾丁快线 9189 当日班次。", "建议准备现金。"],
-        food: ["墾丁大街夜市"],
+        routePlan: {
+          title: "西线电动车环游",
+          subtitle: "日和湾居出发，压缩成约 3 小时骑行。白沙湾负责沙滩拍照，关山才是正式日落点，晚餐先锁定恒春镇中心。",
+          metrics: [
+            ["31 km", "总距离"],
+            ["70 min", "纯骑行"],
+            ["约 3 h", "压缩版含短停"],
+            ["15:00", "建议出发"]
+          ],
+          googleMapsUrl: "https://www.google.com/maps/dir/?api=1&origin=21.9587664,120.7672723&destination=21.9587664,120.7672723&waypoints=21.9452905,120.7408588%7C21.9222406,120.7373466%7C21.9340356,120.7183345%7C21.9636701,120.7196053%7C22.00092,120.74644&travelmode=driving",
+          stops: [
+            ["日和湾居 Sunshine Liv.", "起点 / 终点"],
+            ["后壁湖渔港", "补给 / 短停"],
+            ["猫鼻头公园", "海岸观景"],
+            ["白沙湾海滩", "沙滩拍照"],
+            ["关山夕照 / 高山岩福德宫", "正式日落点"],
+            ["恒春古城南门 / 老街", "晚餐区域"]
+          ]
+        },
+        reminders: [
+          "出发前确认墾丁快线 9189 当日班次。",
+          "建议准备现金。",
+          "西线电动车约 31 km，压缩版按 15:00–18:00 左右执行，每站短停。",
+          "白沙湾只做沙滩拍照，正式日落点放在关山夕照 / 高山岩福德宫。",
+          "第一晚晚餐先记录为恒春镇中心，具体餐厅待确认。"
+        ],
+        food: ["恒春镇中心晚餐（店待定）"],
         budget: [
           budget("墾丁快线 9189", "NT$145", "交通"),
           budget("打车费用", "估算", "交通"),
-          budget("墾丁大街夜市", "估算", "夜市")
+          budget("电动车租借", "待确认", "交通"),
+          budget("恒春镇中心晚餐", "估算", "餐饮")
         ]
       },
       {
@@ -1641,6 +1737,7 @@
             <p class="rail-muted">按地点顺序串起当天移动方式。</p>
           </div>
         </div>
+        ${renderRoutePlan(day)}
         <div class="route-panel">
           ${day.timeline.map((item, index) => `
             <div class="route-step">
@@ -1656,6 +1753,30 @@
             </div>
           `).join("")}
         </div>
+      `;
+    }
+
+    function renderRoutePlan(day) {
+      if (!day.routePlan) return "";
+      const plan = day.routePlan;
+      return `
+        <article class="route-plan">
+          <div class="route-plan-head">
+            <div>
+              <h3>${icon("bike", "icon-sm")} ${esc(plan.title)}</h3>
+              <p>${esc(plan.subtitle)}</p>
+            </div>
+            <button class="btn btn-small btn-primary" onclick="openMapsUrl('${escAttr(plan.googleMapsUrl)}')">${icon("map-pin", "icon-sm")} 打开西线路线</button>
+          </div>
+          <div class="route-metrics">
+            ${plan.metrics.map(([value, label]) => `<div class="route-metric"><strong>${esc(value)}</strong><span>${esc(label)}</span></div>`).join("")}
+          </div>
+          <div class="route-stop-grid">
+            ${plan.stops.map(([name, tag], index) => `
+              <div class="route-stop-pill"><b>${index + 1}</b><span><strong>${esc(name)}</strong><br>${esc(tag)}</span></div>
+            `).join("")}
+          </div>
+        </article>
       `;
     }
 
@@ -1944,6 +2065,9 @@
     function openMaps(query) {
       window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, "_blank", "noopener,noreferrer");
     }
+    function openMapsUrl(url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
     async function copyText(text) {
       try {
         await navigator.clipboard.writeText(text);
@@ -2024,6 +2148,7 @@
     window.saveExpense = saveExpense;
     window.deleteExpense = deleteExpense;
     window.openMaps = openMaps;
+    window.openMapsUrl = openMapsUrl;
     window.copyText = copyText;
     window.copyDayPlan = copyDayPlan;
     window.copyTripSummary = copyTripSummary;
