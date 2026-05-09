@@ -7,7 +7,7 @@
   <meta name="description" content="A layered interactive travel guide for Taiwan Trip 2026." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..900,50..100,0..1&family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -32,6 +32,9 @@
       --radius-lg: 28px;
       --radius: 22px;
       --ease: cubic-bezier(.2,.8,.2,1);
+      --font-serif: "Newsreader", "Noto Serif TC", "Noto Serif SC", serif;
+      --font-sans: "Noto Sans TC", "Noto Sans SC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "Manrope", "Noto Sans TC", system-ui, sans-serif;
     }
 
     * { box-sizing: border-box; }
@@ -39,7 +42,7 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: "Inter", "Noto Sans TC", system-ui, -apple-system, sans-serif;
+      font-family: var(--font-sans);
       color: var(--ink);
       background:
         linear-gradient(140deg, rgba(16,34,53,.06), transparent 32%),
@@ -51,7 +54,7 @@
     button { -webkit-tap-highlight-color: transparent; }
     a { color: inherit; }
     .hidden { display: none !important; }
-    .serif { font-family: "Playfair Display", Georgia, serif; }
+    .serif { font-family: var(--font-serif); }
     .icon { width: 18px; height: 18px; stroke-width: 1.9; }
     .icon-sm { width: 15px; height: 15px; stroke-width: 2; }
 
@@ -786,7 +789,14 @@
       .journey-grid { grid-template-columns: 1fr; }
       .hero-trip-card { min-height: 430px; }
       .topbar { height: 62px; padding: 0 14px; }
-      .top-actions .btn:not(.keep-mobile) { display: none; }
+      .top-actions .btn:not(.keep-mobile):not(.home-mobile) { display: none; }
+      .top-actions .home-mobile {
+        display: inline-flex;
+        width: 42px;
+        min-width: 42px;
+        padding: 0;
+      }
+      .top-actions .home-mobile span { display: none; }
       .app-shell { grid-template-columns: 1fr; padding: 16px 14px 96px; }
       .side-nav { display: none; }
       .mobile-nav { display: grid; }
@@ -838,10 +848,13 @@
       --radius: 24px;
       --ease: cubic-bezier(.19, 1, .22, 1);
       --bounce: cubic-bezier(.34, 1.56, .64, 1);
+      --font-serif: "Newsreader", "Noto Serif TC", serif;
+      --font-sans: "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "Manrope", "Noto Sans TC", system-ui, sans-serif;
     }
 
     body {
-      font-family: "Noto Sans SC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: var(--font-sans);
       color: var(--ink-navy);
       background-color: var(--cream);
       background-image:
@@ -930,8 +943,8 @@
     .empty-state h2,
     .hero-trip-card h2,
     .city-card h3 {
-      font-family: "Fraunces", "Noto Serif SC", Georgia, serif;
-      font-variation-settings: "SOFT" 70, "WONK" 1;
+      font-family: var(--font-serif);
+      font-variation-settings: normal;
       letter-spacing: 0;
     }
     .chip,
@@ -942,7 +955,7 @@
     .stat-tile strong,
     .route-metric strong,
     .route-metric span {
-      font-family: "Space Grotesk", "Noto Sans SC", system-ui, sans-serif;
+      font-family: var(--font-mono);
     }
 
     .card,
@@ -974,7 +987,7 @@
       color: var(--ink-navy);
       border-radius: 999px;
       box-shadow: 0 10px 24px rgba(23, 50, 77, .1), inset 0 -2px 0 rgba(23,50,77,.04);
-      font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
+      font-family: var(--font-mono);
       font-weight: 800;
       transition: transform .22s var(--bounce), box-shadow .22s var(--ease), background .22s var(--ease);
     }
@@ -1166,8 +1179,386 @@
     }
     .future-card strong {
       color: rgba(23, 50, 77, .74);
-      font-family: "Fraunces", "Noto Serif SC", serif;
+      font-family: var(--font-serif);
     }
+
+    .journey-home {
+      align-items: center;
+      color: var(--ink-navy);
+    }
+    .journey-home .journey-wrap {
+      width: min(1240px, 100%);
+    }
+    .journey-hero-layout {
+      display: grid;
+      grid-template-columns: minmax(0, .92fr) minmax(380px, .78fr);
+      gap: clamp(20px, 4vw, 48px);
+      align-items: center;
+    }
+    .journey-copy {
+      display: grid;
+      align-content: center;
+      gap: 18px;
+      min-height: 560px;
+    }
+    .journey-home .journey-kicker {
+      width: fit-content;
+      color: #0A6EA1;
+      letter-spacing: 0;
+      text-transform: none;
+      font-family: var(--font-mono);
+      font-weight: 800;
+    }
+    .journey-home .journey-title {
+      margin: 4px 0 0;
+      max-width: 720px;
+      font-size: clamp(52px, 8.2vw, 104px);
+      line-height: .94;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+    .journey-home .journey-subtitle {
+      max-width: 650px;
+      margin: 0;
+      color: #486B83;
+      font-size: clamp(18px, 2.1vw, 25px);
+      line-height: 1.55;
+      font-weight: 700;
+    }
+    .journey-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 720px;
+    }
+    .journey-meta-grid span {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 44px;
+      padding: 10px 13px;
+      border: 1px solid rgba(23,50,77,.08);
+      border-radius: 18px;
+      background: rgba(255,255,255,.56);
+      box-shadow: 0 10px 24px rgba(23,50,77,.06);
+      color: #31536C;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .journey-note {
+      max-width: 680px;
+      margin: 0;
+      color: #526D83;
+      line-height: 1.75;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .journey-actions,
+    .journey-quick-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn-journey {
+      min-height: 52px;
+      padding-inline: 22px;
+      font-size: 15px;
+    }
+    .journey-quick-row button {
+      border: 1px solid rgba(23,50,77,.08);
+      background: rgba(255,255,255,.62);
+      color: var(--ink-navy);
+      border-radius: 18px;
+      min-height: 46px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 850;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(23,50,77,.06);
+      transition: transform .22s var(--bounce), background .22s var(--ease);
+    }
+    .journey-quick-row button:hover {
+      transform: translateY(-3px);
+      background: #fff;
+    }
+    .journey-side {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+      animation: postcardIn .78s var(--bounce) .12s both;
+    }
+    .taiwan-postcard {
+      position: relative;
+      overflow: hidden;
+      min-height: 360px;
+      border-radius: 34px;
+      padding: 24px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 80% 14%, rgba(255,209,102,.84), transparent 17%),
+        linear-gradient(138deg, rgba(28,167,236,.96), rgba(0,191,166,.94) 48%, rgba(255,107,90,.9));
+      border: 1px solid rgba(255,255,255,.65);
+      box-shadow: 0 34px 80px rgba(28,129,180,.24);
+    }
+    .taiwan-postcard::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .48;
+      background:
+        linear-gradient(116deg, transparent 16%, rgba(255,255,255,.28) 16.2%, transparent 16.6% 48%, rgba(255,255,255,.24) 48.2%, transparent 48.7%),
+        radial-gradient(circle at 12% 88%, rgba(255,255,255,.28), transparent 22%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.1) 0 1px, transparent 1px 24px);
+      animation: routeDraw 6s ease-in-out infinite alternate;
+    }
+    .postcard-stamp {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 86px;
+      height: 86px;
+      border: 2px dashed rgba(255,255,255,.78);
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      transform: rotate(6deg);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-weight: 900;
+      font-size: 12px;
+      z-index: 2;
+    }
+    .postcard-route,
+    .postcard-content {
+      position: relative;
+      z-index: 2;
+    }
+    .postcard-route {
+      margin: 18px 0 42px;
+      padding-right: 84px;
+    }
+    .home-route-preview {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      align-items: center;
+    }
+    .home-route-line {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 21px;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.35);
+      overflow: hidden;
+    }
+    .home-route-line::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform-origin: left center;
+      background: linear-gradient(90deg, #fff, var(--mango), #fff);
+      animation: routeLineDraw 2.8s var(--ease) both, routeFlow 5.5s linear infinite 2.8s;
+    }
+    .home-route-node {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      justify-items: center;
+      gap: 7px;
+      border: 0;
+      background: transparent;
+      color: #fff;
+      cursor: default;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .home-route-node .icon-sm {
+      width: 42px;
+      height: 42px;
+      padding: 11px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.22);
+      border: 1px solid rgba(255,255,255,.45);
+      box-shadow: 0 12px 24px rgba(23,50,77,.14);
+      transition: transform .22s var(--bounce), background .22s var(--ease);
+    }
+    .home-route-node.clickable {
+      cursor: pointer;
+    }
+    .home-route-node.clickable:hover .icon-sm {
+      transform: translateY(-4px) scale(1.04);
+      background: rgba(255,255,255,.34);
+    }
+    .home-route-node.current .icon-sm {
+      animation: routePulse 2.6s ease-in-out infinite;
+    }
+    .postcard-content {
+      display: grid;
+      gap: 14px;
+      max-width: 420px;
+    }
+    .postcard-content .trip-label {
+      color: rgba(255,255,255,.86);
+      letter-spacing: 0;
+      text-transform: none;
+      font-family: var(--font-mono);
+    }
+    .postcard-content h2 {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: .98;
+    }
+    .postcard-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .postcard-tags span {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.2);
+      border: 1px solid rgba(255,255,255,.24);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .home-map-card,
+    .new-trip-card,
+    .home-city-card {
+      border: 1px solid rgba(23,50,77,.08);
+      background: rgba(255,255,255,.68);
+      box-shadow: 0 16px 34px rgba(23,50,77,.08);
+      border-radius: 26px;
+    }
+    .home-map-card {
+      padding: 12px;
+    }
+    .home-card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 4px 4px 10px;
+      color: var(--ink-navy);
+    }
+    .home-card-head strong {
+      font-family: var(--font-serif);
+      font-size: 22px;
+    }
+    .home-card-head span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .home-map-card .home-route-map {
+      height: 270px;
+      border-radius: 22px;
+    }
+    .new-trip-card {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      text-align: left;
+      padding: 16px;
+      color: var(--ink-navy);
+      cursor: pointer;
+      transition: transform .22s var(--bounce), background .22s var(--ease);
+    }
+    .new-trip-card:hover {
+      transform: translateY(-3px);
+      background: #fff;
+    }
+    .new-trip-plus {
+      width: 46px;
+      height: 46px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, var(--coral), var(--mango));
+    }
+    .new-trip-card strong,
+    .new-trip-card small {
+      display: block;
+    }
+    .new-trip-card strong {
+      font-family: var(--font-serif);
+      font-size: 18px;
+    }
+    .new-trip-card small {
+      margin-top: 4px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-weight: 700;
+    }
+    .home-city-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .home-city-card {
+      position: relative;
+      min-height: 138px;
+      padding: 18px;
+      text-align: left;
+      overflow: hidden;
+      color: var(--ink-navy);
+      cursor: pointer;
+      transition: transform .24s var(--bounce), box-shadow .24s var(--ease);
+    }
+    .home-city-card::after {
+      content: "";
+      position: absolute;
+      right: -24px;
+      bottom: -36px;
+      width: 120px;
+      height: 120px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+    .home-city-card:hover {
+      transform: translateY(-4px) rotate(.35deg);
+      box-shadow: 0 22px 44px rgba(23,50,77,.13);
+    }
+    .home-city-card span,
+    .home-city-card strong,
+    .home-city-card small {
+      position: relative;
+      z-index: 1;
+      display: block;
+    }
+    .home-city-card span {
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .home-city-card strong {
+      margin: 8px 0 10px;
+      font-family: var(--font-serif);
+      font-size: 32px;
+      line-height: 1;
+    }
+    .home-city-card small {
+      color: #526D83;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+    .home-city-kaohsiung { --accent: var(--ocean); }
+    .home-city-kenting { --accent: var(--teal); }
+    .home-city-taipei { --accent: var(--coral); }
 
     .topbar {
       background: rgba(255, 248, 234, .88);
@@ -1181,7 +1572,7 @@
       box-shadow: 0 14px 26px color-mix(in srgb, var(--accent) 28%, transparent);
     }
     .brand-title strong {
-      font-family: "Fraunces", "Noto Serif SC", serif;
+      font-family: var(--font-serif);
       font-size: 16px;
     }
     .app-shell {
@@ -1216,7 +1607,7 @@
     }
     .rail-card h3 {
       color: color-mix(in srgb, var(--accent) 68%, var(--ink-navy));
-      font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
+      font-family: var(--font-mono);
       letter-spacing: .02em;
     }
 
@@ -1314,7 +1705,7 @@
 
     .section-head h2,
     .panel-head h2 {
-      font-family: "Fraunces", "Noto Serif SC", serif;
+      font-family: var(--font-serif);
       font-size: clamp(22px, 3vw, 30px);
     }
     .city-grid {
@@ -1648,7 +2039,7 @@
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       box-shadow: 0 10px 22px color-mix(in srgb, var(--accent) 28%, transparent);
       animation: routePulse 2.6s ease-in-out infinite;
-      font-family: "Space Grotesk", sans-serif;
+      font-family: var(--font-mono);
     }
     .route-card,
     .route-plan,
@@ -1687,7 +2078,7 @@
     }
     .food-grid .mini-card h3 {
       color: #B15D13;
-      font-family: "Fraunces", "Noto Serif SC", serif;
+      font-family: var(--font-serif);
     }
     .budget-grid .mini-card {
       background:
@@ -1755,7 +2146,7 @@
         #FFF9E8;
       background-size: 100% 100%, 100% 32px, 100% 100%;
       box-shadow: 0 16px 34px rgba(23,50,77,.09), inset 0 0 0 10px rgba(255,255,255,.28);
-      font-family: "Noto Sans SC", system-ui, sans-serif;
+      font-family: var(--font-sans);
     }
 
     .overlay {
@@ -1854,13 +2245,13 @@
       align-items: center;
       gap: 7px;
       color: color-mix(in srgb, var(--accent) 70%, var(--ink-navy));
-      font: 800 12px/1 "Space Grotesk", "Noto Sans SC", sans-serif;
+      font: 800 12px/1 var(--font-mono);
       letter-spacing: .08em;
       text-transform: uppercase;
     }
     .map-card-head h2 {
       margin: 8px 0 4px;
-      font-family: "Fraunces", "Noto Serif SC", serif;
+      font-family: var(--font-serif);
       font-size: clamp(28px, 4vw, 44px);
       line-height: 1;
     }
@@ -1942,7 +2333,7 @@
     }
     .map-stat strong {
       display: block;
-      font: 800 20px/1.1 "Space Grotesk", sans-serif;
+      font: 800 20px/1.1 var(--font-mono);
       color: var(--ink-navy);
       margin-bottom: 4px;
     }
@@ -1999,7 +2390,7 @@
       place-items: center;
       color: #fff;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      font: 900 14px/1 "Space Grotesk", sans-serif;
+      font: 900 14px/1 var(--font-mono);
       box-shadow: 0 10px 18px color-mix(in srgb, var(--accent) 24%, transparent);
     }
     .map-node-card h3 {
@@ -2020,7 +2411,7 @@
       background: rgba(255,255,255,.58);
     }
     .leaflet-container {
-      font-family: "Noto Sans SC", system-ui, sans-serif;
+      font-family: var(--font-sans);
     }
     .leaflet-control-attribution {
       font-size: 10px;
@@ -2048,7 +2439,7 @@
     }
     .travel-marker span {
       transform: rotate(45deg);
-      font: 900 13px/1 "Space Grotesk", sans-serif;
+      font: 900 13px/1 var(--font-mono);
     }
     .travel-marker.selected,
     .travel-marker.hovered {
@@ -2173,6 +2564,10 @@
       from { background-position: 0 0; }
       to { background-position: 0 200%; }
     }
+    @keyframes routeLineDraw {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
     @keyframes routePulse {
       0%, 100% { transform: scale(1); box-shadow: 0 12px 24px rgba(23,50,77,.1); }
       50% { transform: scale(1.035); box-shadow: 0 14px 30px color-mix(in srgb, var(--accent) 22%, transparent); }
@@ -2223,11 +2618,76 @@
 
     @media (max-width: 1180px) {
       .app-shell { grid-template-columns: 230px minmax(0, 1fr); }
+      .journey-hero-layout {
+        grid-template-columns: 1fr;
+      }
+      .journey-copy {
+        min-height: auto;
+      }
     }
     @media (max-width: 820px) {
       .journey-page { place-items: start center; padding-top: 42px; }
       .journey-title { font-size: clamp(48px, 16vw, 72px); }
       .hero-trip-card { min-height: 390px; }
+      .journey-home { padding: 22px 14px 34px; }
+      .journey-home .journey-wrap { width: 100%; }
+      .journey-hero-layout { gap: 16px; }
+      .journey-home .journey-title { font-size: clamp(42px, 15vw, 64px); }
+      .journey-home .journey-subtitle { font-size: 17px; }
+      .journey-meta-grid,
+      .home-city-row {
+        grid-template-columns: 1fr;
+      }
+      .journey-actions .btn {
+        width: 100%;
+      }
+      .journey-quick-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .journey-quick-row button {
+        min-height: 58px;
+        padding: 8px 6px;
+        justify-content: center;
+        flex-direction: column;
+        border-radius: 20px;
+        font-size: 12px;
+      }
+      .taiwan-postcard {
+        min-height: 330px;
+        padding: 18px;
+      }
+      .postcard-stamp {
+        width: 68px;
+        height: 68px;
+        border-radius: 20px;
+        font-size: 10px;
+      }
+      .postcard-route {
+        padding-right: 54px;
+        margin-bottom: 30px;
+      }
+      .home-route-preview {
+        gap: 5px;
+      }
+      .home-route-node span {
+        font-size: 10px;
+      }
+      .home-route-node .icon-sm {
+        width: 34px;
+        height: 34px;
+        padding: 8px;
+      }
+      .home-route-line {
+        top: 17px;
+      }
+      .postcard-content h2 {
+        font-size: clamp(28px, 11vw, 40px);
+      }
+      .home-map-card .home-route-map {
+        height: 240px;
+      }
       .app-shell { grid-template-columns: 1fr; padding-top: 14px; }
       .dashboard-hero { min-height: 420px; }
       .hero-stats { grid-template-columns: 1fr 1fr; }
@@ -3102,48 +3562,93 @@
 
     function renderJourneySelect() {
       return `
-        <main class="journey-page">
+        <main class="journey-page journey-home">
           <div class="journey-wrap">
-            <div class="journey-kicker">${icon("compass", "icon-sm")} Travel Intelligence</div>
-            <h1 class="journey-title serif">Choose Your<br />Journey</h1>
-            <p class="journey-subtitle">选择你的旅行攻略</p>
-            <section class="journey-grid">
-              <article class="hero-trip-card">
-                <div>
-                  <div class="trip-card-top">
-                    <div>
-                      <div class="trip-label">Current Guide</div>
-                      <h2 class="serif">台湾 2026</h2>
-                    </div>
-                    <span class="tag sage">Ready</span>
-                  </div>
-                  <div class="trip-route-card">
-                    <div class="trip-route-line">
-                      <span>高雄</span><span>·</span><span>墾丁</span><span>·</span><span>台北</span>
-                    </div>
-                    <div class="trip-card-meta">
-                      <span class="chip">${icon("calendar-days", "icon-sm")} 9 天 8 夜</span>
-                      <span class="chip">${icon("calendar", "icon-sm")} May 2026</span>
-                      ${tripData.themes.map(t => `<span class="chip">${esc(t)}</span>`).join("")}
-                    </div>
-                  </div>
+            <section class="journey-hero-layout">
+              <div class="journey-copy">
+                <div class="journey-kicker">${icon("route", "icon-sm")} 当前旅程</div>
+                <h1 class="journey-title serif">台湾旅行 2026</h1>
+                <p class="journey-subtitle">高雄、墾丁、台北，9 天 8 夜。先把路线走顺，再把每天过得漂亮一点。</p>
+                <div class="journey-meta-grid">
+                  <span>${icon("calendar-days", "icon-sm")} 2026.05.11 – 2026.05.19</span>
+                  <span>${icon("plane", "icon-sm")} 香港 → 高雄 → 墾丁 → 台北 → 香港</span>
+                  <span>${icon("timer", "icon-sm")} 9 天 8 夜</span>
+                  <span>${icon("sparkles", "icon-sm")} 海岛 / 夜市 / 日落 / 城市漫游</span>
                 </div>
-                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-                  <button class="btn btn-primary" onclick="enterTrip()">${icon("arrow-right", "icon-sm")} 进入台湾攻略</button>
-                  <span style="color:var(--muted);font-size:13px;font-weight:700;">Hong Kong → Kaohsiung → Kenting → Taipei</span>
+                <p class="journey-note">高雄先看日落和夜市，墾丁留给海风和机车，台北先保留一点自由度。地图会跟着每天行程切换，不用在一长页里找东西。</p>
+                <div class="journey-actions">
+                  <button class="btn btn-primary btn-journey" onclick="enterTrip()">${icon("arrow-right", "icon-sm")} 进入行程</button>
+                  <button class="btn btn-ghost btn-journey" onclick="enterTripMap()">${icon("map", "icon-sm")} 查看路线地图</button>
                 </div>
-              </article>
-              <aside class="future-grid">
-                ${["Japan", "Korea", "Thailand", "Europe", "Custom Trip"].map(name => `
-                  <div class="future-card">
-                    <div><strong>${name}</strong><br><span>Coming later</span></div>
-                    ${icon("lock", "icon")}
+                <div class="journey-quick-row" aria-label="quick entries">
+                  <button onclick="selectCity('kaohsiung')">${icon("ship", "icon-sm")} 城市</button>
+                  <button onclick="selectDay('d1', 'kaohsiung')">${icon("calendar-check", "icon-sm")} 日期</button>
+                  <button onclick="enterTripMap()">${icon("route", "icon-sm")} 地图</button>
+                  <button onclick="enterTripChecklist()">${icon("check-square", "icon-sm")} 清单</button>
+                </div>
+              </div>
+              <aside class="journey-side">
+                <article class="taiwan-postcard">
+                  <div class="postcard-stamp">May 2026</div>
+                  <div class="postcard-route">
+                    ${renderHomeRoutePreview()}
                   </div>
-                `).join("")}
+                  <div class="postcard-content">
+                    <span class="trip-label">Taiwan Trip 2026</span>
+                    <h2 class="serif">Kaohsiung · Kenting · Taipei</h2>
+                    <div class="postcard-tags">
+                      <span>9D8N</span>
+                      <span>已规划：高雄、墾丁</span>
+                      <span>待规划：台北</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="enterTrip()">${icon("ticket", "icon-sm")} 进入台湾行程</button>
+                  </div>
+                </article>
+                <section class="home-map-card">
+                  <div class="home-card-head">
+                    <strong>路线预览</strong>
+                    <span>点击城市节点进入对应页面</span>
+                  </div>
+                  <div id="map-home-route" class="leaflet-map home-route-map" data-map-kind="trip" aria-label="首页台湾路线预览地图"></div>
+                </section>
+                <button class="new-trip-card" onclick="openNewTripModal()">
+                  <span class="new-trip-plus">${icon("plus", "icon-sm")}</span>
+                  <span><strong>新建下一段旅程</strong><small>从空白开始、导入地图，或复制当前台湾模板。</small></span>
+                </button>
               </aside>
+            </section>
+            <section class="home-city-row" aria-label="city quick cards">
+              ${Object.values(tripData.cities).map(city => `
+                <button class="home-city-card home-city-${city.id}" onclick="selectCity('${city.id}')">
+                  <span>${esc(city.range)}</span>
+                  <strong>${esc(city.name)}</strong>
+                  <small>${esc(city.id === "taipei" ? "先保留一点临场发挥。" : city.id === "kenting" ? "海风、浮潜和机车路线。" : "港湾、夜市和艺术区。")}</small>
+                </button>
+              `).join("")}
             </section>
           </div>
         </main>
+      `;
+    }
+
+    function renderHomeRoutePreview() {
+      const nodes = [
+        { label: "香港", iconName: "plane-takeoff" },
+        { label: "高雄", cityId: "kaohsiung", iconName: "ship" },
+        { label: "墾丁", cityId: "kenting", iconName: "waves" },
+        { label: "台北", cityId: "taipei", iconName: "building-2" },
+        { label: "香港", iconName: "plane-landing" }
+      ];
+      return `
+        <div class="home-route-preview" aria-label="香港到台湾旅行路线">
+          <div class="home-route-line"></div>
+          ${nodes.map((node, index) => `
+            <button class="home-route-node ${node.cityId ? "clickable" : ""} ${index === 1 ? "current" : ""}" ${node.cityId ? `onclick="selectCity('${node.cityId}')"` : "disabled"}>
+              ${icon(node.iconName, "icon-sm")}
+              <span>${esc(node.label)}</span>
+            </button>
+          `).join("")}
+        </div>
       `;
     }
 
@@ -3174,7 +3679,7 @@
             </div>
           </div>
           <div class="top-actions">
-            <button class="btn btn-ghost" onclick="goJourneySelect()">${icon("chevron-left", "icon-sm")} 返回攻略选择</button>
+            <button class="btn btn-ghost home-mobile" onclick="goJourneySelect()">${icon("chevron-left", "icon-sm")} <span>返回攻略选择</span></button>
             <button class="btn btn-ghost keep-mobile" onclick="openDrawer('confirm')">${icon("circle-help", "icon-sm")} 待确认中心</button>
             <button class="btn btn-primary keep-mobile" onclick="openDrawer('checklist')">${icon("check-square", "icon-sm")} 打卡清单</button>
           </div>
@@ -3827,6 +4332,17 @@
     function renderModal() {
       if (!appState.modal) return "";
       const modal = appState.modal;
+      if (modal.type === "new-trip") {
+        return `
+          <div class="modal-wrap" onclick="closeModal(event)">
+            <div class="modal" onclick="event.stopPropagation()">
+              <h2 class="serif">新建下一段旅程</h2>
+              <p class="rail-muted">这里未来可以接入新旅程创建：从空白开始、导入地图，或复制当前台湾模板。现在先把台湾 2026 做成真正好用的路线 App。</p>
+              <div style="display:flex;justify-content:flex-end;margin-top:18px;"><button class="btn btn-primary" onclick="setState({modal:null})">先专注台湾 2026</button></div>
+            </div>
+          </div>
+        `;
+      }
       if (modal.type === "map") {
         const day = tripData.daysById[modal.dayId] || selectedDay();
         if (!day) return "";
@@ -3896,8 +4412,8 @@
           <button class="${appState.currentView === "trip-dashboard" ? "active" : ""}" onclick="goDashboard()">${icon("layout-dashboard", "icon-sm")}<span>总览</span></button>
           <button class="${appState.currentView === "city" ? "active" : ""}" onclick="mobileGoCity()">${icon("building-2", "icon-sm")}<span>城市</span></button>
           <button class="${appState.currentView === "day" ? "active" : ""}" onclick="mobileGoDay()">${icon("calendar-days", "icon-sm")}<span>日期</span></button>
+          <button class="${appState.currentView === "day" && appState.selectedTab === "route" ? "active" : ""}" onclick="mobileGoMap()">${icon("route", "icon-sm")}<span>地图</span></button>
           <button onclick="openDrawer('checklist')">${icon("check-square", "icon-sm")}<span>清单</span></button>
-          <button onclick="openDrawer('settings')">${icon("settings", "icon-sm")}<span>设置</span></button>
         </nav>
       `;
     }
@@ -4168,6 +4684,12 @@
     function enterTrip() {
       setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedCity: null, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null });
     }
+    function enterTripMap() {
+      setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedCity: null, selectedDay: null, selectedTab: "route", selectedMapPoint: null });
+    }
+    function enterTripChecklist() {
+      setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedCity: null, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, drawer: "checklist" });
+    }
     function goJourneySelect() { setState({ currentView: "journey-select", drawer: null, selectedMapPoint: null }); }
     function goDashboard() { setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, drawer: null }); }
     function selectCity(cityId) { setState({ currentView: "city", selectedTrip: tripData.id, selectedCity: cityId, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, searchQuery: "", typeFilter: "all", drawer: null }); }
@@ -4184,6 +4706,7 @@
     function openDrawer(name) { setState({ drawer: name }); }
     function closeDrawer(event) { if (event.target.classList.contains("overlay")) setState({ drawer: null }); }
     function openAIModal() { setState({ modal: { type: "ai" } }); }
+    function openNewTripModal() { setState({ modal: { type: "new-trip" } }); }
     function openItemNote(itemId) { setState({ modal: { type: "item-note", itemId } }); }
     function openExpenseModal() { setState({ modal: { type: "expense" } }); }
     function closeModal(event) { if (event.target.classList.contains("modal-wrap")) setState({ modal: null }); }
@@ -4293,8 +4816,23 @@
       else if (appState.selectedCity) setState({ currentView: "city" });
       else goDashboard();
     }
+    function mobileGoMap() {
+      if (appState.selectedDay) {
+        setState({ currentView: "day", selectedTab: "route", searchQuery: "", typeFilter: "all" });
+        return;
+      }
+      if (appState.selectedCity) {
+        const firstDay = daysForCity(appState.selectedCity)[0];
+        if (firstDay) selectDay(firstDay.id, appState.selectedCity);
+        setState({ selectedTab: "route" });
+        return;
+      }
+      enterTripMap();
+    }
 
     window.enterTrip = enterTrip;
+    window.enterTripMap = enterTripMap;
+    window.enterTripChecklist = enterTripChecklist;
     window.goJourneySelect = goJourneySelect;
     window.goDashboard = goDashboard;
     window.selectCity = selectCity;
@@ -4307,6 +4845,7 @@
     window.openDrawer = openDrawer;
     window.closeDrawer = closeDrawer;
     window.openAIModal = openAIModal;
+    window.openNewTripModal = openNewTripModal;
     window.openItemNote = openItemNote;
     window.openExpenseModal = openExpenseModal;
     window.closeModal = closeModal;
@@ -4333,6 +4872,7 @@
     window.resetLocalData = resetLocalData;
     window.mobileGoCity = mobileGoCity;
     window.mobileGoDay = mobileGoDay;
+    window.mobileGoMap = mobileGoMap;
 
     render();
   </script>
