@@ -8,7 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..900,50..100,0..1&family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
       --navy: #102235;
@@ -710,6 +712,15 @@
     }
     @keyframes popIn { from { transform: translateY(8px) scale(.98); opacity: .55; } to { transform: none; opacity: 1; } }
     .modal h2 { margin: 0 0 8px; }
+    .map-modal-wrap { padding: 14px; }
+    .map-modal {
+      width: auto;
+      max-width: none;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+    }
     .field { display: grid; gap: 7px; margin-top: 14px; }
     .field label { font-size: 12px; color: var(--muted); font-weight: 850; }
     .field input, .field textarea, .field select {
@@ -1820,6 +1831,316 @@
       animation: navBounce .44s var(--bounce);
     }
 
+    /* Interactive Leaflet travel maps */
+    .map-card {
+      border-radius: 30px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 84% 10%, color-mix(in srgb, var(--accent-2) 28%, transparent), transparent 22%),
+        linear-gradient(135deg, rgba(255,253,246,.96), #FFF3D9);
+      border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+      box-shadow: 0 24px 58px rgba(23,50,77,.14);
+    }
+    .map-card-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 20px 20px 12px;
+      flex-wrap: wrap;
+    }
+    .map-title-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: color-mix(in srgb, var(--accent) 70%, var(--ink-navy));
+      font: 800 12px/1 "Space Grotesk", "Noto Sans SC", sans-serif;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .map-card-head h2 {
+      margin: 8px 0 4px;
+      font-family: "Fraunces", "Noto Serif SC", serif;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1;
+    }
+    .map-card-head p {
+      margin: 0;
+      max-width: 660px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .map-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .map-shell {
+      position: relative;
+      padding: 0 16px 16px;
+    }
+    .leaflet-map {
+      height: 520px;
+      width: 100%;
+      border-radius: 26px;
+      overflow: hidden;
+      background: #E8FAFF;
+      border: 1px solid rgba(23,50,77,.1);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.38), 0 20px 44px rgba(23,50,77,.1);
+      z-index: 1;
+    }
+    .overview-map .leaflet-map,
+    .city-mini-map .leaflet-map {
+      height: 420px;
+    }
+    .map-card.fullscreen-map-card {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 0;
+      height: min(86vh, 920px);
+      width: min(1220px, calc(100vw - 36px));
+      border-radius: 34px;
+      padding: 0;
+    }
+    .fullscreen-map-card .map-card-head {
+      grid-column: 1;
+      grid-row: 1;
+      display: block;
+      padding: 24px;
+      overflow: auto;
+      border-right: 1px solid rgba(23,50,77,.08);
+    }
+    .fullscreen-map-card .map-shell {
+      grid-column: 2;
+      grid-row: 1 / 4;
+      padding: 16px;
+      min-width: 0;
+    }
+    .fullscreen-map-card .leaflet-map {
+      height: calc(min(86vh, 920px) - 32px);
+    }
+    .fullscreen-map-card .map-route-summary {
+      grid-column: 1;
+      grid-row: 2;
+      grid-template-columns: 1fr;
+      padding: 0 24px 14px;
+    }
+    .map-route-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      padding: 0 16px 16px;
+    }
+    .map-stat {
+      border-radius: 20px;
+      padding: 14px;
+      background: rgba(255,255,255,.76);
+      border: 1px solid rgba(23,50,77,.08);
+      box-shadow: 0 10px 20px rgba(23,50,77,.06);
+    }
+    .map-stat strong {
+      display: block;
+      font: 800 20px/1.1 "Space Grotesk", sans-serif;
+      color: var(--ink-navy);
+      margin-bottom: 4px;
+    }
+    .map-stat span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .map-node-strip {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 0 16px 18px;
+      scroll-snap-type: x mandatory;
+    }
+    .fullscreen-map-card .map-node-strip {
+      grid-column: 1;
+      grid-row: 3;
+      display: grid;
+      padding: 0 24px 24px;
+      overflow: auto;
+    }
+    .map-node-card {
+      flex: 0 0 230px;
+      scroll-snap-align: start;
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      text-align: left;
+      border: 1px solid rgba(23,50,77,.08);
+      background: rgba(255,255,255,.78);
+      border-radius: 20px;
+      padding: 12px;
+      color: var(--ink-navy);
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(23,50,77,.06);
+      transition: transform .2s var(--bounce), box-shadow .2s var(--ease), border-color .2s var(--ease);
+    }
+    .map-node-card:hover,
+    .map-node-card.active {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 32px rgba(23,50,77,.12);
+      border-color: color-mix(in srgb, var(--accent) 34%, transparent);
+    }
+    .map-node-card.active {
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, #fff), #FFFDF6);
+    }
+    .map-node-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      font: 900 14px/1 "Space Grotesk", sans-serif;
+      box-shadow: 0 10px 18px color-mix(in srgb, var(--accent) 24%, transparent);
+    }
+    .map-node-card h3 {
+      margin: 0 0 4px;
+      font-size: 14px;
+      line-height: 1.3;
+    }
+    .map-node-card p,
+    .map-node-card small {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      display: block;
+    }
+    .map-node-card.suggested {
+      border-style: dashed;
+      background: rgba(255,255,255,.58);
+    }
+    .leaflet-container {
+      font-family: "Noto Sans SC", system-ui, sans-serif;
+    }
+    .leaflet-control-attribution {
+      font-size: 10px;
+      background: rgba(255,253,246,.74) !important;
+      border-radius: 999px 0 0 0;
+    }
+    .travel-marker-shell {
+      background: transparent;
+      border: 0;
+    }
+    .travel-marker {
+      --marker-color: var(--accent);
+      width: 34px;
+      height: 34px;
+      border-radius: 999px 999px 999px 10px;
+      transform: rotate(-45deg);
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--marker-color), color-mix(in srgb, var(--marker-color) 70%, var(--mango)));
+      border: 3px solid #fff;
+      color: #fff;
+      box-shadow: 0 10px 22px color-mix(in srgb, var(--marker-color) 36%, transparent);
+      transition: transform .2s var(--bounce), filter .2s var(--ease), box-shadow .2s var(--ease);
+      position: relative;
+    }
+    .travel-marker span {
+      transform: rotate(45deg);
+      font: 900 13px/1 "Space Grotesk", sans-serif;
+    }
+    .travel-marker.selected,
+    .travel-marker.hovered {
+      transform: rotate(-45deg) scale(1.22);
+      filter: saturate(1.15);
+      box-shadow: 0 0 0 8px color-mix(in srgb, var(--marker-color) 18%, transparent), 0 16px 30px color-mix(in srgb, var(--marker-color) 46%, transparent);
+      z-index: 999 !important;
+    }
+    .travel-marker.done span {
+      font-size: 0;
+    }
+    .travel-marker.done span::after {
+      content: "✓";
+      font-size: 15px;
+    }
+    .travel-marker.fav::after {
+      content: "★";
+      position: absolute;
+      right: -8px;
+      top: -9px;
+      transform: rotate(45deg);
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--mango);
+      color: #8A5300;
+      border: 2px solid #fff;
+      font-size: 10px;
+    }
+    .travel-marker.suggested {
+      background: #FFFDF6;
+      color: var(--ink-navy);
+      border: 3px dashed var(--marker-color);
+      box-shadow: 0 8px 18px rgba(23,50,77,.14);
+    }
+    .travel-marker.suggested span {
+      color: var(--marker-color);
+    }
+    .leaflet-marker-icon {
+      animation: markerPop .32s var(--bounce) both;
+    }
+    .leaflet-marker-icon:nth-child(2) { animation-delay: .04s; }
+    .leaflet-marker-icon:nth-child(3) { animation-delay: .08s; }
+    .leaflet-marker-icon:nth-child(4) { animation-delay: .12s; }
+    .travel-line {
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 4px 7px rgba(23,50,77,.18));
+      animation: mapLineFlow 4.4s linear infinite;
+    }
+    .line-flight { stroke-dasharray: 12 12; }
+    .line-walk { stroke-dasharray: 2 9; }
+    .line-scooter { stroke-dasharray: 14 5 4 5; }
+    .line-taxi { stroke-dasharray: 10 7; }
+    .line-hsr { stroke-dasharray: 18 6; }
+    .line-bus { stroke-dasharray: 12 6; }
+    .leaflet-popup-content-wrapper {
+      border-radius: 18px;
+      background: #FFFDF6;
+      box-shadow: 0 14px 34px rgba(23,50,77,.18);
+    }
+    .leaflet-popup-content {
+      margin: 12px 14px;
+      min-width: 170px;
+    }
+    .map-popup-title {
+      font-weight: 900;
+      color: var(--ink-navy);
+      margin-bottom: 4px;
+    }
+    .map-popup-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .timeline-item.map-selected {
+      border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+      box-shadow: 0 22px 44px color-mix(in srgb, var(--accent) 16%, transparent);
+    }
+    .map-placeholder-note {
+      margin: 0 16px 16px;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: rgba(255,209,102,.2);
+      border: 1px dashed rgba(255,209,102,.5);
+      color: #76581D;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
     @keyframes heroIn {
       from { opacity: 0; transform: translateY(18px) scale(.98); }
       to { opacity: 1; transform: none; }
@@ -1892,6 +2213,13 @@
       45% { transform: translateY(-4px); }
       100% { transform: translateY(0); }
     }
+    @keyframes markerPop {
+      from { opacity: 0; transform: translateY(10px) scale(.78); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes mapLineFlow {
+      to { stroke-dashoffset: -80; }
+    }
 
     @media (max-width: 1180px) {
       .app-shell { grid-template-columns: 230px minmax(0, 1fr); }
@@ -1900,7 +2228,7 @@
       .journey-page { place-items: start center; padding-top: 42px; }
       .journey-title { font-size: clamp(48px, 16vw, 72px); }
       .hero-trip-card { min-height: 390px; }
-      .app-shell { padding-top: 14px; }
+      .app-shell { grid-template-columns: 1fr; padding-top: 14px; }
       .dashboard-hero { min-height: 420px; }
       .hero-stats { grid-template-columns: 1fr 1fr; }
       .timeline-list::before { left: 19px; }
@@ -1910,6 +2238,64 @@
       .tab-bar { top: 66px; }
       .page-hero::after,
       .day-header::after { opacity: .22; }
+      .leaflet-map,
+      .overview-map .leaflet-map,
+      .city-mini-map .leaflet-map {
+        height: 420px;
+      }
+      .map-card-head,
+      .map-shell {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      .map-route-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      .map-node-strip {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      .map-card.fullscreen-map-card {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(0, 1fr) auto auto;
+        width: calc(100vw - 18px);
+        height: calc(100vh - 24px);
+      }
+      .fullscreen-map-card .map-card-head {
+        grid-column: 1;
+        grid-row: 1;
+        border-right: 0;
+        border-bottom: 1px solid rgba(23,50,77,.08);
+        max-height: 30vh;
+        overflow: auto;
+        padding: 16px;
+      }
+      .fullscreen-map-card .map-shell {
+        grid-column: 1;
+        grid-row: 2;
+        min-height: 0;
+        padding: 12px;
+      }
+      .fullscreen-map-card .leaflet-map {
+        height: 100%;
+        min-height: 340px;
+      }
+      .fullscreen-map-card .map-route-summary {
+        grid-column: 1;
+        grid-row: 3;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0 12px 10px;
+      }
+      .fullscreen-map-card .map-node-strip {
+        grid-column: 1;
+        grid-row: 4;
+        display: flex;
+        overflow-x: auto;
+        padding: 0 12px 12px;
+      }
     }
     @media (prefers-reduced-motion: reduce) {
       *,
@@ -2299,12 +2685,80 @@
       confirm: { label: "待确认", icon: "circle-help", tone: "dark" }
     };
 
+    const locationCatalog = {
+      "香港": { lat: 22.308, lng: 113.9185, cityId: "hongkong", query: "Hong Kong International Airport" },
+      "小港国际机场": { lat: 22.5771, lng: 120.3502, cityId: "kaohsiung", query: "Kaohsiung International Airport" },
+      "美丽岛站": { lat: 22.6314, lng: 120.3019, cityId: "kaohsiung", query: "美丽岛站 光之穹顶 高雄" },
+      "光之穹顶": { lat: 22.6314, lng: 120.3019, cityId: "kaohsiung", query: "Dome of Light 高雄" },
+      "福容徕旅 高雄": { lat: 22.6274, lng: 120.3007, cityId: "kaohsiung", query: "福容徕旅 高雄", approximate: true },
+      "高雄中央公园": { lat: 22.6236, lng: 120.3012, cityId: "kaohsiung", query: "高雄中央公园" },
+      "老江红茶牛奶 南台总店": { lat: 22.6319, lng: 120.2999, cityId: "kaohsiung", query: "老江红茶牛奶 南台总店 高雄", approximate: true },
+      "六合夜市": { lat: 22.6332, lng: 120.2993, cityId: "kaohsiung", query: "六合夜市 高雄" },
+      "高雄市立美术馆": { lat: 22.6564, lng: 120.2865, cityId: "kaohsiung", query: "高雄市立美术馆" },
+      "三多商圈": { lat: 22.6133, lng: 120.3042, cityId: "kaohsiung", query: "三多商圈 高雄" },
+      "三多商圈站": { lat: 22.6138, lng: 120.3047, cityId: "kaohsiung", query: "捷运三多商圈站 高雄" },
+      "高雄新堀江": { lat: 22.6231, lng: 120.3022, cityId: "kaohsiung", query: "高雄新堀江" },
+      "西子湾": { lat: 22.6245, lng: 120.2642, cityId: "kaohsiung", query: "西子湾 高雄" },
+      "打狗英国领事馆官邸": { lat: 22.6196, lng: 120.2658, cityId: "kaohsiung", query: "打狗英国领事馆官邸 高雄" },
+      "驳二艺术特区": { lat: 22.6206, lng: 120.2812, cityId: "kaohsiung", query: "驳二艺术特区 高雄" },
+      "驳二大义站": { lat: 22.6204, lng: 120.2819, cityId: "kaohsiung", query: "驳二大义站 高雄" },
+      "爱河之心": { lat: 22.6602, lng: 120.3032, cityId: "kaohsiung", query: "爱河之心 高雄", approximate: true },
+      "高铁左营站": { lat: 22.6874, lng: 120.3094, cityId: "kaohsiung", query: "高铁左营站" },
+      "日和湾居 Sunshine Liv": { lat: 21.9587664, lng: 120.7672723, cityId: "kenting", query: "日和湾居 Sunshine Liv 垦丁" },
+      "南湾": { lat: 21.9598, lng: 120.7639, cityId: "kenting", query: "南湾 垦丁" },
+      "南湾沙滩": { lat: 21.9598, lng: 120.7639, cityId: "kenting", query: "南湾沙滩 垦丁" },
+      "墾丁大街": { lat: 21.9446, lng: 120.7985, cityId: "kenting", query: "垦丁大街" },
+      "墾丁大街夜市": { lat: 21.9446, lng: 120.7985, cityId: "kenting", query: "垦丁大街夜市" },
+      "Good Dive": { lat: 21.9472, lng: 120.7795, cityId: "kenting", query: "Good Dive 垦丁", approximate: true },
+      "船帆石": { lat: 21.9329, lng: 120.8213, cityId: "kenting", query: "船帆石 垦丁" },
+      "墾丁路边小店": { lat: 21.9278, lng: 120.835, cityId: "kenting", query: "垦丁 午餐 小店", approximate: true },
+      "鵝鑾鼻公园": { lat: 21.9015, lng: 120.852, cityId: "kenting", query: "鹅銮鼻公园" },
+      "龙磐公园": { lat: 21.9367, lng: 120.8471, cityId: "kenting", query: "龙磐公园 垦丁" },
+      "后壁湖渔港": { lat: 21.9452905, lng: 120.7408588, cityId: "kenting", query: "后壁湖渔港 垦丁" },
+      "猫鼻头公园": { lat: 21.9222406, lng: 120.7373466, cityId: "kenting", query: "猫鼻头公园" },
+      "白沙湾海滩": { lat: 21.9340356, lng: 120.7183345, cityId: "kenting", query: "白沙湾海滩 垦丁" },
+      "关山夕照 / 高山岩福德宫": { lat: 21.9636701, lng: 120.7196053, cityId: "kenting", query: "关山夕照 高山岩福德宫 垦丁" },
+      "恒春镇中心": { lat: 22.00092, lng: 120.74644, cityId: "kenting", query: "恒春镇中心 晚餐" },
+      "墾丁快线站": { lat: 21.946, lng: 120.799, cityId: "kenting", query: "垦丁快线 垦丁站", approximate: true },
+      "台北车站": { lat: 25.0478, lng: 121.517, cityId: "taipei", query: "台北车站" },
+      "台北": { lat: 25.033, lng: 121.5654, cityId: "taipei", query: "台北", approximate: true },
+      "台北 101": { lat: 25.03397, lng: 121.56447, cityId: "taipei", query: "台北 101" },
+      "信义区": { lat: 25.033, lng: 121.567, cityId: "taipei", query: "台北 信义区", approximate: true },
+      "西门町": { lat: 25.0421, lng: 121.5084, cityId: "taipei", query: "西门町 台北" },
+      "宁夏夜市": { lat: 25.0564, lng: 121.5155, cityId: "taipei", query: "宁夏夜市 台北" },
+      "饶河夜市": { lat: 25.0508, lng: 121.5777, cityId: "taipei", query: "饶河夜市 台北" },
+      "淡水": { lat: 25.1689, lng: 121.4442, cityId: "taipei", query: "淡水 台北" },
+      "九份": { lat: 25.1097, lng: 121.8442, cityId: "taipei", query: "九份", approximate: true }
+    };
+
+    const tripMapRoute = [
+      { id: "trip-hkg", label: "Hong Kong", name: "香港", lat: 22.308, lng: 113.9185, cityId: "hongkong", transportFromPrevious: "飞机" },
+      { id: "trip-khh", label: "Kaohsiung", name: "高雄", lat: 22.6314, lng: 120.3019, cityId: "kaohsiung", transportFromPrevious: "飞机" },
+      { id: "trip-kt", label: "Kenting", name: "墾丁", lat: 21.9587664, lng: 120.7672723, cityId: "kenting", transportFromPrevious: "快线 / 打车" },
+      { id: "trip-tpe", label: "Taipei", name: "台北", lat: 25.0478, lng: 121.517, cityId: "taipei", transportFromPrevious: "高铁" },
+      { id: "trip-hkg-return", label: "Hong Kong", name: "香港", lat: 22.308, lng: 113.9185, cityId: "hongkong", transportFromPrevious: "飞机" }
+    ];
+
+    const taipeiSuggestionPoints = [
+      suggestionPoint("tp-101", "台北 101", "台北 101", "城市夜景", "建议规划点"),
+      suggestionPoint("tp-xinyi", "信义区", "信义区", "购物 / 夜景", "建议规划点"),
+      suggestionPoint("tp-ximen", "西门町", "西门町", "街区漫游", "建议规划点"),
+      suggestionPoint("tp-ningxia", "宁夏夜市", "宁夏夜市", "夜市", "建议规划点"),
+      suggestionPoint("tp-raohe", "饶河夜市", "饶河夜市", "夜市", "建议规划点"),
+      suggestionPoint("tp-tamsui", "淡水", "淡水", "半日线", "建议规划点"),
+      suggestionPoint("tp-jiufen", "九份", "九份", "半日线", "建议规划点")
+    ];
+
+    hydrateTimelineMapData();
+
     const defaultState = {
       currentView: "journey-select",
       selectedTrip: null,
       selectedCity: null,
       selectedDay: null,
       selectedTab: "timeline",
+      selectedMapPoint: null,
+      mapViewMode: "inline",
       completedItems: {},
       favoriteItems: {},
       itemNotes: {},
@@ -2320,6 +2774,7 @@
     };
 
     let appState = loadState();
+    let activeLeafletMaps = {};
 
     function item(id, time, title, type, place, detail, transport) {
       return { id, time, title, type, place, detail, transport };
@@ -2363,6 +2818,8 @@
       if (state.currentView !== "journey-select" && !state.selectedTrip) state.selectedTrip = tripData.id;
       if (state.selectedCity && !tripData.cities[state.selectedCity]) state.selectedCity = null;
       if (state.selectedDay && !tripData.daysById[state.selectedDay]) state.selectedDay = null;
+      if (!("selectedMapPoint" in state)) state.selectedMapPoint = null;
+      if (!state.mapViewMode) state.mapViewMode = "inline";
       if (state.currentView === "day" && !state.selectedDay) state.currentView = state.selectedCity ? "city" : "trip-dashboard";
       if (state.currentView === "city" && !state.selectedCity) state.currentView = "trip-dashboard";
       return state;
@@ -2433,6 +2890,192 @@
       return days.flatMap(day => day.timeline || []);
     }
 
+    function cityCenter(cityId) {
+      const centers = {
+        kaohsiung: { lat: 22.6314, lng: 120.3019, cityId: "kaohsiung", query: "高雄", approximate: true },
+        kenting: { lat: 21.9587664, lng: 120.7672723, cityId: "kenting", query: "墾丁 南湾", approximate: true },
+        taipei: { lat: 25.0478, lng: 121.517, cityId: "taipei", query: "台北", approximate: true },
+        hongkong: { lat: 22.308, lng: 113.9185, cityId: "hongkong", query: "Hong Kong International Airport", approximate: true }
+      };
+      return centers[cityId] || centers.taipei;
+    }
+
+    function locationFor(place, cityId) {
+      const text = String(place || "").trim();
+      if (locationCatalog[text]) return locationCatalog[text];
+      const key = Object.keys(locationCatalog).find(name => text.includes(name) || name.includes(text));
+      if (key) return locationCatalog[key];
+      return cityCenter(cityId);
+    }
+
+    function suggestionPoint(id, title, locationName, tag, notes) {
+      const loc = locationFor(locationName, "taipei");
+      return {
+        id,
+        dayId: "taipei-suggested",
+        cityId: "taipei",
+        time: "",
+        title,
+        description: notes,
+        type: "suggestion",
+        locationName,
+        lat: loc.lat,
+        lng: loc.lng,
+        transportFromPrevious: tag,
+        googleMapsQuery: loc.query || locationName,
+        notes,
+        tag,
+        suggested: true,
+        approximate: !!loc.approximate
+      };
+    }
+
+    function hydrateTimelineMapData() {
+      days.forEach(day => {
+        (day.timeline || []).forEach(item => {
+          const loc = locationFor(item.place || item.title, day.cityId);
+          item.dayId = day.id;
+          item.cityId = loc.cityId || day.cityId;
+          item.description = item.detail;
+          item.locationName = item.place || item.title;
+          item.lat = loc.lat;
+          item.lng = loc.lng;
+          item.transportFromPrevious = item.transport;
+          item.googleMapsQuery = loc.query || `${item.locationName} ${day.cityName}`;
+          item.notes = item.detail;
+          item.approximate = !!loc.approximate;
+        });
+      });
+    }
+
+    function dayRoutePlaces(dayId) {
+      const routes = {
+        d1: [
+          ["小港国际机场", "14:15", "航班"],
+          ["美丽岛站", "15:30", "捷运"],
+          ["光之穹顶", "15:50", "步行"],
+          ["福容徕旅 高雄", "16:30", "捷运/打车"],
+          ["高雄中央公园", "17:15", "步行"],
+          ["老江红茶牛奶 南台总店", "18:00", "步行/打车"],
+          ["六合夜市", "19:00", "步行/捷运"],
+          ["福容徕旅 高雄", "21:00", "捷运/打车"]
+        ],
+        d2: [
+          ["福容徕旅 高雄", "09:10", "出发"],
+          ["高雄市立美术馆", "09:30", "打车"],
+          ["三多商圈", "12:00", "打车"],
+          ["高雄新堀江", "13:00", "步行"],
+          ["三多商圈站", "14:30", "捷运"],
+          ["打狗英国领事馆官邸", "15:45", "步行/打车"],
+          ["西子湾", "17:00", "步行"],
+          ["驳二艺术特区", "18:00", "捷运/轻轨"],
+          ["驳二大义站", "18:30", "步行"],
+          ["爱河之心", "21:00", "打车"],
+          ["福容徕旅 高雄", "22:00", "打车"]
+        ],
+        d3: [
+          ["福容徕旅 高雄", "10:00", "步行"],
+          ["高铁左营站", "10:30", "打车/捷运"],
+          ["日和湾居 Sunshine Liv", "12:30", "快线 9189 / 打车"],
+          ["后壁湖渔港", "15:20", "电动车"],
+          ["猫鼻头公园", "15:55", "电动车"],
+          ["白沙湾海滩", "16:40", "电动车"],
+          ["关山夕照 / 高山岩福德宫", "17:30", "电动车"],
+          ["恒春镇中心", "18:30", "电动车"],
+          ["日和湾居 Sunshine Liv", "21:00", "电动车"]
+        ],
+        d4: [
+          ["日和湾居 Sunshine Liv", "10:00", "酒店"],
+          ["Good Dive", "12:00", "打车/接送"],
+          ["Good Dive", "13:00", "活动"],
+          ["日和湾居 Sunshine Liv", "15:30", "接送/打车"],
+          ["南湾沙滩", "18:00", "步行"],
+          ["墾丁大街夜市", "19:00", "打车"],
+          ["日和湾居 Sunshine Liv", "21:00", "打车"]
+        ],
+        d5: [
+          ["日和湾居 Sunshine Liv", "11:00", "机车"],
+          ["船帆石", "11:30", "机车"],
+          ["墾丁路边小店", "13:00", "机车"],
+          ["鵝鑾鼻公园", "14:30", "机车"],
+          ["龙磐公园", "16:00", "机车"],
+          ["南湾沙滩", "18:00", "机车"],
+          ["日和湾居 Sunshine Liv", "19:00", "机车"]
+        ],
+        d6: [
+          ["日和湾居 Sunshine Liv", "11:00", "打车"],
+          ["墾丁快线站", "11:30", "打车"],
+          ["高铁左营站", "13:00", "快线"],
+          ["台北车站", "14:30", "高铁"],
+          ["台北", "下午", "待确认"]
+        ]
+      };
+      return routes[dayId] || [];
+    }
+
+    function routePointFromPlace(day, entry, index, usedIds) {
+      const [locationName, time, transport] = entry;
+      const candidates = (day.timeline || []).filter(item => {
+        if (usedIds.has(item.id)) return false;
+        return item.place === locationName || item.locationName === locationName || item.title.includes(locationName) || locationName.includes(item.place || "");
+      });
+      const exactMatch = candidates.find(item => item.time === time);
+      const timelineMatch = time ? exactMatch : candidates[0];
+      if (timelineMatch) usedIds.add(timelineMatch.id);
+      const loc = locationFor(locationName, day.cityId);
+      return {
+        id: timelineMatch?.id || `${day.id}-route-${index}`,
+        dayId: day.id,
+        cityId: loc.cityId || day.cityId,
+        time: timelineMatch?.time || time || "",
+        title: timelineMatch?.title || locationName,
+        description: timelineMatch?.detail || (day.id === "d3" ? "西线骑行节点，实际停留可按体力缩短。" : "路线节点。"),
+        type: timelineMatch?.type || (transport?.includes("车") || transport?.includes("捷运") || transport?.includes("高铁") ? "transport" : "sight"),
+        locationName,
+        lat: loc.lat,
+        lng: loc.lng,
+        transportFromPrevious: transport || timelineMatch?.transport || "步行",
+        googleMapsQuery: loc.query || `${locationName} ${day.cityName}`,
+        notes: timelineMatch?.detail || "",
+        approximate: !!loc.approximate,
+        routeIndex: index + 1
+      };
+    }
+
+    function mapPointsForDay(day) {
+      if (!day) return [];
+      if (!day.planned) {
+        return taipeiSuggestionPoints.map((point, index) => ({ ...point, id: `${day.id}-${point.id}`, dayId: day.id, routeIndex: index + 1 }));
+      }
+      const routeEntries = dayRoutePlaces(day.id);
+      if (routeEntries.length) {
+        const usedIds = new Set();
+        return routeEntries.map((entry, index) => routePointFromPlace(day, entry, index, usedIds));
+      }
+      return (day.timeline || [])
+        .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
+        .map((item, index) => ({ ...item, routeIndex: index + 1 }));
+    }
+
+    function mapPointsForCity(cityId) {
+      if (cityId === "taipei") return taipeiSuggestionPoints.map((point, index) => ({ ...point, routeIndex: index + 1 }));
+      const seen = new Set();
+      const points = [];
+      daysForCity(cityId).forEach(day => {
+        mapPointsForDay(day).forEach(point => {
+          if (point.cityId !== cityId || seen.has(point.locationName)) return;
+          seen.add(point.locationName);
+          points.push({ ...point, id: `city-${cityId}-${points.length}`, routeIndex: points.length + 1 });
+        });
+      });
+      return points;
+    }
+
+    function mainTransportLabels(points) {
+      const labels = [...new Set(points.slice(1).map(point => point.transportFromPrevious).filter(Boolean).map(label => label.replace(/\s+/g, " ")))];
+      return labels.slice(0, 3).join(" / ");
+    }
+
     function tripProgress() {
       const items = allTimelineItems();
       const completed = items.filter(item => appState.completedItems[item.id]).length;
@@ -2444,6 +3087,7 @@
     }
 
     function render() {
+      cleanupLeafletMaps();
       const app = document.getElementById("app");
       if (appState.currentView === "journey-select") {
         app.innerHTML = renderJourneySelect();
@@ -2453,6 +3097,7 @@
       document.getElementById("modal-root").innerHTML = renderModal();
       document.getElementById("toast-root").innerHTML = appState.toast ? `<div class="toast">${esc(appState.toast)}</div>` : "";
       if (window.lucide) lucide.createIcons();
+      scheduleMapInit();
     }
 
     function renderJourneySelect() {
@@ -2646,6 +3291,7 @@
             </div>
           </div>
         </section>
+        ${renderOverviewMap()}
         <section class="section-head">
           <div>
             <h2>选择城市</h2>
@@ -2724,6 +3370,7 @@
             ${daysForCity(city.id).map(day => renderDateChip(day, city.id)).join("")}
           </div>
         </section>
+        ${renderCityMiniMap(city)}
         ${renderCityInfo(city)}
       `;
     }
@@ -2816,7 +3463,7 @@
     }
 
     function renderSelectedTab(day) {
-      if (!day.planned && appState.selectedTab !== "notes" && appState.selectedTab !== "budget") {
+      if (!day.planned && appState.selectedTab !== "notes" && appState.selectedTab !== "budget" && appState.selectedTab !== "route") {
         return renderTaipeiEmptyState("day");
       }
       if (appState.selectedTab === "route") return renderRouteTab(day);
@@ -2863,7 +3510,7 @@
       const fav = !!appState.favoriteItems[item.id];
       const note = appState.itemNotes[item.id];
       return `
-        <article class="timeline-item ${done ? "done" : ""}">
+        <article class="timeline-item ${done ? "done" : ""} ${appState.selectedMapPoint === item.id ? "map-selected" : ""}" onclick="selectMapPoint('${item.id}')" onmouseenter="softHighlightMapPoint('${item.id}', true)" onmouseleave="softHighlightMapPoint('${item.id}', false)">
           <div class="timeline-time">${esc(item.time)}</div>
           <div class="timeline-body">
             <h3>${icon(meta.icon, "icon-sm")} ${esc(item.title)} <span class="tag ${meta.tone}">${esc(meta.label)}</span></h3>
@@ -2872,6 +3519,7 @@
               <button class="action-btn ${done ? "done" : ""}" onclick="toggleComplete('${item.id}')">${icon(done ? "check-circle-2" : "circle", "icon-sm")} ${done ? "已完成" : "标记完成"}</button>
               <button class="action-btn ${fav ? "active" : ""}" onclick="toggleFavorite('${item.id}')">${icon("heart", "icon-sm")} ${fav ? "已收藏" : "收藏"}</button>
               <button class="action-btn" onclick="openItemNote('${item.id}')">${icon("notebook-pen", "icon-sm")} 添加备注</button>
+              <button class="action-btn" onclick="showItemOnMap('${item.id}')">${icon("route", "icon-sm")} 定位路线</button>
               <button class="action-btn" onclick="openMaps('${escAttr(item.place)}')">${icon("map-pin", "icon-sm")} 打开地图</button>
               <button class="action-btn" onclick="copyText('${escAttr(item.place || item.title)}')">${icon("copy", "icon-sm")} 复制地点</button>
             </div>
@@ -2886,31 +3534,121 @@
     }
 
     function renderRouteTab(day) {
-      if (!day.timeline.length) return renderTaipeiEmptyState("day");
+      return renderRouteMapCard(day);
+    }
+
+    function renderOverviewMap() {
+      const progress = tripProgress();
       return `
-        <div class="panel-head">
-          <div>
-            <h2>视觉化路线</h2>
-            <p class="rail-muted">按地点顺序串起当天移动方式。</p>
+        <section class="map-card overview-map">
+          <div class="map-card-head">
+            <div>
+              <div class="map-title-kicker">${icon("map", "icon-sm")} Trip Launchpad</div>
+              <h2 class="serif">总路线地图</h2>
+              <p>先看大方向：香港飞高雄，往南进墾丁，再一路北上台北，最后返港。</p>
+            </div>
+            <div class="map-toolbar">
+              <button class="btn btn-small btn-ghost" onclick="resetMapView('map-trip')">${icon("crosshair", "icon-sm")} 重置视角</button>
+              <button class="btn btn-small" onclick="copyTripSummary()">${icon("copy", "icon-sm")} 复制路线</button>
+            </div>
           </div>
-        </div>
-        ${renderRoutePlan(day)}
-        <div class="route-panel">
-          ${day.timeline.map((item, index) => `
-            <div class="route-step">
-              <div class="route-dot">${index + 1}</div>
-              <div class="route-card mini-card">
-                <strong>${esc(item.time)} · ${esc(item.place || item.title)}</strong>
-                <p>${esc(item.transport || "步行")} · ${esc(item.title)}</p>
-                <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-                  <button class="btn btn-small btn-ghost" onclick="openMaps('${escAttr(item.place || item.title)}')">${icon("map-pin", "icon-sm")} 打开地图</button>
-                  <button class="btn btn-small btn-ghost" onclick="copyText('${escAttr(item.place || item.title)}')">${icon("copy", "icon-sm")} 复制地点</button>
-                </div>
+          <div class="map-shell"><div id="map-trip" class="leaflet-map" data-map-kind="trip" aria-label="台湾总路线地图"></div></div>
+          <div class="map-route-summary">
+            <div class="map-stat"><strong>5</strong><span>路线节点</span></div>
+            <div class="map-stat"><strong>${progress.percent}%</strong><span>完成进度</span></div>
+            <div class="map-stat"><strong>飞机 / 快线 / 高铁</strong><span>主要交通</span></div>
+            <div class="map-stat"><strong>9 天 8 夜</strong><span>旅行长度</span></div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderCityMiniMap(city) {
+      const points = mapPointsForCity(city.id);
+      return `
+        <section class="map-card city-mini-map">
+          <div class="map-card-head">
+            <div>
+              <div class="map-title-kicker">${icon(city.id === "kenting" ? "waves" : city.id === "taipei" ? "building-2" : "ship", "icon-sm")} City Map</div>
+              <h2 class="serif">${esc(city.name)}地点速览</h2>
+              <p>${city.id === "taipei" ? "台北还没锁死路线，先把可能想去的点放在地图上。" : `这里先放${esc(city.name)}段会出现的主要地点，选日期后会切到当天路线。`}</p>
+            </div>
+            <div class="map-toolbar">
+              <button class="btn btn-small btn-ghost" onclick="resetMapView('map-city-${city.id}')">${icon("crosshair", "icon-sm")} 重置视角</button>
+            </div>
+          </div>
+          <div class="map-shell"><div id="map-city-${city.id}" class="leaflet-map" data-map-kind="city" data-city="${escAttr(city.id)}" aria-label="${escAttr(city.name)}地点地图"></div></div>
+          <div class="map-node-strip">
+            ${points.slice(0, 10).map((point, index) => renderMapNodeCard(point, index, `map-city-${city.id}`)).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderRouteMapCard(day, options = {}) {
+      const full = !!options.full;
+      const mapId = full ? `map-day-${day.id}-full` : `map-day-${day.id}`;
+      const points = mapPointsForDay(day);
+      const transports = mainTransportLabels(points);
+      const isPendingTaipei = !day.planned;
+      return `
+        <section class="map-card ${full ? "fullscreen-map-card" : ""}">
+          <div class="map-card-head">
+            <div>
+              <div class="map-title-kicker">${icon("route", "icon-sm")} Day ${esc(day.dayNo.replace("Day ", ""))} Route Map</div>
+              <h2 class="serif">今日路线地图</h2>
+              <p>${isPendingTaipei ? "台北段还没锁死，地图只标出建议规划点，不把它伪装成已确认行程。" : routeCopyForDay(day)}</p>
+              <div class="city-tags">
+                <span class="tag">${esc(day.cityName)}</span>
+                <span class="tag orange">${esc(day.date)}</span>
+                <span class="tag sage">${esc(day.density)}</span>
               </div>
             </div>
-          `).join("")}
-        </div>
+            <div class="map-toolbar">
+              ${full ? `<button class="btn btn-small btn-ghost" onclick="setState({modal:null,mapViewMode:'inline'})">${icon("x", "icon-sm")} 关闭</button>` : `<button class="btn btn-small btn-primary" onclick="openMapModal('${day.id}')">${icon("maximize-2", "icon-sm")} 全屏查看地图</button>`}
+              <button class="btn btn-small btn-ghost" onclick="resetMapView('${mapId}')">${icon("crosshair", "icon-sm")} 重置视角</button>
+              <button class="btn btn-small btn-ghost" onclick="copyRoute('${day.id}')">${icon("copy", "icon-sm")} 复制当天路线</button>
+            </div>
+          </div>
+          ${full ? "" : renderRoutePlan(day)}
+          <div class="map-shell"><div id="${mapId}" class="leaflet-map" data-map-kind="day" data-day="${escAttr(day.id)}" aria-label="${escAttr(day.label)}路线地图"></div></div>
+          <div class="map-route-summary">
+            <div class="map-stat"><strong>${points.length}</strong><span>${isPendingTaipei ? "建议点" : "地点数"}</span></div>
+            <div class="map-stat"><strong>${esc(transports || "待确认")}</strong><span>主要交通方式</span></div>
+            <div class="map-stat"><strong>${esc(day.density)}</strong><span>路线节奏</span></div>
+            <div class="map-stat"><strong>${esc(day.focus)}</strong><span>今日重点</span></div>
+          </div>
+          <div class="map-node-strip">
+            ${points.map((point, index) => renderMapNodeCard(point, index, mapId)).join("")}
+          </div>
+        </section>
       `;
+    }
+
+    function renderMapNodeCard(point, index, mapId) {
+      const selected = appState.selectedMapPoint === point.id;
+      const suggested = !!point.suggested;
+      return `
+        <button class="map-node-card ${selected ? "active" : ""} ${suggested ? "suggested" : ""}" onclick="focusMapPoint('${escAttr(point.id)}', '${escAttr(mapId)}')">
+          <span class="map-node-num">${suggested ? icon("sparkles", "icon-sm") : index + 1}</span>
+          <span>
+            <strong>${esc(point.time ? `${point.time} · ${point.locationName || point.title}` : (point.locationName || point.title))}</strong>
+            <small>${esc(point.transportFromPrevious || point.tag || "步行 / 停留")}${point.approximate ? " · 近似坐标" : ""}</small>
+          </span>
+        </button>
+      `;
+    }
+
+    function routeCopyForDay(day) {
+      const copy = {
+        d1: "落地第一件事：先去美丽岛看光之穹顶，再把夜晚交给六合夜市。",
+        d2: "这一天会比较满，西子湾和驳二尽量卡在傍晚，光线最好。",
+        d3: "下午换成西线电动车环游，从后壁湖、猫鼻头、白沙湾一路骑到关山看夕阳。",
+        d4: "墾丁这天别排太满，浮潜之后留点时间吹海风。",
+        d5: "机车环线的节奏别太赶，龙磐公园适合多停一会儿。",
+        d6: "今天是北上转场日，核心是快线和高铁衔接，台北晚上先保持弹性。"
+      };
+      return copy[day.id] || day.focus;
     }
 
     function renderRoutePlan(day) {
@@ -3089,6 +3827,17 @@
     function renderModal() {
       if (!appState.modal) return "";
       const modal = appState.modal;
+      if (modal.type === "map") {
+        const day = tripData.daysById[modal.dayId] || selectedDay();
+        if (!day) return "";
+        return `
+          <div class="modal-wrap map-modal-wrap" onclick="closeModal(event)">
+            <div class="modal map-modal" onclick="event.stopPropagation()">
+              ${renderRouteMapCard(day, { full: true })}
+            </div>
+          </div>
+        `;
+      }
       if (modal.type === "ai") {
         return `
           <div class="modal-wrap" onclick="closeModal(event)">
@@ -3165,18 +3914,269 @@
       return "Completed";
     }
 
-    function enterTrip() {
-      setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedCity: null, selectedDay: null, selectedTab: "timeline" });
+    function cleanupLeafletMaps() {
+      Object.values(activeLeafletMaps || {}).forEach(entry => {
+        try { entry.map.remove(); } catch {}
+      });
+      activeLeafletMaps = {};
     }
-    function goJourneySelect() { setState({ currentView: "journey-select", drawer: null }); }
-    function goDashboard() { setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedDay: null, selectedTab: "timeline", drawer: null }); }
-    function selectCity(cityId) { setState({ currentView: "city", selectedTrip: tripData.id, selectedCity: cityId, selectedDay: null, selectedTab: "timeline", searchQuery: "", typeFilter: "all", drawer: null }); }
+
+    function scheduleMapInit() {
+      if (!document.querySelector(".leaflet-map")) return;
+      window.requestAnimationFrame(() => window.setTimeout(initLeafletMaps, 0));
+    }
+
+    function initLeafletMaps() {
+      if (!window.L) return;
+      document.querySelectorAll(".leaflet-map").forEach(el => {
+        if (!el.id || activeLeafletMaps[el.id]) return;
+        const map = L.map(el, {
+          zoomControl: true,
+          scrollWheelZoom: false,
+          doubleClickZoom: true,
+          tap: true
+        });
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap"
+        }).addTo(map);
+        const points = pointsForMapElement(el);
+        const entry = { map, points, markers: {}, kind: el.dataset.mapKind };
+        activeLeafletMaps[el.id] = entry;
+        drawTravelMap(el.id, entry, points);
+        window.setTimeout(() => {
+          map.invalidateSize();
+          fitMapToPoints(map, points);
+          focusSelectedMarkerInMap(el.id, false);
+        }, 80);
+      });
+    }
+
+    function pointsForMapElement(el) {
+      if (el.dataset.mapKind === "trip") {
+        return tripMapRoute.map((point, index) => ({
+          ...point,
+          title: point.name,
+          locationName: point.name,
+          time: index === 0 ? "Start" : index === tripMapRoute.length - 1 ? "Return" : "",
+          routeIndex: index + 1,
+          googleMapsQuery: point.name
+        }));
+      }
+      if (el.dataset.mapKind === "city") return mapPointsForCity(el.dataset.city);
+      const day = tripData.daysById[el.dataset.day];
+      return mapPointsForDay(day);
+    }
+
+    function drawTravelMap(mapId, entry, points) {
+      if (!points.length) {
+        entry.map.setView([23.7, 121], 7);
+        return;
+      }
+      points.forEach((point, index) => {
+        if (index === 0) return;
+        const previous = points[index - 1];
+        const mode = transportMode(point.transportFromPrevious);
+        L.polyline([[previous.lat, previous.lng], [point.lat, point.lng]], {
+          color: transportColor(mode, point.cityId),
+          weight: transportWeight(mode),
+          opacity: 0.86,
+          dashArray: transportDash(mode),
+          className: `travel-line line-${mode}`
+        }).addTo(entry.map);
+      });
+      points.forEach((point, index) => {
+        const marker = L.marker([point.lat, point.lng], {
+          icon: makeTravelMarker(point, index, entry.kind)
+        }).addTo(entry.map);
+        marker.bindPopup(renderMapPopup(point, index), { closeButton: false });
+        marker.on("click", () => {
+          if (entry.kind === "trip" && tripData.cities[point.cityId]) {
+            selectCity(point.cityId);
+            return;
+          }
+          focusMapPoint(point.id, mapId);
+        });
+        marker.on("mouseover", () => setMarkerHover(point.id, true));
+        marker.on("mouseout", () => setMarkerHover(point.id, false));
+        entry.markers[point.id] = marker;
+      });
+    }
+
+    function makeTravelMarker(point, index, kind) {
+      const selected = appState.selectedMapPoint === point.id || (kind === "trip" && point.cityId === appState.selectedCity);
+      const currentTripNode = kind === "trip" && !appState.selectedCity && point.cityId === "kaohsiung";
+      const done = !!appState.completedItems[point.id];
+      const fav = !!appState.favoriteItems[point.id];
+      const color = markerColor(point);
+      const label = point.suggested ? "?" : point.routeIndex || index + 1;
+      const markerClass = [
+        "travel-marker",
+        selected || currentTripNode ? "selected" : "",
+        done ? "done" : "",
+        fav ? "fav" : "",
+        point.suggested ? "suggested" : ""
+      ].filter(Boolean).join(" ");
+      return L.divIcon({
+        className: "travel-marker-shell",
+        html: `<div class="${markerClass}" style="--marker-color:${color}" data-marker-id="${escAttr(point.id)}"><span>${label}</span></div>`,
+        iconSize: [42, 42],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -34]
+      });
+    }
+
+    function renderMapPopup(point, index) {
+      const title = point.locationName || point.title;
+      const meta = [
+        point.time ? `${point.time}` : `No. ${index + 1}`,
+        point.transportFromPrevious,
+        point.suggested ? "建议规划点" : "",
+        point.approximate ? "近似坐标" : ""
+      ].filter(Boolean).join(" · ");
+      return `
+        <div class="map-popup-title">${esc(title)}</div>
+        <div class="map-popup-meta">${esc(meta)}</div>
+        ${point.description ? `<div class="map-popup-meta">${esc(point.description)}</div>` : ""}
+        <button class="btn btn-small btn-ghost" style="margin-top:8px;" onclick="openMaps('${escAttr(point.googleMapsQuery || title)}')">${icon("map-pin", "icon-sm")} Google Maps</button>
+      `;
+    }
+
+    function markerColor(point) {
+      if (point.suggested) return "#FF6B5A";
+      if (point.type === "food" || point.type === "night-market") return "#FF6B5A";
+      if (point.type === "sunset") return "#FFB23F";
+      if (point.type === "activity") return "#00BFA6";
+      if (point.cityId === "kenting") return "#00BFA6";
+      if (point.cityId === "taipei") return "#5B7CFA";
+      if (point.cityId === "kaohsiung") return "#1CA7EC";
+      return "#17324D";
+    }
+
+    function transportMode(label = "") {
+      if (/飞机|航班|flight/i.test(label)) return "flight";
+      if (/高铁|HSR/i.test(label)) return "hsr";
+      if (/机车|电动车|bike|scooter/i.test(label)) return "scooter";
+      if (/捷运|轻轨|MRT/i.test(label)) return "mrt";
+      if (/打车|taxi|接送/i.test(label)) return "taxi";
+      if (/快线|巴士|bus|9189/i.test(label)) return "bus";
+      if (/步行|逛/i.test(label)) return "walk";
+      return "default";
+    }
+
+    function transportColor(mode, cityId) {
+      const colors = {
+        flight: "#1CA7EC",
+        hsr: "#7C5CFF",
+        scooter: "#43B86F",
+        mrt: "#1CA7EC",
+        taxi: "#FF8A4C",
+        bus: "#00BFA6",
+        walk: "#A78B5F",
+        default: cityId === "kenting" ? "#00BFA6" : cityId === "taipei" ? "#FF6B5A" : "#1CA7EC"
+      };
+      return colors[mode] || colors.default;
+    }
+
+    function transportWeight(mode) {
+      return mode === "flight" || mode === "hsr" ? 5 : mode === "walk" ? 3 : 4;
+    }
+
+    function transportDash(mode) {
+      const dashes = {
+        flight: "12 12",
+        walk: "2 9",
+        scooter: "14 5 4 5",
+        taxi: "10 7",
+        hsr: "18 6",
+        bus: "12 6"
+      };
+      return dashes[mode] || null;
+    }
+
+    function fitMapToPoints(map, points) {
+      if (!points.length) return;
+      if (points.length === 1) {
+        map.setView([points[0].lat, points[0].lng], 14);
+        return;
+      }
+      const bounds = L.latLngBounds(points.map(point => [point.lat, point.lng]));
+      map.fitBounds(bounds, { padding: [32, 32], maxZoom: 14 });
+    }
+
+    function focusSelectedMarkerInMap(mapId, animate = true) {
+      const entry = activeLeafletMaps[mapId];
+      if (!entry || !appState.selectedMapPoint) return;
+      const marker = entry.markers[appState.selectedMapPoint];
+      const point = entry.points.find(item => item.id === appState.selectedMapPoint);
+      if (!marker || !point) return;
+      if (animate) entry.map.flyTo([point.lat, point.lng], Math.max(entry.map.getZoom(), 14), { duration: 0.6 });
+      else entry.map.setView([point.lat, point.lng], Math.max(entry.map.getZoom(), 13));
+      marker.openPopup();
+    }
+
+    function setMarkerHover(pointId, active) {
+      const safeId = window.CSS?.escape ? CSS.escape(pointId) : String(pointId).replace(/"/g, '\\"');
+      document.querySelectorAll(`[data-marker-id="${safeId}"]`).forEach(el => {
+        el.classList.toggle("hovered", active);
+      });
+    }
+
+    function resetMapView(mapId) {
+      const entry = activeLeafletMaps[mapId];
+      if (!entry) return;
+      fitMapToPoints(entry.map, entry.points);
+    }
+
+    function selectMapPoint(pointId) {
+      setState({ selectedMapPoint: pointId });
+    }
+
+    function focusMapPoint(pointId, mapId) {
+      const entry = activeLeafletMaps[mapId];
+      if (entry?.markers?.[pointId]) {
+        const point = entry.points.find(item => item.id === pointId);
+        if (point) entry.map.flyTo([point.lat, point.lng], Math.max(entry.map.getZoom(), 14), { duration: 0.6 });
+        entry.markers[pointId].openPopup();
+      }
+      setState({ selectedMapPoint: pointId });
+    }
+
+    function softHighlightMapPoint(pointId, active) {
+      setMarkerHover(pointId, active);
+    }
+
+    function showItemOnMap(itemId) {
+      setState({ selectedTab: "route", selectedMapPoint: itemId, searchQuery: "", typeFilter: "all" });
+    }
+
+    function openMapModal(dayId) {
+      setState({ modal: { type: "map", dayId }, mapViewMode: "fullscreen" });
+    }
+
+    async function copyRoute(dayId) {
+      const day = tripData.daysById[dayId];
+      if (!day) return;
+      const points = mapPointsForDay(day);
+      const lines = [
+        `${day.label} · ${day.cityName} · 今日路线`,
+        points.map((point, index) => `${index + 1}. ${point.locationName || point.title}`).join(" → ")
+      ];
+      await copyText(lines.join("\n"));
+    }
+
+    function enterTrip() {
+      setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedCity: null, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null });
+    }
+    function goJourneySelect() { setState({ currentView: "journey-select", drawer: null, selectedMapPoint: null }); }
+    function goDashboard() { setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, drawer: null }); }
+    function selectCity(cityId) { setState({ currentView: "city", selectedTrip: tripData.id, selectedCity: cityId, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, searchQuery: "", typeFilter: "all", drawer: null }); }
     function selectDay(dayId, cityContext) {
       const day = tripData.daysById[dayId];
       const cityId = cityContext && tripData.cities[cityContext] ? cityContext : (day?.cityId || appState.selectedCity);
-      setState({ currentView: "day", selectedTrip: tripData.id, selectedCity: cityId, selectedDay: dayId, selectedTab: "timeline", searchQuery: "", typeFilter: "all", drawer: null });
+      setState({ currentView: "day", selectedTrip: tripData.id, selectedCity: cityId, selectedDay: dayId, selectedTab: "timeline", selectedMapPoint: null, searchQuery: "", typeFilter: "all", drawer: null });
     }
-    function backToCity() { setState({ currentView: "city", selectedDay: null, selectedTab: "timeline", searchQuery: "", typeFilter: "all" }); }
+    function backToCity() { setState({ currentView: "city", selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, searchQuery: "", typeFilter: "all" }); }
     function setTab(tab) { setState({ selectedTab: tab, searchQuery: "", typeFilter: "all" }); }
     function updateSearch(value) { setState({ searchQuery: value }, true); }
     function setTypeFilter(type) { setState({ typeFilter: type }); }
@@ -3310,6 +4310,13 @@
     window.openItemNote = openItemNote;
     window.openExpenseModal = openExpenseModal;
     window.closeModal = closeModal;
+    window.resetMapView = resetMapView;
+    window.selectMapPoint = selectMapPoint;
+    window.focusMapPoint = focusMapPoint;
+    window.softHighlightMapPoint = softHighlightMapPoint;
+    window.showItemOnMap = showItemOnMap;
+    window.openMapModal = openMapModal;
+    window.copyRoute = copyRoute;
     window.toggleComplete = toggleComplete;
     window.toggleFavorite = toggleFavorite;
     window.toggleChecklist = toggleChecklist;
