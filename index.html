@@ -3,39 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Taiwan Trip 2026 · Travel App</title>
-  <meta name="description" content="A layered interactive travel guide for Taiwan Trip 2026." />
+  <title>台湾旅行 2026 · 路线手帐</title>
+  <meta name="description" content="高雄、墾丁、台北 9 天 8 夜的台湾旅行路线、地图与每日行程手帐。" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=Noto+Sans+SC:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;600;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
-      --navy: #102235;
-      --navy-2: #18344f;
-      --ivory: #fbf7ef;
-      --paper: #fffdf8;
-      --sand: #e8dac4;
-      --sand-2: #f3eadf;
-      --orange: #d76d3a;
-      --orange-2: #f2a36e;
-      --sage: #7f9a80;
-      --sage-2: #e9efe7;
-      --ink: #172033;
-      --muted: #6e7786;
-      --line: rgba(23, 32, 51, 0.1);
-      --glass: rgba(255, 253, 248, 0.72);
-      --shadow: 0 24px 70px rgba(16, 34, 53, 0.12);
-      --shadow-soft: 0 14px 38px rgba(16, 34, 53, 0.1);
-      --radius-lg: 28px;
-      --radius: 22px;
+      --cream: #FFF8EA;
+      --paper: #FFFDF6;
+      --ink: #17324D;
+      --muted: #6C7B8A;
+      --ocean: #1CA7EC;
+      --teal: #00BFA6;
+      --coral: #FF6B5A;
+      --mango: #FFD166;
+      --palm: #6BCB77;
+      --kaohsiung-main: #1CA7EC;
+      --kaohsiung-accent: #FF8A3D;
+      --kenting-main: #00BFA6;
+      --kenting-accent: #FFD166;
+      --taipei-main: #3577FF;
+      --taipei-accent: #FF4D66;
+      --navy: var(--ink);
+      --navy-2: #245174;
+      --ivory: var(--cream);
+      --sand: #FFE7BD;
+      --sand-2: #FFF1D0;
+      --orange: var(--coral);
+      --orange-2: #FF9D5C;
+      --sage: var(--palm);
+      --sage-2: #E6F9DD;
+      --line: rgba(23, 50, 77, 0.12);
+      --glass: rgba(255, 253, 246, 0.72);
+      --shadow: 0 26px 70px rgba(50, 95, 129, 0.16);
+      --shadow-soft: 0 16px 38px rgba(72, 98, 120, 0.11);
+      --radius-lg: 32px;
+      --radius: 24px;
       --ease: cubic-bezier(.2,.8,.2,1);
-      --font-display: "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", "Microsoft JhengHei", "Microsoft YaHei", system-ui, sans-serif;
-      --font-serif: var(--font-display);
-      --font-sans: "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", "Microsoft JhengHei", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: "Manrope", "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
+      --font-title: "Noto Serif TC", "Noto Serif SC", serif;
+      --font-display: "Newsreader", "Noto Serif TC", "Noto Serif SC", serif;
+      --font-body: "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
+      --font-label: "Manrope", "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
+      --font-note: "Noto Serif TC", "Noto Serif SC", serif;
+      --font-serif: var(--font-title);
+      --font-sans: var(--font-body);
+      --font-mono: var(--font-label);
     }
 
     * { box-sizing: border-box; }
@@ -126,7 +142,7 @@
       border-radius: var(--radius);
     }
 
-    /* Journey selection */
+    /* Taiwan boarding page */
     .journey-page {
       min-height: 100vh;
       display: grid;
@@ -167,8 +183,8 @@
       backdrop-filter: blur(20px);
       font-size: 12px;
       font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
     .journey-title {
       margin: 24px 0 10px;
@@ -197,7 +213,7 @@
       border: 1px solid rgba(255,255,255,.28);
     }
     .trip-card-top { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
-    .trip-label { color: var(--orange); font-size: 12px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .trip-label { color: var(--orange); font-size: 12px; font-weight: 900; letter-spacing: 0; text-transform: none; }
     .hero-trip-card h2 { margin: 12px 0 12px; font-size: clamp(34px, 5vw, 62px); line-height: .96; }
     .trip-card-meta { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 18px; }
     .trip-route-card {
@@ -207,22 +223,6 @@
       border: 1px solid rgba(16,34,53,.08);
     }
     .trip-route-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--navy); font-size: 13px; font-weight: 800; }
-    .future-grid { display: grid; gap: 12px; }
-    .future-card {
-      border-radius: 24px;
-      padding: 22px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
-      backdrop-filter: blur(20px);
-      color: rgba(255,255,255,.48);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      min-height: 82px;
-    }
-    .future-card strong { color: rgba(255,255,255,.78); font-size: 19px; }
-    .future-card span { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-
     /* App shell */
     .topbar {
       position: sticky;
@@ -273,7 +273,7 @@
       overflow: auto;
     }
     .side-nav { padding: 16px; }
-    .side-title { color: var(--muted); font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; margin: 4px 8px 10px; }
+    .side-title { color: var(--muted); font-size: 11px; font-weight: 900; letter-spacing: 0; text-transform: none; margin: 4px 8px 10px; }
     .nav-btn {
       width: 100%;
       border: 0;
@@ -335,7 +335,7 @@
       backdrop-filter: blur(16px);
       min-width: 140px;
     }
-    .stat-tile span { color: rgba(255,255,255,.66); font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .stat-tile span { color: rgba(255,255,255,.66); font-size: 11px; font-weight: 900; letter-spacing: 0; text-transform: none; }
     .stat-tile strong { display: block; margin-top: 7px; font-size: 22px; }
     .progress-bar { height: 8px; border-radius: 999px; background: rgba(255,255,255,.16); overflow: hidden; margin-top: 10px; }
     .progress-bar div { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--orange-2), var(--sage)); }
@@ -798,6 +798,17 @@
         padding: 0;
       }
       .top-actions .home-mobile span { display: none; }
+      .top-actions .keep-mobile {
+        width: 42px;
+        min-width: 42px;
+        padding: 0;
+        font-size: 0;
+        gap: 0;
+      }
+      .top-actions .keep-mobile .icon-sm {
+        width: 18px;
+        height: 18px;
+      }
       .app-shell { grid-template-columns: 1fr; padding: 16px 14px 96px; }
       .side-nav { display: none; }
       .mobile-nav { display: grid; }
@@ -826,6 +837,12 @@
       --mint-soft: #E2FFF8;
       --night-red: #FF4D66;
       --city-blue: #3577FF;
+      --kaohsiung-main: #1CA7EC;
+      --kaohsiung-accent: #FF8A3D;
+      --kenting-main: #00BFA6;
+      --kenting-accent: #FFD166;
+      --taipei-main: #3577FF;
+      --taipei-accent: #FF4D66;
       --accent: var(--ocean);
       --accent-2: var(--teal);
       --accent-3: var(--coral);
@@ -849,10 +866,14 @@
       --radius: 24px;
       --ease: cubic-bezier(.19, 1, .22, 1);
       --bounce: cubic-bezier(.34, 1.56, .64, 1);
-      --font-display: "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", "Microsoft JhengHei", "Microsoft YaHei", system-ui, sans-serif;
-      --font-serif: var(--font-display);
-      --font-sans: "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", "Microsoft JhengHei", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: "Manrope", "PingFang TC", "PingFang SC", "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
+      --font-title: "Noto Serif TC", "Noto Serif SC", serif;
+      --font-display: "Newsreader", "Noto Serif TC", "Noto Serif SC", serif;
+      --font-body: "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
+      --font-label: "Manrope", "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
+      --font-note: "Noto Serif TC", "Noto Serif SC", serif;
+      --font-serif: var(--font-title);
+      --font-sans: var(--font-body);
+      --font-mono: var(--font-label);
     }
 
     body {
@@ -1170,21 +1191,6 @@
       border-color: rgba(255,255,255,.26);
       box-shadow: none;
     }
-    .future-card {
-      color: rgba(23, 50, 77, .46);
-      background: rgba(255,255,255,.66);
-      border-color: rgba(23,50,77,.08);
-      backdrop-filter: none;
-      box-shadow: 0 14px 28px rgba(23,50,77,.08);
-    }
-    .future-card:hover {
-      transform: translateY(-2px) rotate(.3deg);
-    }
-    .future-card strong {
-      color: rgba(23, 50, 77, .74);
-      font-family: var(--font-serif);
-    }
-
     .journey-home {
       align-items: center;
       color: var(--ink-navy);
@@ -1436,7 +1442,6 @@
       font-weight: 800;
     }
     .home-map-card,
-    .new-trip-card,
     .home-city-card {
       border: 1px solid rgba(23,50,77,.08);
       background: rgba(255,255,255,.68);
@@ -1466,44 +1471,6 @@
     .home-map-card .home-route-map {
       height: 270px;
       border-radius: 22px;
-    }
-    .new-trip-card {
-      display: grid;
-      grid-template-columns: 46px minmax(0, 1fr);
-      gap: 12px;
-      align-items: center;
-      text-align: left;
-      padding: 16px;
-      color: var(--ink-navy);
-      cursor: pointer;
-      transition: transform .22s var(--bounce), background .22s var(--ease);
-    }
-    .new-trip-card:hover {
-      transform: translateY(-3px);
-      background: #fff;
-    }
-    .new-trip-plus {
-      width: 46px;
-      height: 46px;
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      background: linear-gradient(135deg, var(--coral), var(--mango));
-    }
-    .new-trip-card strong,
-    .new-trip-card small {
-      display: block;
-    }
-    .new-trip-card strong {
-      font-family: var(--font-serif);
-      font-size: 18px;
-    }
-    .new-trip-card small {
-      margin-top: 4px;
-      color: var(--muted);
-      line-height: 1.45;
-      font-weight: 700;
     }
     .home-city-row {
       display: grid;
@@ -2249,8 +2216,8 @@
       gap: 7px;
       color: color-mix(in srgb, var(--accent) 70%, var(--ink-navy));
       font: 800 12px/1 var(--font-mono);
-      letter-spacing: .08em;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
     .map-card-head h2 {
       margin: 8px 0 4px;
@@ -2550,8 +2517,7 @@
     .section-head h2,
     .panel-head h2,
     .map-card-head h2,
-    .brand-title strong,
-    .future-card strong {
+    .brand-title strong {
       font-family: var(--font-display);
       font-weight: 700;
       letter-spacing: -0.012em;
@@ -2592,6 +2558,245 @@
     .travel-marker span {
       font-family: var(--font-mono);
       font-weight: 700;
+    }
+
+    /* Taiwan route notebook cleanup: one bright system, with travel materials */
+    body {
+      background-color: var(--cream);
+      background-image:
+        radial-gradient(circle at 10% 12%, rgba(255, 209, 102, .28), transparent 24%),
+        radial-gradient(circle at 90% 8%, rgba(28, 167, 236, .16), transparent 28%),
+        linear-gradient(115deg, rgba(255,253,246,.96), rgba(255,248,234,.86));
+    }
+    .journey-page {
+      background:
+        radial-gradient(circle at 16% 16%, rgba(255,209,102,.38), transparent 26%),
+        radial-gradient(circle at 88% 14%, rgba(28,167,236,.2), transparent 30%),
+        linear-gradient(135deg, #FFFDF6, #FFF8EA 54%, #FFEBD8);
+      color: var(--ink-navy);
+    }
+    .journey-page::before {
+      background:
+        linear-gradient(90deg, rgba(23,50,77,.045) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(23,50,77,.035) 1px, transparent 1px),
+        radial-gradient(circle, rgba(23,50,77,.08) 1px, transparent 1.4px);
+      background-size: 86px 86px, 86px 86px, 18px 18px;
+      mask-image: none;
+    }
+    .journey-title,
+    .hero-title,
+    .page-title,
+    .day-title-grid h1,
+    .postcard-content h2 {
+      font-family: var(--font-title);
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+    .journey-title { font-weight: 700; }
+    .panel-head h2,
+    .section-head h2,
+    .map-card-head h2,
+    .drawer h2,
+    .modal h2,
+    .home-card-head strong,
+    .brand-title strong {
+      font-family: var(--font-body);
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+    .trip-label,
+    .side-title,
+    .stat-tile span,
+    .map-title-kicker {
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .postcard-card,
+    .ticket-card,
+    .receipt-card,
+    .note-card,
+    .map-card-lite {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(23,50,77,.1);
+      color: var(--ink-navy);
+      box-shadow: 0 18px 40px rgba(23,50,77,.1);
+    }
+    .postcard-card,
+    .note-card {
+      border-radius: 28px;
+      background:
+        linear-gradient(90deg, rgba(23,50,77,.035) 1px, transparent 1px) 0 0 / 28px 28px,
+        linear-gradient(180deg, #FFFDF6, #FFF6DF);
+    }
+    .ticket-card {
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at 0 50%, transparent 14px, rgba(255,255,255,.95) 15px),
+        radial-gradient(circle at 100% 50%, transparent 14px, rgba(255,255,255,.95) 15px),
+        linear-gradient(135deg, #fff, #FFF1D0);
+    }
+    .ticket-card::after {
+      content: "";
+      position: absolute;
+      top: 18px;
+      bottom: 18px;
+      left: 62%;
+      border-left: 2px dashed rgba(23,50,77,.14);
+    }
+    .receipt-card {
+      border-radius: 22px;
+      background:
+        repeating-linear-gradient(180deg, rgba(23,50,77,.045) 0 1px, transparent 1px 28px),
+        linear-gradient(180deg, #fff, #FFF8EA);
+    }
+    .map-card-lite {
+      border-radius: 26px;
+      background:
+        linear-gradient(120deg, rgba(28,167,236,.1), transparent 38%),
+        linear-gradient(90deg, rgba(23,50,77,.04) 1px, transparent 1px) 0 0 / 34px 34px,
+        #FFFDF6;
+    }
+    .stamp-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .stamp {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 11px;
+      border: 1px solid rgba(23,50,77,.13);
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      color: var(--ink-navy);
+      font-family: var(--font-label);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .stamp-pending { border-style: dashed; color: #9C512A; background: rgba(255,209,102,.24); }
+    .prep-row {
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 390px);
+      align-items: stretch;
+    }
+    .prep-copy {
+      max-width: 720px;
+      color: #526D83;
+      line-height: 1.78;
+      font-weight: 600;
+      margin: 16px 0 0;
+    }
+    .prep-ticket {
+      padding: 22px;
+      display: grid;
+      align-content: center;
+      gap: 14px;
+      transform: rotate(.5deg);
+    }
+    .ticket-row {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      font-family: var(--font-label);
+      font-weight: 800;
+    }
+    .ticket-row span { color: var(--muted); }
+    .ticket-route { color: #526D83; font-weight: 700; position: relative; z-index: 1; }
+    .ticket-dash { border-top: 1px dashed rgba(23,50,77,.18); position: relative; z-index: 1; }
+    .prep-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .prep-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .prep-card {
+      padding: 18px;
+      min-height: 176px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transform: rotate(var(--tilt, 0deg));
+    }
+    .prep-card:nth-child(1) { --tilt: -.35deg; }
+    .prep-card:nth-child(2) { --tilt: .3deg; }
+    .prep-card:nth-child(3) { --tilt: -.15deg; }
+    .prep-card h3 {
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+    }
+    .prep-card p {
+      margin: 0;
+      color: #526D83;
+      line-height: 1.65;
+      font-weight: 600;
+    }
+    .prep-card small {
+      color: var(--muted);
+      font-family: var(--font-label);
+      font-weight: 800;
+      margin-top: 12px;
+    }
+    .route-node {
+      border: 0;
+      cursor: default;
+      font-family: var(--font-label);
+    }
+    .route-node.clickable { cursor: pointer; }
+    .route-node.clickable:hover { transform: translateY(-3px); }
+    .home-route-node small {
+      margin-top: -4px;
+      color: rgba(255,255,255,.86);
+      font-size: 10px;
+    }
+    .home-city-card {
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, #FFFDF6), #FFFDF6 58%, #FFF1D0);
+    }
+    .home-city-kaohsiung {
+      background:
+        linear-gradient(90deg, rgba(28,167,236,.12) 1px, transparent 1px) 0 0 / 24px 24px,
+        linear-gradient(135deg, #F3FBFF, #FFF1D0);
+    }
+    .home-city-kenting {
+      background:
+        radial-gradient(50% 100% at 50% 0%, rgba(0,191,166,.18) 0 45%, transparent 46%) 0 0 / 90px 44px repeat-x,
+        linear-gradient(135deg, #E8FFF9, #FFF2BD);
+    }
+    .home-city-taipei {
+      border-style: dashed;
+      background:
+        repeating-linear-gradient(-5deg, rgba(53,119,255,.08) 0 2px, transparent 2px 22px),
+        linear-gradient(135deg, #FFFDF6, #FFE7E1);
+    }
+    .home-city-card strong { font-family: var(--font-body); font-weight: 800; }
+    .leaflet-map {
+      border-radius: 24px;
+      border: 1px solid rgba(23,50,77,.1);
+    }
+    @media (max-width: 1180px) {
+      .prep-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 820px) {
+      .prep-row,
+      .prep-grid { grid-template-columns: 1fr; }
+      .prep-ticket::after { display: none; }
+      .prep-ticket { transform: none; }
+      .top-actions .keep-mobile {
+        width: 42px;
+        min-width: 42px;
+        padding: 0;
+        font-size: 0;
+        gap: 0;
+        overflow: hidden;
+      }
+      .top-actions .keep-mobile .icon-sm {
+        width: 18px;
+        height: 18px;
+      }
     }
 
     @keyframes heroIn {
@@ -2838,6 +3043,7 @@
 
   <script>
     const STORAGE_KEY = "taiwanTrip2026State";
+    const SESSION_HOME_KEY = "taiwanTrip2026BoardingSeen-v1";
 
     const tripData = {
       id: "taiwan2026",
@@ -3274,6 +3480,8 @@
     hydrateTimelineMapData();
 
     const defaultState = {
+      designVersion: "taiwan-route-notebook-v3",
+      homeSeenVersion: "taiwan-boarding-page-v1",
       currentView: "journey-select",
       selectedTrip: null,
       selectedCity: null,
@@ -3329,13 +3537,44 @@
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        return normalizeState(raw ? { ...defaultState, ...JSON.parse(raw) } : { ...defaultState });
+        const saved = raw ? JSON.parse(raw) : null;
+        const state = normalizeState(saved ? { ...defaultState, ...saved } : { ...defaultState }, saved?.designVersion, saved?.homeSeenVersion);
+        if (!sessionStorage.getItem(SESSION_HOME_KEY)) {
+          sessionStorage.setItem(SESSION_HOME_KEY, "1");
+          return {
+            ...state,
+            currentView: "journey-select",
+            selectedTrip: null,
+            selectedCity: null,
+            selectedDay: null,
+            selectedTab: "timeline",
+            selectedMapPoint: null,
+            drawer: null,
+            modal: null
+          };
+        }
+        return state;
       } catch {
         return { ...defaultState };
       }
     }
 
-    function normalizeState(state) {
+    function normalizeState(state, savedDesignVersion = defaultState.designVersion, savedHomeSeenVersion = defaultState.homeSeenVersion) {
+      if (savedDesignVersion !== defaultState.designVersion || savedHomeSeenVersion !== defaultState.homeSeenVersion) {
+        state = {
+          ...state,
+          designVersion: defaultState.designVersion,
+          homeSeenVersion: defaultState.homeSeenVersion,
+          currentView: "journey-select",
+          selectedTrip: null,
+          selectedCity: null,
+          selectedDay: null,
+          selectedTab: "timeline",
+          selectedMapPoint: null,
+          drawer: null,
+          modal: null
+        };
+      }
       if (!state.currentView) state.currentView = "journey-select";
       if (state.currentView !== "journey-select" && !state.selectedTrip) state.selectedTrip = tripData.id;
       if (state.selectedCity && !tripData.cities[state.selectedCity]) state.selectedCity = null;
@@ -3598,7 +3837,7 @@
       return labels.slice(0, 3).join(" / ");
     }
 
-    function tripProgress() {
+    function tripCompletion() {
       const items = allTimelineItems();
       const completed = items.filter(item => appState.completedItems[item.id]).length;
       return { completed, total: items.length, percent: items.length ? Math.round(completed / items.length * 100) : 0 };
@@ -3628,25 +3867,26 @@
           <div class="journey-wrap">
             <section class="journey-hero-layout">
               <div class="journey-copy">
-                <div class="journey-kicker">${icon("route", "icon-sm")} 当前旅程</div>
+                <div class="journey-kicker">${icon("route", "icon-sm")} 台湾 2026 出发页</div>
                 <h1 class="journey-title serif">台湾旅行 2026</h1>
-                <p class="journey-subtitle">高雄、墾丁、台北，9 天 8 夜。先把路线走顺，再把每天过得漂亮一点。</p>
+                <p class="journey-subtitle">五月从高雄落地，先把夜市和日落走顺；再把三天留给墾丁的海风；台北先不锁死，保留一点临场发挥。</p>
                 <div class="journey-meta-grid">
-                  <span>${icon("calendar-days", "icon-sm")} 2026.05.11 – 2026.05.19</span>
+                  <span>${icon("calendar-days", "icon-sm")} 2026.05.11 – 05.19</span>
                   <span>${icon("plane", "icon-sm")} 香港 → 高雄 → 墾丁 → 台北 → 香港</span>
                   <span>${icon("timer", "icon-sm")} 9 天 8 夜</span>
-                  <span>${icon("sparkles", "icon-sm")} 海岛 / 夜市 / 日落 / 城市漫游</span>
+                  <span>${icon("clipboard-check", "icon-sm")} 高雄已规划 / 墾丁已规划 / 台北待补齐</span>
                 </div>
-                <p class="journey-note">高雄先看日落和夜市，墾丁留给海风和机车，台北先保留一点自由度。地图会跟着每天行程切换，不用在一长页里找东西。</p>
+                <p class="journey-note">这趟不是打卡清单，是一条从港湾走到海边、再进城市的路线。地图会跟着每天行程切换，不用在一长页里翻来翻去。</p>
                 <div class="journey-actions">
                   <button class="btn btn-primary btn-journey" onclick="enterTrip()">${icon("arrow-right", "icon-sm")} 进入行程</button>
-                  <button class="btn btn-ghost btn-journey" onclick="enterTripMap()">${icon("map", "icon-sm")} 查看路线地图</button>
+                  <button class="btn btn-ghost btn-journey" onclick="enterTripMap()">${icon("map", "icon-sm")} 看路线地图</button>
+                  <button class="btn btn-ghost btn-journey" onclick="enterTripConfirm()">${icon("circle-help", "icon-sm")} 打开待确认事项</button>
                 </div>
                 <div class="journey-quick-row" aria-label="quick entries">
                   <button onclick="selectCity('kaohsiung')">${icon("ship", "icon-sm")} 城市</button>
                   <button onclick="selectDay('d1', 'kaohsiung')">${icon("calendar-check", "icon-sm")} 日期</button>
                   <button onclick="enterTripMap()">${icon("route", "icon-sm")} 地图</button>
-                  <button onclick="enterTripChecklist()">${icon("check-square", "icon-sm")} 清单</button>
+                  <button onclick="enterTripConfirm()">${icon("circle-help", "icon-sm")} 待确认</button>
                 </div>
               </div>
               <aside class="journey-side">
@@ -3660,8 +3900,9 @@
                     <h2 class="serif">Kaohsiung · Kenting · Taipei</h2>
                     <div class="postcard-tags">
                       <span>9D8N</span>
-                      <span>已规划：高雄、墾丁</span>
-                      <span>待规划：台北</span>
+                      <span>2026 五月</span>
+                      <span>Flight U0136 / KHH T1</span>
+                      <span>台北待规划</span>
                     </div>
                     <button class="btn btn-primary" onclick="enterTrip()">${icon("ticket", "icon-sm")} 进入台湾行程</button>
                   </div>
@@ -3673,10 +3914,6 @@
                   </div>
                   <div id="map-home-route" class="leaflet-map home-route-map" data-map-kind="trip" aria-label="首页台湾路线预览地图"></div>
                 </section>
-                <button class="new-trip-card" onclick="openNewTripModal()">
-                  <span class="new-trip-plus">${icon("plus", "icon-sm")}</span>
-                  <span><strong>新建下一段旅程</strong><small>从空白开始、导入地图，或复制当前台湾模板。</small></span>
-                </button>
               </aside>
             </section>
             <section class="home-city-row" aria-label="city quick cards">
@@ -3684,7 +3921,7 @@
                 <button class="home-city-card home-city-${city.id}" onclick="selectCity('${city.id}')">
                   <span>${esc(city.range)}</span>
                   <strong>${esc(city.name)}</strong>
-                  <small>${esc(city.id === "taipei" ? "先保留一点临场发挥。" : city.id === "kenting" ? "海风、浮潜和机车路线。" : "港湾、夜市和艺术区。")}</small>
+                  <small>${esc(city.id === "taipei" ? "待规划，先保留一点自由度。" : city.id === "kenting" ? "南湾、浮潜、机车、龙磐公园。" : "港湾、夜市、驳二、西子湾。")}</small>
                 </button>
               `).join("")}
             </section>
@@ -3698,7 +3935,7 @@
         { label: "香港", iconName: "plane-takeoff" },
         { label: "高雄", cityId: "kaohsiung", iconName: "ship" },
         { label: "墾丁", cityId: "kenting", iconName: "waves" },
-        { label: "台北", cityId: "taipei", iconName: "building-2" },
+        { label: "台北", cityId: "taipei", iconName: "building-2", note: "待规划" },
         { label: "香港", iconName: "plane-landing" }
       ];
       return `
@@ -3708,6 +3945,7 @@
             <button class="home-route-node ${node.cityId ? "clickable" : ""} ${index === 1 ? "current" : ""}" ${node.cityId ? `onclick="selectCity('${node.cityId}')"` : "disabled"}>
               ${icon(node.iconName, "icon-sm")}
               <span>${esc(node.label)}</span>
+              ${node.note ? `<small>${esc(node.note)}</small>` : ""}
             </button>
           `).join("")}
         </div>
@@ -3736,12 +3974,12 @@
           <div class="brand">
             <div class="brand-mark">${icon("map", "icon-sm")}</div>
             <div class="brand-title">
-              <strong>${esc(tripData.titleEn)}</strong>
+              <strong>台湾旅行 2026</strong>
               <span>${esc(tripData.days)} · ${esc(tripData.month)}</span>
             </div>
           </div>
           <div class="top-actions">
-            <button class="btn btn-ghost home-mobile" onclick="goJourneySelect()">${icon("chevron-left", "icon-sm")} <span>返回攻略选择</span></button>
+            <button class="btn btn-ghost home-mobile" onclick="goJourneySelect()">${icon("chevron-left", "icon-sm")} <span>回到出发页</span></button>
             <button class="btn btn-ghost keep-mobile" onclick="openDrawer('confirm')">${icon("circle-help", "icon-sm")} 待确认中心</button>
             <button class="btn btn-primary keep-mobile" onclick="openDrawer('checklist')">${icon("check-square", "icon-sm")} 打卡清单</button>
           </div>
@@ -3753,12 +3991,12 @@
       const currentCity = selectedCity();
       return `
         <aside class="side-nav card">
-          <div class="side-title">Guide</div>
+          <div class="side-title">总览</div>
           <button class="nav-btn ${appState.currentView === "trip-dashboard" ? "active" : ""}" onclick="goDashboard()">
             ${icon("layout-dashboard", "icon-sm")} 台湾总览
           </button>
           <div class="side-divider"></div>
-          <div class="side-title">Cities</div>
+          <div class="side-title">城市</div>
           ${Object.values(tripData.cities).map(city => `
             <button class="nav-btn ${appState.selectedCity === city.id ? "active" : ""}" onclick="selectCity('${city.id}')">
               ${icon(city.id === "kenting" ? "waves" : city.id === "taipei" ? "building-2" : "ship", "icon-sm")}
@@ -3768,7 +4006,7 @@
           `).join("")}
           ${currentCity ? `
             <div class="side-divider"></div>
-            <div class="side-title">Dates · ${esc(currentCity.name)}</div>
+            <div class="side-title">日期 · ${esc(currentCity.name)}</div>
             ${daysForCity(currentCity.id).map(day => {
               const context = dayContext(day, currentCity.id);
               return `
@@ -3785,19 +4023,13 @@
     }
 
     function renderRightRail() {
-      const progress = tripProgress();
       const day = selectedDay();
       const city = selectedCity();
       const reminders = day?.reminders?.slice(0, 2) || tripData.globalConfirmations.slice(0, 3);
       return `
         <aside class="right-rail">
           <section class="rail-card card">
-            <h3>Trip Pulse</h3>
-            <div class="rail-muted">${progress.completed}/${progress.total} 个行程节点已完成</div>
-            <div class="progress-bar"><div style="width:${progress.percent}%"></div></div>
-          </section>
-          <section class="rail-card card">
-            <h3>${day ? "今日重点" : city ? "城市状态" : "路线"}</h3>
+            <h3>${day ? "今天怎么走" : city ? "城市节奏" : "手边提醒"}</h3>
             <div class="rail-muted">${esc(day?.focus || city?.intro || tripData.route.join(" → "))}</div>
           </section>
           <section class="rail-card card">
@@ -3808,8 +4040,8 @@
             <button class="btn btn-small btn-ghost" style="margin-top:12px;" onclick="openDrawer('confirm')">打开待确认中心</button>
           </section>
           <section class="rail-card card">
-            <h3>预算摘要</h3>
-            <div class="rail-muted">已添加 ${userExpenseTotalCount()} 个自定义费用。已知费用按日期保留原币种，暂不做自动汇率换算。</div>
+            <h3>旅行小账本</h3>
+            <div class="rail-muted">已添加 ${userExpenseTotalCount()} 个自定义费用。已知费用按日期保留原币种，现场再补更稳。</div>
           </section>
         </aside>
       `;
@@ -3822,67 +4054,79 @@
     }
 
     function renderDashboard() {
-      const progress = tripProgress();
       return `
-        <section class="dashboard-hero">
+        <section class="dashboard-hero prep-hero">
           <div class="hero-content">
-            <div class="hero-row">
+            <div class="hero-row prep-row">
               <div>
-                <span class="chip hero-chip">${icon("sparkles", "icon-sm")} Active Guide</span>
-                <h1 class="hero-title serif">Taiwan Trip<br />2026</h1>
+                <span class="chip hero-chip">${icon("map-pinned", "icon-sm")} 旅行准备桌面</span>
+                <h1 class="hero-title serif">台湾旅行<br />2026</h1>
                 <div class="hero-meta">
                   ${esc(tripData.range)} · ${esc(tripData.days)}<br />
-                  Hong Kong → Kaohsiung → Kenting → Taipei → Hong Kong
+                  香港 → 高雄 → 墾丁 → 台北 → 香港
                 </div>
+                <p class="prep-copy">先把跨城路线、住宿和待确认事项放在同一张桌面上。高雄和墾丁已经能按天走，台北先留一点空白，等前半段路线稳定后再补。</p>
               </div>
-              <div class="hero-stats">
-                <div class="stat-tile"><span>Countdown</span><strong>${esc(countdownText())}</strong></div>
-                <div class="stat-tile"><span>Progress</span><strong>${progress.percent}%</strong><div class="progress-bar"><div style="width:${progress.percent}%"></div></div></div>
-                <div class="stat-tile"><span>Budget Items</span><strong>${userExpenseTotalCount()}</strong></div>
-                <div class="stat-tile"><span>Status</span><strong>Planning</strong></div>
+              <div class="prep-ticket ticket-card">
+                <div class="ticket-row">
+                  <span>Flight U0136</span>
+                  <strong>HKG → KHH</strong>
+                </div>
+                <div class="ticket-route">12:45 起飞 · 14:15 到小港 T1</div>
+                <div class="ticket-dash"></div>
+                <div class="ticket-row">
+                  <span>路线节奏</span>
+                  <strong>港湾 → 海边 → 城市</strong>
+                </div>
               </div>
             </div>
             <div class="route-visual" aria-label="trip route">
               ${["香港", "高雄", "墾丁", "台北", "香港"].map((name, index, arr) => `
-                <span class="route-node">${index === 1 || index === 4 ? icon(index === 1 ? "plane-landing" : "plane-takeoff", "icon-sm") : ""}${esc(name)}</span>
+                <button class="route-node ${index > 0 && index < 4 ? "clickable" : ""}" ${index > 0 && index < 4 ? `onclick="selectCity('${["kaohsiung","kenting","taipei"][index - 1]}')"` : "disabled"}>
+                  ${index === 0 ? icon("plane-takeoff", "icon-sm") : index === 4 ? icon("plane-landing", "icon-sm") : index === 2 ? icon("waves", "icon-sm") : index === 3 ? icon("building-2", "icon-sm") : icon("ship", "icon-sm")}
+                  ${esc(name)}
+                </button>
                 ${index < arr.length - 1 ? `<span class="route-arrow">${index === 0 || index === 3 ? "✈" : "→"}</span>` : ""}
               `).join("")}
             </div>
-            <div class="flight-strip">
-              ${tripData.flights.map(flight => `
-                <div class="mini-card">
-                  <h3>${icon("plane", "icon-sm")} ${esc(flight.flightNo)} · ${esc(flight.cabin)}</h3>
-                  <p>${esc(flight.title)} · ${esc(flight.time)} · ${esc(flight.airport)}</p>
-                </div>
-              `).join("")}
+            <div class="prep-actions">
+              <button class="btn btn-primary" onclick="selectCity('kaohsiung')">${icon("ship", "icon-sm")} 从高雄开始</button>
+              <button class="btn btn-ghost" onclick="enterTripMap()">${icon("map", "icon-sm")} 看总路线地图</button>
+              <button class="btn btn-ghost" onclick="openDrawer('confirm')">${icon("circle-help", "icon-sm")} 查看待确认</button>
             </div>
           </div>
         </section>
         ${renderOverviewMap()}
+        <section class="prep-grid">
+          <article class="note-card prep-card">
+            <h3>${icon("clipboard-check", "icon-sm")} 城市进度</h3>
+            <p>高雄和墾丁已经按日期拆好；台北先不急着塞满，等交通和返港信息确认后再补。</p>
+            <div class="stamp-row"><span class="stamp">高雄已规划</span><span class="stamp">墾丁已规划</span><span class="stamp stamp-pending">台北待补齐</span></div>
+          </article>
+          <article class="ticket-card prep-card">
+            <h3>${icon("bed-double", "icon-sm")} 住宿票据</h3>
+            <p>高雄住福容徕旅，墾丁住日和湾居；台北住宿还没锁，先别让前半段的节奏被它打乱。</p>
+          </article>
+          <article class="receipt-card prep-card">
+            <h3>${icon("wallet", "icon-sm")} 预算小票</h3>
+            <p>高雄酒店约 HK$574/晚；墾丁快线、机车、夜市和打车先按估算记，现场再微调。</p>
+            <small>已记录 ${userExpenseTotalCount()} 项自定义费用</small>
+          </article>
+          <article class="map-card-lite prep-card">
+            <h3>${icon("circle-help", "icon-sm")} 待确认</h3>
+            <p>Good Dive 集合点、9189 班次、机车证件、台北段和返港航班都放在待确认中心。</p>
+            <button class="btn btn-small btn-ghost" onclick="openDrawer('confirm')">打开待确认事项</button>
+          </article>
+        </section>
         <section class="section-head">
           <div>
             <h2>选择城市</h2>
-            <p>从港湾城市到南国海岸，再进入首都城市。</p>
+            <p>从高雄的港湾和夜市，接到墾丁的海风和机车，再把台北留给临场发挥。</p>
           </div>
           <button class="btn btn-ghost" onclick="copyTripSummary()">${icon("copy", "icon-sm")} 复制总览</button>
         </section>
         <section class="city-grid">
           ${Object.values(tripData.cities).map(city => renderCityCard(city)).join("")}
-        </section>
-        <section class="card panel">
-          <div class="panel-head">
-            <div>
-              <h2>轻量预算汇总</h2>
-              <p class="rail-muted">已知大项、交通估算与待补费用集中留档。</p>
-            </div>
-            <button class="btn btn-small" onclick="openDrawer('settings')">${icon("settings", "icon-sm")} 设置</button>
-          </div>
-          <div class="budget-grid">
-            <div class="mini-card"><h3>高雄酒店</h3><p>约 HK$574/晚 · 已订</p></div>
-            <div class="mini-card"><h3>墾丁交通</h3><p>墾丁快线 NT$145 · 班次需确认</p></div>
-            <div class="mini-card"><h3>机车</h3><p>NT$350–500/天 · 证件规则需确认</p></div>
-            <div class="mini-card"><h3>自定义费用</h3><p>已记录 ${userExpenseTotalCount()} 项，保存在本机 localStorage。</p></div>
-          </div>
         </section>
       `;
     }
@@ -4005,7 +4249,7 @@
         <section class="card panel">
           <div class="panel-head">
             <div>
-              <h2>${city ? esc(city.name) : "日期"}内日期</h2>
+              <h2>${city ? esc(city.name) : "日期"}日期</h2>
               <p class="rail-muted">同一城市内快速切换当天节奏。</p>
             </div>
           </div>
@@ -4105,12 +4349,12 @@
     }
 
     function renderOverviewMap() {
-      const progress = tripProgress();
+      const progress = tripCompletion();
       return `
         <section class="map-card overview-map">
           <div class="map-card-head">
             <div>
-              <div class="map-title-kicker">${icon("map", "icon-sm")} Trip Launchpad</div>
+              <div class="map-title-kicker">${icon("map", "icon-sm")} 路线总图</div>
               <h2 class="serif">总路线地图</h2>
               <p>先看大方向：香港飞高雄，往南进墾丁，再一路北上台北，最后返港。</p>
             </div>
@@ -4122,7 +4366,7 @@
           <div class="map-shell"><div id="map-trip" class="leaflet-map" data-map-kind="trip" aria-label="台湾总路线地图"></div></div>
           <div class="map-route-summary">
             <div class="map-stat"><strong>5</strong><span>路线节点</span></div>
-            <div class="map-stat"><strong>${progress.percent}%</strong><span>完成进度</span></div>
+            <div class="map-stat"><strong>${progress.completed}/${progress.total}</strong><span>已打卡节点</span></div>
             <div class="map-stat"><strong>飞机 / 快线 / 高铁</strong><span>主要交通</span></div>
             <div class="map-stat"><strong>9 天 8 夜</strong><span>旅行长度</span></div>
           </div>
@@ -4136,7 +4380,7 @@
         <section class="map-card city-mini-map">
           <div class="map-card-head">
             <div>
-              <div class="map-title-kicker">${icon(city.id === "kenting" ? "waves" : city.id === "taipei" ? "building-2" : "ship", "icon-sm")} City Map</div>
+              <div class="map-title-kicker">${icon(city.id === "kenting" ? "waves" : city.id === "taipei" ? "building-2" : "ship", "icon-sm")} 城市地点图</div>
               <h2 class="serif">${esc(city.name)}地点速览</h2>
               <p>${city.id === "taipei" ? "台北还没锁死路线，先把可能想去的点放在地图上。" : `这里先放${esc(city.name)}段会出现的主要地点，选日期后会切到当天路线。`}</p>
             </div>
@@ -4162,7 +4406,7 @@
         <section class="map-card ${full ? "fullscreen-map-card" : ""}">
           <div class="map-card-head">
             <div>
-              <div class="map-title-kicker">${icon("route", "icon-sm")} Day ${esc(day.dayNo.replace("Day ", ""))} Route Map</div>
+              <div class="map-title-kicker">${icon("route", "icon-sm")} Day ${esc(day.dayNo.replace("Day ", ""))} 今日路线</div>
               <h2 class="serif">今日路线地图</h2>
               <p>${isPendingTaipei ? "台北段还没锁死，地图只标出建议规划点，不把它伪装成已确认行程。" : routeCopyForDay(day)}</p>
               <div class="city-tags">
@@ -4315,12 +4559,12 @@
       return `
         <div class="empty-state">
           ${icon("sparkles", "icon")}
-          <h2 class="serif">台北段待规划</h2>
-          <p>台北段保持开放，适合根据高雄和墾丁后的体力，再决定城市夜景、购物夜市或半日线。</p>
+          <h2 class="serif">台北先留白</h2>
+          <p>前半段已经排得很满，台北先不要急着塞满。等高雄和墾丁路线确认后，再决定是城市夜景、夜市，还是九份/淡水半日线。</p>
           <div class="suggest-grid" style="margin:18px 0;">
-            ${tripData.taipeiSuggestions.map(item => `<div class="mini-card"><h3>${esc(item)}</h3><p>建议方向，可后续展开成半日或整日路线。</p></div>`).join("")}
+            ${tripData.taipeiSuggestions.map(item => `<div class="mini-card"><h3>${esc(item)}</h3><p>建议规划点，还不是确认行程。</p></div>`).join("")}
           </div>
-          <button class="btn btn-primary" onclick="openAIModal()">${icon("wand-sparkles", "icon-sm")} 生成台北行程</button>
+          <button class="btn btn-primary" onclick="openTaipeiPlanModal()">${icon("notebook-pen", "icon-sm")} 补台北段</button>
         </div>
       `;
     }
@@ -4386,7 +4630,7 @@
         <div class="info-list">
           <div class="mini-card"><h3>本地状态</h3><p>当前攻略、城市、日期、打卡、收藏、备注和预算都保存在 localStorage key：<strong>${STORAGE_KEY}</strong></p></div>
           <button class="btn btn-danger" onclick="resetLocalData()">${icon("rotate-ccw", "icon-sm")} 重置本地数据</button>
-          <button class="btn" onclick="goJourneySelect()">${icon("map", "icon-sm")} 返回攻略选择</button>
+          <button class="btn" onclick="goJourneySelect()">${icon("map", "icon-sm")} 回到出发页</button>
         </div>
       `;
     }
@@ -4394,17 +4638,6 @@
     function renderModal() {
       if (!appState.modal) return "";
       const modal = appState.modal;
-      if (modal.type === "new-trip") {
-        return `
-          <div class="modal-wrap" onclick="closeModal(event)">
-            <div class="modal" onclick="event.stopPropagation()">
-              <h2 class="serif">新建下一段旅程</h2>
-              <p class="rail-muted">这里未来可以接入新旅程创建：从空白开始、导入地图，或复制当前台湾模板。现在先把台湾 2026 做成真正好用的路线 App。</p>
-              <div style="display:flex;justify-content:flex-end;margin-top:18px;"><button class="btn btn-primary" onclick="setState({modal:null})">先专注台湾 2026</button></div>
-            </div>
-          </div>
-        `;
-      }
       if (modal.type === "map") {
         const day = tripData.daysById[modal.dayId] || selectedDay();
         if (!day) return "";
@@ -4416,13 +4649,13 @@
           </div>
         `;
       }
-      if (modal.type === "ai") {
+      if (modal.type === "taipei-plan") {
         return `
           <div class="modal-wrap" onclick="closeModal(event)">
             <div class="modal" onclick="event.stopPropagation()">
-              <h2 class="serif">AI Planning Demo</h2>
-              <p class="rail-muted">这里可以接入 AI 规划，当前为前端演示。</p>
-              <div style="display:flex;justify-content:flex-end;margin-top:18px;"><button class="btn btn-primary" onclick="setState({modal:null})">知道了</button></div>
+              <h2 class="serif">台北段规划入口</h2>
+              <p class="rail-muted">这里先作为前端占位：后面可以改成手动补路线、导入地图点，或把台北建议点拆成日期。当前先保留自由度。</p>
+              <div style="display:flex;justify-content:flex-end;margin-top:18px;"><button class="btn btn-primary" onclick="setState({modal:null})">先留白</button></div>
             </div>
           </div>
         `;
@@ -4752,6 +4985,9 @@
     function enterTripChecklist() {
       setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedCity: null, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, drawer: "checklist" });
     }
+    function enterTripConfirm() {
+      setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedCity: null, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, drawer: "confirm" });
+    }
     function goJourneySelect() { setState({ currentView: "journey-select", drawer: null, selectedMapPoint: null }); }
     function goDashboard() { setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, drawer: null }); }
     function selectCity(cityId) { setState({ currentView: "city", selectedTrip: tripData.id, selectedCity: cityId, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, searchQuery: "", typeFilter: "all", drawer: null }); }
@@ -4767,8 +5003,7 @@
     function clearFilters() { setState({ searchQuery: "", typeFilter: "all" }); }
     function openDrawer(name) { setState({ drawer: name }); }
     function closeDrawer(event) { if (event.target.classList.contains("overlay")) setState({ drawer: null }); }
-    function openAIModal() { setState({ modal: { type: "ai" } }); }
-    function openNewTripModal() { setState({ modal: { type: "new-trip" } }); }
+    function openTaipeiPlanModal() { setState({ modal: { type: "taipei-plan" } }); }
     function openItemNote(itemId) { setState({ modal: { type: "item-note", itemId } }); }
     function openExpenseModal() { setState({ modal: { type: "expense" } }); }
     function closeModal(event) { if (event.target.classList.contains("modal-wrap")) setState({ modal: null }); }
@@ -4895,6 +5130,7 @@
     window.enterTrip = enterTrip;
     window.enterTripMap = enterTripMap;
     window.enterTripChecklist = enterTripChecklist;
+    window.enterTripConfirm = enterTripConfirm;
     window.goJourneySelect = goJourneySelect;
     window.goDashboard = goDashboard;
     window.selectCity = selectCity;
@@ -4906,8 +5142,7 @@
     window.clearFilters = clearFilters;
     window.openDrawer = openDrawer;
     window.closeDrawer = closeDrawer;
-    window.openAIModal = openAIModal;
-    window.openNewTripModal = openNewTripModal;
+    window.openTaipeiPlanModal = openTaipeiPlanModal;
     window.openItemNote = openItemNote;
     window.openExpenseModal = openExpenseModal;
     window.closeModal = closeModal;
