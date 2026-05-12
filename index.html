@@ -10388,7 +10388,12 @@
     function updateSearch(value) { setState({ searchQuery: value }, true); }
     function setTypeFilter(type) { setState({ typeFilter: type }); }
     function clearFilters() { setState({ searchQuery: "", typeFilter: "all" }); }
-    function openDrawer(name) { setState({ drawer: name, fabOpen: false }); }
+    function openDrawer(name) {
+      setState({ drawer: name, fabOpen: false });
+      if (name === "settings" && supabaseClient && currentUser && !currentMembership) {
+        loadCurrentMembership().then(() => loadTripMembers()).then(() => render());
+      }
+    }
     function closeDrawer(event) { if (event.target.classList.contains("overlay")) setState({ drawer: null }); }
     function runDrawerAction(action) {
       setState({ drawer: null, fabOpen: false }, false);
