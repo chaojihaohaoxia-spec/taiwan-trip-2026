@@ -6373,16 +6373,17 @@
         return selected;
       }
 
-      appState = normalizeState({ ...appState, ...basePatch });
-      saveState([]);
-      await loadCurrentMembership(selected.id);
-      await loadTripMembers(selected.id);
-      await loadStateFromCloud();
-      await loadExpenses({ silent: true });
-      await loadCheckins();
+      setState(basePatch);
+      await Promise.all([
+        loadCurrentMembership(selected.id),
+        loadTripMembers(selected.id),
+        loadStateFromCloud(),
+        loadExpenses({ silent: true }),
+        loadCheckins()
+      ]);
       subscribeTripStateRealtime();
       subscribeExpensesRealtime();
-      setState(basePatch);
+      render();
       return selected;
     }
 
