@@ -10148,11 +10148,16 @@
       }
 
       setState({ authLoading: true, authError: "", authMessage: "" });
+      const _authTimer = setTimeout(() => {
+        if (appState.authLoading) setState({ authLoading: false, authError: "Supabase 正在冷启动，请等 15 秒后再点一次登录", authMessage: "" });
+      }, 20000);
       try {
         if (appState.authMode === "signup") await signUp(email, password, nickname);
         else await signIn(email, password);
       } catch (error) {
         setState({ authLoading: false, authError: authErrorMessage(error), authMessage: "" });
+      } finally {
+        clearTimeout(_authTimer);
       }
     }
 
@@ -10305,6 +10310,9 @@
 
       bindAuthStateListener();
       setState({ currentView: "auth", authLoading: true, authError: "", authMessage: "" });
+      const _initTimer = setTimeout(() => {
+        if (appState.authLoading) setState({ currentView: "auth", authLoading: false, authError: "", authMessage: "服务器启动中，请稍后点击登录" });
+      }, 15000);
       try {
         const { data: { session }, error } = await supabaseClient.auth.getSession();
         if (error) throw error;
@@ -10323,6 +10331,8 @@
       } catch (error) {
         console.warn("Supabase auth unavailable, falling back to local mode.", error);
         setState({ currentView: "journey-select", authLoading: false, authError: "", authMessage: "" });
+      } finally {
+        clearTimeout(_initTimer);
       }
     }
 
