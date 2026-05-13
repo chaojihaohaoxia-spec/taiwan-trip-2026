@@ -5126,7 +5126,16 @@
 
     const supabaseClient = (() => {
       try {
-        return isSupabaseConfigured() ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+        return isSupabaseConfigured()
+          ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+              auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+                storageKey: "taiwanTrip2026Auth"
+              }
+            })
+          : null;
       } catch {
         return null;
       }
@@ -6047,6 +6056,14 @@
       return `<span class="role-pill ${esc(safeRole)}">${icon(role === "viewer" ? "eye" : role === "editor" ? "pencil" : "hard-drive", "icon-sm")} ${esc(roleLabel(role))}</span>`;
     }
 
+    function withTimeout(promise, label = "请求", ms = 12000) {
+      let timer;
+      const timeout = new Promise((_, reject) => {
+        timer = window.setTimeout(() => reject(new Error(`${label}响应超时，请刷新后重试。`)), ms);
+      });
+      return Promise.race([promise, timeout]).finally(() => window.clearTimeout(timer));
+    }
+
     function activeTripId() {
       return appState.selectedTrip || TRIP_ID;
     }
@@ -6164,13 +6181,16 @@
     async function loadStateFromCloud() {
       if (!supabaseClient || !currentUser) return;
       try {
-        const { data, error } = await supabaseClient
-          .from("trip_user_state")
-          .select("user_id,state_key,state_value,updated_at")
-          .eq("trip_id", activeTripId())
-          .eq("user_id", currentUser.id)
-          .in("state_key", CLOUD_STATE_KEYS)
-          .order("updated_at", { ascending: true });
+        const { data, error } = await withTimeout(
+          supabaseClient
+            .from("trip_user_state")
+            .select("user_id,state_key,state_value,updated_at")
+            .eq("trip_id", activeTripId())
+            .eq("user_id", currentUser.id)
+            .in("state_key", CLOUD_STATE_KEYS)
+            .order("updated_at", { ascending: true }),
+          "读取云端状态"
+        );
         if (error || !Array.isArray(data) || !data.length) return;
 
         const cloudPatch = {};
@@ -6195,12 +6215,15 @@
         return null;
       }
       try {
-        const { data, error } = await supabaseClient
-          .from("trip_members")
-          .select("trip_id,user_id,email,role,joined_at")
-          .eq("trip_id", tripId)
-          .eq("user_id", currentUser.id)
-          .maybeSingle();
+        const { data, error } = await withTimeout(
+          supabaseClient
+            .from("trip_members")
+            .select("trip_id,user_id,email,role,joined_at")
+            .eq("trip_id", tripId)
+            .eq("user_id", currentUser.id)
+            .maybeSingle(),
+          "读取成员权限"
+        );
         currentMembership = error ? null : data;
         return currentMembership;
       } catch {
@@ -6229,11 +6252,14 @@
         return;
       }
       try {
-        const { data, error } = await supabaseClient
-          .from("trip_members")
-          .select("email,role,joined_at,user_id")
-          .eq("trip_id", tripId)
-          .order("joined_at", { ascending: true });
+        const { data, error } = await withTimeout(
+          supabaseClient
+            .from("trip_members")
+            .select("email,role,joined_at,user_id")
+            .eq("trip_id", tripId)
+            .order("joined_at", { ascending: true }),
+          "读取成员列表"
+        );
         tripMembers = error ? [] : (data || []);
       } catch {
         tripMembers = [];
@@ -6374,13 +6400,14 @@
       }
 
       setState(basePatch);
-      await Promise.all([
+      const cloudLoads = [
         loadCurrentMembership(selected.id),
         loadTripMembers(selected.id),
         loadStateFromCloud(),
         loadExpenses({ silent: true }),
         loadCheckins()
-      ]);
+      ];
+      await Promise.all(cloudLoads.map(load => load.catch(error => console.warn("Trip data load skipped.", error))));
       subscribeTripStateRealtime();
       subscribeExpensesRealtime();
       render();
@@ -7160,28 +7187,37 @@
     async function loadUserTrips() {
       if (!supabaseClient || !currentUser) return [];
       try {
-        const { data, error } = await supabaseClient
-          .from("trip_members")
-          .select("trip_id, role, trips(id, title, description, cover_emoji, start_date, end_date, owner_id)")
-          .eq("user_id", currentUser.id)
-          .order("joined_at", { ascending: true });
+        const { data, error } = await withTimeout(
+          supabaseClient
+            .from("trip_members")
+            .select("trip_id, role, trips(id, title, description, cover_emoji, start_date, end_date, owner_id)")
+            .eq("user_id", currentUser.id)
+            .order("joined_at", { ascending: true }),
+          "读取行程列表"
+        );
         if (error) throw error;
         return (data || []).map(normalizeTripCard).filter(Boolean);
       } catch {
         try {
-          const { data: memberRows, error: memberError } = await supabaseClient
-            .from("trip_members")
-            .select("trip_id, role, joined_at")
-            .eq("user_id", currentUser.id)
-            .order("joined_at", { ascending: true });
+          const { data: memberRows, error: memberError } = await withTimeout(
+            supabaseClient
+              .from("trip_members")
+              .select("trip_id, role, joined_at")
+              .eq("user_id", currentUser.id)
+              .order("joined_at", { ascending: true }),
+            "读取成员行程"
+          );
           if (memberError || !Array.isArray(memberRows) || !memberRows.length) return [];
           const tripIds = [...new Set(memberRows.map(row => row.trip_id).filter(Boolean))];
           let tripRows = [];
           if (tripIds.length) {
-            const { data } = await supabaseClient
-              .from("trips")
-              .select("id, title, description, cover_emoji, start_date, end_date, owner_id")
-              .in("id", tripIds);
+            const { data } = await withTimeout(
+              supabaseClient
+                .from("trips")
+                .select("id, title, description, cover_emoji, start_date, end_date, owner_id")
+                .in("id", tripIds),
+              "读取行程信息"
+            );
             tripRows = Array.isArray(data) ? data : [];
           }
           const tripsById = new Map(tripRows.map(trip => [trip.id, trip]));
@@ -10120,6 +10156,7 @@
       if (/email not confirmed/i.test(message)) return "邮箱还没有完成验证，请先输入邮箱验证码。";
       if (/invalid login credentials/i.test(message)) return "邮箱或密码不正确，请重新检查。";
       if (/already registered|already exists/i.test(message)) return "这个邮箱已经注册，可以直接切换到登录。";
+      if (/超时|timeout/i.test(message)) return message;
       if (/password/i.test(message)) return "密码不符合要求，请至少输入 6 位。";
       return message || "操作失败，请稍后再试。";
     }
@@ -10163,7 +10200,10 @@
 
     async function signIn(email, password) {
       if (!supabaseClient) throw new Error("Supabase 尚未配置。");
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const { data, error } = await withTimeout(
+        supabaseClient.auth.signInWithPassword({ email, password }),
+        "登录"
+      );
       if (error) throw error;
       currentUser = data?.session?.user || data?.user || currentUser;
       await refreshCollaboration(data?.session || null);
@@ -10171,14 +10211,17 @@
 
     async function signUp(email, password, nickname) {
       if (!supabaseClient) throw new Error("Supabase 尚未配置。");
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: authRedirectUrl(),
-          data: { display_name: nickname }
-        }
-      });
+      const { data, error } = await withTimeout(
+        supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: authRedirectUrl(),
+            data: { display_name: nickname }
+          }
+        }),
+        "注册"
+      );
       if (error) throw error;
       if (data?.session) {
         currentUser = data.session.user;
@@ -10200,7 +10243,7 @@
       }
       setState({ authLoading: true, authError: "", authMessage: "" });
       try {
-        const { error } = await supabaseClient.auth.signInWithOtp({ email });
+        const { error } = await withTimeout(supabaseClient.auth.signInWithOtp({ email }), "发送验证码");
         if (error) throw error;
         setAuthOtpFlow(email, "magiclink");
       } catch (error) {
@@ -10214,9 +10257,12 @@
       if (!supabaseClient || !email || authOtpRemainingSeconds() > 0) return;
       setState({ authLoading: true, authError: "", authMessage: "" });
       try {
-        const { error } = type === "signup"
-          ? await supabaseClient.auth.resend({ type: "signup", email })
-          : await supabaseClient.auth.signInWithOtp({ email });
+        const { error } = await withTimeout(
+          type === "signup"
+            ? supabaseClient.auth.resend({ type: "signup", email })
+            : supabaseClient.auth.signInWithOtp({ email }),
+          "重新发送验证码"
+        );
         if (error) throw error;
         setAuthOtpFlow(email, type);
       } catch (error) {
@@ -10235,7 +10281,10 @@
       }
       setState({ authLoading: true, authError: "", authMessage: "" });
       try {
-        const { data, error } = await supabaseClient.auth.verifyOtp({ email, token: code, type });
+        const { data, error } = await withTimeout(
+          supabaseClient.auth.verifyOtp({ email, token: code, type }),
+          "验证验证码"
+        );
         if (error) throw error;
         const session = data?.session || (await supabaseClient.auth.getSession()).data?.session || null;
         currentUser = session?.user || data?.user || currentUser;
