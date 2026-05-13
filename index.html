@@ -75,6 +75,7 @@
     .serif { font-family: var(--font-serif); }
     .icon { width: 18px; height: 18px; stroke-width: 1.9; }
     .icon-sm { width: 15px; height: 15px; stroke-width: 2; }
+    .icon-xs { width: 13px; height: 13px; stroke-width: 2.2; }
 
     .app-root { min-height: 100vh; }
     .cloud-sync-banner {
@@ -251,6 +252,160 @@
       color: var(--muted);
       font-size: 12px;
       line-height: 1.6;
+    }
+
+    /* Visual upgrade: immersive auth entry */
+    .auth-page {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0a1628 0%, #102236 40%, #0d3d4a 70%, #00bfa6 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 24px 16px;
+    }
+    .auth-page::before {
+      content: "";
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,191,166,.18) 0%, transparent 70%);
+      top: -100px;
+      right: -100px;
+      animation: floatOrb 8s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .auth-page::after {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(28,167,236,.15) 0%, transparent 70%);
+      bottom: -80px;
+      left: -80px;
+      animation: floatOrb 10s ease-in-out infinite alternate-reverse;
+      pointer-events: none;
+      z-index: 0;
+    }
+    @keyframes floatOrb {
+      from { transform: translate(0,0) scale(1); }
+      to { transform: translate(30px, 20px) scale(1.1); }
+    }
+    .auth-intro {
+      text-align: center;
+      margin-bottom: 32px;
+      padding: 0;
+    }
+    .auth-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .auth-brand-mark {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #00bfa6, #1ca7ec);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(0,191,166,.4);
+      color: #fff;
+    }
+    .auth-brand-mark .icon-sm {
+      width: 28px;
+      height: 28px;
+      color: #fff;
+    }
+    .auth-title {
+      font-size: clamp(28px, 6vw, 36px);
+      color: #fff;
+      margin: 0;
+    }
+    .auth-copy {
+      color: rgba(255,255,255,.6);
+      font-size: 14px;
+      margin: 0;
+      letter-spacing: .04em;
+    }
+    .auth-wrap {
+      width: min(420px, 100%);
+      z-index: 1;
+      animation: authCardIn .5s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes authCardIn {
+      from { opacity: 0; transform: translateY(40px) scale(.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .auth-card {
+      background: rgba(255,255,255,.06) !important;
+      backdrop-filter: blur(40px) !important;
+      border: 1px solid rgba(255,255,255,.12) !important;
+      border-radius: 28px !important;
+      padding: 32px 28px !important;
+      box-shadow: 0 32px 80px rgba(0,0,0,.4) !important;
+    }
+    .auth-card .trip-label {
+      color: rgba(255,255,255,.45);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .auth-card h2 { color: #fff; }
+    .auth-card label { color: rgba(255,255,255,.7) !important; }
+    .auth-card input {
+      background: rgba(255,255,255,.08) !important;
+      border: 1px solid rgba(255,255,255,.15) !important;
+      color: #fff !important;
+      border-radius: 14px !important;
+    }
+    .auth-card input::placeholder { color: rgba(255,255,255,.3); }
+    .auth-card input:focus {
+      border-color: #00bfa6;
+      box-shadow: 0 0 0 3px rgba(0,191,166,.2);
+    }
+    .auth-tabs {
+      background: rgba(255,255,255,.08);
+      border-radius: 14px;
+    }
+    .auth-tab { color: rgba(255,255,255,.5); }
+    .auth-tab.active {
+      background: rgba(255,255,255,.15);
+      color: #fff;
+    }
+    .auth-text-btn { color: rgba(255,255,255,.5); }
+    .auth-alert.error {
+      background: rgba(239,68,68,.15);
+      border-color: rgba(239,68,68,.3);
+      color: #fca5a5;
+    }
+    .auth-alert.success {
+      background: rgba(0,191,166,.15);
+      border-color: rgba(0,191,166,.3);
+      color: #5eead4;
+    }
+    .auth-deco-text {
+      position: absolute;
+      bottom: 28px;
+      right: 28px;
+      color: rgba(255,255,255,.12);
+      font-size: 96px;
+      font-family: serif;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+    }
+
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .platform-page {
       min-height: 100vh;
@@ -972,7 +1127,8 @@
     .add-itinerary-row {
       display: flex;
       justify-content: center;
-      padding-top: 4px;
+      padding-top: 8px;
+      margin-bottom: 38px;
     }
     .add-itinerary-row .btn {
       width: min(360px, 100%);
@@ -1336,6 +1492,36 @@
     }
     .category-option.active,
     .split-chip.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 10px 22px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+    .status-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .status-pill {
+      min-height: 42px;
+      border: 1px solid rgba(23,50,77,.1);
+      background: rgba(255,255,255,.76);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 0 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform .18s var(--ease), box-shadow .18s var(--ease), background .18s var(--ease), color .18s var(--ease);
+    }
+    .status-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(23,50,77,.08);
+    }
+    .status-pill.active {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       color: #fff;
       border-color: transparent;
@@ -1722,6 +1908,10 @@
         height: 18px;
       }
       .app-shell { grid-template-columns: 1fr; padding: 16px 14px 96px; }
+      .main-stage,
+      .timeline-wrap {
+        padding-bottom: 100px;
+      }
       .side-nav { display: none; }
       .mobile-nav { display: grid; }
       .hero-row, .page-title-row, .day-title-grid { grid-template-columns: 1fr; display: grid; }
@@ -2890,6 +3080,70 @@
       font-weight: 900;
       animation: checkPop .32s var(--bounce);
     }
+    .timeline-item.is-editable.done::after {
+      right: 50px;
+    }
+    .item-edit-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 0;
+      background: rgba(16,34,53,.06);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity .2s var(--ease), transform .2s var(--ease), background .2s var(--ease), color .2s var(--ease);
+      cursor: pointer;
+      z-index: 5;
+    }
+    .timeline-item:hover .item-edit-btn {
+      opacity: 1;
+    }
+    .item-edit-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(28,167,236,.14);
+      color: var(--ink-navy);
+    }
+    .timeline-status-mark {
+      position: absolute;
+      left: 8px;
+      top: 9px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #ECFDF5;
+      color: #10b981;
+      box-shadow: 0 0 0 4px rgba(255,255,255,.88);
+      z-index: 4;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .timeline-item.status-done {
+      border-left: 3px solid #10b981;
+    }
+    .timeline-item.status-skipped {
+      opacity: .5;
+      filter: grayscale(.12);
+      background: linear-gradient(180deg, rgba(241,245,249,.92), rgba(248,250,252,.84));
+      border-color: rgba(100,116,139,.18);
+    }
+    .timeline-item.status-skipped::before {
+      background: #94A3B8;
+      box-shadow: 0 0 0 5px rgba(255,255,255,.85), 0 8px 18px rgba(100,116,139,.18);
+    }
+    .timeline-item.status-skipped.done::after {
+      display: none;
+    }
+    .timeline-item.status-skipped .timeline-title {
+      text-decoration: line-through;
+    }
     .timeline-time {
       color: var(--accent-3);
       background: rgba(255,255,255,.76);
@@ -2900,6 +3154,26 @@
       box-shadow: 0 8px 16px rgba(23,50,77,.06);
       position: relative;
       z-index: 3;
+      display: grid;
+      justify-items: center;
+      gap: 2px;
+    }
+    .timeline-actual-time {
+      font-size: 11px;
+      color: #10b981;
+      font-weight: 600;
+      margin-top: 2px;
+      line-height: 1.2;
+    }
+    .timeline-actual-note {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(16,185,129,.08);
+      color: #106B4F;
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.5;
     }
     .timeline-body h3 {
       align-items: flex-start;
@@ -3404,6 +3678,12 @@
     }
     .timeline-item.done .timeline-rating-jump {
       right: 54px;
+    }
+    .timeline-item.is-editable .timeline-rating-jump {
+      right: 48px;
+    }
+    .timeline-item.is-editable.done .timeline-rating-jump {
+      right: 88px;
     }
     .timeline-rating-jump .rating-badge {
       min-height: 21px;
@@ -4179,8 +4459,62 @@
       border-radius: 999px;
       padding: 7px 14px;
       margin-top: 2px;
+      position: relative;
+      z-index: 6;
     }
     .trip-now-bar .icon-sm { flex-shrink: 0; }
+
+    /* Visual upgrade: motion and layering polish */
+    .btn {
+      transition: transform .14s ease, box-shadow .14s ease;
+    }
+    .btn:active {
+      transform: scale(.97);
+    }
+    .card,
+    .soft-card,
+    .mini-card {
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .timeline-list::before {
+      z-index: 0;
+      pointer-events: none;
+    }
+    .timeline-item {
+      position: relative;
+      z-index: 1;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .timeline-item::before {
+      z-index: 2;
+      pointer-events: none;
+    }
+    .timeline-item:hover {
+      transform: translateX(3px);
+      box-shadow: -3px 0 0 var(--teal), 0 18px 38px rgba(23,50,77,.12);
+    }
+    .timeline-time {
+      position: relative;
+      z-index: 3;
+    }
+    .travel-app::before,
+    .travel-app::after,
+    .journey-page::before,
+    .journey-page::after,
+    .journey-wrap::before,
+    .journey-wrap::after,
+    .dashboard-hero::before,
+    .dashboard-hero::after,
+    .page-hero::before,
+    .page-hero::after,
+    .day-header::before,
+    .day-header::after,
+    .city-card::before,
+    .city-card::after,
+    .home-city-card::after,
+    .ticket-card::after {
+      pointer-events: none;
+    }
     .prep-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -4513,7 +4847,13 @@
       .timeline-list::before { left: 19px; }
       .timeline-item { padding-left: 42px; }
       .timeline-item::before { left: 14px; top: 19px; }
+      .item-edit-btn { opacity: .6; }
+      .timeline-status-mark { left: 8px; top: 13px; }
       .timeline-time { width: fit-content; }
+      .add-itinerary-row {
+        margin-bottom: 112px;
+        padding-bottom: env(safe-area-inset-bottom);
+      }
       .spot-card-header {
         grid-template-columns: auto minmax(0, 1fr);
       }
@@ -4537,6 +4877,9 @@
       }
       .timeline-item.done .timeline-rating-jump {
         right: 48px;
+      }
+      .timeline-item.is-editable.done .timeline-rating-jump {
+        right: 84px;
       }
       .tab-bar { top: 66px; }
       .page-hero::after,
@@ -6246,6 +6589,12 @@
       }
     }
 
+    async function loadTripsAfterBootstrap() {
+      if (!supabaseClient || !currentUser) return [];
+      await ensureInitialMembership();
+      return loadUserTrips();
+    }
+
     async function loadTripMembers(tripId = activeTripId()) {
       if (!supabaseClient || !currentUser) {
         tripMembers = [];
@@ -6332,7 +6681,11 @@
 
     async function routeAfterLogin(options = {}) {
       const preferredTripId = options.preferredTripId || "";
-      const userTrips = await loadUserTrips();
+      let userTrips = await loadUserTrips();
+      if (!userTrips.length) {
+        const bootstrappedTrips = await loadTripsAfterBootstrap();
+        if (bootstrappedTrips.length) userTrips = bootstrappedTrips;
+      }
       const basePatch = {
         userTrips,
         authLoading: false,
@@ -6399,7 +6752,15 @@
         return selected;
       }
 
-      setState(basePatch);
+      const todayDayId = nearestTripDayId();
+      const todayDay = tripData.daysById[todayDayId];
+      setState({
+        ...basePatch,
+        currentView: "day",
+        selectedDay: todayDayId,
+        selectedCity: todayDay?.cityId || "kaohsiung",
+        selectedTab: "timeline"
+      });
       const cloudLoads = [
         loadCurrentMembership(selected.id),
         loadTripMembers(selected.id),
@@ -6707,6 +7068,10 @@
 
     function itemLocationName(item) {
       return item?.location || item?.locationName || item?.place || item?.title || "";
+    }
+
+    function normalizeItemStatus(status) {
+      return ["planned", "done", "skipped"].includes(status) ? status : "planned";
     }
 
     function getEffectiveItem(item) {
@@ -7333,6 +7698,7 @@
               `}
             </article>
           </section>
+          <div class="auth-deco-text">台</div>
         </main>
       `;
     }
@@ -7431,11 +7797,13 @@
           <section class="platform-empty-card">
             <div class="platform-empty-icon" aria-hidden="true">✈️</div>
             <h1 class="serif">还没有行程</h1>
-            <p>你还没有加入任何旅行计划</p>
+            <p>这个账号还没有读到台湾行程的成员权限</p>
             <div class="platform-actions">
+              <button class="btn btn-primary" onclick="enterTrip()">${icon("map", "icon-sm")} 打开台湾行程 2026</button>
               <button class="btn btn-primary" onclick="showCreateTripComingSoon()">${icon("plus", "icon-sm")} 创建新行程</button>
               <button class="btn btn-ghost" onclick="openInviteCodeModal()">${icon("ticket", "icon-sm")} 输入邀请码</button>
             </div>
+            <p class="rail-muted" style="max-width:520px;margin:14px auto 0;">如果要云端同步编辑，需要用邀请码加入，或在 Supabase 的 trip_members 里把当前账号加入 taiwan2026。</p>
             <div style="margin-top:18px;">${renderUserSessionControls()}</div>
           </section>
         </main>
@@ -7943,6 +8311,9 @@
       } else {
         app.innerHTML = renderShell();
       }
+      app.style.animation = "none";
+      app.offsetHeight;
+      app.style.animation = "pageIn .25s ease both";
       document.getElementById("modal-root").innerHTML = renderModal();
       document.getElementById("toast-root").innerHTML = appState.toast ? `<div class="toast">${esc(appState.toast)}</div>` : "";
       if (window.lucide) lucide.createIcons();
@@ -8852,16 +9223,27 @@
       const note = appState.itemNotes[item.id];
       const checkedIn = hasItemCheckin(item.id);
       const editable = canEditTrip();
+      const edits = (appState.itemEdits || {})[item.id] || {};
+      const itemStatus = normalizeItemStatus(edits.status || item.status || "planned");
+      const actualTime = edits.actualTime || item.actualTime || "";
+      const actualNote = edits.actualNote || item.actualNote || "";
+      const statusClass = itemStatus === "done" ? "status-done" : itemStatus === "skipped" ? "status-skipped" : "";
       const spot = spotEntryForTimelineItem(item);
       const timelineRating = spot ? spotReview(spot.id).rating : null;
       return `
-        <article class="timeline-item ${done ? "done" : ""} ${appState.selectedMapPoint === item.id ? "map-selected" : ""}" onclick="selectMapPoint('${item.id}')" onmouseenter="softHighlightMapPoint('${item.id}', true)" onmouseleave="softHighlightMapPoint('${item.id}', false)">
+        <article class="timeline-item ${editable ? "is-editable" : ""} ${done ? "done" : ""} ${statusClass} ${appState.selectedMapPoint === item.id ? "map-selected" : ""}" onclick="selectMapPoint('${item.id}')" onmouseenter="softHighlightMapPoint('${item.id}', true)" onmouseleave="softHighlightMapPoint('${item.id}', false)">
+          ${editable ? `<button class="item-edit-btn" onclick="event.stopPropagation(); openEditItemModal('${escAttr(item.id)}')" title="编辑" aria-label="编辑 ${esc(item.title)}">${icon("pencil", "icon-xs")}</button>` : ""}
+          ${itemStatus === "done" ? `<span class="timeline-status-mark" title="已完成">✅</span>` : ""}
           ${timelineRating ? `<button class="timeline-rating-jump" onclick="event.stopPropagation(); goSpotReviews('${escAttr(spot.id)}')" aria-label="查看 ${esc(timelineRating)} 评级">${renderRatingBadge(timelineRating)}</button>` : ""}
-          <div class="timeline-time">${esc(item.time)}</div>
+          <div class="timeline-time">
+            <span>${esc(item.time)}</span>
+            ${actualTime ? `<span class="timeline-actual-time">实际: ${esc(actualTime)}</span>` : ""}
+          </div>
           <div class="timeline-body">
-            <h3 class="${timelineRating ? "timeline-rating-spacer" : ""}">${icon(meta.icon, "icon-sm")} ${esc(item.title)} <span class="tag ${meta.tone}">${esc(meta.label)}</span></h3>
+            <h3 class="timeline-title ${timelineRating ? "timeline-rating-spacer" : ""}">${icon(meta.icon, "icon-sm")} ${esc(item.title)} <span class="tag ${meta.tone}">${esc(meta.label)}</span></h3>
             <p>${esc(item.detail)}</p>
             ${item.duration ? `<p class="rail-muted">${icon("clock-3", "icon-sm")} ${esc(item.duration)}</p>` : ""}
+            ${actualNote ? `<div class="timeline-actual-note">实际备注：${esc(actualNote)}</div>` : ""}
             ${renderTimelineFoodFold(item, day)}
             <div class="timeline-actions">
               ${editable ? `
@@ -9220,7 +9602,7 @@
         <div class="more-drawer">
           <div>
             <div class="drawer-section-title">─── 行程导航 ───</div>
-            ${drawerAction("🏠", "总览", "goDashboard()")}
+            ${drawerAction("🗺️", "行程总览", "goDashboard()")}
             ${drawerAction("🚢", "高雄", "selectCity('kaohsiung')")}
             ${drawerAction("🌊", "墾丁", "selectCity('kenting')")}
             ${drawerAction("🏙", "台北", "selectCity('taipei')")}
@@ -9519,6 +9901,7 @@
         ["other", "other · 其他"]
       ];
       const selectedType = typeOptions.some(([value]) => value === effective.type) ? effective.type : "other";
+      const currentStatus = normalizeItemStatus(modal.itemStatusDraft || effective.status || "planned");
       return `
         <div class="modal-wrap" onclick="closeModal(event)">
           <div class="modal itinerary-modal" onclick="event.stopPropagation()">
@@ -9552,6 +9935,27 @@
               <label for="itinerary-notes">备注</label>
               <textarea id="itinerary-notes" placeholder="补充交通、排队、餐厅或现场调整备注...">${esc(effective.notes || effective.detail || "")}</textarea>
             </div>
+            ${editing ? `
+              <div class="expense-form-grid">
+                <div class="field">
+                  <label for="itinerary-actual-time">实际到达时间（可选）</label>
+                  <input id="itinerary-actual-time" type="time" name="actualTime" value="${esc(effective.actualTime || "")}" placeholder="HH:MM" />
+                </div>
+                <div class="field">
+                  <label>状态</label>
+                  <input id="itinerary-status" type="hidden" name="status" value="${esc(currentStatus)}" />
+                  <div class="status-pills">
+                    <button type="button" data-status="planned" class="status-pill ${currentStatus === "planned" ? "active" : ""}" onclick="setItemEditStatus('planned')">📅 计划中</button>
+                    <button type="button" data-status="done" class="status-pill ${currentStatus === "done" ? "active" : ""}" onclick="setItemEditStatus('done')">✅ 已完成</button>
+                    <button type="button" data-status="skipped" class="status-pill ${currentStatus === "skipped" ? "active" : ""}" onclick="setItemEditStatus('skipped')">⏭ 已跳过</button>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="itinerary-actual-note">实际情况备注</label>
+                <textarea id="itinerary-actual-note" name="actualNote" rows="2" placeholder="比如：人很多但很好玩，晚了20分钟">${esc(effective.actualNote || "")}</textarea>
+              </div>
+            ` : ""}
             <div class="modal-actions">
               ${editing ? `<button class="btn btn-danger" onclick="deleteItineraryItem('${escAttr(effective.id)}')">${icon("trash-2", "icon-sm")} 删除此项</button>` : ""}
               <button class="btn" onclick="setState({modal:null})">取消</button>
@@ -9756,11 +10160,11 @@
 
     function renderMobileNav() {
       if (["auth", "journey-select", "trip-list", "no-trips"].includes(appState.currentView)) return "";
-      if (!isTaiwanTripSelected()) return "";
+      const mapActive = (appState.currentView === "day" && appState.selectedTab === "route") || (appState.currentView === "trip-dashboard" && appState.selectedTab === "route");
       return `
         <nav class="mobile-nav">
-          <button class="${appState.currentView === "day" && appState.selectedTab !== "route" ? "active" : ""}" onclick="mobileGoItinerary()">${icon("calendar-days", "icon-sm")}<span>行程</span></button>
-          <button class="${appState.currentView === "day" && appState.selectedTab === "route" ? "active" : ""}" onclick="mobileGoMap()">${icon("map", "icon-sm")}<span>地图</span></button>
+          <button class="${appState.currentView === "day" && appState.selectedTab !== "route" ? "active" : ""}" onclick="mobileGoToday()">${icon("calendar-days", "icon-sm")}<span>今日</span></button>
+          <button class="${mapActive ? "active" : ""}" onclick="mobileGoMap()">${icon("map", "icon-sm")}<span>地图</span></button>
           <button class="mobile-fab ${appState.fabOpen ? "active" : ""}" onclick="toggleFabSheet()" aria-label="快捷操作">${icon("plus", "icon-sm")}<span>新增</span></button>
           <button class="${appState.currentView === "expenses" ? "active" : ""}" onclick="goExpenses()">${icon("receipt-text", "icon-sm")}<span>账本</span></button>
           <button onclick="openDrawer('more')">${icon("menu", "icon-sm")}<span>更多</span></button>
@@ -10533,6 +10937,15 @@
       goDashboard();
     }
 
+    function setItemEditStatus(status) {
+      const normalized = normalizeItemStatus(status);
+      const input = document.getElementById("itinerary-status");
+      if (input) input.value = normalized;
+      document.querySelectorAll(".status-pill").forEach(button => {
+        button.classList.toggle("active", button.dataset.status === normalized);
+      });
+    }
+
     function readItineraryForm() {
       const time = document.getElementById("itinerary-time")?.value.trim() || "";
       const title = document.getElementById("itinerary-title")?.value.trim() || "";
@@ -10540,7 +10953,11 @@
       const duration = document.getElementById("itinerary-duration")?.value.trim() || "";
       const type = document.getElementById("itinerary-type")?.value || "other";
       const notes = document.getElementById("itinerary-notes")?.value.trim() || "";
-      return { time, title, location, place: location, locationName: location, duration, type, notes, detail: notes };
+      const actualTime = document.getElementById("itinerary-actual-time")?.value.trim() || "";
+      const actualNote = document.getElementById("itinerary-actual-note")?.value.trim() || "";
+      const existingStatus = appState.modal?.itemId ? (appState.itemEdits || {})[appState.modal.itemId]?.status : "";
+      const status = normalizeItemStatus(document.getElementById("itinerary-status")?.value || existingStatus || "planned");
+      return { time, title, location, place: location, locationName: location, duration, type, notes, detail: notes, actualTime, actualNote, status };
     }
 
     function saveItineraryItem(mode) {
@@ -10552,7 +10969,8 @@
         return;
       }
       if (mode === "edit" && modal?.itemId) {
-        const itemEdits = { ...(appState.itemEdits || {}), [modal.itemId]: form };
+        const previousEdit = (appState.itemEdits || {})[modal.itemId] || {};
+        const itemEdits = { ...(appState.itemEdits || {}), [modal.itemId]: { ...previousEdit, ...form } };
         setState({ itemEdits, modal: null });
         toast("行程已更新");
         return;
@@ -11379,6 +11797,20 @@ ${folders}
       });
       return best?.id || "";
     }
+    function mobileGoToday() {
+      const dayId = nearestTripDayId();
+      const day = tripData.daysById[dayId];
+      if (!day) return;
+      setState({
+        currentView: "day",
+        selectedDay: dayId,
+        selectedCity: day.cityId || "kaohsiung",
+        selectedTab: "timeline",
+        selectedMapPoint: null,
+        drawer: null,
+        fabOpen: false
+      });
+    }
     function mobileGoItinerary() {
       if (appState.selectedDay) {
         setState({ currentView: "day", selectedTab: "timeline", searchQuery: "", typeFilter: "all", fabOpen: false });
@@ -11429,6 +11861,7 @@ ${folders}
     window.openAddItemModal = openAddItemModal;
     window.openEditItemModal = openEditItemModal;
     window.openEditDayModal = openEditDayModal;
+    window.setItemEditStatus = setItemEditStatus;
     window.saveItineraryItem = saveItineraryItem;
     window.deleteItineraryItem = deleteItineraryItem;
     window.closeModal = closeModal;
@@ -11479,6 +11912,7 @@ ${folders}
     window.resetLocalData = resetLocalData;
     window.mobileGoCity = mobileGoCity;
     window.mobileGoDay = mobileGoDay;
+    window.mobileGoToday = mobileGoToday;
     window.mobileGoItinerary = mobileGoItinerary;
     window.mobileGoMap = mobileGoMap;
     window.toggleFabSheet = toggleFabSheet;
