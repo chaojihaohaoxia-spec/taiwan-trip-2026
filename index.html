@@ -7281,7 +7281,7 @@
       return `
         <div class="user-session ${extraClass}">
           <span class="user-email-chip" title="${escAttr(currentUser.email)}">${icon("user-round", "icon-sm")} <span>${esc(currentUserHandle())}</span></span>
-          <button class="btn btn-small btn-ghost" onclick="signOut()">${icon("log-out", "icon-sm")} 退出</button>
+          <button class="btn btn-small btn-ghost" onclick="signOut()">${icon("log-out", "icon-sm")} 退出本设备</button>
         </div>
       `;
     }
@@ -9302,7 +9302,7 @@
           </div>
           ${isViewerRole() ? `<div class="readonly-note"><strong>viewer 只读模式。</strong>你可以查看实时更新，但不能修改备注、费用、清单或打卡状态。</div>` : ""}
           ${authNotice ? `<p class="rail-muted">${esc(authNotice)}</p>` : ""}
-          <button class="btn" onclick="signOut()">${icon("log-out", "icon-sm")} 退出登录</button>
+          <button class="btn" onclick="signOut()">${icon("log-out", "icon-sm")} 退出本设备</button>
         </div>
       `;
     }
@@ -10312,7 +10312,7 @@
         return;
       }
       try {
-        const { error } = await supabaseClient.auth.signOut();
+        const { error } = await supabaseClient.auth.signOut({ scope: "local" });
         if (error) throw error;
         resetAuthState();
       } catch (error) {
