@@ -6684,12 +6684,19 @@
           // initializeAuthGate() will validate the session and refresh data in background.
           const hasAuthCache = (() => {
             try {
-              const ref = (SUPABASE_URL || "").replace(/https?:\/\//, "").split(".")[0];
-              const tok = localStorage.getItem(`sb-${ref}-auth-token`);
-              if (!tok) return false;
-              const d = JSON.parse(tok);
-              const s = d?.currentSession || d;
-              return !!(s?.user && s?.refresh_token);
+              // Check both custom storageKey and default Supabase key
+              const keys = [
+                "taiwanTrip2026Auth",
+                `sb-${(SUPABASE_URL || "").replace(/https?:\/\//, "").split(".")[0]}-auth-token`
+              ];
+              for (const k of keys) {
+                const tok = localStorage.getItem(k);
+                if (!tok) continue;
+                const d = JSON.parse(tok);
+                const s = d?.currentSession || d;
+                if (s?.user && s?.refresh_token) return true;
+              }
+              return false;
             } catch { return false; }
           })();
           const savedView = saved?.currentView;
@@ -11946,15 +11953,24 @@
       authStateListener = data?.subscription || true;
     }
 
+    // The storageKey we passed to supabaseClient — must match exactly
+    const AUTH_STORAGE_KEY = "taiwanTrip2026Auth";
+
     function getLocalCachedSession() {
       try {
-        const projectRef = SUPABASE_URL.replace(/https?:\/\//, "").split(".")[0];
-        const raw = localStorage.getItem(`sb-${projectRef}-auth-token`);
-        if (!raw) return null;
-        const data = JSON.parse(raw);
-        const session = data?.currentSession || data;
-        if (!session?.user || !session?.access_token || !session?.refresh_token) return null;
-        return session;
+        // Try our custom storageKey first (matches supabaseClient config)
+        const keys = [
+          AUTH_STORAGE_KEY,
+          `sb-${(SUPABASE_URL || "").replace(/https?:\/\//, "").split(".")[0]}-auth-token`
+        ];
+        for (const key of keys) {
+          const raw = localStorage.getItem(key);
+          if (!raw) continue;
+          const data = JSON.parse(raw);
+          const session = data?.currentSession || data;
+          if (session?.user && session?.refresh_token) return session;
+        }
+        return null;
       } catch { return null; }
     }
 
@@ -12025,13 +12041,19 @@
         return;
       }
 
-      // No cached auth session at all — show login form
+      // No cached auth session at all — show login form immediately
       setState({
         currentView: "auth",
         authLoading: false,
         authError: "",
         authMessage: pendingInviteCode ? "检测到邀请链接，请先登录或注册，登录后会自动加入行程。" : ""
       });
+      // Proactively warm up Supabase while user types credentials.
+      // If Supabase is cold (~30-60s wake), this head start means login
+      // will feel faster because warming started before they clicked submit.
+      setTimeout(() => {
+        supabaseClient.auth.getSession().catch(() => {});
+      }, 300);
     }
 
     async function goTripList() {
