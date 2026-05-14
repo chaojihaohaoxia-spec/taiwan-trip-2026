@@ -3848,6 +3848,36 @@
 .ledger-cat-grid { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
 .ledger-cat-btn { border:1.5px solid var(--line); border-radius:999px; padding:5px 12px; font-size:13px; background:transparent; cursor:pointer; transition:all .15s; }
 .ledger-cat-btn.active { border-color:var(--teal); background:rgba(0,191,166,.1); font-weight:700; }
+/* Collaborative ledger */
+.ledger-tabs{display:flex;gap:0;margin-bottom:16px;border-radius:16px;overflow:hidden;background:rgba(0,0,0,.06);padding:4px;}
+.ledger-tab-btn{flex:1;padding:9px 6px;border:0;background:transparent;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;border-radius:12px;color:var(--muted);}
+.ledger-tab-btn.active{background:#fff;color:var(--navy);box-shadow:0 2px 8px rgba(0,0,0,.1);}
+.settlement-card{background:linear-gradient(135deg,#17324D,#2a5298);color:#fff;border-radius:24px;padding:20px 24px;margin-bottom:16px;}
+.settlement-card.settled{background:linear-gradient(135deg,#2e7d32,#388e3c);}
+.settlement-card .sc-label{font-size:11px;font-weight:700;opacity:.65;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:4px;}
+.settlement-card .sc-amount{font-size:30px;font-weight:900;line-height:1.1;}
+.settlement-card .sc-desc{font-size:13px;opacity:.8;margin-top:6px;}
+.collab-stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.collab-stat{background:rgba(255,255,255,.85);border-radius:18px;padding:14px 16px;box-shadow:0 6px 18px rgba(23,50,77,.07);}
+.collab-stat .cs-label{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;}
+.collab-stat .cs-amount{font-size:19px;font-weight:800;color:var(--coral);}
+.dual-legend{display:flex;gap:14px;margin-bottom:12px;font-size:12px;font-weight:700;}
+.dual-legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle;}
+.dual-bar-row{margin-bottom:12px;}
+.dual-bar-cat-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.dual-bar-cat{font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dual-bar-amounts{font-size:11px;color:var(--muted);white-space:nowrap;}
+.dual-bar-track{height:8px;border-radius:999px;background:rgba(0,0,0,.07);overflow:hidden;display:flex;}
+.dual-bar-me{height:100%;background:var(--teal);transition:width .3s;}
+.dual-bar-partner{height:100%;background:#9B59B6;transition:width .3s;}
+.entry-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:999px;white-space:nowrap;}
+.entry-tag-shared{background:rgba(0,191,166,.12);color:var(--teal);}
+.entry-tag-me{background:rgba(23,50,77,.08);color:var(--navy);}
+.entry-tag-partner{background:rgba(155,89,182,.12);color:#9B59B6;}
+.ledger-entry-meta{font-size:11px;color:var(--muted);display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:3px;}
+.paid-by-selector,.for-whom-selector{display:flex;gap:8px;}
+.pbs-btn{flex:1;padding:8px 4px;border:1.5px solid var(--line);border-radius:12px;background:transparent;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;text-align:center;}
+.pbs-btn.active{border-color:var(--teal);background:rgba(0,191,166,.1);color:var(--navy);}
     .spot-card {
       --spot-rating-color: rgba(23,50,77,.1);
       border-left: 6px solid transparent;
@@ -6055,7 +6085,7 @@
     const SUPABASE_URL = window.TAIWAN_SUPABASE_URL || "https://vzybjxghnoyubzdhvmsl.supabase.co";
     const SUPABASE_ANON_KEY = window.TAIWAN_SUPABASE_ANON_KEY || "sb_publishable_dfEGPYFxKz9FQS_sNYgXPA_7ncxovbK";
     const PUBLIC_SITE_URL = "https://chaojihaohaoxia-spec.github.io/taiwan-trip-2026/";
-    const CLOUD_STATE_KEYS = ["dayNotes", "itemNotes", "confirmStatus", "checkedItems", "completedItems", "favoriteItems", "spotReviews", "itemEdits", "deletedItems", "addedItems"];
+    const CLOUD_STATE_KEYS = ["dayNotes", "itemNotes", "confirmStatus", "checkedItems", "completedItems", "favoriteItems", "spotReviews", "itemEdits", "deletedItems", "addedItems", "personalLedger"];
     const CLOUD_TO_APP_STATE_KEY = {
       dayNotes: "dayNotes",
       itemNotes: "itemNotes",
@@ -6066,7 +6096,8 @@
       spotReviews: "spotReviews",
       itemEdits: "itemEdits",
       deletedItems: "deletedItems",
-      addedItems: "addedItems"
+      addedItems: "addedItems",
+      personalLedger: "personalLedger"
     };
     const APP_TO_CLOUD_STATE_KEY = Object.fromEntries(Object.entries(CLOUD_TO_APP_STATE_KEY).map(([cloudKey, appKey]) => [appKey, cloudKey]));
 
@@ -6738,7 +6769,9 @@
       packingList: {},
       dayDiaries: {},
       personalLedger: [],
-      personalLedgerMonth: ""
+      personalLedgerMonth: "",
+      personalLedgerTab: "detail",
+      partnerName: ""
     };
 
     let appState = loadState();
@@ -7011,7 +7044,7 @@
       if (state.selectedCity && !tripData.cities[state.selectedCity]) state.selectedCity = null;
       if (state.selectedDay && !tripData.daysById[state.selectedDay]) state.selectedDay = null;
       if (!("selectedMapPoint" in state)) state.selectedMapPoint = null;
-      if (!["auth", "journey-select", "trip-list", "no-trips", "trip-dashboard", "trip-album", "spot-reviews", "expenses", "city", "day"].includes(state.currentView)) state.currentView = supabaseClient ? "auth" : "trip-dashboard";
+      if (!["auth", "journey-select", "trip-list", "no-trips", "trip-dashboard", "trip-album", "spot-reviews", "expenses", "city", "day", "personal-ledger"].includes(state.currentView)) state.currentView = supabaseClient ? "auth" : "trip-dashboard";
       if (["food", "reminders", "budget"].includes(state.selectedTab)) state.selectedTab = "timeline";
       if (!["timeline", "route", "notes", "album"].includes(state.selectedTab)) state.selectedTab = "timeline";
       if (!state.mapViewMode) state.mapViewMode = "inline";
@@ -7040,6 +7073,10 @@
       state.checkedItems = state.checklistStatus;
       if (state.currentView === "day" && !state.selectedDay) state.currentView = state.selectedCity ? "city" : "trip-dashboard";
       if (state.currentView === "city" && !state.selectedCity) state.currentView = "trip-dashboard";
+      state.personalLedger = Array.isArray(state.personalLedger) ? state.personalLedger : [];
+      if (!state.personalLedgerMonth) state.personalLedgerMonth = new Date().toISOString().slice(0,7);
+      if (!["detail","analysis"].includes(state.personalLedgerTab)) state.personalLedgerTab = "detail";
+      if (typeof state.partnerName !== "string") state.partnerName = "";
       return state;
     }
 
@@ -7217,12 +7254,97 @@
         ${diary.updatedAt?`<div class="diary-meta">最后更新 ${new Date(diary.updatedAt).toLocaleString("zh-TW",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div>`:""}
       </div>`;
     }
-    // ── Personal Ledger ──
+    // ── Personal Ledger (Collaborative) ──
     function openPersonalLedger() { setState({currentView:"personal-ledger",drawer:null,fabOpen:false}); }
-    function openAddPersonalEntryModal(type="expense") { setState({modal:{type:"add-personal-entry",entryType:type}}); }
+    function openAddPersonalEntryModal(type="expense") { setState({modal:{type:"add-personal-entry",entryType:type,paidBy:"me",forWhom:"shared"}}); }
+
+    // Collaborative helpers
+    function partnerEmail() {
+      const me = currentUser?.email || "";
+      return tripMembers.find(m => m.email && m.email !== me)?.email || "";
+    }
+    function partnerDisplayName() {
+      if (appState.partnerName) return appState.partnerName;
+      const pe = partnerEmail();
+      return pe ? formatUserHandle(pe) : "伴侣";
+    }
+    function resolveRelative(val, addedBy) {
+      const me = currentUser?.email || "";
+      if (val === "shared") return "共同";
+      if (val === "me") return addedBy === me ? "我" : partnerDisplayName();
+      if (val === "partner") return addedBy === me ? partnerDisplayName() : "我";
+      return val || "";
+    }
+    function iPaidAbsolute(e) {
+      const me = currentUser?.email || "";
+      const isMyEntry = !e.addedBy || e.addedBy === me;
+      return isMyEntry ? (e.paidBy !== "partner") : (e.paidBy === "partner");
+    }
+    function myBenefitAbsolute(e) {
+      const me = currentUser?.email || "";
+      const isMyEntry = !e.addedBy || e.addedBy === me;
+      if (!e.forWhom || e.forWhom === "shared") return null;
+      return isMyEntry ? e.forWhom === "me" : e.forWhom === "partner";
+    }
+    function calculateSettlement(entries) {
+      let balance = 0;
+      entries.filter(e => e.type !== "income" && (e.paidBy || e.forWhom)).forEach(e => {
+        const amt = e.amount || 0;
+        const iPaid = iPaidAbsolute(e);
+        const fw = e.forWhom || "me";
+        if (fw === "shared") { balance += iPaid ? amt / 2 : -amt / 2; }
+        else {
+          const forMeAbs = myBenefitAbsolute(e);
+          if (forMeAbs === true && !iPaid) balance -= amt;
+          if (forMeAbs === false && iPaid) balance += amt;
+        }
+      });
+      return { balance, partnerOwesMe: Math.max(0, balance), iOwePartner: Math.max(0, -balance) };
+    }
+    function mySpendingByCategory(entries) {
+      const me = currentUser?.email || "";
+      const result = {};
+      entries.filter(e => e.type !== "income").forEach(e => {
+        const amt = e.amount || 0;
+        const isMyEntry = !e.addedBy || e.addedBy === me;
+        let myShare = 0;
+        if (!e.forWhom) { myShare = isMyEntry ? amt : 0; }
+        else if (e.forWhom === "shared") { myShare = amt / 2; }
+        else { myShare = (isMyEntry ? e.forWhom === "me" : e.forWhom === "partner") ? amt : 0; }
+        if (myShare > 0) result[e.category] = (result[e.category] || 0) + myShare;
+      });
+      return result;
+    }
+    function partnerSpendingByCategory(entries) {
+      const me = currentUser?.email || "";
+      const result = {};
+      entries.filter(e => e.type !== "income").forEach(e => {
+        const amt = e.amount || 0;
+        const isMyEntry = !e.addedBy || e.addedBy === me;
+        let pShare = 0;
+        if (!e.forWhom) { pShare = 0; }
+        else if (e.forWhom === "shared") { pShare = amt / 2; }
+        else { pShare = (isMyEntry ? e.forWhom === "partner" : e.forWhom === "me") ? amt : 0; }
+        if (pShare > 0) result[e.category] = (result[e.category] || 0) + pShare;
+      });
+      return result;
+    }
+
     function addPersonalEntry(entry) {
       if(!requireEditor("添加账单")) return;
-      const newEntry={id:`pl-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,type:entry.type||"expense",amount:parseFloat(entry.amount)||0,currency:entry.currency||"HKD",category:entry.category||"其他",note:entry.note||"",date:entry.date||new Date().toISOString().slice(0,10),createdAt:new Date().toISOString()};
+      const newEntry={
+        id:`pl-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
+        type:entry.type||"expense",
+        amount:parseFloat(entry.amount)||0,
+        currency:entry.currency||"HKD",
+        category:entry.category||"其他",
+        note:entry.note||"",
+        date:entry.date||new Date().toISOString().slice(0,10),
+        addedBy:currentUser?.email||"",
+        paidBy:entry.paidBy||"me",
+        forWhom:entry.forWhom||"me",
+        createdAt:new Date().toISOString()
+      };
       setState({personalLedger:[newEntry,...(appState.personalLedger||[])],modal:null});
     }
     function deletePersonalEntry(id) {
@@ -7231,7 +7353,7 @@
     }
     function personalLedgerMonthEntries() {
       const month=appState.personalLedgerMonth||new Date().toISOString().slice(0,7);
-      return (appState.personalLedger||[]).filter(e=>e.date.startsWith(month));
+      return (appState.personalLedger||[]).filter(e=>e.date&&e.date.startsWith(month));
     }
     function personalLedgerStats(entries) {
       const income=entries.filter(e=>e.type==="income").reduce((s,e)=>s+e.amount,0);
@@ -7243,53 +7365,160 @@
     function submitPersonalEntry() {
       const amount=parseFloat(document.getElementById("pl-amount")?.value)||0;
       if(!amount) return;
-      addPersonalEntry({type:appState.modal?.entryType||"expense",amount,currency:document.getElementById("pl-currency")?.value||"HKD",category:document.getElementById("pl-category")?.value||"其他",note:document.getElementById("pl-note")?.value?.trim()||"",date:document.getElementById("pl-date")?.value||new Date().toISOString().slice(0,10)});
+      addPersonalEntry({
+        type:appState.modal?.entryType||"expense",
+        amount,
+        currency:document.getElementById("pl-currency")?.value||"HKD",
+        category:document.getElementById("pl-category")?.value||"其他",
+        note:document.getElementById("pl-note")?.value?.trim()||"",
+        date:document.getElementById("pl-date")?.value||new Date().toISOString().slice(0,10),
+        paidBy:appState.modal?.paidBy||"me",
+        forWhom:appState.modal?.forWhom||(appState.modal?.entryType==="income"?"me":"shared")
+      });
     }
+
     function renderPersonalLedgerPage() {
       const month=appState.personalLedgerMonth||new Date().toISOString().slice(0,7);
+      const tab=appState.personalLedgerTab||"detail";
       const entries=personalLedgerMonthEntries();
-      const stats=personalLedgerStats(entries);
-      const allMonths=[...new Set((appState.personalLedger||[]).map(e=>e.date.slice(0,7)))].sort().reverse();
+      const expenseEntries=entries.filter(e=>e.type!=="income");
+      const allMonths=[...new Set((appState.personalLedger||[]).map(e=>e.date?.slice(0,7)).filter(Boolean))].sort().reverse();
       if(!allMonths.includes(month)) allMonths.unshift(month);
+      const settle=calculateSettlement(expenseEntries);
+      const hasPartner=!!(tripMembers.find(m=>m.email&&m.email!==currentUser?.email)||appState.partnerName);
+      const partnerName=partnerDisplayName();
+      const myCats=mySpendingByCategory(expenseEntries);
+      const pCats=partnerSpendingByCategory(expenseEntries);
+      const myTotal=Object.values(myCats).reduce((s,v)=>s+v,0);
+      const pTotal=Object.values(pCats).reduce((s,v)=>s+v,0);
+      const totalAll=myTotal+pTotal;
+
+      // Settlement card
+      const settled=Math.abs(settle.balance)<0.01;
+      const settleCard=`<div class="settlement-card${settled?" settled":""}">
+        <div class="sc-label">${icon("arrow-left-right","icon-sm")} 本月结算</div>
+        ${settled
+          ?`<div class="sc-amount">✅ 已结清</div><div class="sc-desc">本月双方账目平衡，无需转账。</div>`
+          :settle.partnerOwesMe>0
+            ?`<div class="sc-amount">${settle.partnerOwesMe.toFixed(1)} HKD</div><div class="sc-desc">${esc(partnerName)} 需还给你</div>`
+            :`<div class="sc-amount">${settle.iOwePartner.toFixed(1)} HKD</div><div class="sc-desc">你需还给 ${esc(partnerName)}</div>`
+        }
+      </div>`;
+
+      // Tab detail
       const grouped={};
       entries.forEach(e=>{if(!grouped[e.date])grouped[e.date]=[];grouped[e.date].push(e);});
       const sortedDates=Object.keys(grouped).sort().reverse();
+      const tabDetail=`<div class="ledger-entries">${sortedDates.length===0
+        ?`<div class="empty-state card"><h2 class="serif">本月还没有记录</h2><p>点击右上角「记一笔」开始记账。</p></div>`
+        :sortedDates.map(date=>{
+          const dayTotal=grouped[date].filter(e=>e.type!=="income").reduce((s,e)=>s+e.amount,0);
+          return `<div class="ledger-date-group">
+            <div class="ledger-date-label">${new Date(date+"T12:00:00").toLocaleDateString("zh-TW",{month:"long",day:"numeric",weekday:"short"})}<span style="float:right;font-weight:700;color:var(--coral);">-${dayTotal.toFixed(1)}</span></div>
+            ${grouped[date].map(e=>{
+              const meta=PERSONAL_LEDGER_CATEGORIES.find(c=>c.id===e.category)||{emoji:"📝"};
+              const isIncome=e.type==="income";
+              const paidLabel=e.paidBy?`<span class="entry-tag ${e.paidBy==="me"?"entry-tag-me":"entry-tag-partner"}">${resolveRelative(e.paidBy,e.addedBy)} 付</span>`:"";
+              const forLabel=e.forWhom?`<span class="entry-tag ${e.forWhom==="shared"?"entry-tag-shared":e.forWhom==="me"?"entry-tag-me":"entry-tag-partner"}">${resolveRelative(e.forWhom,e.addedBy)}</span>`:"";
+              const addedByLabel=e.addedBy&&e.addedBy!==currentUser?.email?`<span style="font-size:10px;color:var(--muted);">${esc(formatUserHandle(e.addedBy))} 记</span>`:"";
+              return `<div class="ledger-entry">
+                <span class="ledger-entry-icon">${meta.emoji}</span>
+                <div class="ledger-entry-body">
+                  <strong>${esc(e.category)}</strong>${e.note?`<span>${esc(e.note)}</span>`:""}
+                  <div class="ledger-entry-meta">${paidLabel}${forLabel}${addedByLabel}</div>
+                </div>
+                <div class="ledger-entry-amount ${isIncome?"income":"expense"}">${isIncome?"+":"-"}${e.amount.toFixed(1)} <small>${esc(e.currency)}</small></div>
+                ${canEditTrip()?`<button class="btn-icon-ghost" onclick="deletePersonalEntry('${escAttr(e.id)}')" title="删除">${icon("trash-2","icon-xs")}</button>`:""}
+              </div>`;
+            }).join("")}
+          </div>`;
+        }).join("")
+      }</div>`;
+
+      // Tab analysis
+      const allCats=[...new Set([...Object.keys(myCats),...Object.keys(pCats)])];
+      const maxAmt=Math.max(...allCats.map(c=>(myCats[c]||0)+(pCats[c]||0)),1);
+      const tabAnalysis=allCats.length===0
+        ?`<div class="empty-state card" style="margin-top:0;"><h2 class="serif">暂无支出数据</h2><p>记录支出后可在此查看分析。</p></div>`
+        :`<div>
+          <div class="dual-legend">
+            <span><span class="dual-legend-dot" style="background:var(--teal);"></span>我 (${myTotal.toFixed(1)})</span>
+            <span><span class="dual-legend-dot" style="background:#9B59B6;"></span>${esc(partnerName)} (${pTotal.toFixed(1)})</span>
+          </div>
+          <div class="collab-stats-row">
+            <div class="collab-stat"><div class="cs-label">我的支出</div><div class="cs-amount">${myTotal.toFixed(1)} HKD</div></div>
+            <div class="collab-stat"><div class="cs-label">${esc(partnerName)}的支出</div><div class="cs-amount">${pTotal.toFixed(1)} HKD</div></div>
+          </div>
+          <section class="card" style="padding:16px 20px;">
+            <h3 style="margin:0 0 14px;font-size:14px;">${icon("bar-chart-2","icon-sm")} 分类对比</h3>
+            ${allCats.sort((a,b)=>((myCats[b]||0)+(pCats[b]||0))-((myCats[a]||0)+(pCats[a]||0))).map(cat=>{
+              const catMeta=PERSONAL_LEDGER_CATEGORIES.find(c=>c.id===cat)||{emoji:"📝"};
+              const me=myCats[cat]||0;const p=pCats[cat]||0;const tot=me+p;
+              const meW=totalAll?Math.round(me/totalAll*100):0;const pW=totalAll?Math.round(p/totalAll*100):0;
+              return `<div class="dual-bar-row">
+                <div class="dual-bar-cat-row">
+                  <span class="dual-bar-cat">${catMeta.emoji} ${esc(cat)}</span>
+                  <span class="dual-bar-amounts">${me.toFixed(1)} / ${p.toFixed(1)}</span>
+                </div>
+                <div class="dual-bar-track">
+                  <div class="dual-bar-me" style="width:${meW}%;"></div>
+                  <div class="dual-bar-partner" style="width:${pW}%;"></div>
+                </div>
+              </div>`;
+            }).join("")}
+          </section>
+        </div>`;
+
       return `<section class="page-hero">
         <div class="crumb-row"><button class="btn btn-small btn-ghost" onclick="goDashboard()">${icon("chevron-left","icon-sm")} 返回</button></div>
         <div class="page-title-row">
-          <div><span class="tag sage">${icon("wallet","icon-sm")} 日常账本</span><h1 class="page-title serif">💰 个人记账</h1><p class="page-intro">随时记录收入支出，不限于旅行。</p></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-ghost" onclick="openAddPersonalEntryModal('expense')">${icon("minus","icon-sm")} 记支出</button>
-            <button class="btn btn-primary" onclick="openAddPersonalEntryModal('income')">${icon("plus","icon-sm")} 记收入</button>
-          </div>
+          <div><span class="tag sage">${icon("wallet","icon-sm")} 共同账本</span><h1 class="page-title serif">💰 日常记账</h1><p class="page-intro">两个人的收支，一目了然。</p></div>
+          <button class="btn btn-primary" onclick="openAddPersonalEntryModal('expense')">${icon("plus","icon-sm")} 记一笔</button>
         </div>
       </section>
-      <div class="ledger-stats-row">
-        <div class="ledger-stat-card income"><span>收入</span><strong>+${stats.income.toFixed(1)}</strong></div>
-        <div class="ledger-stat-card expense"><span>支出</span><strong>-${stats.expense.toFixed(1)}</strong></div>
-        <div class="ledger-stat-card ${stats.balance>=0?"positive":"negative"}"><span>结余</span><strong>${stats.balance>=0?"+":""}${stats.balance.toFixed(1)}</strong></div>
-      </div>
       <div class="ledger-month-tabs">${allMonths.slice(0,6).map(m=>`<button class="chip ${m===month?"active":""}" onclick="setState({personalLedgerMonth:'${m}'})">${m}</button>`).join("")}</div>
-      ${Object.entries(stats.byCategory).length?`<section class="ledger-category-bars card"><h3 style="margin:0 0 12px;">${icon("pie-chart","icon-sm")} 支出分类</h3>${Object.entries(stats.byCategory).sort((a,b)=>b[1]-a[1]).map(([cat,amount])=>{const meta=PERSONAL_LEDGER_CATEGORIES.find(c=>c.id===cat)||{emoji:"📝",color:"#95A5A6"};const pct=stats.expense?Math.round(amount/stats.expense*100):0;return `<div class="category-bar-row"><div class="category-bar-label"><span>${meta.emoji} ${esc(cat)}</span><b>${pct}%</b></div><div class="category-bar-track"><div class="category-bar-fill" style="width:${Math.max(pct,3)}%;background:${meta.color};"></div></div></div>`;}).join("")}</section>`:""}
-      <div class="ledger-entries">${sortedDates.length===0?`<div class="empty-state card"><h2 class="serif">本月还没有记录</h2><p>点击"记支出"或"记收入"开始记账。</p></div>`:sortedDates.map(date=>`<div class="ledger-date-group"><div class="ledger-date-label">${new Date(date+"T12:00:00").toLocaleDateString("zh-TW",{month:"long",day:"numeric",weekday:"short"})}</div>${grouped[date].map(e=>{const meta=PERSONAL_LEDGER_CATEGORIES.find(c=>c.id===e.category)||{emoji:"📝"};const isIncome=e.type==="income";return `<div class="ledger-entry"><span class="ledger-entry-icon">${meta.emoji}</span><div class="ledger-entry-body"><strong>${esc(e.category)}</strong>${e.note?`<span>${esc(e.note)}</span>`:""}</div><div class="ledger-entry-amount ${isIncome?"income":"expense"}">${isIncome?"+":"-"}${e.amount.toFixed(1)} ${esc(e.currency)}</div>${canEditTrip()?`<button class="btn-icon-ghost" onclick="deletePersonalEntry('${escAttr(e.id)}')">${icon("trash-2","icon-xs")}</button>`:""}</div>`;}).join("")}</div>`).join("")}</div>`;
+      ${hasPartner||expenseEntries.some(e=>e.forWhom)?settleCard:""}
+      <div class="ledger-tabs">
+        <button class="ledger-tab-btn ${tab==="detail"?"active":""}" onclick="setState({personalLedgerTab:'detail'})">明细</button>
+        <button class="ledger-tab-btn ${tab==="analysis"?"active":""}" onclick="setState({personalLedgerTab:'analysis'})">分析</button>
+      </div>
+      ${tab==="detail"?tabDetail:tabAnalysis}`;
     }
+
     function renderAddPersonalEntryModal() {
-      const isIncome=appState.modal?.entryType==="income";
+      const m=appState.modal||{};
+      const isIncome=m.entryType==="income";
+      const paidBy=m.paidBy||"me";
+      const forWhom=m.forWhom||(isIncome?"me":"shared");
       const today=new Date().toISOString().slice(0,10);
       const expenseCats=PERSONAL_LEDGER_CATEGORIES.filter(c=>!["收入","工资"].includes(c.id));
       const incomeCats=PERSONAL_LEDGER_CATEGORIES.filter(c=>["收入","工资","其他"].includes(c.id));
       const cats=isIncome?incomeCats:expenseCats;
+      const partnerName=partnerDisplayName();
       return `<div class="modal-overlay" onclick="setState({modal:null})"><div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-head"><h3>${isIncome?"💰 记收入":"💸 记支出"}</h3><button class="btn btn-ghost" onclick="setState({modal:null})">${icon("x","icon-sm")}</button></div>
         <form onsubmit="event.preventDefault();submitPersonalEntry()">
           <div class="modal-field"><label>类型</label><div style="display:flex;gap:8px;">
-            <button type="button" class="btn ${!isIncome?"btn-primary":"btn-ghost"}" onclick="setState({modal:{...appState.modal,entryType:'expense'}})">支出</button>
-            <button type="button" class="btn ${isIncome?"btn-primary":"btn-ghost"}" onclick="setState({modal:{...appState.modal,entryType:'income'}})">收入</button>
+            <button type="button" class="btn ${!isIncome?"btn-primary":"btn-ghost"}" onclick="setState({modal:{...appState.modal,entryType:'expense',forWhom:'shared'}})">支出</button>
+            <button type="button" class="btn ${isIncome?"btn-primary":"btn-ghost"}" onclick="setState({modal:{...appState.modal,entryType:'income',forWhom:'me',paidBy:'me'}})">收入</button>
           </div></div>
           <div class="modal-field"><label>金额</label><div style="display:flex;gap:8px;">
-            <input id="pl-amount" type="number" step="0.01" min="0" placeholder="0.00" required style="flex:1;" />
+            <input id="pl-amount" type="number" step="0.01" min="0" placeholder="0.00" required style="flex:1;" autofocus />
             <select id="pl-currency"><option value="HKD">HKD</option><option value="NTD">NTD</option><option value="CNY">CNY</option><option value="USD">USD</option></select>
           </div></div>
+          ${!isIncome?`<div class="modal-field"><label>谁付款</label>
+            <div class="paid-by-selector">
+              <button type="button" class="pbs-btn ${paidBy==="me"?"active":""}" onclick="setState({modal:{...appState.modal,paidBy:'me'}})">我</button>
+              <button type="button" class="pbs-btn ${paidBy==="partner"?"active":""}" onclick="setState({modal:{...appState.modal,paidBy:'partner'}})">${esc(partnerName)}</button>
+            </div>
+          </div>
+          <div class="modal-field"><label>用于谁</label>
+            <div class="for-whom-selector">
+              <button type="button" class="pbs-btn ${forWhom==="shared"?"active":""}" onclick="setState({modal:{...appState.modal,forWhom:'shared'}})">一起 🤝</button>
+              <button type="button" class="pbs-btn ${forWhom==="me"?"active":""}" onclick="setState({modal:{...appState.modal,forWhom:'me'}})">我</button>
+              <button type="button" class="pbs-btn ${forWhom==="partner"?"active":""}" onclick="setState({modal:{...appState.modal,forWhom:'partner'}})">${esc(partnerName)}</button>
+            </div>
+          </div>`:""}
           <div class="modal-field"><label>分类</label>
             <div class="ledger-cat-grid">${cats.map(c=>`<button type="button" class="ledger-cat-btn" data-cat="${escAttr(c.id)}" onclick="document.getElementById('pl-category').value='${escAttr(c.id)}';document.querySelectorAll('.ledger-cat-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">${c.emoji} ${c.id}</button>`).join("")}</div>
             <input id="pl-category" type="hidden" value="${isIncome?"收入":"餐饮"}" />
@@ -7318,6 +7547,12 @@
 
     function mergeDeletedItemsState(base = [], incoming = []) {
       return [...new Set([...(Array.isArray(base) ? base : []), ...(Array.isArray(incoming) ? incoming : [])].map(String))];
+    }
+
+    function mergePersonalLedgerState(base = [], incoming = []) {
+      const byId = new Map((Array.isArray(base) ? base : []).map(e => [e.id, e]));
+      (Array.isArray(incoming) ? incoming : []).forEach(e => { if (e?.id) byId.set(e.id, e); });
+      return [...byId.values()].sort((a, b) => (b.date || "") < (a.date || "") ? -1 : 1);
     }
 
     function mergeAddedItemsState(base = {}, incoming = {}) {
@@ -7352,6 +7587,10 @@
       }
       if (appKey === "addedItems") {
         target.addedItems = mergeAddedItemsState(target.addedItems, value);
+        return;
+      }
+      if (appKey === "personalLedger") {
+        target.personalLedger = mergePersonalLedgerState(target.personalLedger, value);
         return;
       }
       target[appKey] = mergeObjectState(target[appKey], value);
@@ -7447,6 +7686,25 @@
         appState = normalizeState({ ...appState, ...cloudPatch });
         saveState([]);
         applyingRemoteState = false;
+
+        // Also load partner's personal ledger entries (cross-user merge)
+        try {
+          const { data: pld } = await supabaseClient
+            .from("trip_user_state")
+            .select("state_value")
+            .eq("trip_id", activeTripId())
+            .eq("state_key", "personalLedger")
+            .neq("user_id", currentUser.id);
+          if (pld?.length) {
+            pld.forEach(row => {
+              appState.personalLedger = mergePersonalLedgerState(
+                appState.personalLedger || [], Array.isArray(row.state_value) ? row.state_value : []
+              );
+            });
+            saveState([]);
+          }
+        } catch {}
+
         render();
       } catch {
         applyingRemoteState = false;
@@ -11216,7 +11474,8 @@
             ${drawerAction("📄", "旅行报告", "generateTravelReport()")}
             ${drawerAction("📤", "导出到 Google My Maps", "generateKML()")}
             ${drawerAction("🧳", "打包清单", "openDrawer('packing')")}
-            ${drawerAction("💰", "日常账本", "openPersonalLedger()")}
+            ${drawerAction("🧾", "行程费用", "goExpenses()")}
+            ${drawerAction("💰", "共同账本", "openPersonalLedger()")}
           </div>
           <div>
             <div class="drawer-section-title">─── 设置 ───</div>
@@ -11371,6 +11630,17 @@
           ${renderCollaborationPanel()}
           ${renderInvitePanel()}
           ${renderMembersPanel()}
+          <div class="soft-card info-card">
+            <h3>${icon("wallet", "icon-sm")} 共同账本设置</h3>
+            <p class="rail-muted">设置伴侣的显示名称，让账单归属更清晰。</p>
+            <div class="field">
+              <label for="partner-name-input">伴侣称呼</label>
+              <input id="partner-name-input" type="text" placeholder="例如：Jeremy / 老婆 / 小红" value="${escAttr(appState.partnerName||"")}" />
+            </div>
+            <div class="settings-action-row">
+              <button class="btn btn-small btn-primary" onclick="setState({partnerName:document.getElementById('partner-name-input')?.value?.trim()||''});toast('已保存伴侣称呼 ✓')">${icon("save","icon-sm")} 保存</button>
+            </div>
+          </div>
           <div class="soft-card info-card">
             <h3>${icon("receipt-text", "icon-sm")} 旅行账本</h3>
             <p class="rail-muted">打开完整账本，查看按天、类别和付款人整理的旅行费用。</p>
@@ -11903,12 +12173,14 @@
     function renderMobileNav() {
       if (["auth", "journey-select", "trip-list", "no-trips"].includes(appState.currentView)) return "";
       const mapActive = (appState.currentView === "day" && appState.selectedTab === "route") || (appState.currentView === "trip-dashboard" && appState.selectedTab === "route");
+      const todayActive = appState.currentView === "day" && appState.selectedTab !== "route";
+      const ledgerActive = appState.currentView === "personal-ledger";
       return `
         <nav class="mobile-nav">
-          <button class="${appState.currentView === "day" && appState.selectedTab !== "route" ? "active" : ""}" onclick="mobileGoToday()">${icon("calendar-days", "icon-sm")}<span>今日</span></button>
+          <button class="${todayActive ? "active" : ""}" onclick="mobileGoToday()">${icon("calendar-days", "icon-sm")}<span>今日</span></button>
           <button class="${mapActive ? "active" : ""}" onclick="mobileGoMap()">${icon("map", "icon-sm")}<span>地图</span></button>
           <button class="mobile-fab ${appState.fabOpen ? "active" : ""}" onclick="toggleFabSheet()" aria-label="快捷操作">${icon("plus", "icon-sm")}<span>新增</span></button>
-          <button class="${appState.currentView === "expenses" ? "active" : ""}" onclick="goExpenses()">${icon("receipt-text", "icon-sm")}<span>账本</span></button>
+          <button class="${ledgerActive ? "active" : ""}" onclick="openPersonalLedger()">${icon("wallet", "icon-sm")}<span>账本</span></button>
           <button onclick="openDrawer('more')">${icon("menu", "icon-sm")}<span>更多</span></button>
         </nav>
         ${renderFabSheet()}
@@ -11926,7 +12198,7 @@
               <button class="fab-sheet-item" onclick="quickSpotReviews()"><span class="fab-sheet-icon">⭐</span><span>给地点评级</span></button>
               <button class="fab-sheet-item" onclick="quickEditToday()"><span class="fab-sheet-icon">✏️</span><span>编辑今日行程</span></button>
               <button class="fab-sheet-item" onclick="openDrawer('packing');setState({fabOpen:false})"><span class="fab-sheet-icon">🧳</span><span>打包清单</span></button>
-              <button class="fab-sheet-item" onclick="openPersonalLedger();setState({fabOpen:false})"><span class="fab-sheet-icon">💰</span><span>日常记账</span></button>
+              <button class="fab-sheet-item" onclick="goExpenses();setState({fabOpen:false})"><span class="fab-sheet-icon">🧾</span><span>行程费用</span></button>
             </div>
             <button class="fab-sheet-cancel" onclick="setState({fabOpen:false})">取消</button>
           </div>
