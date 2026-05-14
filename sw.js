@@ -1,6 +1,6 @@
 // 旅行手帐 Service Worker
 // 缓存策略：App Shell 优先缓存，Supabase / CDN 走网络
-const CACHE = "th-v1";
+const CACHE = "th-v2";
 const SHELL = [
   "/taiwan-trip-2026/",
   "/taiwan-trip-2026/index.html",
