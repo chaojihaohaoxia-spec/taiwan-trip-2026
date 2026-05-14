@@ -2324,7 +2324,7 @@
       --radius-lg: 32px;
       --radius: 24px;
       --ease: cubic-bezier(.19, 1, .22, 1);
-      --bounce: cubic-bezier(.34, 1.56, .64, 1);
+      --bounce: cubic-bezier(.2, .8, .2, 1);
       --font-title: "Noto Serif TC", "Noto Serif SC", serif;
       --font-display: "Newsreader", "Noto Serif TC", "Noto Serif SC", serif;
       --font-body: "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
@@ -5091,6 +5091,115 @@
       to { stroke-dashoffset: -80; }
     }
 
+    /* Interaction polish: keep feedback local to the control after the first paint. */
+    .app-root.app-settled .travel-app,
+    .app-root.app-settled .journey-wrap,
+    .app-root.app-settled .hero-trip-card,
+    .app-root.app-settled .taiwan-postcard,
+    .app-root.app-settled .page-hero,
+    .app-root.app-settled .day-header,
+    .app-root.app-settled .panel,
+    .app-root.app-settled .timeline-item,
+    .app-root.app-settled .date-chip.active,
+    .app-root.app-settled .tab-btn.active,
+    .app-root.app-settled .chip.active,
+    .app-root.app-settled .action-btn.active,
+    .app-root.app-settled .action-btn.done,
+    .app-root.app-settled .timeline-item.done::after,
+    #mobile-nav-root.nav-settled .mobile-nav button.active,
+    #mobile-nav-root.nav-settled .mobile-nav button.active::after,
+    #mobile-nav-root.nav-settled .mobile-nav button.active .icon-sm {
+      animation: none !important;
+    }
+    .app-root.app-settled .timeline-item {
+      animation-delay: 0s !important;
+    }
+    .btn,
+    .action-btn,
+    .tab-btn,
+    .date-chip,
+    .chip,
+    .nav-btn,
+    .drawer-action,
+    .mobile-nav button,
+    .journey-quick-row button {
+      transition:
+        transform .14s ease,
+        box-shadow .18s ease,
+        background .18s ease,
+        color .18s ease,
+        border-color .18s ease,
+        opacity .18s ease;
+    }
+    .btn:hover,
+    .action-btn:hover,
+    .tab-btn:hover,
+    .date-chip:hover,
+    .journey-quick-row button:hover {
+      transform: translateY(-1px);
+    }
+    .timeline-item:hover,
+    .map-node-card.active,
+    .city-card:hover,
+    .prep-card:hover {
+      transform: translateY(-2px);
+    }
+    .btn:active,
+    button:active,
+    button.is-pressed,
+    .btn.is-pressed,
+    .action-btn:active,
+    .action-btn.is-pressed,
+    .tab-btn:active,
+    .tab-btn.is-pressed,
+    .date-chip:active,
+    .date-chip.is-pressed,
+    .chip:active,
+    .chip.is-pressed,
+    .nav-btn:active,
+    .nav-btn.is-pressed,
+    .drawer-action:active,
+    .drawer-action.is-pressed,
+    .mobile-nav button:active,
+    .mobile-nav button.is-pressed,
+    .journey-quick-row button:active,
+    .journey-quick-row button.is-pressed,
+    .trip-card:active,
+    .trip-card.is-pressed,
+    .home-city-card:active,
+    .home-city-card.is-pressed,
+    .timeline-item:active,
+    .timeline-item.is-pressed {
+      transform: translateY(1px) scale(.992);
+      box-shadow: 0 8px 18px rgba(23, 50, 77, .09);
+    }
+    .btn:hover .icon-sm,
+    .btn:hover .icon {
+      transform: translateX(1px);
+    }
+    .date-chip.active,
+    .tab-btn.active,
+    .mobile-nav button.active:not(.mobile-fab) {
+      transform: none;
+    }
+    .mobile-nav button.active:not(.mobile-fab) {
+      box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+    .mobile-nav button.active .icon-sm {
+      animation: none;
+    }
+    .auth-card .btn-primary:hover {
+      transform: translateY(-1px);
+    }
+    button:focus-visible,
+    .btn:focus-visible,
+    .action-btn:focus-visible,
+    .tab-btn:focus-visible,
+    .chip:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent, #1CA7EC) 34%, transparent);
+      outline-offset: 3px;
+    }
+
     @media (max-width: 1180px) {
       .app-shell { grid-template-columns: 220px minmax(0, 1fr) minmax(240px, 270px); gap: 16px; }
       .journey-hero-layout {
@@ -6434,6 +6543,8 @@
     let authNotice = "";
     let authOtpTimer = null;
     let collaborationRefreshPromise = null;
+    let hasRenderedAppOnce = false;
+    let pressedControl = null;
     let checkins = [];
     let checkinsLoading = false;
     let checkinsRealtimeChannel = null;
@@ -7544,6 +7655,44 @@
       appState = normalizeState({ ...appState, ...patch });
       saveState(Object.keys(patch));
       if (shouldRender) render();
+    }
+
+    function clearPressedControl() {
+      if (!pressedControl) return;
+      pressedControl.classList.remove("is-pressed");
+      pressedControl = null;
+    }
+
+    function bindInteractionFeedback() {
+      const selector = [
+        "button",
+        ".btn",
+        ".action-btn",
+        ".tab-btn",
+        ".date-chip",
+        ".chip",
+        ".nav-btn",
+        ".drawer-action",
+        ".trip-card",
+        ".home-city-card",
+        ".timeline-item",
+        ".map-node-card"
+      ].join(",");
+
+      document.addEventListener("pointerdown", (event) => {
+        const control = event.target.closest(selector);
+        if (!control || control.disabled || control.getAttribute("aria-disabled") === "true") return;
+        clearPressedControl();
+        pressedControl = control;
+        control.classList.add("is-pressed");
+      }, { passive: true });
+
+      ["pointerup", "pointercancel", "dragstart"].forEach((eventName) => {
+        document.addEventListener(eventName, clearPressedControl, { passive: true });
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") clearPressedControl();
+      });
     }
 
     function esc(value) {
@@ -9315,6 +9464,8 @@
     function render() {
       cleanupLeafletMaps();
       const app = document.getElementById("app");
+      const alreadyRendered = hasRenderedAppOnce;
+      app.classList.toggle("app-settled", alreadyRendered);
       if (appState.currentView === "auth") {
         app.innerHTML = renderAuthView();
       } else if (appState.currentView === "journey-select") {
@@ -9326,17 +9477,25 @@
       } else {
         app.innerHTML = renderShell();
       }
-      app.style.animation = "none";
-      app.offsetHeight;
-      app.style.animation = "pageIn .25s ease both";
       const mobileNavRoot = document.getElementById("mobile-nav-root");
-      if (mobileNavRoot) mobileNavRoot.innerHTML = renderMobileNav();
+      if (mobileNavRoot) {
+        mobileNavRoot.classList.toggle("nav-settled", alreadyRendered);
+        mobileNavRoot.innerHTML = renderMobileNav();
+      }
       document.getElementById("modal-root").innerHTML = renderModal();
       document.getElementById("toast-root").innerHTML = appState.toast ? `<div class="toast">${esc(appState.toast)}</div>` : "";
       if (window.lucide) lucide.createIcons();
       scheduleMapInit();
       if (appState.authMode === "otp" && authOtpRemainingSeconds() > 0 && !authOtpTimer) scheduleAuthOtpTimer();
       if (appState.authMode !== "otp" && authOtpTimer) clearAuthOtpTimer();
+      if (!hasRenderedAppOnce) {
+        hasRenderedAppOnce = true;
+        requestAnimationFrame(() => {
+          app.classList.add("app-settled");
+          mobileNavRoot?.classList.add("nav-settled");
+        });
+      }
+      clearPressedControl();
     }
 
     function renderJourneySelect() {
@@ -13596,6 +13755,7 @@ ${folders}
     window.openTripAlbum = openTripAlbum;
 
     async function init() {
+      bindInteractionFeedback();
       await initializeAuthGate();
     }
 
