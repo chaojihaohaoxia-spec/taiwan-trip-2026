@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>旅行手帐 · 旅行规划与记账 App</title>
+  <title>热爱生活7885 · 生活记账与旅行规划</title>
   <meta name="description" content="把行程、账本、照片和同行计划收在一个可以共同编辑的旅行空间。" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2300bfa6'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-size='15' font-weight='700' fill='white'%3ETH%3C/text%3E%3C/svg%3E" />
   <link rel="manifest" href="manifest.json" />
@@ -11,7 +11,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="旅行手帐" />
+  <meta name="apple-mobile-web-app-title" content="热爱生活7885" />
   <link rel="apple-touch-icon" href="icon-192.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -3899,6 +3899,51 @@
 .calc-total-label{font-size:12px;font-weight:700;color:var(--muted);}
 .calc-total-num{font-size:26px;font-weight:900;color:var(--teal);}
 .calc-total-currency{font-size:13px;font-weight:700;color:var(--muted);margin-left:4px;}
+/* ── Analysis page ─────────────────────────────────────── */
+.analysis-page{display:flex;flex-direction:column;gap:12px;padding-bottom:28px;}
+.analysis-hero{background:linear-gradient(135deg,#17324D 0%,#0d3b6e 100%);border-radius:24px;padding:22px 20px 18px;color:#fff;}
+.analysis-hero-label{font-size:10px;font-weight:800;opacity:.6;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.analysis-hero-total{font-size:46px;font-weight:900;line-height:1;margin-bottom:14px;letter-spacing:-.5px;}
+.analysis-hero-currency{font-size:18px;font-weight:700;opacity:.65;margin-left:3px;}
+.analysis-hero-metrics{display:flex;align-items:center;background:rgba(255,255,255,.1);border-radius:14px;padding:10px 0;}
+.analysis-metric{flex:1;text-align:center;display:flex;flex-direction:column;gap:3px;}
+.am-val{font-size:18px;font-weight:800;}
+.am-label{font-size:10px;opacity:.6;}
+.analysis-metric-divider{width:1px;height:28px;background:rgba(255,255,255,.2);flex-shrink:0;}
+.analysis-card{background:rgba(255,255,255,.88);border-radius:20px;padding:16px 18px;box-shadow:0 4px 18px rgba(23,50,77,.07);}
+.analysis-card-title{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;}
+/* Split bar */
+.split-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.split-name{font-size:12px;font-weight:700;color:var(--navy);white-space:nowrap;min-width:20px;}
+.split-bar-track{flex:1;height:14px;border-radius:999px;overflow:hidden;display:flex;background:rgba(0,0,0,.06);}
+.split-bar-fill{height:100%;min-width:4px;transition:flex .4s;}
+.split-labels{display:flex;justify-content:space-between;font-size:12px;font-weight:700;}
+/* Donut chart */
+.donut-section{display:flex;align-items:center;gap:14px;}
+.donut-chart-wrap{flex-shrink:0;}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:9px;min-width:0;}
+.donut-legend-row{display:flex;align-items:center;gap:7px;font-size:12px;}
+.donut-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.donut-legend-cat{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);}
+.donut-legend-pct{font-weight:800;color:var(--navy);flex-shrink:0;font-size:11px;}
+/* Daily chart */
+.daily-chart-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;padding-top:2px;}
+/* Category ranking */
+.cat-rank-row{margin-bottom:14px;}
+.cat-rank-row:last-child{margin-bottom:0;}
+.cat-rank-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
+.cat-rank-name{font-size:13px;font-weight:700;color:var(--ink);}
+.cat-rank-amt{font-size:13px;font-weight:800;color:var(--coral);}
+.cat-rank-bar-track{height:7px;border-radius:999px;background:rgba(0,0,0,.07);overflow:hidden;margin-bottom:4px;}
+.cat-rank-bar-fill{height:100%;border-radius:999px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.cat-rank-sub{font-size:11px;color:var(--muted);}
+/* Biggest expense */
+.top-expense-row{display:flex;align-items:center;gap:12px;}
+.top-expense-emoji{font-size:28px;flex-shrink:0;line-height:1;}
+.top-expense-body{flex:1;min-width:0;}
+.top-expense-note{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);}
+.top-expense-cat{font-size:11px;color:var(--muted);margin-top:3px;}
+.top-expense-amt{font-size:22px;font-weight:900;color:var(--coral);flex-shrink:0;white-space:nowrap;}
     .spot-card {
       --spot-rating-color: rgba(23,50,77,.1);
       border-left: 6px solid transparent;
@@ -7055,7 +7100,7 @@
       state.userTrips = Array.isArray(state.userTrips) ? state.userTrips.filter(Boolean) : [];
       state.dynamicDays = Array.isArray(state.dynamicDays) ? state.dynamicDays.filter(Boolean) : [];
       state.dynamicItems = Array.isArray(state.dynamicItems) ? state.dynamicItems.filter(Boolean) : [];
-      if (!["auth", "journey-select", "trip-list", "no-trips"].includes(state.currentView) && !state.selectedTrip) state.selectedTrip = tripData.id;
+      if (!["auth", "journey-select", "trip-list", "no-trips", "personal-ledger"].includes(state.currentView) && !state.selectedTrip) state.selectedTrip = tripData.id;
       if (state.selectedCity && !tripData.cities[state.selectedCity]) state.selectedCity = null;
       if (state.selectedDay && !tripData.daysById[state.selectedDay]) state.selectedDay = null;
       if (!("selectedMapPoint" in state)) state.selectedMapPoint = null;
@@ -7459,38 +7504,123 @@
         }).join("")
       }</div>`;
 
-      // Tab analysis
+      // ── Analysis tab — rich visualizations ──────────────────
       const allCats=[...new Set([...Object.keys(myCats),...Object.keys(pCats)])];
-      const maxAmt=Math.max(...allCats.map(c=>(myCats[c]||0)+(pCats[c]||0)),1);
-      const tabAnalysis=allCats.length===0
+      const CAT_COLORS=['#00BFA6','#7C4DFF','#F4A261','#E63946','#2196F3','#FF9800','#4CAF50','#78909C'];
+      const sortedCats=[...allCats].sort((a,b)=>((myCats[b]||0)+(pCats[b]||0))-((myCats[a]||0)+(pCats[a]||0)));
+      // Daily totals for the selected month
+      const [ledYr,ledMo]=month.split('-').map(Number);
+      const daysInMo=new Date(ledYr,ledMo,0).getDate();
+      const todayRef=new Date();
+      const dailyMap={};
+      for(let d=1;d<=daysInMo;d++) dailyMap[`${month}-${String(d).padStart(2,'0')}`]=0;
+      expenseEntries.forEach(e=>{if(Object.prototype.hasOwnProperty.call(dailyMap,e.date))dailyMap[e.date]+=e.amount;});
+      const dailyArr=Object.entries(dailyMap);
+      const maxDaily=Math.max(...Object.values(dailyMap),1);
+      const dayCount=dailyArr.filter(([,v])=>v>0).length;
+      const avgPerDay=dayCount>0?totalAll/dayCount:0;
+      // Biggest single expense
+      const biggest=expenseEntries.length>0?expenseEntries.reduce((m,e)=>e.amount>m.amount?e:m,expenseEntries[0]):null;
+      // Donut chart: stroke-dasharray segments starting at top (12 o'clock)
+      const R=52,CX=68,CY=68,CIRC=2*Math.PI*R;
+      let donutOff=CIRC/4;
+      const donutCircles=sortedCats.length===0
+        ?`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="#e9e9e9" stroke-width="22"/>`
+        :sortedCats.map((cat,i)=>{
+            const val=(myCats[cat]||0)+(pCats[cat]||0);
+            const dash=totalAll>0?(val/totalAll)*CIRC:0;
+            const o=donutOff; donutOff-=dash;
+            return `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${CAT_COLORS[i%CAT_COLORS.length]}" stroke-width="22" stroke-dasharray="${dash.toFixed(2)} ${(CIRC-dash).toFixed(2)}" stroke-dashoffset="${o.toFixed(2)}"/>`;
+          }).join('');
+      // Daily bar chart SVG
+      const BW=7,BG=3,CH=60;
+      const svgChartW=daysInMo*(BW+BG);
+      const barsSVG=dailyArr.map(([date,amt],i)=>{
+          const bH=Math.max(amt/maxDaily*CH,amt>0?3:0);
+          const x=i*(BW+BG),y=CH-bH;
+          const dn=parseInt(date.slice(-2));
+          const isTod=todayRef.getFullYear()===ledYr&&todayRef.getMonth()+1===ledMo&&todayRef.getDate()===dn;
+          return `<rect x="${x}" y="${y.toFixed(1)}" width="${BW}" height="${Math.max(bH,0.5).toFixed(1)}" rx="2" fill="${isTod?'#00BFA6':'#17324D'}" opacity="${amt>0?'0.75':'0.12'}"/>`;
+        }).join('')+
+        dailyArr.map(([date],i)=>{
+          const d=parseInt(date.slice(-2));
+          if(d!==1&&d%5!==0) return '';
+          return `<text x="${(i*(BW+BG)+BW/2).toFixed(1)}" y="${CH+13}" text-anchor="middle" font-size="8" fill="rgba(23,50,77,.4)">${d}</text>`;
+        }).join('');
+
+      const tabAnalysis=totalAll===0
         ?`<div class="empty-state card" style="margin-top:0;"><h2 class="serif">暂无支出数据</h2><p>记录支出后可在此查看分析。</p></div>`
-        :`<div>
-          <div class="dual-legend">
-            <span><span class="dual-legend-dot" style="background:var(--teal);"></span>我 (${myTotal.toFixed(1)})</span>
-            <span><span class="dual-legend-dot" style="background:#9B59B6;"></span>${esc(partnerName)} (${pTotal.toFixed(1)})</span>
+        :`<div class="analysis-page">
+          <div class="analysis-hero">
+            <div class="analysis-hero-label">本月总花销</div>
+            <div class="analysis-hero-total">${totalAll.toFixed(0)}<span class="analysis-hero-currency">HKD</span></div>
+            <div class="analysis-hero-metrics">
+              <div class="analysis-metric"><span class="am-val">${dayCount}</span><span class="am-label">天有记录</span></div>
+              <div class="analysis-metric-divider"></div>
+              <div class="analysis-metric"><span class="am-val">${avgPerDay.toFixed(0)}</span><span class="am-label">日均花销</span></div>
+              <div class="analysis-metric-divider"></div>
+              <div class="analysis-metric"><span class="am-val">${expenseEntries.length}</span><span class="am-label">笔支出</span></div>
+            </div>
           </div>
-          <div class="collab-stats-row">
-            <div class="collab-stat"><div class="cs-label">我的支出</div><div class="cs-amount">${myTotal.toFixed(1)} HKD</div></div>
-            <div class="collab-stat"><div class="cs-label">${esc(partnerName)}的支出</div><div class="cs-amount">${pTotal.toFixed(1)} HKD</div></div>
+          <div class="analysis-card">
+            <div class="analysis-card-title">👥 花销归属</div>
+            <div class="split-row">
+              <span class="split-name">我</span>
+              <div class="split-bar-track">
+                <div class="split-bar-fill" style="flex:${Math.max(myTotal,0.001)};background:var(--teal);border-radius:${pTotal>0?'999px 0 0 999px':'999px'};"></div>
+                ${pTotal>0?`<div class="split-bar-fill" style="flex:${pTotal};background:#9B59B6;border-radius:0 999px 999px 0;"></div>`:''}
+              </div>
+              <span class="split-name">${esc(partnerName)}</span>
+            </div>
+            <div class="split-labels">
+              <span style="color:var(--teal);">${myTotal.toFixed(0)} HKD · ${totalAll>0?((myTotal/totalAll)*100).toFixed(0):0}%</span>
+              <span style="color:#9B59B6;">${pTotal.toFixed(0)} HKD · ${totalAll>0?((pTotal/totalAll)*100).toFixed(0):0}%</span>
+            </div>
           </div>
-          <section class="card" style="padding:16px 20px;">
-            <h3 style="margin:0 0 14px;font-size:14px;">${icon("bar-chart-2","icon-sm")} 分类对比</h3>
-            ${allCats.sort((a,b)=>((myCats[b]||0)+(pCats[b]||0))-((myCats[a]||0)+(pCats[a]||0))).map(cat=>{
-              const catMeta=PERSONAL_LEDGER_CATEGORIES.find(c=>c.id===cat)||{emoji:"📝"};
-              const me=myCats[cat]||0;const p=pCats[cat]||0;const tot=me+p;
-              const meW=totalAll?Math.round(me/totalAll*100):0;const pW=totalAll?Math.round(p/totalAll*100):0;
-              return `<div class="dual-bar-row">
-                <div class="dual-bar-cat-row">
-                  <span class="dual-bar-cat">${catMeta.emoji} ${esc(cat)}</span>
-                  <span class="dual-bar-amounts">${me.toFixed(1)} / ${p.toFixed(1)}</span>
-                </div>
-                <div class="dual-bar-track">
-                  <div class="dual-bar-me" style="width:${meW}%;"></div>
-                  <div class="dual-bar-partner" style="width:${pW}%;"></div>
-                </div>
-              </div>`;
-            }).join("")}
-          </section>
+          <div class="analysis-card">
+            <div class="analysis-card-title">🍩 分类占比</div>
+            <div class="donut-section">
+              <div class="donut-chart-wrap">
+                <svg width="136" height="136" viewBox="0 0 136 136">
+                  ${donutCircles}
+                  <text x="${CX}" y="${CY-4}" text-anchor="middle" font-size="12" font-weight="800" fill="#17324D">${totalAll.toFixed(0)}</text>
+                  <text x="${CX}" y="${CY+12}" text-anchor="middle" font-size="9" fill="rgba(23,50,77,.5)">HKD</text>
+                </svg>
+              </div>
+              <div class="donut-legend">
+                ${sortedCats.slice(0,6).map((cat,i)=>{
+                  const val=(myCats[cat]||0)+(pCats[cat]||0);
+                  const pct=totalAll>0?((val/totalAll)*100).toFixed(0):0;
+                  const catMeta=PERSONAL_LEDGER_CATEGORIES.find(c=>c.id===cat)||{emoji:'📝'};
+                  return `<div class="donut-legend-row"><span class="donut-legend-dot" style="background:${CAT_COLORS[i%CAT_COLORS.length]};"></span><span class="donut-legend-cat">${catMeta.emoji} ${esc(cat)}</span><span class="donut-legend-pct">${pct}%</span></div>`;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-card-title">📊 每日花销（${month.slice(5,7)}月）</div>
+            <div class="daily-chart-wrap">
+              <svg width="${svgChartW}" height="${CH+16}" viewBox="0 0 ${svgChartW} ${CH+16}">${barsSVG}</svg>
+            </div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-card-title">📋 分类排行</div>
+            ${sortedCats.map((cat,i)=>{
+              const val=(myCats[cat]||0)+(pCats[cat]||0);
+              const pct=totalAll>0?((val/totalAll)*100):0;
+              const catMeta=PERSONAL_LEDGER_CATEGORIES.find(c=>c.id===cat)||{emoji:'📝'};
+              const meAmt=myCats[cat]||0,pAmt=pCats[cat]||0;
+              return `<div class="cat-rank-row"><div class="cat-rank-top"><span class="cat-rank-name">${catMeta.emoji} ${esc(cat)}</span><span class="cat-rank-amt">${val.toFixed(0)} HKD</span></div><div class="cat-rank-bar-track"><div class="cat-rank-bar-fill" style="width:${pct.toFixed(1)}%;background:${CAT_COLORS[i%CAT_COLORS.length]};"></div></div><div class="cat-rank-sub">我 ${meAmt.toFixed(0)} · ${esc(partnerName)} ${pAmt.toFixed(0)} · 占比 ${pct.toFixed(0)}%</div></div>`;
+            }).join('')}
+          </div>
+          ${biggest?`<div class="analysis-card">
+            <div class="analysis-card-title">💸 最大单笔</div>
+            <div class="top-expense-row">
+              <div class="top-expense-emoji">${(PERSONAL_LEDGER_CATEGORIES.find(c=>c.id===biggest.category)||{emoji:'📝'}).emoji}</div>
+              <div class="top-expense-body"><div class="top-expense-note">${esc(biggest.note||biggest.category)}</div><div class="top-expense-cat">${esc(biggest.category)} · ${biggest.date}</div></div>
+              <div class="top-expense-amt">${biggest.amount.toFixed(0)}<small> ${esc(biggest.currency)}</small></div>
+            </div>
+          </div>`:''}
         </div>`;
 
       return `<div class="ledger-page-header">
@@ -7498,7 +7628,7 @@
         <button class="btn btn-primary" onclick="openAddPersonalEntryModal('expense')">${icon("plus","icon-sm")} 记一笔</button>
       </div>
       <div class="ledger-month-tabs">${allMonths.slice(0,6).map(m=>`<button class="chip ${m===month?"active":""}" onclick="setState({personalLedgerMonth:'${m}'})">${m}</button>`).join("")}</div>
-      ${spendCard}
+      ${tab==="detail"?spendCard:""}
       <div class="ledger-tabs">
         <button class="ledger-tab-btn ${tab==="detail"?"active":""}" onclick="setState({personalLedgerTab:'detail'})">明细</button>
         <button class="ledger-tab-btn ${tab==="analysis"?"active":""}" onclick="setState({personalLedgerTab:'analysis'})">分析</button>
@@ -7989,7 +8119,7 @@
       tripMembers = [];
       unsubscribeTripStateRealtime();
       unsubscribeExpensesRealtime();
-      setState({ ...basePatch, currentView: "no-trips", selectedTrip: null, selectedCity: null, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null });
+      setState({ ...basePatch, currentView: "personal-ledger", selectedTrip: null, selectedCity: null, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null });
       return userTrips;
     }
 
@@ -9347,14 +9477,14 @@
       return `
         <main class="auth-page">
           <div class="auth-wrap">
-            <section class="auth-intro" aria-label="旅行手帐">
+            <section class="auth-intro" aria-label="热爱生活7885">
               <div>
                 <div class="auth-brand">
                   <div class="auth-brand-main">
                     <div class="auth-brand-mark" aria-hidden="true">${brandMark(28)}</div>
-                    <h1 class="auth-title serif">旅行手帐</h1>
+                    <h1 class="auth-title serif">热爱生活7885</h1>
                   </div>
-                  <p class="auth-copy">把期待、决定和回忆，收进同一趟旅程。</p>
+                  <p class="auth-copy">记录生活，记录爱。</p>
                 </div>
               </div>
               <div class="auth-trip-board" role="img" aria-label="旅行照片轮播">
@@ -9367,9 +9497,9 @@
                 <div class="auth-trip-caption">
                   <div>
                     <div class="trip-label">下一站</div>
-                    <h2 class="serif">你的行程、账本和照片，都在一个地方。</h2>
+                    <h2 class="serif">你们的账本、行程和照片，都在这里。</h2>
                   </div>
-                  <p>从想去的地方开始，把每天的安排、花过的钱和舍不得删的照片慢慢收好。</p>
+                  <p>记下每一笔花销、每一张照片、每一天的安排。两个人的生活，都好好留着。</p>
                 </div>
               </div>
               <div class="auth-feature-strip" aria-label="旅行功能">
@@ -11448,7 +11578,7 @@
     function renderNotesTab(day) {
       const note = appState.dayNotes[day.id] || "";
       return `
-        <div class="panel-head"><div><h2>当日备注</h2><p class="rail-muted">像旅行手帐一样写下当天想法，自动保存到本机。</p></div></div>
+        <div class="panel-head"><div><h2>当日备注</h2><p class="rail-muted">像日记一样写下当天的想法，自动保存到本机。</p></div></div>
         ${canEditTrip()
           ? `<textarea class="note-paper" placeholder="写下今天的备注、灵感、临时调整..." oninput="saveDayNote('${day.id}', this.value)">${esc(note)}</textarea>`
           : `<div class="note-paper readonly-value">${esc(note || "还没有备注。")}</div><div class="readonly-note">viewer 只读：不能编辑当天备注。</div>`}
@@ -13064,7 +13194,7 @@
       }
       const userTrips = await loadUserTrips();
       setState({
-        currentView: userTrips.length ? "trip-list" : "no-trips",
+        currentView: userTrips.length ? "trip-list" : "personal-ledger",
         userTrips,
         selectedTrip: null,
         selectedCity: null,

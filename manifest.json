@@ -1,7 +1,7 @@
 {
-  "name": "旅行手帐",
-  "short_name": "旅行手帐",
-  "description": "把行程、账本、照片和同行计划收在一个旅行空间。",
+  "name": "热爱生活7885",
+  "short_name": "热爱生活",
+  "description": "记录生活、旅行和爱——账本、行程、照片，都在这里。",
   "start_url": "/taiwan-trip-2026/",
   "scope": "/taiwan-trip-2026/",
   "display": "standalone",
