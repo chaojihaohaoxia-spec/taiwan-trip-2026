@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>台湾旅行 2026 · 路线手帐</title>
-  <meta name="description" content="高雄、墾丁、台北 9 天 8 夜的台湾旅行路线、地图与每日行程手帐。" />
+  <title>旅行手帐 · 旅行规划与记账 App</title>
+  <meta name="description" content="把行程、账本、照片和同行计划收在一个可以共同编辑的旅行空间。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%2212%22%20y1%3D%228%22%20x2%3D%2254%22%20y2%3D%2258%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%3Cstop%20stop-color%3D%22%231CA7EC%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2300BFA6%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2218%22%20fill%3D%22url(%23g)%22%2F%3E%3Cpath%20d%3D%22M16%2020h24M27%2020v27M41%2020v27M52%2020v27M41%2033h11%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%225.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M18%2048c8%205%2022%205%2032-2%22%20fill%3D%22none%22%20stroke%3D%22%23FFD166%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2246%22%20r%3D%223.5%22%20fill%3D%22%23FFD166%22%2F%3E%3C%2Fsvg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=Noto+Sans+SC:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;600;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -96,83 +97,273 @@
       box-shadow: 0 10px 24px rgba(16,34,53,.16);
     }
     .auth-page {
-      min-height: 100vh;
+      min-height: 100dvh;
       display: grid;
-      place-items: start center;
-      padding: clamp(28px, 7vw, 72px) 18px;
-      background: linear-gradient(135deg, #FFF8EA 0%, #f0e8d8 100%);
-    }
-    .auth-wrap {
-      width: min(470px, 100%);
-      display: grid;
-      gap: 18px;
-    }
-    .auth-intro,
-    .auth-card {
-      padding: clamp(22px, 5vw, 34px);
-    }
-    .auth-intro {
-      padding-bottom: 4px;
-      text-align: center;
-    }
-    .auth-brand {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      place-items: center;
+      padding: clamp(18px, 4vw, 48px);
+      background:
+        linear-gradient(90deg, rgba(16,34,53,.045) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(16,34,53,.045) 1px, transparent 1px),
+        linear-gradient(145deg, #fffdf6 0%, #f6ecdd 44%, #e8f7f2 100%);
+      background-size: 34px 34px, 34px 34px, auto;
       color: var(--ink);
     }
+    .auth-wrap {
+      width: min(1080px, 100%);
+      min-height: min(760px, calc(100dvh - 48px));
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 460px);
+      gap: clamp(18px, 4vw, 42px);
+      align-items: stretch;
+    }
+    .auth-intro {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto minmax(280px, 1fr) auto;
+      gap: 18px;
+      min-height: 100%;
+    }
+    .auth-brand {
+      display: grid;
+      gap: 8px;
+      color: var(--ink);
+    }
+    .auth-brand-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
     .auth-brand-mark {
-      width: 44px;
-      height: 44px;
-      border-radius: 16px;
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
       display: grid;
       place-items: center;
       color: #fff;
       background: linear-gradient(135deg, var(--ocean), var(--teal));
-      box-shadow: 0 14px 28px rgba(28,167,236,.22);
+      box-shadow: 0 16px 32px rgba(28,167,236,.22);
+      flex: 0 0 auto;
+    }
+    .auth-brand-mark .th-logo {
+      width: 34px;
+      height: 34px;
+      display: block;
     }
     .auth-title {
       margin: 0;
-      font-size: clamp(32px, 9vw, 46px);
-      line-height: 1;
+      font-size: clamp(34px, 6vw, 62px);
+      line-height: .98;
+      color: var(--ink);
     }
     .auth-copy {
+      color: rgba(16,34,53,.64);
+      line-height: 1.7;
+      margin: 0;
+      font-size: clamp(15px, 1.6vw, 18px);
+      max-width: 520px;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .auth-trip-board {
+      position: relative;
+      min-height: 420px;
+      border-radius: 32px;
+      overflow: hidden;
+      border: 1px solid rgba(16,34,53,.12);
+      background: #17324d;
+      box-shadow: 0 28px 70px rgba(16,34,53,.18);
+      isolation: isolate;
+    }
+    .auth-trip-board::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(16,34,53,.02), rgba(16,34,53,.48));
+      z-index: -2;
+    }
+    .auth-photo-carousel {
+      position: absolute;
+      inset: 0;
+      z-index: -3;
+      background: #17324d;
+    }
+    .auth-photo-slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.04);
+      animation: authPhotoFade 28s infinite;
+      will-change: opacity, transform;
+    }
+    .auth-photo-slide:nth-child(1) { opacity: 1; animation-delay: 0s; }
+    .auth-photo-slide:nth-child(2) { animation-delay: 7s; }
+    .auth-photo-slide:nth-child(3) { animation-delay: 14s; }
+    .auth-photo-slide:nth-child(4) { animation-delay: 21s; }
+    @keyframes authPhotoFade {
+      0%, 21% { opacity: 1; transform: scale(1); }
+      26%, 95% { opacity: 0; transform: scale(1.06); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .auth-trip-board::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 54%;
+      background: linear-gradient(180deg, transparent, rgba(8,26,43,.82));
+      z-index: -1;
+    }
+    .auth-trip-caption {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 18px;
+      padding: clamp(22px, 4vw, 34px);
+      color: #fffdf6;
+    }
+    .auth-trip-caption .trip-label {
+      color: rgba(255,253,246,.72);
+    }
+    .auth-trip-caption h2 {
+      margin: 8px 0 0;
+      font-size: clamp(34px, 6vw, 70px);
+      line-height: .96;
+      letter-spacing: 0;
+      max-width: 640px;
+    }
+    .auth-trip-caption p {
+      max-width: 520px;
+      margin: 0;
+      color: rgba(255,253,246,.78);
+      line-height: 1.7;
+      font-weight: 750;
+    }
+    .auth-feature-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .auth-feature-card {
+      min-height: 74px;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,253,246,.9);
+      border: 1px solid rgba(16,34,53,.08);
+      box-shadow: 0 12px 28px rgba(16,34,53,.08);
+    }
+    .auth-feature-card span {
+      display: block;
       color: var(--muted);
-      line-height: 1.65;
-      margin: 12px auto 0;
-      font-size: 15px;
-      max-width: 340px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+    .auth-feature-card strong {
+      display: block;
+      margin-top: 7px;
+      color: var(--ink);
+      font-size: 18px;
+      letter-spacing: 0;
     }
     .auth-card {
-      border-radius: 30px;
+      align-self: center;
+      border-radius: 28px;
+      padding: clamp(22px, 3vw, 34px);
+      background: rgba(255,253,246,.94);
+      border: 1px solid rgba(16,34,53,.1);
+      box-shadow: 0 24px 62px rgba(16,34,53,.16);
+    }
+    .auth-card-head {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .auth-card .trip-label {
+      color: var(--ocean);
+      font-size: 11px;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      font-weight: 950;
+    }
+    .auth-card h2.serif {
+      margin: 0;
+      color: var(--ink);
+      font-size: clamp(30px, 5vw, 44px);
+      line-height: 1.05;
+    }
+    .auth-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-weight: 700;
     }
     .auth-tabs {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 6px;
-      padding: 6px;
-      border-radius: 999px;
+      padding: 5px;
+      border-radius: 18px;
       background: rgba(16,34,53,.06);
-      margin: 20px 0 18px;
+      margin: 0 0 20px;
     }
     .auth-tab {
       min-height: 44px;
       border: 0;
-      border-radius: 999px;
+      border-radius: 14px;
       background: transparent;
       color: var(--muted);
       cursor: pointer;
-      font-weight: 900;
+      font-weight: 950;
+      letter-spacing: 0;
     }
     .auth-tab.active {
-      background: var(--paper);
+      background: #fff;
       color: var(--ink);
-      box-shadow: 0 8px 18px rgba(16,34,53,.08);
+      box-shadow: 0 10px 24px rgba(16,34,53,.1);
     }
     .auth-form {
       display: grid;
       gap: 14px;
+    }
+    .auth-card .field {
+      margin-top: 0;
+      gap: 8px;
+    }
+    .auth-card .field label {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 950;
+    }
+    .auth-card .field input {
+      min-height: 52px;
+      border-radius: 18px;
+      border: 1px solid rgba(16,34,53,.13);
+      background: #fff;
+      color: var(--ink);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+      font-size: 16px;
+      font-weight: 760;
+    }
+    .auth-card .field input::placeholder {
+      color: rgba(16,34,53,.36);
+    }
+    .auth-card .field input:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 4px rgba(0,191,166,.14);
+    }
+    .auth-card .btn-primary {
+      min-height: 52px;
+      border: 0;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--ink), #1b5d73 52%, var(--teal));
+      color: #fffdf6;
+      box-shadow: 0 16px 30px rgba(16,34,53,.18);
+    }
+    .auth-card .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 36px rgba(16,34,53,.22);
     }
     .auth-text-btn {
       min-height: 44px;
@@ -180,7 +371,7 @@
       background: transparent;
       color: var(--ocean);
       cursor: pointer;
-      font-weight: 900;
+      font-weight: 950;
       justify-self: center;
       padding: 4px 10px;
     }
@@ -188,6 +379,19 @@
       color: var(--muted);
       cursor: not-allowed;
       opacity: .62;
+    }
+    .auth-mini-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(255,209,102,.22);
+      color: rgba(16,34,53,.72);
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1.45;
     }
     .otp-panel {
       display: grid;
@@ -252,155 +456,6 @@
       color: var(--muted);
       font-size: 12px;
       line-height: 1.6;
-    }
-
-    /* Visual upgrade: immersive auth entry */
-    .auth-page {
-      min-height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #0a1628 0%, #102236 40%, #0d3d4a 70%, #00bfa6 100%);
-      position: relative;
-      overflow: hidden;
-      padding: 24px 16px;
-    }
-    .auth-page::before {
-      content: "";
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,191,166,.18) 0%, transparent 70%);
-      top: -100px;
-      right: -100px;
-      animation: floatOrb 8s ease-in-out infinite alternate;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .auth-page::after {
-      content: "";
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(28,167,236,.15) 0%, transparent 70%);
-      bottom: -80px;
-      left: -80px;
-      animation: floatOrb 10s ease-in-out infinite alternate-reverse;
-      pointer-events: none;
-      z-index: 0;
-    }
-    @keyframes floatOrb {
-      from { transform: translate(0,0) scale(1); }
-      to { transform: translate(30px, 20px) scale(1.1); }
-    }
-    .auth-intro {
-      text-align: center;
-      margin-bottom: 32px;
-      padding: 0;
-    }
-    .auth-brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-    .auth-brand-mark {
-      width: 52px;
-      height: 52px;
-      background: linear-gradient(135deg, #00bfa6, #1ca7ec);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 32px rgba(0,191,166,.4);
-      color: #fff;
-    }
-    .auth-brand-mark .icon-sm {
-      width: 28px;
-      height: 28px;
-      color: #fff;
-    }
-    .auth-title {
-      font-size: clamp(28px, 6vw, 36px);
-      color: #fff;
-      margin: 0;
-    }
-    .auth-copy {
-      color: rgba(255,255,255,.6);
-      font-size: 14px;
-      margin: 0;
-      letter-spacing: .04em;
-    }
-    .auth-wrap {
-      width: min(420px, 100%);
-      z-index: 1;
-      animation: authCardIn .5s cubic-bezier(.34,1.56,.64,1) both;
-    }
-    @keyframes authCardIn {
-      from { opacity: 0; transform: translateY(40px) scale(.95); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .auth-card {
-      background: rgba(255,255,255,.06) !important;
-      backdrop-filter: blur(40px) !important;
-      border: 1px solid rgba(255,255,255,.12) !important;
-      border-radius: 28px !important;
-      padding: 32px 28px !important;
-      box-shadow: 0 32px 80px rgba(0,0,0,.4) !important;
-    }
-    .auth-card .trip-label {
-      color: rgba(255,255,255,.45);
-      font-size: 11px;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-    }
-    .auth-card h2 { color: #fff; }
-    .auth-card label { color: rgba(255,255,255,.7) !important; }
-    .auth-card input {
-      background: rgba(255,255,255,.08) !important;
-      border: 1px solid rgba(255,255,255,.15) !important;
-      color: #fff !important;
-      border-radius: 14px !important;
-    }
-    .auth-card input::placeholder { color: rgba(255,255,255,.3); }
-    .auth-card input:focus {
-      border-color: #00bfa6;
-      box-shadow: 0 0 0 3px rgba(0,191,166,.2);
-    }
-    .auth-tabs {
-      background: rgba(255,255,255,.08);
-      border-radius: 14px;
-    }
-    .auth-tab { color: rgba(255,255,255,.5); }
-    .auth-tab.active {
-      background: rgba(255,255,255,.15);
-      color: #fff;
-    }
-    .auth-text-btn { color: rgba(255,255,255,.5); }
-    .auth-alert.error {
-      background: rgba(239,68,68,.15);
-      border-color: rgba(239,68,68,.3);
-      color: #fca5a5;
-    }
-    .auth-alert.success {
-      background: rgba(0,191,166,.15);
-      border-color: rgba(0,191,166,.3);
-      color: #5eead4;
-    }
-    .auth-deco-text {
-      position: absolute;
-      bottom: 28px;
-      right: 28px;
-      color: rgba(255,255,255,.12);
-      font-size: 96px;
-      font-family: serif;
-      line-height: 1;
-      pointer-events: none;
-      user-select: none;
-      z-index: 0;
     }
 
     @keyframes pageIn {
@@ -509,9 +564,276 @@
       background: rgba(23,50,77,.08);
       color: var(--muted);
     }
+    .trip-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      padding: 20px;
+    }
+    .trip-card {
+      border: 0;
+      border-radius: 22px;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,.1);
+      transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s ease;
+      background: white;
+      text-align: left;
+      color: inherit;
+    }
+    .trip-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 14px 40px rgba(0,0,0,.16);
+    }
+    .trip-card:active {
+      transform: translateY(-2px) scale(.98);
+    }
+    .trip-card-cover {
+      height: 130px;
+      background: linear-gradient(135deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 50%, #000030));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .trip-card-emoji {
+      font-size: 54px;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,.2));
+    }
+    .trip-card-body {
+      display: block;
+      padding: 16px;
+    }
+    .trip-card-body .role-pill {
+      width: fit-content;
+      color: #1a2332;
+      font-size: 11px;
+      font-weight: 850;
+    }
+    .trip-card-title {
+      margin: 0 0 4px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a2332;
+    }
+    .trip-card-dates {
+      margin: 0 0 6px;
+      font-size: 12px;
+      color: #888;
+    }
+    .trip-card-desc {
+      margin: 0 0 10px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
     .trip-arrow {
       color: var(--muted);
     }
+    .dynamic-trip-page {
+      padding: 24px clamp(16px, 4vw, 38px) 92px;
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+    .dynamic-trip-hero {
+      padding: clamp(22px, 4vw, 34px);
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+    }
+    .dynamic-trip-hero h1 {
+      margin: 10px 0 8px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1;
+    }
+    .dynamic-trip-hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .dynamic-trip-cover {
+      width: 72px;
+      height: 72px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--teal), var(--ocean));
+      box-shadow: 0 18px 42px rgba(28,167,236,.2);
+      font-size: 42px;
+      flex: 0 0 auto;
+    }
+    .day-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.08);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .day-card-header {
+      padding: 14px 16px;
+      background: linear-gradient(135deg, var(--teal), var(--ocean));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .day-card-header h3 { margin: 0; font-size: 15px; font-weight: 700; }
+    .day-card-header p { margin: 2px 0 0; font-size: 12px; opacity: .75; }
+    .day-card-actions {
+      display: flex;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+    .day-card-actions .btn {
+      min-height: 32px;
+      padding: 0 10px;
+      background: rgba(255,255,255,.16);
+      color: white;
+      border-color: rgba(255,255,255,.22);
+      box-shadow: none;
+    }
+    .day-card-body { padding: 8px 0; }
+    .dynamic-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #f5f5f5;
+      position: relative;
+    }
+    .dynamic-item-time { font-size: 12px; color: var(--muted); min-width: 36px; padding-top: 2px; }
+    .dynamic-item-icon { font-size: 16px; min-width: 20px; }
+    .dynamic-item-body { flex: 1; min-width: 0; }
+    .dynamic-item-title { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+    .dynamic-item-location { font-size: 12px; color: var(--muted); margin: 0; }
+    .dynamic-item-notes { font-size: 12px; color: var(--muted); margin: 5px 0 0; line-height: 1.45; }
+    .dynamic-item-actions { display: flex; gap: 4px; opacity: 0; transition: opacity .15s; }
+    .dynamic-item-actions.has-map { opacity: 1; }
+    .dynamic-item:hover .dynamic-item-actions { opacity: 1; }
+    .dynamic-item .btn-icon {
+      width: 36px;
+      min-height: 36px;
+      border-radius: 12px;
+    }
+    .dynamic-item.status-done { border-left: 3px solid #10b981; }
+    .dynamic-item.status-skipped { opacity: .45; }
+    .dynamic-item.status-skipped .dynamic-item-title { text-decoration: line-through; }
+    .dynamic-trip-tabs {
+      margin: 0;
+    }
+    .dynamic-trip-map-card {
+      min-height: 540px;
+    }
+    .dynamic-trip-map-card .map-card-head {
+      align-items: center;
+    }
+    #dynamic-trip-map {
+      height: min(70vh, 720px);
+      min-height: 460px;
+      width: 100%;
+      border-radius: 26px;
+      overflow: hidden;
+      background: #E8FAFF;
+      border: 1px solid rgba(23,50,77,.1);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.38), 0 20px 44px rgba(23,50,77,.1);
+      z-index: 1;
+    }
+    .dynamic-map-empty {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      margin: 0;
+    }
+    .add-day-btn {
+      width: 100%;
+      padding: 16px;
+      border: 2px dashed rgba(0,191,166,.3);
+      border-radius: 20px;
+      background: rgba(0,191,166,.04);
+      color: var(--teal);
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 8px;
+    }
+    .add-day-btn:hover { border-color: var(--teal); background: rgba(0,191,166,.08); }
+    .dynamic-day-empty {
+      padding: 18px 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .dynamic-card-footer {
+      padding: 12px 16px 16px;
+      background: #fff;
+    }
+    .emoji-picker,
+    .dynamic-category-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .emoji-option,
+    .dynamic-category-option {
+      border: 1px solid rgba(23,50,77,.1);
+      background: rgba(255,255,255,.76);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 850;
+    }
+    .emoji-option {
+      width: 44px;
+      min-height: 44px;
+      border-radius: 16px;
+      font-size: 22px;
+    }
+    .dynamic-category-option {
+      min-height: 42px;
+      border-radius: 999px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .emoji-option.active,
+    .dynamic-category-option.active {
+      background: linear-gradient(135deg, var(--teal), var(--ocean));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 10px 22px rgba(28,167,236,.18);
+    }
+    .place-search-wrap { position: relative; }
+    .place-results {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 200;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.15);
+      overflow: hidden;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid rgba(0,0,0,.08);
+    }
+    .place-result-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #f5f5f5;
+      transition: background .15s;
+    }
+    .place-result-item:hover { background: #f8fbff; }
+    .place-result-name { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+    .place-result-full { font-size: 11px; color: #888; margin-top: 2px; }
+    #place-map-preview { margin-top: 8px; }
     .platform-empty {
       min-height: min(620px, calc(100vh - 80px));
       display: grid;
@@ -1908,6 +2230,9 @@
         height: 18px;
       }
       .app-shell { grid-template-columns: 1fr; padding: 16px 14px 96px; }
+      .dynamic-trip-page { padding: 16px 14px 96px; }
+      .dynamic-trip-hero { display: grid; }
+      .dynamic-item-actions { opacity: 0.6; }
       .main-stage,
       .timeline-wrap {
         padding-bottom: 100px;
@@ -4773,10 +5098,74 @@
       }
     }
     @media (max-width: 820px) {
-      .auth-page { padding: 18px 14px; place-items: start center; }
-      .auth-wrap { gap: 14px; }
-      .auth-intro { padding-top: 10px; }
-      .auth-card { border-radius: 26px; padding-inline: clamp(14px, 4vw, 34px); }
+      .auth-page { padding: 16px 14px 22px; place-items: start center; }
+      .auth-wrap {
+        min-height: auto;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .auth-intro {
+        grid-template-rows: auto auto auto;
+        gap: 12px;
+      }
+      .auth-brand-mark {
+        width: 46px;
+        height: 46px;
+        border-radius: 16px;
+      }
+      .auth-brand-mark .th-logo {
+        width: 30px;
+        height: 30px;
+      }
+      .auth-copy {
+        font-size: 14px;
+      }
+      .auth-trip-board {
+        min-height: 206px;
+        border-radius: 24px;
+      }
+      .auth-trip-caption {
+        gap: 8px;
+        padding: 18px;
+      }
+      .auth-trip-caption h2 {
+        font-size: clamp(26px, 8vw, 36px);
+        max-width: 320px;
+      }
+      .auth-trip-caption p {
+        display: none;
+      }
+      .auth-feature-strip {
+        gap: 8px;
+      }
+      .auth-feature-card {
+        min-height: 56px;
+        padding: 10px;
+        border-radius: 15px;
+      }
+      .auth-feature-card span {
+        font-size: 10px;
+      }
+      .auth-feature-card strong {
+        font-size: 15px;
+        margin-top: 3px;
+        line-height: 1.24;
+        white-space: nowrap;
+      }
+      .auth-card {
+        align-self: stretch;
+        border-radius: 24px;
+        padding: 20px 18px;
+      }
+      .auth-card-head {
+        margin-bottom: 16px;
+      }
+      .auth-card h2.serif {
+        font-size: 30px;
+      }
+      .auth-card p {
+        font-size: 14px;
+      }
       .journey-auth-bar { top: 12px; right: 12px; left: 12px; display: flex; justify-content: flex-end; }
       .journey-auth-bar .user-email-chip { max-width: 118px; }
       .journey-page { place-items: start center; padding-top: 42px; }
@@ -5333,6 +5722,14 @@
     const appConfig = {
       anthropicApiKey: localStorage.getItem(ANTHROPIC_KEY_STORAGE_KEY) || ""
     };
+
+    /*
+      Supabase SQL for real place search on dynamic trip_items:
+
+      ALTER TABLE trip_items
+        ADD COLUMN IF NOT EXISTS location_lat double precision,
+        ADD COLUMN IF NOT EXISTS location_lng double precision;
+    */
 
     /*
       Supabase SQL for the photo check-in feature:
@@ -6047,6 +6444,8 @@
       authOtpCode: "",
       authOtpExpiresAt: 0,
       userTrips: [],
+      dynamicDays: [],
+      dynamicItems: [],
       selectedTrip: null,
       selectedCity: null,
       selectedDay: null,
@@ -6062,6 +6461,8 @@
       checklistStatus: {},
       confirmStatus: {},
       spotReviews: {},
+      dynamicDays: [],
+      dynamicItems: [],
       itemEdits: {},
       deletedItems: [],
       addedItems: {},
@@ -6078,6 +6479,10 @@
 
     let appState = loadState();
     let activeLeafletMaps = {};
+    let placeSearchDebounceTimer = null;
+    let placeSearchResults = [];
+    let selectedPlaceData = null;
+    let placePreviewMap = null;
 
     function item(id, time, title, type, place, detail, transport) {
       return { id, time, title, type, place, detail, transport };
@@ -6308,6 +6713,8 @@
       state.authOtpCode = state.authOtpCode || "";
       state.authOtpExpiresAt = Number(state.authOtpExpiresAt || 0);
       state.userTrips = Array.isArray(state.userTrips) ? state.userTrips.filter(Boolean) : [];
+      state.dynamicDays = Array.isArray(state.dynamicDays) ? state.dynamicDays.filter(Boolean) : [];
+      state.dynamicItems = Array.isArray(state.dynamicItems) ? state.dynamicItems.filter(Boolean) : [];
       if (!["auth", "journey-select", "trip-list", "no-trips"].includes(state.currentView) && !state.selectedTrip) state.selectedTrip = tripData.id;
       if (state.selectedCity && !tripData.cities[state.selectedCity]) state.selectedCity = null;
       if (state.selectedDay && !tripData.daysById[state.selectedDay]) state.selectedDay = null;
@@ -6323,6 +6730,8 @@
       state.itemNotes = state.itemNotes || {};
       state.confirmStatus = state.confirmStatus || {};
       state.spotReviews = state.spotReviews || {};
+      state.dynamicDays = Array.isArray(state.dynamicDays) ? state.dynamicDays : [];
+      state.dynamicItems = Array.isArray(state.dynamicItems) ? state.dynamicItems : [];
       state.itemEdits = state.itemEdits && typeof state.itemEdits === "object" && !Array.isArray(state.itemEdits) ? state.itemEdits : {};
       state.deletedItems = Array.isArray(state.deletedItems) ? [...new Set(state.deletedItems.map(String))] : [];
       state.addedItems = state.addedItems && typeof state.addedItems === "object" && !Array.isArray(state.addedItems) ? state.addedItems : {};
@@ -6727,6 +7136,23 @@
       return userTrips;
     }
 
+    async function loadDynamicTripData(tripId) {
+      if (!supabaseClient || !tripId || tripId === TRIP_ID) {
+        appState.dynamicDays = [];
+        appState.dynamicItems = [];
+        return;
+      }
+      const [{ data: days, error: daysError }, { data: items, error: itemsError }] = await Promise.all([
+        supabaseClient.from("trip_days").select("*").eq("trip_id", tripId).order("sort_order"),
+        supabaseClient.from("trip_items").select("*").eq("trip_id", tripId).order("sort_order")
+      ]);
+      if (daysError) throw daysError;
+      if (itemsError) throw itemsError;
+      appState.dynamicDays = days || [];
+      appState.dynamicItems = (items || []).map(normalizeDynamicItem);
+      saveState([]);
+    }
+
     async function enterUserTrip(tripId, options = {}) {
       const userTrips = options.userTrips || appState.userTrips || [];
       const selected = userTrips.find(trip => trip.id === tripId) || fallbackTripMeta(tripId);
@@ -6748,7 +7174,14 @@
         tripMembers = [];
         unsubscribeTripStateRealtime();
         unsubscribeExpensesRealtime();
-        setState(basePatch);
+        setState({ ...basePatch, dynamicDays: [], dynamicItems: [] });
+        const dynamicLoads = [
+          loadCurrentMembership(selected.id),
+          loadTripMembers(selected.id),
+          loadDynamicTripData(selected.id)
+        ];
+        await Promise.all(dynamicLoads.map(load => load.catch(error => console.warn("Dynamic trip data load skipped.", error))));
+        render();
         return selected;
       }
 
@@ -7006,6 +7439,9 @@
     }
 
     function setState(patch, shouldRender = true) {
+      if (patch.modal === null && ["add-item", "edit-item", "dynamic-item"].includes(appState.modal?.type)) {
+        resetPlaceSearchState();
+      }
       appState = normalizeState({ ...appState, ...patch });
       saveState(Object.keys(patch));
       if (shouldRender) render();
@@ -7017,6 +7453,118 @@
 
     function icon(name, cls = "icon") {
       return `<i data-lucide="${name}" class="${cls}"></i>`;
+    }
+
+    function cleanupPlacePreviewMap() {
+      if (!placePreviewMap) return;
+      try { placePreviewMap.remove(); } catch {}
+      placePreviewMap = null;
+    }
+
+    function resetPlaceSearchState() {
+      clearTimeout(placeSearchDebounceTimer);
+      placeSearchDebounceTimer = null;
+      placeSearchResults = [];
+      selectedPlaceData = null;
+      cleanupPlacePreviewMap();
+    }
+
+    async function searchPlace(query) {
+      if (!query || query.trim().length < 2) {
+        placeSearchResults = [];
+        renderPlaceSearchResults([]);
+        return;
+      }
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`;
+        const res = await fetch(url, { headers: { "Accept-Language": "zh-CN,zh,en" } });
+        const data = await res.json();
+        placeSearchResults = data.map(r => ({
+          displayName: r.display_name,
+          shortName: r.name || r.display_name.split(",")[0],
+          lat: parseFloat(r.lat),
+          lng: parseFloat(r.lon)
+        })).filter(r => Number.isFinite(r.lat) && Number.isFinite(r.lng));
+        renderPlaceSearchResults(placeSearchResults);
+      } catch {
+        placeSearchResults = [];
+        renderPlaceSearchResults([]);
+      }
+    }
+
+    function onPlaceSearchInput(value) {
+      selectedPlaceData = null;
+      cleanupPlacePreviewMap();
+      clearTimeout(placeSearchDebounceTimer);
+      placeSearchDebounceTimer = setTimeout(() => searchPlace(value), 500);
+    }
+
+    function renderPlaceSearchResults(results) {
+      const el = document.getElementById("place-search-results");
+      if (!el) return;
+      if (!results.length) {
+        el.innerHTML = "";
+        el.style.display = "none";
+        return;
+      }
+      el.style.display = "block";
+      el.innerHTML = results.map((r, i) => `
+        <div class="place-result-item" onclick="selectPlaceResult(${i})">
+          <div class="place-result-name">${esc(r.shortName)}</div>
+          <div class="place-result-full">${esc(r.displayName.slice(0, 60))}${r.displayName.length > 60 ? "…" : ""}</div>
+        </div>
+      `).join("");
+    }
+
+    function selectPlaceResult(index) {
+      const place = placeSearchResults[index];
+      if (!place) return;
+      selectedPlaceData = place;
+      const input = document.getElementById("place-search-input");
+      if (input) input.value = place.shortName;
+      const legacyInput = document.getElementById("dynamic-item-location") || document.getElementById("itinerary-location");
+      if (legacyInput) legacyInput.value = place.shortName;
+      const el = document.getElementById("place-search-results");
+      if (el) {
+        el.innerHTML = "";
+        el.style.display = "none";
+      }
+      showPlaceMapPreview(place.lat, place.lng, place.shortName);
+    }
+
+    function showPlaceMapPreview(lat, lng, name) {
+      const container = document.getElementById("place-map-preview");
+      if (!container) return;
+      cleanupPlacePreviewMap();
+      container.style.display = "block";
+      container.innerHTML = `<div id="place-preview-map" style="height:120px;border-radius:12px;overflow:hidden;"></div>`;
+      requestAnimationFrame(() => {
+        if (!window.L || !document.body.contains(container)) return;
+        placePreviewMap = L.map("place-preview-map", { zoomControl: false, dragging: false, scrollWheelZoom: false });
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(placePreviewMap);
+        L.marker([lat, lng]).addTo(placePreviewMap).bindPopup(name).openPopup();
+        placePreviewMap.setView([lat, lng], 15);
+      });
+    }
+
+    function renderPlaceSearchField(initialValue = "") {
+      return `
+        <div class="field place-search-field">
+          <label>搜索地点（可选）</label>
+          <div class="place-search-wrap">
+            <input
+              id="place-search-input"
+              type="text"
+              value="${esc(initialValue)}"
+              placeholder="搜索地点名称"
+              oninput="onPlaceSearchInput(this.value)"
+              autocomplete="off"
+            />
+            <div id="place-search-results" class="place-results" style="display:none"></div>
+          </div>
+          <div id="place-map-preview"></div>
+        </div>
+      `;
     }
 
     function daysForCity(cityId) {
@@ -7067,7 +7615,38 @@
     }
 
     function itemLocationName(item) {
-      return item?.location || item?.locationName || item?.place || item?.title || "";
+      return item?.location_name || item?.location || item?.locationName || item?.place || item?.title || "";
+    }
+
+    function selectedPlaceFields(place = selectedPlaceData) {
+      if (!place) return {};
+      return {
+        location_name: place.shortName,
+        location_lat: place.lat,
+        location_lng: place.lng,
+        locationName: place.shortName,
+        location: place.shortName,
+        place: place.shortName,
+        lat: place.lat,
+        lng: place.lng,
+        googleMapsQuery: `${place.lat},${place.lng}`,
+        approximate: false
+      };
+    }
+
+    function itemRealCoords(item) {
+      const lat = Number(item?.location_lat ?? item?.locationLat);
+      const lng = Number(item?.location_lng ?? item?.locationLng);
+      if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+      return null;
+    }
+
+    function itemMapCoords(item) {
+      const real = itemRealCoords(item);
+      if (real) return real;
+      const lat = Number(item?.lat);
+      const lng = Number(item?.lng);
+      return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
     }
 
     function normalizeItemStatus(status) {
@@ -7080,13 +7659,18 @@
       const merged = { ...item, ...edits };
       const day = tripData.daysById[merged.dayId] || selectedDay();
       const locationName = itemLocationName(merged);
-      const loc = locationFor(locationName || merged.title, day?.cityId || merged.cityId);
+      const realCoords = itemRealCoords(merged);
+      const loc = realCoords
+        ? { ...realCoords, cityId: merged.cityId || day?.cityId, query: `${realCoords.lat},${realCoords.lng}` }
+        : locationFor(locationName || merged.title, day?.cityId || merged.cityId);
       const detail = merged.detail ?? merged.notes ?? "";
       return {
         ...merged,
         place: locationName,
         location: locationName,
         locationName,
+        location_name: merged.location_name || locationName,
+        ...(realCoords ? { location_lat: realCoords.lat, location_lng: realCoords.lng } : {}),
         detail,
         description: detail,
         notes: merged.notes ?? detail,
@@ -7094,8 +7678,8 @@
         cityId: loc.cityId || day?.cityId || merged.cityId,
         lat: loc.lat,
         lng: loc.lng,
-        googleMapsQuery: loc.query || `${locationName || merged.title} ${day?.cityName || ""}`.trim(),
-        approximate: !!loc.approximate,
+        googleMapsQuery: merged.googleMapsQuery || loc.query || `${locationName || merged.title} ${day?.cityName || ""}`.trim(),
+        approximate: realCoords ? false : !!loc.approximate,
         transportFromPrevious: merged.transportFromPrevious || merged.transport || merged.duration || ""
       };
     }
@@ -7257,7 +7841,10 @@
       const timelineMatch = time ? exactMatch : candidates[0];
       if (timelineMatch) usedIds.add(timelineMatch.id);
       const effectiveLocationName = timelineMatch ? itemLocationName(timelineMatch) : locationName;
-      const loc = locationFor(effectiveLocationName, day.cityId);
+      const timelineCoords = timelineMatch ? itemRealCoords(timelineMatch) : null;
+      const loc = timelineCoords
+        ? { ...timelineCoords, cityId: timelineMatch.cityId || day.cityId, query: `${timelineCoords.lat},${timelineCoords.lng}` }
+        : locationFor(effectiveLocationName, day.cityId);
       return {
         id: timelineMatch?.id || `${day.id}-route-${index}`,
         dayId: day.id,
@@ -7272,7 +7859,7 @@
         transportFromPrevious: transport || timelineMatch?.transport || "步行",
         googleMapsQuery: loc.query || `${effectiveLocationName} ${day.cityName}`,
         notes: timelineMatch?.detail || "",
-        approximate: !!loc.approximate,
+        approximate: timelineCoords ? false : !!loc.approximate,
         routeIndex: index + 1
       };
     }
@@ -7325,7 +7912,58 @@
       };
     }
 
+    function normalizeDynamicItem(item = {}) {
+      const title = item.title || item.name || item.location_name || item.location || "未命名地点";
+      const locationName = item.location_name || item.location || item.place || title;
+      const category = item.category || "attraction";
+      return {
+        ...item,
+        id: String(item.id || `${item.day_id || "dynamic"}-${title}`),
+        title,
+        name: title,
+        dayId: item.day_id || item.dayId || "",
+        day_id: item.day_id || item.dayId || "",
+        locationName,
+        location_name: locationName,
+        location: locationName,
+        category,
+        rating: item.rating || null
+      };
+    }
+
+    function getAllSpots() {
+      return allSpotEntries();
+    }
+
+    function dynamicDayLabel(dayId) {
+      const day = (appState.dynamicDays || []).find(item => item.id === dayId || item.day_id === dayId);
+      return day?.title || day?.label || day?.date || dayId || "未分日期";
+    }
+
+    function getReviewableSpots() {
+      if (isTaiwanTripSelected()) return getAllSpots();
+      const reviewableCategories = new Set(["attraction", "food"]);
+      return (appState.dynamicItems || [])
+        .map(normalizeDynamicItem)
+        .filter(item => reviewableCategories.has(item.category || "attraction"))
+        .map(item => ({
+          id: item.id,
+          name: item.title,
+          location: item.location_name || "",
+          category: item.category || "attraction",
+          dayId: item.day_id || item.dayId || "",
+          cityName: currentTripTitle(),
+          schedule: dynamicDayLabel(item.day_id || item.dayId),
+          dateText: dynamicDayLabel(item.day_id || item.dayId),
+          rating: item.rating || null
+        }));
+    }
+
     function spotReview(spotId) {
+      if (!isTaiwanTripSelected()) {
+        const item = (appState.dynamicItems || []).map(normalizeDynamicItem).find(entry => entry.id === spotId);
+        return { ...emptySpotReview(), rating: item?.rating || null };
+      }
       const saved = appState.spotReviews?.[spotId] || {};
       return {
         ...emptySpotReview(),
@@ -7364,6 +8002,10 @@
     }
 
     function spotLogSectionsForSpot(spot, review = emptySpotReview()) {
+      if (!isTaiwanTripSelected()) {
+        if (spot.category === "food") return [{ logType: "foodLog", iconName: "utensils", title: "吃了什么" }];
+        return [];
+      }
       const matches = timelineMatchesForSpot(spot.cityName, spot.name);
       const types = new Set(matches.map(({ item }) => item.type));
       const context = [
@@ -7451,7 +8093,7 @@
     }
 
     function spotEntryById(spotId) {
-      return allSpotEntries().find(spot => spot.id === spotId) || null;
+      return getReviewableSpots().find(spot => spot.id === spotId) || null;
     }
 
     function spotEntryForTimelineItem(item) {
@@ -7470,8 +8112,7 @@
       setState({ spotReviews }, shouldRender);
     }
 
-    function spotRatingStats() {
-      const spots = allSpotEntries();
+    function spotRatingStats(spots = getReviewableSpots()) {
       const counts = Object.fromEntries(RATING_ORDER.map(rating => [rating, 0]));
       let unrated = 0;
       spots.forEach(spot => {
@@ -7482,8 +8123,8 @@
       return { counts, unrated, total: spots.length };
     }
 
-    function rankedSpotEntries() {
-      return allSpotEntries()
+    function rankedSpotEntries(spots = getReviewableSpots()) {
+      return spots
         .map(spot => ({ ...spot, review: spotReview(spot.id) }))
         .filter(spot => spot.review.rating)
         .sort((a, b) => {
@@ -7520,6 +8161,7 @@
           title: tripData.title,
           description: "高雄·墾丁·台北 9天8夜",
           cover_emoji: "🌴",
+          cover_color: "#00bfa6",
           start_date: "2026-05-11",
           end_date: "2026-05-19",
           owner_id: null,
@@ -7531,6 +8173,7 @@
         title: "未命名行程",
         description: "该行程内容开发中",
         cover_emoji: "✈️",
+        cover_color: "#00bfa6",
         start_date: "",
         end_date: "",
         owner_id: null,
@@ -7555,7 +8198,7 @@
         const { data, error } = await withTimeout(
           supabaseClient
             .from("trip_members")
-            .select("trip_id, role, trips(id, title, description, cover_emoji, start_date, end_date, owner_id)")
+            .select("trip_id, role, trips(id, title, description, cover_emoji, cover_color, start_date, end_date, owner_id)")
             .eq("user_id", currentUser.id)
             .order("joined_at", { ascending: true }),
           "读取行程列表"
@@ -7606,7 +8249,7 @@
       const trip = currentTrip();
       if (trip?.start_date && trip?.end_date) return `${trip.start_date} – ${trip.end_date}`;
       if (trip?.id === TRIP_ID) return `${tripData.days} · ${tripData.month}`;
-      return "内容开发中";
+      return "日期待定";
     }
 
     function isTaiwanTripSelected() {
@@ -7620,13 +8263,82 @@
     }
 
     function formatTripDateRange(trip) {
-      if (trip?.start_date && trip?.end_date) return `${trip.start_date} – ${trip.end_date}`;
-      if (trip?.id === TRIP_ID) return "2026-05-11 – 2026-05-19";
-      return "日期待定";
+      if (!trip?.start_date) return "日期待定";
+      const s = trip.start_date.slice(5).replace("-", "/");
+      const e = trip.end_date ? trip.end_date.slice(5).replace("-", "/") : "?";
+      return `${s} – ${e}`;
     }
 
     function showCreateTripComingSoon() {
-      toast("功能开发中，敬请期待");
+      openCreateTripModal();
+    }
+
+    function openCreateTripModal() {
+      if (!currentUser) {
+        setState({ currentView: "auth", selectedTrip: null });
+        return;
+      }
+      if (!supabaseClient) {
+        toast("请先配置 Supabase 后再创建行程");
+        return;
+      }
+      setState({ modal: { type: "create-trip", coverEmoji: "✈️" }, fabOpen: false });
+    }
+
+    function selectCreateTripEmoji(emoji) {
+      const input = document.getElementById("create-trip-emoji");
+      if (input) input.value = emoji;
+      document.querySelectorAll(".emoji-option").forEach(button => {
+        button.classList.toggle("active", button.dataset.emoji === emoji);
+      });
+    }
+
+    function readCreateTripForm() {
+      return {
+        title: document.getElementById("create-trip-title")?.value.trim() || "",
+        startDate: document.getElementById("create-trip-start")?.value || "",
+        endDate: document.getElementById("create-trip-end")?.value || "",
+        description: document.getElementById("create-trip-description")?.value.trim() || "",
+        coverEmoji: document.getElementById("create-trip-emoji")?.value || "✈️"
+      };
+    }
+
+    async function submitCreateTrip() {
+      const formData = readCreateTripForm();
+      if (!formData.title) {
+        toast("请填写行程名称");
+        return;
+      }
+      try {
+        await createTrip(formData);
+      } catch (error) {
+        console.warn("Create trip failed.", error);
+        toast("创建失败，请检查 Supabase 权限");
+      }
+    }
+
+    async function createTrip(formData) {
+      if (!supabaseClient || !currentUser) throw new Error("请先登录并配置 Supabase");
+      const tripId = "trip-" + Date.now();
+      const { error: tripError } = await supabaseClient.from("trips").insert({
+        id: tripId,
+        title: formData.title,
+        description: formData.description,
+        cover_emoji: formData.coverEmoji || "✈️",
+        start_date: formData.startDate || null,
+        end_date: formData.endDate || null,
+        owner_id: currentUser.id
+      });
+      if (tripError) throw tripError;
+      const { error: memberError } = await supabaseClient.from("trip_members").insert({
+        trip_id: tripId,
+        user_id: currentUser.id,
+        email: currentUser.email,
+        role: "editor"
+      });
+      if (memberError) throw memberError;
+      setState({ modal: null });
+      await goTripList();
     }
 
     function extractInviteCode(value = "") {
@@ -7656,49 +8368,81 @@
       const isOtp = appState.authMode === "otp";
       return `
         <main class="auth-page">
-          <section class="auth-wrap">
-            <header class="auth-intro">
-              <div class="auth-brand">
-                <span class="auth-brand-mark">${icon("map", "icon-sm")}</span>
-                <h1 class="auth-title serif">旅行手帐</h1>
+          <div class="auth-wrap">
+            <section class="auth-intro" aria-label="旅行手帐">
+              <div>
+                <div class="auth-brand">
+                  <div class="auth-brand-main">
+                    <div class="auth-brand-mark" aria-hidden="true">
+                      <svg class="th-logo" viewBox="0 0 64 64" focusable="false">
+                        <path d="M16 20h24M27 20v27M41 20v27M52 20v27M41 33h11" fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M18 48c8 5 22 5 32-2" fill="none" stroke="var(--mango)" stroke-width="4" stroke-linecap="round"></path>
+                        <circle cx="50" cy="46" r="3.5" fill="var(--mango)"></circle>
+                      </svg>
+                    </div>
+                    <h1 class="auth-title serif">旅行手帐</h1>
+                  </div>
+                  <p class="auth-copy">把期待、决定和回忆，收进同一趟旅程。</p>
+                </div>
               </div>
-              <p class="auth-copy">和最重要的人，记录每一段旅程</p>
-            </header>
-            <article class="auth-card card">
+              <div class="auth-trip-board" role="img" aria-label="旅行照片轮播">
+                <div class="auth-photo-carousel" aria-hidden="true">
+                  <div class="auth-photo-slide" style="background-image:url('https://commons.wikimedia.org/wiki/Special:FilePath/Skyscrapers%20and%20urban%20road%20in%20Taipei%20%28Unsplash%29.jpg?width=1600')"></div>
+                  <div class="auth-photo-slide" style="background-image:url('https://commons.wikimedia.org/wiki/Special:FilePath/Kenting%20Hengchun-Township%20Taiwan%20Beach-01.jpg?width=1600')"></div>
+                  <div class="auth-photo-slide" style="background-image:url('https://commons.wikimedia.org/wiki/Special:FilePath/Kaohsiung%20night%20skyline%2020150723.jpg?width=1600')"></div>
+                  <div class="auth-photo-slide" style="background-image:url('https://commons.wikimedia.org/wiki/Special:FilePath/Taipei101Atnight.JPG?width=1600')"></div>
+                </div>
+                <div class="auth-trip-caption">
+                  <div>
+                    <div class="trip-label">下一站</div>
+                    <h2 class="serif">你的行程、账本和照片，都在一个地方。</h2>
+                  </div>
+                  <p>从想去的地方开始，把每天的安排、花过的钱和舍不得删的照片慢慢收好。</p>
+                </div>
+              </div>
+              <div class="auth-feature-strip" aria-label="旅行功能">
+                <div class="auth-feature-card"><span>同行计划</span><strong>把想法放一起</strong></div>
+                <div class="auth-feature-card"><span>花费记录</span><strong>每一笔都清楚</strong></div>
+                <div class="auth-feature-card"><span>旅途照片</span><strong>把回忆收好</strong></div>
+              </div>
+            </section>
+            <article class="auth-card">
               ${isOtp ? renderOtpAuthPanel() : `
-                <div class="trip-label">Taiwan Trip 2026</div>
-                <h2 class="serif" style="margin:10px 0 0;">${isSignup ? "注册账号" : "欢迎回来"}</h2>
+                <div class="auth-card-head">
+                  <div class="trip-label">${isSignup ? "创建账号" : "欢迎回来"}</div>
+                  <h2 class="serif">${isSignup ? "开始新的旅程" : "回到你的旅程"}</h2>
+                  <p>${isSignup ? "创建账号后，就可以保存路线、账本、照片和同行安排。" : "登录后继续管理路线、账本、照片和同行计划。"}</p>
+                </div>
                 <div class="auth-tabs" role="tablist" aria-label="登录方式">
                   <button type="button" class="auth-tab ${!isSignup ? "active" : ""}" onclick="setAuthMode('signin')">登录</button>
                   <button type="button" class="auth-tab ${isSignup ? "active" : ""}" onclick="setAuthMode('signup')">注册</button>
                 </div>
-                <form class="auth-form" onsubmit="handleAuthSubmit(event)">
+                <form class="auth-form" onsubmit="handleAuthSubmit(event)" novalidate>
                   ${isSignup ? `
                     <div class="field">
                       <label for="auth-nickname">昵称</label>
-                      <input id="auth-nickname" name="nickname" type="text" autocomplete="nickname" placeholder="你的名字（如：小明）" maxlength="20" required />
+                      <input id="auth-nickname" name="nickname" type="text" autocomplete="nickname" placeholder="怎么称呼你" maxlength="20" required />
                     </div>
                   ` : ""}
                   <div class="field">
                     <label for="auth-email">邮箱</label>
-                    <input id="auth-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+                    <input id="auth-email" name="email" type="email" autocomplete="email" placeholder="你的邮箱" required />
                   </div>
                   <div class="field">
                     <label for="auth-password">密码</label>
-                    <input id="auth-password" name="password" type="password" autocomplete="${isSignup ? "new-password" : "current-password"}" placeholder="至少 6 位" minlength="6" required />
+                    <input id="auth-password" name="password" type="password" autocomplete="${isSignup ? "new-password" : "current-password"}" placeholder="输入密码" minlength="6" required />
                   </div>
                   ${appState.authError ? `<div class="auth-alert error">${esc(appState.authError)}</div>` : ""}
                   ${appState.authMessage ? `<div class="auth-alert success">${esc(appState.authMessage)}</div>` : ""}
                   <button class="btn btn-primary" type="submit" ${appState.authLoading ? "disabled" : ""}>
                     ${icon(appState.authLoading ? "loader-circle" : isSignup ? "mail-plus" : "log-in", "icon-sm")}
-                    ${appState.authLoading ? "处理中..." : isSignup ? "注册" : "登录"}
+                    ${appState.authLoading ? "正在处理" : isSignup ? "创建旅行空间" : "进入旅行空间"}
                   </button>
                   ${!isSignup ? `<button type="button" class="auth-text-btn" onclick="requestOtpLogin()" ${appState.authLoading ? "disabled" : ""}>用验证码登录</button>` : ""}
                 </form>
               `}
             </article>
-          </section>
-          <div class="auth-deco-text">台</div>
+          </div>
         </main>
       `;
     }
@@ -7709,7 +8453,7 @@
       return `
         <div class="otp-panel">
           <div>
-            <div class="trip-label">${appState.authOtpType === "signup" ? "Signup OTP" : "Login OTP"}</div>
+            <div class="trip-label">${appState.authOtpType === "signup" ? "邮箱验证" : "验证码登录"}</div>
             <h2 class="serif">输入验证码</h2>
             <p class="rail-muted">验证码已发送到 ${esc(email)}，请查收</p>
           </div>
@@ -7768,7 +8512,7 @@
               ${trips.map(trip => renderTripSelectCard(trip)).join("")}
             </div>
             <div class="platform-actions" style="justify-content:flex-start;">
-              <button class="btn btn-primary" onclick="showCreateTripComingSoon()">${icon("plus", "icon-sm")} 创建新行程</button>
+              <button class="btn btn-primary" onclick="openCreateTripModal()">${icon("plus", "icon-sm")} 创建新行程</button>
               <button class="btn btn-ghost" onclick="openInviteCodeModal()">${icon("ticket", "icon-sm")} 输入邀请码</button>
             </div>
           </section>
@@ -7777,17 +8521,18 @@
     }
 
     function renderTripSelectCard(trip) {
-      const role = trip.roleDisplay || trip.role || "editor";
       return `
-        <button class="trip-select-card" onclick="enterUserTrip('${escAttr(trip.id)}')">
-          <span class="trip-cover-emoji" aria-hidden="true">${esc(trip.cover_emoji || "✈️")}</span>
-          <span class="trip-card-body">
-            <strong>${esc(trip.title || "未命名行程")}</strong>
-            <span>${esc(formatTripDateRange(trip))}</span>
-            <span class="trip-role-chip ${escAttr(role)}">${esc(roleCardLabel(role))}</span>
-          </span>
-          <span class="trip-arrow">${icon("arrow-right", "icon-sm")}</span>
-        </button>
+        <div class="trip-card" onclick="enterUserTrip('${escAttr(trip.id)}')" style="--card-accent:${escAttr(trip.cover_color || "#00bfa6")}">
+          <div class="trip-card-cover">
+            <span class="trip-card-emoji">${esc(trip.cover_emoji || "✈️")}</span>
+          </div>
+          <div class="trip-card-body">
+            <h3 class="trip-card-title">${esc(trip.title || "未命名行程")}</h3>
+            <p class="trip-card-dates">${esc(formatTripDateRange(trip))}</p>
+            <p class="trip-card-desc">${esc(trip.description || "")}</p>
+            <span class="role-pill">${esc(roleCardLabel(trip.role))}</span>
+          </div>
+        </div>
       `;
     }
 
@@ -7800,13 +8545,151 @@
             <p>这个账号还没有读到台湾行程的成员权限</p>
             <div class="platform-actions">
               <button class="btn btn-primary" onclick="enterTrip()">${icon("map", "icon-sm")} 打开台湾行程 2026</button>
-              <button class="btn btn-primary" onclick="showCreateTripComingSoon()">${icon("plus", "icon-sm")} 创建新行程</button>
+              <button class="btn btn-primary" onclick="openCreateTripModal()">${icon("plus", "icon-sm")} 创建新行程</button>
               <button class="btn btn-ghost" onclick="openInviteCodeModal()">${icon("ticket", "icon-sm")} 输入邀请码</button>
             </div>
             <p class="rail-muted" style="max-width:520px;margin:14px auto 0;">如果要云端同步编辑，需要用邀请码加入，或在 Supabase 的 trip_members 里把当前账号加入 taiwan2026。</p>
             <div style="margin-top:18px;">${renderUserSessionControls()}</div>
           </section>
         </main>
+      `;
+    }
+
+    function dynamicTripDateRange(trip = currentTrip()) {
+      if (trip?.start_date && trip?.end_date) return `${trip.start_date} – ${trip.end_date}`;
+      if (trip?.start_date) return `${trip.start_date} 出发`;
+      if (trip?.end_date) return `${trip.end_date} 结束`;
+      return "日期待定";
+    }
+
+    function dynamicCategoryMeta(category = "attraction") {
+      const metas = {
+        attraction: { icon: "🏛️", label: "景点" },
+        food: { icon: "🍽️", label: "餐饮" },
+        transport: { icon: "🚌", label: "交通" },
+        hotel: { icon: "🏨", label: "住宿" },
+        shopping: { icon: "🛍️", label: "购物" },
+        activity: { icon: "🎭", label: "活动" }
+      };
+      return metas[category] || metas.attraction;
+    }
+
+    function dynamicItemsForDay(dayId) {
+      return (appState.dynamicItems || [])
+        .filter(item => item.day_id === dayId)
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    }
+
+    function renderDynamicTripPage() {
+      const trip = currentTrip();
+      const daysList = [...(appState.dynamicDays || [])].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      const selectedDynamicTab = appState.selectedTab === "route" ? "route" : "timeline";
+      return `
+        <main class="dynamic-trip-page">
+          <section class="dynamic-trip-hero card">
+            <div>
+              <span class="chip">${icon("calendar-days", "icon-sm")} ${esc(dynamicTripDateRange(trip))}</span>
+              <h1 class="serif">${esc(trip.title || "未命名行程")}</h1>
+              <p>${esc(trip.description || "自由规划你的下一趟旅行。")}</p>
+            </div>
+            <div class="dynamic-trip-cover" aria-hidden="true">${esc(trip.cover_emoji || "✈️")}</div>
+          </section>
+
+          <section class="tab-bar dynamic-trip-tabs" aria-label="trip tabs">
+            ${renderTabButton("timeline", "行程", "list-checks")}
+            ${renderTabButton("route", "地图", "map")}
+          </section>
+
+          ${selectedDynamicTab === "route" ? renderDynamicTripMapTab() : `
+            ${!daysList.length ? `
+              <section class="empty-state card">
+                ${icon("calendar-plus", "icon")}
+                <h2 class="serif">还没有规划</h2>
+                <p>还没有规划，点击下方按钮开始添加。</p>
+              </section>
+            ` : daysList.map(day => renderDynamicDayCard(day)).join("")}
+
+            <button class="add-day-btn" onclick="openAddDayModal()">${icon("plus", "icon-sm")} 添加一天</button>
+          `}
+        </main>
+      `;
+    }
+
+    function renderDynamicTripMapTab() {
+      const items = appState.dynamicItems || [];
+      const mappedCount = items.filter(item => itemMapCoords(item)).length;
+      return `
+        <section class="map-card dynamic-trip-map-card">
+          <div class="map-card-head">
+            <div>
+              <div class="map-title-kicker">${icon("map-pin", "icon-sm")} 真实地点地图</div>
+              <h2 class="serif">行程地点总览</h2>
+              <p>从地点搜索保存的坐标会显示在这里，适合快速检查每天的空间分布。</p>
+            </div>
+            <div class="map-toolbar">
+              <button class="btn btn-small btn-ghost" onclick="resetMapView('dynamic-trip-map')">${icon("crosshair", "icon-sm")} 重置视角</button>
+            </div>
+          </div>
+          <div class="map-shell"><div id="dynamic-trip-map" aria-label="动态行程地点地图"></div></div>
+          <div class="map-route-summary">
+            <div class="map-stat"><strong>${mappedCount}</strong><span>有坐标地点</span></div>
+            <div class="map-stat"><strong>${items.length}</strong><span>行程条目</span></div>
+            <div class="map-stat"><strong>${(appState.dynamicDays || []).length}</strong><span>规划天数</span></div>
+            <div class="map-stat"><strong>${esc(currentTripTitle())}</strong><span>当前行程</span></div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDynamicDayCard(day) {
+      const items = dynamicItemsForDay(day.id);
+      const dateText = day.day_date || "日期待定";
+      const cityText = day.city_name || "地点待定";
+      return `
+        <section class="day-card">
+          <header class="day-card-header">
+            <div>
+              <h3>第${esc(day.day_number || (day.sort_order ?? 0) + 1)}天 · ${esc(cityText)} · ${esc(dateText)}</h3>
+              <p>${esc(day.title || "自由规划日")}</p>
+            </div>
+            <div class="day-card-actions">
+              <button class="btn btn-small" onclick="openAddDayModal('${escAttr(day.id)}')">${icon("pencil", "icon-sm")} 编辑</button>
+              <button class="btn btn-small" onclick="deleteTripDay('${escAttr(day.id)}')">${icon("trash-2", "icon-sm")} 删除</button>
+            </div>
+          </header>
+          <div class="day-card-body">
+            ${items.length ? items.map(renderDynamicItem).join("") : `<div class="dynamic-day-empty">还没有景点或活动。</div>`}
+          </div>
+          <footer class="dynamic-card-footer">
+            <button class="btn btn-small btn-primary" onclick="openAddItemModal('${escAttr(day.id)}')">${icon("plus", "icon-sm")} 添加景点/活动</button>
+          </footer>
+        </section>
+      `;
+    }
+
+    function renderDynamicItem(item) {
+      const meta = dynamicCategoryMeta(item.category);
+      const status = item.status || "planned";
+      const hasLocation = item.location_lat != null || !!item.location_name;
+      return `
+        <article class="dynamic-item status-${escAttr(status)}">
+          <div class="dynamic-item-time">${esc(item.planned_time || "--")}</div>
+          <div class="dynamic-item-icon" aria-hidden="true">${esc(meta.icon)}</div>
+          <div class="dynamic-item-body">
+            <h4 class="dynamic-item-title">${esc(item.title || "未命名条目")}</h4>
+            ${item.location_name ? `<p class="dynamic-item-location">${esc(item.location_name)}</p>` : ""}
+            ${item.notes ? `<p class="dynamic-item-notes">${esc(item.notes)}</p>` : ""}
+          </div>
+          <div class="dynamic-item-actions ${hasLocation ? "has-map" : ""}">
+            ${hasLocation ? `
+              <button class="btn btn-icon btn-ghost" onclick="event.stopPropagation(); openItemOnMap('${escAttr(item.id)}')" title="查看地图" aria-label="查看 ${esc(item.title || "条目")} 地图">
+                ${icon("map-pin", "icon-xs")}
+              </button>
+            ` : ""}
+            <button class="btn btn-small btn-ghost" onclick="editDynamicItem('${escAttr(item.id)}')">${icon("pencil", "icon-sm")}</button>
+            <button class="btn btn-small btn-ghost" onclick="deleteDynamicItem('${escAttr(item.id)}')">${icon("trash-2", "icon-sm")}</button>
+          </div>
+        </article>
       `;
     }
 
@@ -7848,12 +8731,29 @@
       return Boolean(supabaseClient && isSupabaseConfigured());
     }
 
+    function dynamicCheckinItems() {
+      return (appState.dynamicItems || []).map(normalizeDynamicItem).map(item => ({
+        id: item.id,
+        dayId: item.day_id || item.dayId || "",
+        title: item.title,
+        place: item.location_name || item.location || item.title,
+        locationName: item.location_name || item.location || item.title,
+        cityId: activeTripId(),
+        googleMapsQuery: item.location_name || item.title
+      }));
+    }
+
+    function checkinOptions() {
+      return isTaiwanTripSelected() ? allTimelineItems() : dynamicCheckinItems();
+    }
+
     function checkinItem(itemId) {
-      return allTimelineItems().find(item => item.id === itemId) || null;
+      return checkinOptions().find(item => item.id === itemId) || null;
     }
 
     function defaultCheckinItemId() {
       if (appState.selectedMapPoint && checkinItem(appState.selectedMapPoint)) return appState.selectedMapPoint;
+      if (!isTaiwanTripSelected()) return dynamicCheckinItems()[0]?.id || null;
       const day = selectedDay() || tripData.daysById[nearestTripDayId()];
       return timelineItemsForDay(day).find(item => item.id)?.id || allTimelineItems()[0]?.id || null;
     }
@@ -8112,7 +9012,7 @@
     function subscribeCheckins() {
       if (!isCheckinFeatureAvailable() || checkinsRealtimeChannel) return;
       checkinsRealtimeChannel = supabaseClient
-        .channel("taiwan2026-checkins")
+        .channel(`trip-checkins-${safePathPart(activeTripId())}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "checkins", filter: `trip_id=eq.${activeTripId()}` },
@@ -8166,6 +9066,12 @@
       checkinDraft.caption = value;
     }
 
+    function selectCheckinItem(itemId) {
+      const item = checkinItem(itemId);
+      if (!item || appState.modal?.type !== "checkin") return;
+      setState({ modal: { ...appState.modal, itemId: item.id } });
+    }
+
     function handleCheckinFileSelect(event) {
       event.stopPropagation();
       const file = event.target.files?.[0];
@@ -8187,7 +9093,7 @@
     async function uploadCheckinPhoto(file, itemId) {
       validateCheckinFile(file);
       const user = await requireCheckinUser();
-      const path = `taiwan2026/${user.id}/${safePathPart(itemId)}-${Date.now()}.jpg`;
+      const path = `${safePathPart(activeTripId())}/${user.id}/${safePathPart(itemId)}-${Date.now()}.jpg`;
       const { error } = await supabaseClient.storage.from(PHOTO_BUCKET).upload(path, file, {
         cacheControl: "3600",
         contentType: file.type,
@@ -8294,7 +9200,7 @@
     }
 
     function openTripAlbum() {
-      setState({ currentView: "trip-album", selectedTrip: tripData.id, selectedCity: null, selectedDay: null, selectedTab: "album", selectedMapPoint: null, drawer: null });
+      setState({ currentView: "trip-album", selectedTrip: activeTripId(), selectedCity: null, selectedDay: null, selectedTab: "album", selectedMapPoint: null, drawer: null });
     }
 
     function render() {
@@ -8420,10 +9326,15 @@
 
     function renderShell() {
       if (!isTaiwanTripSelected()) {
+        const dynamicMain = ["spot-reviews", "trip-album", "expenses"].includes(appState.currentView)
+          ? `<main class="main-stage">${renderMainContent()}</main>`
+          : renderDynamicTripPage();
         return `
           <div class="travel-app theme-trip view-${appState.currentView}">
             ${renderTopbar()}
-            ${renderUnsupportedTripPage()}
+            ${dynamicMain}
+            ${renderMobileNav()}
+            ${renderDrawer()}
           </div>
         `;
       }
@@ -8698,7 +9609,8 @@
     }
 
     function renderSpotReviewsPage() {
-      const stats = spotRatingStats();
+      const spots = getReviewableSpots();
+      const stats = spotRatingStats(spots);
       const ratedCount = stats.total - stats.unrated;
       return `
         <section class="page-hero rating-center-hero">
@@ -8720,7 +9632,9 @@
           </div>
         </section>
         <section class="spot-review-groups">
-          ${Object.entries(tripData.checklist).map(([cityName, names]) => renderSpotCityGroup(cityName, names)).join("")}
+          ${isTaiwanTripSelected()
+            ? Object.entries(tripData.checklist).map(([cityName, names]) => renderSpotCityGroup(cityName, names)).join("")
+            : renderDynamicSpotGroups(spots)}
         </section>
         ${renderSpotTopBoard()}
       `;
@@ -8744,6 +9658,41 @@
       `;
     }
 
+    function renderDynamicSpotGroups(spots) {
+      if (!spots.length) {
+        return `<section class="empty-state card"><h2 class="serif">还没有可评分地点</h2><p>添加 attraction 或 food 类型的行程项后，会自动出现在这里。</p></section>`;
+      }
+      const groups = new Map();
+      spots.forEach(spot => {
+        const key = spot.dayId || "other";
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(spot);
+      });
+      return [...groups.entries()].map(([dayId, groupSpots]) => {
+        const rated = groupSpots.filter(spot => spotReview(spot.id).rating).length;
+        return `
+          <section class="spot-city-group">
+            <div class="spot-city-head">
+              <div>
+                <span class="tag">${esc(currentTripTitle())}</span>
+                <h2 class="serif">${esc(dynamicDayLabel(dayId))}</h2>
+              </div>
+              <span class="rail-muted">${rated}/${groupSpots.length} 已评级</span>
+            </div>
+            <div class="spot-list">
+              ${groupSpots.map(spot => renderSpotReviewCard(spot)).join("")}
+            </div>
+          </section>
+        `;
+      }).join("");
+    }
+
+    function spotSubtitle(spot) {
+      if (isTaiwanTripSelected()) return `${spot.cityName || ""} · ${spot.schedule || ""}`.replace(/^ · | · $/g, "");
+      const categoryLabel = spot.category === "food" ? "餐饮" : "景点";
+      return [spot.location, categoryLabel, spot.schedule].filter(Boolean).join(" · ");
+    }
+
     function renderSpotReviewCard(spot) {
       if (!spot) return "";
       const review = spotReview(spot.id);
@@ -8760,7 +9709,7 @@
             </button>
             <div class="spot-title-block">
               <strong>${esc(spot.name)}</strong>
-              <span>${esc(spot.cityName)} · ${esc(spot.schedule)}</span>
+              <span>${esc(spotSubtitle(spot))}</span>
             </div>
             <button class="spot-expand-btn" onclick="toggleSpotExpanded('${escAttr(spot.id)}')">
               ${icon(expanded ? "chevron-up" : "chevron-down", "icon-sm")} ${expanded ? "收起" : "展开"}
@@ -9923,10 +10872,7 @@
               <label for="itinerary-title">标题</label>
               <input id="itinerary-title" value="${esc(effective.title || "")}" placeholder="例如：台北 101 夜景" />
             </div>
-            <div class="field">
-              <label for="itinerary-location">地点</label>
-              <input id="itinerary-location" value="${esc(itemLocationName(effective))}" placeholder="例如：台北 101" />
-            </div>
+            ${renderPlaceSearchField(itemLocationName(effective))}
             <div class="field">
               <label for="itinerary-duration">时长</label>
               <input id="itinerary-duration" value="${esc(effective.duration || "")}" placeholder="例如：约 1.5 小时" />
@@ -9966,9 +10912,143 @@
       `;
     }
 
+    function renderCreateTripModal() {
+      const selectedEmoji = appState.modal?.coverEmoji || "✈️";
+      const emojis = ["✈️", "🌴", "🏔️", "🗺️", "🌊", "🏙️", "🌸", "🎌", "🏖️", "🗼"];
+      return `
+        <div class="modal-wrap" onclick="closeModal(event)">
+          <div class="modal" onclick="event.stopPropagation()">
+            <h2 class="serif">${icon("plus", "icon-sm")} 创建行程</h2>
+            <p class="rail-muted">创建后会自动把你加入为 editor，可以开始添加日期和景点活动。</p>
+            <div class="field">
+              <label for="create-trip-title">行程名称</label>
+              <input id="create-trip-title" type="text" placeholder="如：日本大阪 2026" required />
+            </div>
+            <div class="expense-form-grid">
+              <div class="field">
+                <label for="create-trip-start">出发日期</label>
+                <input id="create-trip-start" type="date" />
+              </div>
+              <div class="field">
+                <label for="create-trip-end">结束日期</label>
+                <input id="create-trip-end" type="date" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="create-trip-description">一句话描述</label>
+              <textarea id="create-trip-description" placeholder="这趟旅行的主题"></textarea>
+            </div>
+            <div class="field">
+              <label>封面 emoji</label>
+              <input id="create-trip-emoji" type="hidden" value="${escAttr(selectedEmoji)}" />
+              <div class="emoji-picker">
+                ${emojis.map(emoji => `<button type="button" data-emoji="${escAttr(emoji)}" class="emoji-option ${emoji === selectedEmoji ? "active" : ""}" onclick="selectCreateTripEmoji('${escAttr(emoji)}')">${esc(emoji)}</button>`).join("")}
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn" onclick="setState({modal:null})">取消</button>
+              <button class="btn btn-primary" onclick="submitCreateTrip()">${icon("plus", "icon-sm")} 创建行程</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDynamicDayModal(modal) {
+      const editing = modal.mode === "edit";
+      return `
+        <div class="modal-wrap" onclick="closeModal(event)">
+          <div class="modal" onclick="event.stopPropagation()">
+            <h2 class="serif">${icon(editing ? "pencil" : "calendar-plus", "icon-sm")} ${editing ? "编辑一天" : "添加一天"}</h2>
+            <div class="field">
+              <label for="dynamic-day-date">日期</label>
+              <input id="dynamic-day-date" type="date" value="${esc(modal.date || nextDynamicDayDate())}" />
+            </div>
+            <div class="field">
+              <label for="dynamic-day-city">城市/地点名</label>
+              <input id="dynamic-day-city" type="text" value="${esc(modal.cityName || "")}" placeholder="如：大阪" />
+            </div>
+            <div class="field">
+              <label for="dynamic-day-title">当天标题</label>
+              <input id="dynamic-day-title" type="text" value="${esc(modal.title || "")}" placeholder="如：道顿堀美食一日" />
+            </div>
+            <div class="modal-actions">
+              <button class="btn" onclick="setState({modal:null})">取消</button>
+              <button class="btn btn-primary" onclick="submitDynamicDay()">${icon("save", "icon-sm")} 保存</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDynamicItemModal(modal) {
+      const editing = modal.mode === "edit";
+      const item = editing ? (appState.dynamicItems || []).find(row => String(row.id) === String(modal.itemId)) : null;
+      const day = (appState.dynamicDays || []).find(row => String(row.id) === String(modal.dayId || item?.day_id));
+      if (editing && !item) return "";
+      const effective = item || {
+        planned_time: "",
+        title: "",
+        category: "attraction",
+        location_name: "",
+        notes: "",
+        status: "planned"
+      };
+      const categories = [
+        ["attraction", "🏛️", "景点"],
+        ["food", "🍽️", "餐饮"],
+        ["transport", "🚌", "交通"],
+        ["hotel", "🏨", "住宿"],
+        ["shopping", "🛍️", "购物"],
+        ["activity", "🎭", "活动"]
+      ];
+      const selectedCategory = categories.some(([value]) => value === effective.category) ? effective.category : "attraction";
+      return `
+        <div class="modal-wrap" onclick="closeModal(event)">
+          <div class="modal itinerary-modal" onclick="event.stopPropagation()">
+            <h2 class="serif">${icon(editing ? "pencil" : "plus", "icon-sm")} ${editing ? "编辑条目" : "添加景点/活动"}</h2>
+            <p class="rail-muted">${day ? `第${esc(day.day_number || (day.sort_order ?? 0) + 1)}天 · ${esc(day.city_name || "地点待定")}` : "动态行程"}</p>
+            <div class="field">
+              <label for="dynamic-item-time">时间</label>
+              <input id="dynamic-item-time" type="time" value="${esc(effective.planned_time || "")}" />
+            </div>
+            <div class="field">
+              <label for="dynamic-item-title">名称</label>
+              <input id="dynamic-item-title" type="text" value="${esc(effective.title || "")}" placeholder="景点/餐厅/活动名称" required />
+            </div>
+            <div class="field">
+              <label>类别</label>
+              <input id="dynamic-item-category" type="hidden" value="${escAttr(selectedCategory)}" />
+              <div class="dynamic-category-picker">
+                ${categories.map(([value, emoji, label]) => `
+                  <button type="button" data-category="${escAttr(value)}" class="dynamic-category-option ${value === selectedCategory ? "active" : ""}" onclick="selectDynamicCategory('${escAttr(value)}')">
+                    <span>${esc(emoji)}</span>${esc(label)}
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+            ${renderPlaceSearchField(effective.location_name || "")}
+            <div class="field">
+              <label for="dynamic-item-notes">备注</label>
+              <textarea id="dynamic-item-notes" placeholder="补充交通、排队、订位或现场调整备注...">${esc(effective.notes || "")}</textarea>
+            </div>
+            <input id="dynamic-item-status" type="hidden" value="${escAttr(effective.status || "planned")}" />
+            <div class="modal-actions">
+              ${editing ? `<button class="btn btn-danger" onclick="deleteDynamicItem('${escAttr(effective.id)}')">${icon("trash-2", "icon-sm")} 删除</button>` : ""}
+              <button class="btn" onclick="setState({modal:null})">取消</button>
+              <button class="btn btn-primary" onclick="submitDynamicItem()">${icon("save", "icon-sm")} 保存</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderModal() {
       if (!appState.modal) return "";
       const modal = appState.modal;
+      if (modal.type === "create-trip") return renderCreateTripModal();
+      if (modal.type === "dynamic-day") return renderDynamicDayModal(modal);
+      if (modal.type === "dynamic-item") return renderDynamicItemModal(modal);
       if (modal.type === "invite-code") {
         return `
           <div class="modal-wrap" onclick="closeModal(event)">
@@ -10037,10 +11117,10 @@
           <div class="modal-wrap" onclick="closeModal(event)">
             <div class="modal" onclick="event.stopPropagation()">
               <h2 class="serif">${icon("star", "icon-sm")} 选择评级</h2>
-              <p class="rail-muted">${esc(spot.cityName)} · ${esc(spot.name)}${review.rating ? ` · 当前：${esc(review.rating)}` : ""}</p>
+              <p class="rail-muted">${esc(spotSubtitle(spot) || spot.name)}${review.rating ? ` · 当前：${esc(review.rating)}` : ""}</p>
               <div class="rating-choice-list">
                 ${RATING_OPTIONS.map(option => `
-                  <button class="rating-choice rating-badge ${option.cls}" onclick="setSpotRating('${escAttr(spot.id)}', '${escAttr(option.rating)}')">
+                  <button class="rating-choice rating-badge ${option.cls}" onclick="saveSpotRating('${escAttr(spot.id)}', '${escAttr(option.rating)}')">
                     <span>${esc(option.label)}</span>
                     <small>${esc(option.meaning)}</small>
                   </button>
@@ -10080,12 +11160,19 @@
         const item = checkinItem(modal.itemId);
         if (!item) return "";
         const locationName = item.locationName || item.place || item.title;
+        const options = checkinOptions();
         const fileMeta = checkinDraft.fileName ? `${checkinDraft.fileName} · ${formatFileSize(checkinDraft.fileSize)}` : "";
         return `
           <div class="modal-wrap" onclick="closeModal(event)">
             <div class="modal" onclick="event.stopPropagation()">
               <h2 class="serif">${icon("camera", "icon-sm")} 景点打卡</h2>
               <p class="rail-muted">${esc(locationName)}</p>
+              <div class="field">
+                <label for="checkin-item-select">选择地点</label>
+                <select id="checkin-item-select" onchange="selectCheckinItem(this.value)">
+                  ${options.map(option => `<option value="${escAttr(option.id)}" ${option.id === item.id ? "selected" : ""}>${esc(option.title || option.locationName || option.id)}</option>`).join("")}
+                </select>
+              </div>
               <div class="field">
                 <label>文字说明（可选）</label>
                 <textarea id="checkin-caption-input" placeholder="写下这张照片背后的瞬间..." oninput="updateCheckinCaption(this.value)">${esc(checkinDraft.caption)}</textarea>
@@ -10210,8 +11297,11 @@
     }
 
     function scheduleMapInit() {
-      if (!document.querySelector(".leaflet-map")) return;
-      window.requestAnimationFrame(() => window.setTimeout(initLeafletMaps, 0));
+      if (!document.querySelector(".leaflet-map, #dynamic-trip-map")) return;
+      window.requestAnimationFrame(() => window.setTimeout(() => {
+        initLeafletMaps();
+        initCurrentDynamicTripMap();
+      }, 0));
     }
 
     function initLeafletMaps() {
@@ -10392,6 +11482,47 @@
       map.fitBounds(bounds, { padding: [32, 32], maxZoom: 14 });
     }
 
+    function dynamicMapItems() {
+      return (appState.dynamicItems || []).map(item => {
+        const coords = itemMapCoords(item);
+        return coords ? { ...item, ...coords } : null;
+      }).filter(Boolean);
+    }
+
+    function initCurrentDynamicTripMap() {
+      const el = document.getElementById("dynamic-trip-map");
+      if (!el) return;
+      initDynamicTripMap(dynamicMapItems());
+    }
+
+    function initDynamicTripMap(items) {
+      const el = document.getElementById("dynamic-trip-map");
+      if (!el || !window.L || activeLeafletMaps[el.id]) return;
+      const validItems = (items || []).filter(item => Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lng)));
+      if (!validItems.length) {
+        el.innerHTML = '<p class="dynamic-map-empty">暂无地点数据</p>';
+        return;
+      }
+      el.innerHTML = "";
+      const map = L.map(el, { scrollWheelZoom: false });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+      const entry = { map, points: validItems, markers: {}, kind: "dynamic-trip" };
+      activeLeafletMaps[el.id] = entry;
+      const bounds = [];
+      validItems.forEach(item => {
+        const meta = dynamicCategoryMeta(item.category);
+        const marker = L.marker([item.lat, item.lng]).addTo(map);
+        marker.bindPopup(`
+          <strong>${esc(item.title || "未命名条目")}</strong><br>
+          ${esc(item.planned_time || "")}${item.planned_time ? " · " : ""}${esc(meta.icon)} ${esc(meta.label)}
+        `);
+        marker.on("popupopen", () => window.lucide?.createIcons());
+        entry.markers[item.id] = marker;
+        bounds.push([item.lat, item.lng]);
+      });
+      if (bounds.length) map.fitBounds(bounds, { padding: [20, 20] });
+    }
+
     function focusSelectedMarkerInMap(mapId, animate = true) {
       const entry = activeLeafletMaps[mapId];
       if (!entry || !appState.selectedMapPoint) return;
@@ -10436,6 +11567,16 @@
 
     function showItemOnMap(itemId) {
       setState({ selectedTab: "route", selectedMapPoint: itemId, searchQuery: "", typeFilter: "all" });
+    }
+
+    function openItemOnMap(itemId) {
+      const item = (appState.dynamicItems || []).find(i => String(i.id) === String(itemId)) || timelineItemById(itemId);
+      if (!item) return;
+      const coords = itemRealCoords(item) || itemMapCoords(item);
+      const q = coords
+        ? `${coords.lat},${coords.lng}`
+        : encodeURIComponent(item.location_name || item.locationName || item.location || item.place || item.title || "");
+      window.open(`https://maps.google.com/maps?q=${q}`, "_blank", "noopener");
     }
 
     function openMapModal(dayId) {
@@ -10579,6 +11720,10 @@
         setState({ authError: "请填写邮箱和密码。", authMessage: "" });
         return;
       }
+      if (!email.includes("@")) {
+        setState({ authError: "请填写有效的邮箱地址。", authMessage: "" });
+        return;
+      }
       if (appState.authMode === "signup" && !nickname) {
         setState({ authError: "请填写昵称。", authMessage: "" });
         return;
@@ -10590,7 +11735,7 @@
 
       setState({ authLoading: true, authError: "", authMessage: "" });
       const _authTimer = setTimeout(() => {
-        if (appState.authLoading) setState({ authLoading: false, authError: "Supabase 正在冷启动，请等 15 秒后再点一次登录", authMessage: "" });
+        if (appState.authLoading) setState({ authLoading: false, authError: "云端响应偏慢，请再点一次登录。", authMessage: "" });
       }, 20000);
       try {
         if (appState.authMode === "signup") await signUp(email, password, nickname);
@@ -10762,30 +11907,29 @@
       }
 
       bindAuthStateListener();
-      setState({ currentView: "auth", authLoading: true, authError: "", authMessage: "" });
-      const _initTimer = setTimeout(() => {
-        if (appState.authLoading) setState({ currentView: "auth", authLoading: false, authError: "", authMessage: "服务器启动中，请稍后点击登录" });
-      }, 15000);
+      setState({ currentView: "auth", authLoading: false, authError: "", authMessage: "" });
       try {
-        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        const { data: { session }, error } = await withTimeout(supabaseClient.auth.getSession(), "恢复登录");
         if (error) throw error;
         if (!session) {
           currentUser = null;
-          setState({
-            currentView: "auth",
-            authLoading: false,
-            authError: "",
-            authMessage: pendingInviteCode ? "检测到邀请链接，请先登录或注册，登录后会自动加入行程。" : ""
-          });
+          if (appState.currentView === "auth" && !appState.authLoading) {
+            setState({
+              currentView: "auth",
+              authLoading: false,
+              authError: "",
+              authMessage: pendingInviteCode ? "检测到邀请链接，请先登录或注册，登录后会自动加入行程。" : ""
+            });
+          }
           return;
         }
         currentUser = session.user;
         await refreshCollaboration(session);
       } catch (error) {
-        console.warn("Supabase auth unavailable, falling back to local mode.", error);
-        setState({ currentView: "journey-select", authLoading: false, authError: "", authMessage: "" });
-      } finally {
-        clearTimeout(_initTimer);
+        console.warn("Supabase auth session check unavailable.", error);
+        if (appState.currentView === "auth" && !appState.authLoading) {
+          setState({ currentView: "auth", authLoading: false, authError: "", authMessage: "" });
+        }
       }
     }
 
@@ -10836,7 +11980,7 @@
       setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedCity: null, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, drawer: "confirm" });
     }
     function goExpenses(dayId = "all") {
-      setState({ currentView: "expenses", selectedTrip: tripData.id, selectedCity: null, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, drawer: null, modal: null, fabOpen: false, expenseDayFilter: dayId || "all" });
+      setState({ currentView: "expenses", selectedTrip: activeTripId(), selectedCity: null, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, drawer: null, modal: null, fabOpen: false, expenseDayFilter: dayId || "all" });
     }
     function goJourneySelect() { setState({ currentView: "journey-select", drawer: null, fabOpen: false, selectedMapPoint: null }); }
     function goDashboard() { setState({ currentView: "trip-dashboard", selectedTrip: tripData.id, selectedDay: null, selectedTab: "timeline", selectedMapPoint: null, drawer: null, fabOpen: false }); }
@@ -10867,7 +12011,7 @@
     function closeFabSheet(event) { if (event.target.classList.contains("fab-sheet-overlay")) setState({ fabOpen: false }); }
     function quickCheckin() { setState({ fabOpen: false }); openCheckinModal(null); }
     function quickAddExpense() { setState({ fabOpen: false }); openExpenseModal(); }
-    function quickSpotReviews() { setState({ currentView: "spot-reviews", selectedTrip: tripData.id, drawer: null, fabOpen: false }); }
+    function quickSpotReviews() { setState({ currentView: "spot-reviews", selectedTrip: activeTripId(), drawer: null, fabOpen: false }); }
     function quickEditToday() { setState({ fabOpen: false }); openEditDayModal(); }
     function openTaipeiPlanModal() { setState({ modal: { type: "taipei-plan" } }); }
     function openItemNote(itemId) {
@@ -10905,6 +12049,16 @@
 
     function openAddItemModal(dayId = appState.selectedDay) {
       if (!requireEditor("添加行程")) return;
+      resetPlaceSearchState();
+      if (!isTaiwanTripSelected()) {
+        const targetDayId = dayId || appState.dynamicDays?.[0]?.id;
+        if (!targetDayId) {
+          openAddDayModal();
+          return;
+        }
+        setState({ modal: { type: "dynamic-item", mode: "add", dayId: targetDayId }, fabOpen: false });
+        return;
+      }
       const targetDayId = dayId || nearestTripDayId();
       if (!tripData.daysById[targetDayId]) {
         toast("请先选择一天再添加行程");
@@ -10915,12 +12069,234 @@
 
     function openEditItemModal(itemId) {
       if (!requireEditor("编辑行程")) return;
+      resetPlaceSearchState();
+      if (!isTaiwanTripSelected()) {
+        editDynamicItem(itemId);
+        return;
+      }
       const item = timelineItemById(itemId);
       if (!item) {
         toast("找不到这个行程项");
         return;
       }
       setState({ modal: { type: "edit-item", itemId, dayId: item.dayId }, fabOpen: false });
+    }
+
+    function nextDynamicDayDate() {
+      const daysList = [...(appState.dynamicDays || [])]
+        .filter(day => day.day_date)
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      const last = daysList[daysList.length - 1]?.day_date || currentTrip()?.start_date || "";
+      if (!last) return "";
+      const date = new Date(`${last}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return "";
+      date.setDate(date.getDate() + (daysList.length ? 1 : 0));
+      return date.toISOString().slice(0, 10);
+    }
+
+    function openAddDayModal(dayId = "") {
+      if (!requireEditor(dayId ? "编辑日期" : "添加日期")) return;
+      const existing = dayId ? (appState.dynamicDays || []).find(day => String(day.id) === String(dayId)) : null;
+      setState({
+        modal: {
+          type: "dynamic-day",
+          mode: existing ? "edit" : "add",
+          dayId: existing?.id || null,
+          date: existing?.day_date || nextDynamicDayDate(),
+          cityName: existing?.city_name || "",
+          title: existing?.title || ""
+        },
+        fabOpen: false
+      });
+    }
+
+    function readDynamicDayForm() {
+      return {
+        date: document.getElementById("dynamic-day-date")?.value || "",
+        cityName: document.getElementById("dynamic-day-city")?.value.trim() || "",
+        title: document.getElementById("dynamic-day-title")?.value.trim() || ""
+      };
+    }
+
+    async function submitDynamicDay() {
+      const modal = appState.modal || {};
+      const data = readDynamicDayForm();
+      try {
+        if (modal.mode === "edit" && modal.dayId) await updateTripDay(modal.dayId, data);
+        else await addTripDay(data);
+      } catch (error) {
+        console.warn("Save day failed.", error);
+        toast("保存日期失败，请检查 Supabase 权限");
+      }
+    }
+
+    async function addTripDay(data) {
+      const tripId = activeTripId();
+      const nextOrder = (appState.dynamicDays || []).length;
+      const { data: row, error } = await supabaseClient.from("trip_days").insert({
+        trip_id: tripId,
+        day_date: data.date || null,
+        day_number: nextOrder + 1,
+        title: data.title,
+        city_name: data.cityName,
+        sort_order: nextOrder
+      }).select().single();
+      if (error) throw error;
+      appState.dynamicDays = [...(appState.dynamicDays || []), row];
+      setState({ dynamicDays: appState.dynamicDays, modal: null });
+    }
+
+    async function updateTripDay(dayId, data) {
+      const { data: row, error } = await supabaseClient.from("trip_days")
+        .update({
+          day_date: data.date || null,
+          title: data.title,
+          city_name: data.cityName
+        })
+        .eq("id", dayId)
+        .eq("trip_id", activeTripId())
+        .select()
+        .single();
+      if (error) throw error;
+      appState.dynamicDays = (appState.dynamicDays || []).map(day => String(day.id) === String(dayId) ? row : day);
+      setState({ dynamicDays: appState.dynamicDays, modal: null });
+    }
+
+    function selectDynamicCategory(category) {
+      const input = document.getElementById("dynamic-item-category");
+      if (input) input.value = category;
+      document.querySelectorAll(".dynamic-category-option").forEach(button => {
+        button.classList.toggle("active", button.dataset.category === category);
+      });
+    }
+
+    function readDynamicItemForm() {
+      const locationName = document.getElementById("place-search-input")?.value.trim()
+        || document.getElementById("dynamic-item-location")?.value.trim()
+        || "";
+      return {
+        time: document.getElementById("dynamic-item-time")?.value || "",
+        title: document.getElementById("dynamic-item-title")?.value.trim() || "",
+        category: document.getElementById("dynamic-item-category")?.value || "attraction",
+        locationName,
+        notes: document.getElementById("dynamic-item-notes")?.value.trim() || "",
+        status: document.getElementById("dynamic-item-status")?.value || "planned",
+        ...selectedPlaceFields()
+      };
+    }
+
+    async function submitDynamicItem() {
+      const modal = appState.modal || {};
+      const data = readDynamicItemForm();
+      if (!data.title) {
+        toast("请填写名称");
+        return;
+      }
+      try {
+        if (modal.mode === "edit" && modal.itemId) await updateDynamicItem(modal.itemId, data);
+        else await addTripItem(modal.dayId, data);
+      } catch (error) {
+        console.warn("Save dynamic item failed.", error);
+        toast("保存条目失败，请检查 Supabase 权限");
+      }
+    }
+
+    async function addTripItem(dayId, data) {
+      const tripId = activeTripId();
+      const dayItems = (appState.dynamicItems || []).filter(i => String(i.day_id) === String(dayId));
+      const payload = {
+        trip_id: tripId,
+        day_id: dayId,
+        planned_time: data.time || null,
+        title: data.title,
+        category: data.category || "attraction",
+        notes: data.notes || null,
+        location_name: data.locationName || null,
+        status: "planned",
+        sort_order: dayItems.length,
+        created_by: currentUser.id
+      };
+      if (selectedPlaceData) {
+        payload.location_name = selectedPlaceData.shortName;
+        payload.location_lat = selectedPlaceData.lat;
+        payload.location_lng = selectedPlaceData.lng;
+      }
+      const { data: row, error } = await supabaseClient.from("trip_items").insert(payload).select().single();
+      if (error) throw error;
+      appState.dynamicItems = [...(appState.dynamicItems || []), row];
+      setState({ dynamicItems: appState.dynamicItems, modal: null });
+    }
+
+    async function updateDynamicItem(itemId, data) {
+      const payload = {
+        planned_time: data.time || null,
+        title: data.title,
+        category: data.category || "attraction",
+        notes: data.notes || null,
+        location_name: data.locationName || null,
+        status: data.status || "planned"
+      };
+      if (selectedPlaceData) {
+        payload.location_name = selectedPlaceData.shortName;
+        payload.location_lat = selectedPlaceData.lat;
+        payload.location_lng = selectedPlaceData.lng;
+      }
+      const { data: row, error } = await supabaseClient.from("trip_items")
+        .update(payload)
+        .eq("id", itemId)
+        .eq("trip_id", activeTripId())
+        .select()
+        .single();
+      if (error) throw error;
+      appState.dynamicItems = (appState.dynamicItems || []).map(item => String(item.id) === String(itemId) ? row : item);
+      setState({ dynamicItems: appState.dynamicItems, modal: null });
+    }
+
+    function openEditDynamicItemModal(itemId) {
+      if (!requireEditor("编辑条目")) return;
+      resetPlaceSearchState();
+      const item = (appState.dynamicItems || []).find(row => String(row.id) === String(itemId));
+      if (!item) {
+        toast("找不到这个条目");
+        return;
+      }
+      setState({ modal: { type: "dynamic-item", mode: "edit", itemId, dayId: item.day_id }, fabOpen: false });
+    }
+
+    function editDynamicItem(itemId) {
+      openEditDynamicItemModal(itemId);
+    }
+
+    async function deleteDynamicItem(itemId) {
+      if (!requireEditor("删除条目")) return;
+      if (!confirm("确定删除这个条目吗？")) return;
+      try {
+        const { error } = await supabaseClient.from("trip_items").delete().eq("id", itemId).eq("trip_id", activeTripId());
+        if (error) throw error;
+        appState.dynamicItems = (appState.dynamicItems || []).filter(item => String(item.id) !== String(itemId));
+        setState({ dynamicItems: appState.dynamicItems, modal: null });
+      } catch (error) {
+        console.warn("Delete dynamic item failed.", error);
+        toast("删除失败，请检查 Supabase 权限");
+      }
+    }
+
+    async function deleteTripDay(dayId) {
+      if (!requireEditor("删除日期")) return;
+      if (!confirm("确定删除这一天和当天所有条目吗？")) return;
+      try {
+        const tripId = activeTripId();
+        const { error: itemError } = await supabaseClient.from("trip_items").delete().eq("day_id", dayId).eq("trip_id", tripId);
+        if (itemError) throw itemError;
+        const { error: dayError } = await supabaseClient.from("trip_days").delete().eq("id", dayId).eq("trip_id", tripId);
+        if (dayError) throw dayError;
+        appState.dynamicDays = (appState.dynamicDays || []).filter(day => String(day.id) !== String(dayId));
+        appState.dynamicItems = (appState.dynamicItems || []).filter(item => String(item.day_id) !== String(dayId));
+        setState({ dynamicDays: appState.dynamicDays, dynamicItems: appState.dynamicItems, modal: null });
+      } catch (error) {
+        console.warn("Delete dynamic day failed.", error);
+        toast("删除失败，请检查 Supabase 权限");
+      }
     }
 
     function openEditDayModal() {
@@ -10949,7 +12325,9 @@
     function readItineraryForm() {
       const time = document.getElementById("itinerary-time")?.value.trim() || "";
       const title = document.getElementById("itinerary-title")?.value.trim() || "";
-      const location = document.getElementById("itinerary-location")?.value.trim() || "";
+      const location = document.getElementById("place-search-input")?.value.trim()
+        || document.getElementById("itinerary-location")?.value.trim()
+        || "";
       const duration = document.getElementById("itinerary-duration")?.value.trim() || "";
       const type = document.getElementById("itinerary-type")?.value || "other";
       const notes = document.getElementById("itinerary-notes")?.value.trim() || "";
@@ -10957,7 +12335,24 @@
       const actualNote = document.getElementById("itinerary-actual-note")?.value.trim() || "";
       const existingStatus = appState.modal?.itemId ? (appState.itemEdits || {})[appState.modal.itemId]?.status : "";
       const status = normalizeItemStatus(document.getElementById("itinerary-status")?.value || existingStatus || "planned");
-      return { time, title, location, place: location, locationName: location, duration, type, notes, detail: notes, actualTime, actualNote, status };
+      const placeFields = selectedPlaceFields();
+      return {
+        time,
+        planned_time: time,
+        title,
+        location,
+        place: location,
+        locationName: location,
+        location_name: location,
+        duration,
+        type,
+        notes,
+        detail: notes,
+        actualTime,
+        actualNote,
+        status,
+        ...placeFields
+      };
     }
 
     function saveItineraryItem(mode) {
@@ -10981,26 +12376,30 @@
         return;
       }
       const loc = locationFor(form.location || form.title, day.cityId);
+      const realPlace = selectedPlaceData ? selectedPlaceFields() : null;
       const newItem = {
         id: `custom-${Date.now()}`,
         dayId: day.id,
-        cityId: loc.cityId || day.cityId,
+        cityId: realPlace?.cityId || loc.cityId || day.cityId,
         time: form.time,
+        planned_time: form.planned_time || form.time,
         title: form.title,
         type: form.type,
-        place: form.location,
-        location: form.location,
-        locationName: form.location,
+        place: realPlace?.place || form.location,
+        location: realPlace?.location || form.location,
+        locationName: realPlace?.locationName || form.location,
+        location_name: realPlace?.location_name || form.location,
         duration: form.duration,
         detail: form.notes,
         notes: form.notes,
         description: form.notes,
         transport: "",
         transportFromPrevious: form.duration,
-        lat: loc.lat,
-        lng: loc.lng,
-        googleMapsQuery: loc.query || `${form.location || form.title} ${day.cityName}`,
-        approximate: !!loc.approximate
+        lat: realPlace?.lat ?? loc.lat,
+        lng: realPlace?.lng ?? loc.lng,
+        ...(realPlace ? { location_lat: realPlace.location_lat, location_lng: realPlace.location_lng } : {}),
+        googleMapsQuery: realPlace?.googleMapsQuery || loc.query || `${form.location || form.title} ${day.cityName}`,
+        approximate: realPlace ? false : !!loc.approximate
       };
       const addedItems = { ...(appState.addedItems || {}) };
       addedItems[day.id] = [...(addedItems[day.id] || []), newItem];
@@ -11260,7 +12659,7 @@
     function goSpotReviews(spotId = "") {
       const patch = {
         currentView: "spot-reviews",
-        selectedTrip: tripData.id,
+        selectedTrip: activeTripId(),
         selectedCity: null,
         selectedDay: null,
         selectedTab: "timeline",
@@ -11292,6 +12691,29 @@
         selectedSpotId: spotId,
         expandedSpotReviews: { ...(appState.expandedSpotReviews || {}), [spotId]: true }
       });
+    }
+
+    async function saveSpotRating(spotId, rating) {
+      if (!requireEditor("修改地点评级") || !RATING_ORDER.includes(rating)) return;
+      if (isTaiwanTripSelected()) {
+        setSpotRating(spotId, rating);
+        return;
+      }
+      try {
+        if (!supabaseClient) throw new Error("Supabase 未配置");
+        const { error } = await supabaseClient.from("trip_items").update({ rating }).eq("id", spotId);
+        if (error) throw error;
+        const dynamicItems = (appState.dynamicItems || []).map(item => item.id === spotId ? { ...item, rating } : item);
+        setState({
+          dynamicItems,
+          modal: null,
+          selectedSpotId: spotId,
+          expandedSpotReviews: { ...(appState.expandedSpotReviews || {}), [spotId]: true }
+        });
+        toast(`已标记为「${rating}」`);
+      } catch (error) {
+        toast(`评级保存失败：${error.message || "请稍后重试"}`);
+      }
     }
 
     function setSpotRating(spotId, rating) {
@@ -11385,7 +12807,7 @@
     async function uploadSpotReviewPhoto(file, spotId) {
       validateCheckinFile(file);
       await requireCheckinUser();
-      const path = `taiwan2026/spot-reviews/${safeSpotStoragePart(spotId)}-${Date.now()}.jpg`;
+      const path = `${safePathPart(activeTripId())}/spot-reviews/${safeSpotStoragePart(spotId)}-${Date.now()}.jpg`;
       const { error } = await supabaseClient.storage.from(PHOTO_BUCKET).upload(path, file, {
         cacheControl: "3600",
         contentType: file.type,
@@ -11433,7 +12855,7 @@
     function openGoogleMapsForSpot(spotId) {
       const spot = spotEntryById(spotId);
       if (!spot) return;
-      openMaps(spot.location?.query || spot.name);
+      openMaps(spot.location?.query || spot.location || spot.name);
     }
 
     function catalogLocationFor(place) {
@@ -11879,6 +13301,7 @@ ${folders}
     window.focusMapPoint = focusMapPoint;
     window.softHighlightMapPoint = softHighlightMapPoint;
     window.showItemOnMap = showItemOnMap;
+    window.openItemOnMap = openItemOnMap;
     window.openMapModal = openMapModal;
     window.copyRoute = copyRoute;
     window.toggleComplete = toggleComplete;
@@ -11893,6 +13316,7 @@ ${folders}
     window.goSpotReviews = goSpotReviews;
     window.toggleSpotExpanded = toggleSpotExpanded;
     window.openRatingModal = openRatingModal;
+    window.saveSpotRating = saveSpotRating;
     window.setSpotRating = setSpotRating;
     window.openSpotLogModal = openSpotLogModal;
     window.saveSpotLog = saveSpotLog;
@@ -11931,6 +13355,25 @@ ${folders}
     window.submitInviteCode = submitInviteCode;
     window.handleInviteCode = handleInviteCode;
     window.showCreateTripComingSoon = showCreateTripComingSoon;
+    window.openCreateTripModal = openCreateTripModal;
+    window.selectCreateTripEmoji = selectCreateTripEmoji;
+    window.submitCreateTrip = submitCreateTrip;
+    window.createTrip = createTrip;
+    window.openAddDayModal = openAddDayModal;
+    window.submitDynamicDay = submitDynamicDay;
+    window.addTripDay = addTripDay;
+    window.selectDynamicCategory = selectDynamicCategory;
+    window.submitDynamicItem = submitDynamicItem;
+    window.addTripItem = addTripItem;
+    window.openEditDynamicItemModal = openEditDynamicItemModal;
+    window.editDynamicItem = editDynamicItem;
+    window.deleteDynamicItem = deleteDynamicItem;
+    window.deleteTripDay = deleteTripDay;
+    window.searchPlace = searchPlace;
+    window.onPlaceSearchInput = onPlaceSearchInput;
+    window.renderPlaceSearchResults = renderPlaceSearchResults;
+    window.selectPlaceResult = selectPlaceResult;
+    window.showPlaceMapPreview = showPlaceMapPreview;
     window.setAuthMode = setAuthMode;
     window.handleAuthSubmit = handleAuthSubmit;
     window.requestOtpLogin = requestOtpLogin;
@@ -11948,6 +13391,7 @@ ${folders}
     window.handleCheckinFileSelect = handleCheckinFileSelect;
     window.handleCheckinDrop = handleCheckinDrop;
     window.updateCheckinCaption = updateCheckinCaption;
+    window.selectCheckinItem = selectCheckinItem;
     window.uploadSelectedCheckinPhoto = uploadSelectedCheckinPhoto;
     window.confirmCheckin = confirmCheckin;
     window.openPhotoViewer = openPhotoViewer;
