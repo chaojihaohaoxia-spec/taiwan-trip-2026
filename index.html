@@ -3878,6 +3878,24 @@
 .paid-by-selector,.for-whom-selector{display:flex;gap:8px;}
 .pbs-btn{flex:1;padding:8px 4px;border:1.5px solid var(--line);border-radius:12px;background:transparent;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;text-align:center;}
 .pbs-btn.active{border-color:var(--teal);background:rgba(0,191,166,.1);color:var(--navy);}
+/* Mini-receipt calculator */
+.calc-mode-toggle{display:flex;background:rgba(0,0,0,.05);border-radius:12px;padding:3px;margin-bottom:14px;}
+.calc-mode-btn{flex:1;padding:7px 6px;border:0;background:transparent;font-size:12px;font-weight:700;cursor:pointer;border-radius:9px;transition:.15s;color:var(--muted);}
+.calc-mode-btn.active{background:#fff;color:var(--navy);box-shadow:0 1px 5px rgba(0,0,0,.12);}
+.calc-items{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+.calc-item-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.7);border-radius:12px;padding:8px 10px;border:1px solid var(--line);}
+.calc-item-name{flex:1;border:0;background:transparent;font-size:14px;outline:0;min-width:0;color:var(--navy);}
+.calc-item-name::placeholder{color:var(--muted);}
+.calc-item-amt{width:76px;border:0;background:transparent;font-size:15px;font-weight:700;text-align:right;outline:0;color:var(--coral);}
+.calc-item-amt::placeholder{color:var(--muted);font-weight:400;}
+.calc-item-remove{border:0;background:transparent;cursor:pointer;color:var(--muted);padding:2px 4px;font-size:16px;line-height:1;flex-shrink:0;border-radius:6px;transition:.15s;}
+.calc-item-remove:hover{color:var(--coral);background:rgba(255,107,90,.1);}
+.calc-add-row{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px;border:1.5px dashed rgba(0,191,166,.4);border-radius:12px;background:transparent;font-size:13px;font-weight:700;color:var(--teal);cursor:pointer;margin-bottom:10px;transition:.15s;}
+.calc-add-row:hover{background:rgba(0,191,166,.07);border-color:var(--teal);}
+.calc-total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:linear-gradient(135deg,rgba(0,191,166,.1),rgba(0,191,166,.04));border-radius:14px;margin-bottom:14px;border:1px solid rgba(0,191,166,.2);}
+.calc-total-label{font-size:12px;font-weight:700;color:var(--muted);}
+.calc-total-num{font-size:26px;font-weight:900;color:var(--teal);}
+.calc-total-currency{font-size:13px;font-weight:700;color:var(--muted);margin-left:4px;}
     .spot-card {
       --spot-rating-color: rgba(23,50,77,.1);
       border-left: 6px solid transparent;
@@ -6719,6 +6737,7 @@
     let checkinUploading = false;
     let expensesRealtimeChannel = null;
     let expenseDraft = null;
+    let calcDraftItems = []; // [{id, name, amount}] for mini-receipt calculator
     let expenseSaving = false;
     let spotReviewUploading = false;
 
@@ -7363,17 +7382,29 @@
       return {income,expense,balance:income-expense,byCategory};
     }
     function submitPersonalEntry() {
-      const amount=parseFloat(document.getElementById("pl-amount")?.value)||0;
-      if(!amount) return;
+      const m=appState.modal||{};
+      const isCalc=!!(m.calcMode&&m.entryType!=="income");
+      let amount, noteVal;
+      if(isCalc){
+        amount=getCalcTotal();
+        if(!amount){return;}
+        const noteInput=document.getElementById("pl-note")?.value?.trim()||"";
+        noteVal=noteInput||getCalcAutoNote();
+        calcDraftItems=[]; // reset after save
+      } else {
+        amount=parseFloat(document.getElementById("pl-amount")?.value)||0;
+        if(!amount) return;
+        noteVal=document.getElementById("pl-note")?.value?.trim()||"";
+      }
       addPersonalEntry({
-        type:appState.modal?.entryType||"expense",
+        type:m.entryType||"expense",
         amount,
         currency:document.getElementById("pl-currency")?.value||"HKD",
         category:document.getElementById("pl-category")?.value||"其他",
-        note:document.getElementById("pl-note")?.value?.trim()||"",
+        note:noteVal,
         date:document.getElementById("pl-date")?.value||new Date().toISOString().slice(0,10),
-        paidBy:appState.modal?.paidBy||"me",
-        forWhom:appState.modal?.forWhom||(appState.modal?.entryType==="income"?"me":"shared")
+        paidBy:m.paidBy||"me",
+        forWhom:m.forWhom||(m.entryType==="income"?"me":"shared")
       });
     }
 
@@ -7488,6 +7519,7 @@
     function renderAddPersonalEntryModal() {
       const m=appState.modal||{};
       const isIncome=m.entryType==="income";
+      const calcMode=!isIncome&&!!m.calcMode;
       const paidBy=m.paidBy||"me";
       const forWhom=m.forWhom||(isIncome?"me":"shared");
       const today=new Date().toISOString().slice(0,10);
@@ -7495,17 +7527,44 @@
       const incomeCats=PERSONAL_LEDGER_CATEGORIES.filter(c=>["收入","工资","其他"].includes(c.id));
       const cats=isIncome?incomeCats:expenseCats;
       const partnerName=partnerDisplayName();
+      // If entering calc mode for the first time, seed items
+      if (calcMode && calcDraftItems.length===0) initCalcItems();
+      const curTotal=calcMode?getCalcTotal():0;
+      const curCurrency=m.currency||"HKD";
       return `<div class="modal-overlay" onclick="setState({modal:null})"><div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-head"><h3>${isIncome?"💰 记收入":"💸 记支出"}</h3><button class="btn btn-ghost" onclick="setState({modal:null})">${icon("x","icon-sm")}</button></div>
         <form onsubmit="event.preventDefault();submitPersonalEntry()">
           <div class="modal-field"><label>类型</label><div style="display:flex;gap:8px;">
-            <button type="button" class="btn ${!isIncome?"btn-primary":"btn-ghost"}" onclick="setState({modal:{...appState.modal,entryType:'expense',forWhom:'shared'}})">支出</button>
-            <button type="button" class="btn ${isIncome?"btn-primary":"btn-ghost"}" onclick="setState({modal:{...appState.modal,entryType:'income',forWhom:'me',paidBy:'me'}})">收入</button>
+            <button type="button" class="btn ${!isIncome?"btn-primary":"btn-ghost"}" onclick="setState({modal:{...appState.modal,entryType:'expense',forWhom:'shared',calcMode:false}})">支出</button>
+            <button type="button" class="btn ${isIncome?"btn-primary":"btn-ghost"}" onclick="setState({modal:{...appState.modal,entryType:'income',forWhom:'me',paidBy:'me',calcMode:false}})">收入</button>
           </div></div>
-          <div class="modal-field"><label>金额</label><div style="display:flex;gap:8px;">
+
+          ${!isIncome?`<div class="calc-mode-toggle">
+            <button type="button" class="calc-mode-btn ${!calcMode?"active":""}" onclick="toggleCalcMode(false)">🔢 直接输入</button>
+            <button type="button" class="calc-mode-btn ${calcMode?"active":""}" onclick="toggleCalcMode(true)">🧾 明细合计</button>
+          </div>`:""}
+
+          ${calcMode?`
+          <div class="calc-items" id="calc-items-list">${calcItemsHTML()}</div>
+          <button type="button" class="calc-add-row" onclick="addCalcItem()">
+            ${icon("plus","icon-sm")} 添加一项
+          </button>
+          <div class="calc-total-row">
+            <span class="calc-total-label">合计</span>
+            <span><span class="calc-total-num" id="calc-total-num">${curTotal.toFixed(1)}</span>
+              <select id="pl-currency" style="border:0;background:transparent;font-weight:700;color:var(--muted);font-size:13px;cursor:pointer;">
+                <option value="HKD" ${curCurrency==="HKD"?"selected":""}>HKD</option>
+                <option value="NTD" ${curCurrency==="NTD"?"selected":""}>NTD</option>
+                <option value="CNY" ${curCurrency==="CNY"?"selected":""}>CNY</option>
+                <option value="USD" ${curCurrency==="USD"?"selected":""}>USD</option>
+              </select>
+            </span>
+          </div>`
+          :`<div class="modal-field"><label>金额</label><div style="display:flex;gap:8px;">
             <input id="pl-amount" type="number" step="0.01" min="0" placeholder="0.00" required style="flex:1;" autofocus />
             <select id="pl-currency"><option value="HKD">HKD</option><option value="NTD">NTD</option><option value="CNY">CNY</option><option value="USD">USD</option></select>
-          </div></div>
+          </div></div>`}
+
           ${!isIncome?`<div class="modal-field"><label>谁付款</label>
             <div class="paid-by-selector">
               <button type="button" class="pbs-btn ${paidBy==="me"?"active":""}" onclick="setState({modal:{...appState.modal,paidBy:'me'}})">我</button>
@@ -7523,12 +7582,71 @@
             <div class="ledger-cat-grid">${cats.map(c=>`<button type="button" class="ledger-cat-btn" data-cat="${escAttr(c.id)}" onclick="document.getElementById('pl-category').value='${escAttr(c.id)}';document.querySelectorAll('.ledger-cat-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">${c.emoji} ${c.id}</button>`).join("")}</div>
             <input id="pl-category" type="hidden" value="${isIncome?"收入":"餐饮"}" />
           </div>
-          <div class="modal-field"><label>备注</label><input id="pl-note" type="text" placeholder="可选说明…" /></div>
+          <div class="modal-field"><label>备注</label><input id="pl-note" type="text" placeholder="${calcMode?"自动填入明细，可修改…":"可选说明…"}" /></div>
           <div class="modal-field"><label>日期</label><input id="pl-date" type="date" value="${today}" /></div>
           <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="setState({modal:null})">取消</button><button type="submit" class="btn btn-primary">保存</button></div>
         </form>
       </div></div>`;
     }
+    // ── Mini-receipt calculator ──
+    function initCalcItems() {
+      calcDraftItems = [{ id: `ci-${Date.now()}`, name: "", amount: "" }];
+    }
+    function addCalcItem() {
+      calcDraftItems.push({ id: `ci-${Date.now()}-${Math.random().toString(36).slice(2,5)}`, name: "", amount: "" });
+      rerenderCalcItems();
+    }
+    function removeCalcItem(id) {
+      if (calcDraftItems.length <= 1) {
+        calcDraftItems = [{ id: `ci-${Date.now()}`, name: "", amount: "" }];
+      } else {
+        calcDraftItems = calcDraftItems.filter(i => i.id !== id);
+      }
+      rerenderCalcItems();
+    }
+    function updateCalcItem(id, field, value) {
+      const item = calcDraftItems.find(i => i.id === id);
+      if (item) item[field] = value;
+      updateCalcTotalDisplay();
+    }
+    function getCalcTotal() {
+      return calcDraftItems.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+    }
+    function getCalcAutoNote() {
+      return calcDraftItems
+        .filter(i => i.name.trim() || parseFloat(i.amount))
+        .map(i => `${i.name.trim() || "项目"} ${parseFloat(i.amount) || 0}`)
+        .join(" · ");
+    }
+    function updateCalcTotalDisplay() {
+      const el = document.getElementById("calc-total-num");
+      if (el) el.textContent = getCalcTotal().toFixed(1);
+    }
+    function calcItemsHTML() {
+      return calcDraftItems.map(item => `
+        <div class="calc-item-row">
+          <input class="calc-item-name" type="text" placeholder="项目名称…" value="${escAttr(item.name)}"
+            oninput="updateCalcItem('${escAttr(item.id)}','name',this.value)" />
+          <input class="calc-item-amt" type="number" step="0.1" min="0" placeholder="金额"
+            value="${escAttr(String(item.amount||""))}"
+            oninput="updateCalcItem('${escAttr(item.id)}','amount',this.value)" />
+          <button type="button" class="calc-item-remove" onclick="removeCalcItem('${escAttr(item.id)}')" title="删除">✕</button>
+        </div>`).join("");
+    }
+    function rerenderCalcItems() {
+      const container = document.getElementById("calc-items-list");
+      if (!container) return;
+      container.innerHTML = calcItemsHTML();
+      updateCalcTotalDisplay();
+      // Focus the name field of the last row
+      const inputs = container.querySelectorAll(".calc-item-name");
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    }
+    function toggleCalcMode(on) {
+      if (on) initCalcItems();
+      setState({ modal: { ...appState.modal, calcMode: !!on } });
+    }
+
     function withTimeout(promise, label = "请求", ms = 12000) {
       let timer;
       const timeout = new Promise((_, reject) => {
@@ -14420,6 +14538,10 @@ ${folders}
     window.openAddPersonalEntryModal = openAddPersonalEntryModal;
     window.submitPersonalEntry = submitPersonalEntry;
     window.deletePersonalEntry = deletePersonalEntry;
+    window.addCalcItem = addCalcItem;
+    window.removeCalcItem = removeCalcItem;
+    window.updateCalcItem = updateCalcItem;
+    window.toggleCalcMode = toggleCalcMode;
     window.togglePackingItem = togglePackingItem;
     window.addPackingCustomItem = addPackingCustomItem;
     window.saveDayDiary = saveDayDiary;
