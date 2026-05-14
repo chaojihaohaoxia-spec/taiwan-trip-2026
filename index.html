@@ -11971,15 +11971,29 @@
       if (cached) {
         currentUser = cached.user;
 
-        // CASE 1: User already had a trip view open (page refresh scenario).
-        // Render the cached state INSTANTLY — zero network, zero spinner.
-        // All Supabase refreshes happen silently in background.
-        const hasCachedTrip = appState.selectedTrip &&
-          !["auth", "journey-select"].includes(appState.currentView);
+        // Read raw saved state directly from localStorage.
+        // loadState() may have already reset appState (e.g. new browser session clears selectedTrip),
+        // so we check the raw storage to find if the user had a trip open last time.
+        const rawSaved = (() => {
+          try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch { return null; }
+        })();
 
-        if (hasCachedTrip) {
-          setState({ authLoading: false, authError: "", authMessage: "" });
-          // Background refresh — UI already showing, user won't notice the wait
+        const savedTrip = appState.selectedTrip || rawSaved?.selectedTrip;
+        const savedView = appState.selectedTrip ? appState.currentView : rawSaved?.currentView;
+        const hasCachedTripView = !!(savedTrip &&
+          savedView && !["auth", "journey-select", "no-trips"].includes(savedView));
+
+        if (hasCachedTripView) {
+          // Restore full app state from localStorage if loadState() reset it
+          if (!appState.selectedTrip && rawSaved?.selectedTrip) {
+            const restored = normalizeState({ ...defaultState, ...rawSaved });
+            appState = { ...restored, authLoading: false, authError: "", authMessage: "", drawer: null, modal: null, fabOpen: false };
+          } else {
+            appState = { ...appState, authLoading: false, authError: "", authMessage: "" };
+          }
+          render(); // Show trip immediately — zero network, zero spinner
+
+          // Background: validate session + silently refresh live data
           setTimeout(() => {
             supabaseClient.auth.getSession()
               .then(({ data: { session } }) => {
@@ -11995,29 +12009,23 @@
                   ]).then(() => render()).catch(() => {});
                 }
               })
-              .catch(() => {/* offline — cached content is fine */});
-          }, 100);
+              .catch(() => {/* offline — cached view is fine */});
+          }, 150);
           return;
         }
 
-        // CASE 2: First load in this browser session — no cached view yet.
-        // Kick off Supabase non-blocking; show auth screen briefly.
-        setState({ currentView: "auth", authLoading: true, authMessage: "正在进入...", authError: "" });
+        // No saved trip view — show login form immediately (no spinner, no loading state).
+        // Background session check will navigate to trips automatically when Supabase responds.
+        setState({ currentView: "auth", authLoading: false, authError: "", authMessage: "" });
         supabaseClient.auth.getSession()
           .then(({ data: { session } }) => {
-            if (!session) { resetAuthState(); return; }
-            return refreshCollaboration(session);
+            if (session && !appState.authLoading) return refreshCollaboration(session);
           })
-          .catch(() => {
-            // Supabase cold — try routing with cached token anyway
-            return refreshCollaboration(cached).catch(() => {
-              setState({ currentView: "auth", authLoading: false, authMessage: "", authError: "" });
-            });
-          });
+          .catch(() => {/* Supabase cold — user can log in manually when ready */});
         return;
       }
 
-      // No cached session — show login form immediately (no network call needed)
+      // No cached auth session at all — show login form
       setState({
         currentView: "auth",
         authLoading: false,
