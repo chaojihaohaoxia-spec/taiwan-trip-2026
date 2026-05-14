@@ -1,0 +1,41 @@
+{
+  "name": "旅行手帐",
+  "short_name": "旅行手帐",
+  "description": "把行程、账本、照片和同行计划收在一个旅行空间。",
+  "start_url": "/taiwan-trip-2026/",
+  "scope": "/taiwan-trip-2026/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFF8EA",
+  "theme_color": "#17324D",
+  "lang": "zh-Hant",
+  "categories": ["travel", "lifestyle"],
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "今日行程",
+      "short_name": "今日",
+      "url": "/taiwan-trip-2026/?shortcut=today",
+      "icons": [{ "src": "icon-192.svg", "sizes": "any" }]
+    },
+    {
+      "name": "账本",
+      "short_name": "账本",
+      "url": "/taiwan-trip-2026/?shortcut=expenses",
+      "icons": [{ "src": "icon-192.svg", "sizes": "any" }]
+    }
+  ]
+}

@@ -6,6 +6,13 @@
   <title>旅行手帐 · 旅行规划与记账 App</title>
   <meta name="description" content="把行程、账本、照片和同行计划收在一个可以共同编辑的旅行空间。" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2300bfa6'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-size='15' font-weight='700' fill='white'%3ETH%3C/text%3E%3C/svg%3E" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#17324D" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="旅行手帐" />
+  <link rel="apple-touch-icon" href="icon-192.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=Noto+Sans+SC:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;600;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -3495,9 +3502,17 @@
       gap: 2px;
     }
     .timeline-actual-time {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
       font-size: 11px;
-      color: #10b981;
-      font-weight: 600;
+      color: #0f766e;
+      background: rgba(16,185,129,.12);
+      border: 1px solid rgba(16,185,129,.18);
+      border-radius: 999px;
+      padding: 2px 6px;
+      font-weight: 850;
       margin-top: 2px;
       line-height: 1.2;
     }
@@ -3782,14 +3797,40 @@
       box-shadow: 0 22px 44px color-mix(in srgb, var(--accent) 16%, transparent);
       transform: translateY(-2px);
     }
+    .spot-card.visited { opacity: .72; }
+    .spot-card.visited .spot-title-block strong { text-decoration: line-through; color: var(--muted); }
+    .spot-visited-btn {
+      border: 0; background: transparent; cursor: pointer; padding: 4px 8px;
+      border-radius: 999px; font-size: 12px; font-weight: 700;
+      color: var(--muted); display: flex; align-items: center; gap: 4px;
+      transition: background .15s, color .15s; white-space: nowrap;
+    }
+    .spot-visited-btn:hover { background: rgba(23,50,77,.07); color: var(--ink); }
+    .spot-visited-btn.checked { background: rgba(107,203,119,.18); color: #2e7d32; }
+    .spot-visited-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: 700; color: #2e7d32;
+      background: rgba(107,203,119,.15); border-radius: 999px; padding: 2px 10px;
+    }
+    .spot-city-progress {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .spot-progress-bar {
+      height: 4px; border-radius: 2px; background: rgba(23,50,77,.1);
+      overflow: hidden; min-width: 60px; flex: 1;
+    }
+    .spot-progress-fill {
+      height: 100%; border-radius: 2px; background: var(--palm);
+      transition: width .4s var(--ease);
+    }
     .spot-card-header {
       width: 100%;
       border: 0;
       background: transparent;
       padding: 16px;
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      gap: 12px;
+      grid-template-columns: auto minmax(0, 1fr) auto auto;
+      gap: 10px;
       align-items: center;
       text-align: left;
       color: inherit;
@@ -7914,6 +7955,19 @@
       return ["planned", "done", "skipped"].includes(status) ? status : "planned";
     }
 
+    function normalizeActualTime(value) {
+      const text = String(value || "").trim();
+      return /^--?:--/.test(text) ? "" : text;
+    }
+
+    function itemActualTime(item) {
+      return normalizeActualTime(item?.actualTime ?? item?.actual_time ?? item?.arrivalTime ?? item?.arrival_time ?? "");
+    }
+
+    function itemActualNote(item) {
+      return item?.actualNote ?? item?.actual_note ?? "";
+    }
+
     function getEffectiveItem(item) {
       if (!item) return null;
       const edits = (appState.itemEdits || {})[item.id] || {};
@@ -7935,6 +7989,10 @@
         detail,
         description: detail,
         notes: merged.notes ?? detail,
+        actualTime: itemActualTime(merged),
+        actual_time: itemActualTime(merged),
+        actualNote: itemActualNote(merged),
+        actual_note: itemActualNote(merged),
         dayId: merged.dayId || day?.id || "",
         cityId: loc.cityId || day?.cityId || merged.cityId,
         lat: loc.lat,
@@ -9910,6 +9968,8 @@
 
     function renderSpotCityGroup(cityName, names) {
       const rated = names.filter(name => spotReview(spotIdFor(cityName, name)).rating).length;
+      const visited = names.filter(name => !!appState.checklistStatus[spotIdFor(cityName, name)]).length;
+      const pct = names.length ? Math.round(visited / names.length * 100) : 0;
       return `
         <section class="spot-city-group">
           <div class="spot-city-head">
@@ -9917,7 +9977,13 @@
               <span class="tag">${esc(tripData.cities[SPOT_CITY_IDS[cityName]]?.range || "待规划")}</span>
               <h2 class="serif">${esc(cityName)}</h2>
             </div>
-            <span class="rail-muted">${rated}/${names.length} 已评级</span>
+            <div class="spot-city-progress">
+              <span class="rail-muted">${rated}/${names.length} 已评级</span>
+              <span style="color:#2e7d32;font-weight:700;font-size:13px;">${icon("check-circle-2","icon-sm")} ${visited}/${names.length} 已去</span>
+            </div>
+          </div>
+          <div class="spot-progress-bar" style="margin-bottom:12px;">
+            <div class="spot-progress-fill" style="width:${pct}%"></div>
           </div>
           <div class="spot-list">
             ${names.map(name => renderSpotReviewCard(spotEntryById(spotIdFor(cityName, name)))).join("")}
@@ -9968,9 +10034,10 @@
       const selected = appState.selectedSpotId === spot.id;
       const rating = review.rating;
       const canEdit = canEditTrip();
+      const visited = !!appState.checklistStatus[spot.id];
       const style = `--spot-rating-color:${ratingColor(rating)};`;
       return `
-        <article id="${esc(spotDomId(spot.id))}" class="spot-card ${rating ? "rated" : ""} ${selected ? "selected" : ""}" style="${style}">
+        <article id="${esc(spotDomId(spot.id))}" class="spot-card ${rating ? "rated" : ""} ${selected ? "selected" : ""} ${visited ? "visited" : ""}" style="${style}">
           <div class="spot-card-header">
             <button class="spot-rating-slot ${rating ? "" : "empty"}" onclick="openRatingModal('${escAttr(spot.id)}')" aria-label="${rating ? "更换评级" : "选择评级"}">
               ${rating ? renderRatingBadge(rating) : icon("star", "icon-sm")}
@@ -9979,6 +10046,11 @@
               <strong>${esc(spot.name)}</strong>
               <span>${esc(spotSubtitle(spot))}</span>
             </div>
+            ${canEdit ? `
+              <button class="spot-visited-btn ${visited ? "checked" : ""}" onclick="event.stopPropagation(); toggleChecklist('${escAttr(spot.id)}')" aria-label="${visited ? "取消已去" : "标记已去"}">
+                ${visited ? `${icon("check-circle-2", "icon-sm")} 已去` : `${icon("circle", "icon-sm")} 已去`}
+              </button>
+            ` : (visited ? `<span class="spot-visited-pill">${icon("check-circle-2", "icon-sm")} 已去</span>` : "")}
             <button class="spot-expand-btn" onclick="toggleSpotExpanded('${escAttr(spot.id)}')">
               ${icon(expanded ? "chevron-up" : "chevron-down", "icon-sm")} ${expanded ? "收起" : "展开"}
             </button>
@@ -10442,8 +10514,8 @@
       const editable = canEditTrip();
       const edits = (appState.itemEdits || {})[item.id] || {};
       const itemStatus = normalizeItemStatus(edits.status || item.status || "planned");
-      const actualTime = edits.actualTime || item.actualTime || "";
-      const actualNote = edits.actualNote || item.actualNote || "";
+      const actualTime = itemActualTime({ ...item, ...edits });
+      const actualNote = itemActualNote({ ...item, ...edits });
       const statusClass = itemStatus === "done" ? "status-done" : itemStatus === "skipped" ? "status-skipped" : "";
       const spot = spotEntryForTimelineItem(item);
       const timelineRating = spot ? spotReview(spot.id).rating : null;
@@ -10454,7 +10526,7 @@
           ${timelineRating ? `<button class="timeline-rating-jump" onclick="event.stopPropagation(); goSpotReviews('${escAttr(spot.id)}')" aria-label="查看 ${esc(timelineRating)} 评级">${renderRatingBadge(timelineRating)}</button>` : ""}
           <div class="timeline-time">
             <span>${esc(item.time)}</span>
-            ${actualTime ? `<span class="timeline-actual-time">实际: ${esc(actualTime)}</span>` : ""}
+            ${actualTime ? `<span class="timeline-actual-time">到达 ${esc(actualTime)}</span>` : ""}
           </div>
           <div class="timeline-body">
             <h3 class="timeline-title ${timelineRating ? "timeline-rating-spacer" : ""}">${icon(meta.icon, "icon-sm")} ${esc(item.title)} <span class="tag ${meta.tone}">${esc(meta.label)}</span></h3>
@@ -11153,7 +11225,7 @@
               <div class="expense-form-grid">
                 <div class="field">
                   <label for="itinerary-actual-time">实际到达时间（可选）</label>
-                  <input id="itinerary-actual-time" type="time" name="actualTime" value="${esc(effective.actualTime || "")}" placeholder="HH:MM" />
+                  <input id="itinerary-actual-time" type="time" name="actualTime" value="${esc(itemActualTime(effective))}" placeholder="HH:MM" />
                 </div>
                 <div class="field">
                   <label>状态</label>
@@ -11167,7 +11239,7 @@
               </div>
               <div class="field">
                 <label for="itinerary-actual-note">实际情况备注</label>
-                <textarea id="itinerary-actual-note" name="actualNote" rows="2" placeholder="比如：人很多但很好玩，晚了20分钟">${esc(effective.actualNote || "")}</textarea>
+                <textarea id="itinerary-actual-note" name="actualNote" rows="2" placeholder="比如：人很多但很好玩，晚了20分钟">${esc(itemActualNote(effective))}</textarea>
               </div>
             ` : ""}
             <div class="modal-actions">
@@ -11551,10 +11623,10 @@
       const end = new Date(tripData.endDate);
       if (now < start) {
         const daysLeft = Math.ceil((start - now) / 86400000);
-        return `${daysLeft} days`;
+        return `还有 ${daysLeft} 天`;
       }
-      if (now <= end) return "On trip";
-      return "Completed";
+      if (now <= end) return "旅行中 🎉";
+      return "已完成";
     }
 
     function cleanupLeafletMaps() {
@@ -12688,7 +12760,7 @@
       const duration = document.getElementById("itinerary-duration")?.value.trim() || "";
       const type = document.getElementById("itinerary-type")?.value || "other";
       const notes = document.getElementById("itinerary-notes")?.value.trim() || "";
-      const actualTime = document.getElementById("itinerary-actual-time")?.value.trim() || "";
+      const actualTime = normalizeActualTime(document.getElementById("itinerary-actual-time")?.value || "");
       const actualNote = document.getElementById("itinerary-actual-note")?.value.trim() || "";
       const existingStatus = appState.modal?.itemId ? (appState.itemEdits || {})[appState.modal.itemId]?.status : "";
       const status = normalizeItemStatus(document.getElementById("itinerary-status")?.value || existingStatus || "planned");
@@ -12706,7 +12778,9 @@
         notes,
         detail: notes,
         actualTime,
+        actual_time: actualTime,
         actualNote,
+        actual_note: actualNote,
         status,
         ...placeFields
       };
@@ -13757,6 +13831,16 @@ ${folders}
     async function init() {
       bindInteractionFeedback();
       await initializeAuthGate();
+      // Handle PWA shortcuts (?shortcut=today / expenses)
+      const shortcut = new URLSearchParams(location.search).get("shortcut");
+      if (shortcut === "today" && currentUser) {
+        setTimeout(() => {
+          const todayId = nearestTripDayId();
+          if (todayId) selectDay(todayId, tripData.daysById[todayId]?.cityId);
+        }, 200);
+      } else if (shortcut === "expenses" && currentUser) {
+        setTimeout(() => goExpenses(), 200);
+      }
     }
 
     init();
@@ -13765,6 +13849,14 @@ ${folders}
     setInterval(() => {
       if (getTripPhase().phase === "during") render();
     }, 60 * 1000);
+
+    // PWA Service Worker 注册
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js", { scope: "/taiwan-trip-2026/" })
+          .catch(() => {/* SW 可选，失败不影响主功能 */});
+      });
+    }
   </script>
 </body>
 </html>
