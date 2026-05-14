@@ -1,0 +1,37 @@
+name: Keep Supabase Alive
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 07:10 Asia/Taipei. GitHub schedules use UTC.
+    - cron: "10 23 * * *"
+
+jobs:
+  ping:
+    name: Ping Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Wake Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+            echo "SUPABASE_URL or SUPABASE_ANON_KEY is missing."
+            exit 1
+          fi
+
+          response_code="$(curl -sS -o /tmp/supabase-response.txt -w "%{http_code}" \
+            "${SUPABASE_URL%/}/rest/v1/trips?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")"
+
+          echo "Supabase responded with HTTP ${response_code}."
+          cat /tmp/supabase-response.txt || true
+
+          if [ "${response_code}" = "000" ] || [ "${response_code}" -ge 500 ]; then
+            exit 1
+          fi
