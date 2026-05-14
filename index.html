@@ -3780,6 +3780,74 @@
       display: grid;
       gap: 10px;
     }
+/* ── Weather Widget ── */
+.weather-widget { display:flex; gap:6px; flex-wrap:wrap; padding:10px 0 6px; }
+.weather-loading { color:var(--muted); font-size:13px; align-items:center; }
+.weather-day { display:flex; flex-direction:column; align-items:center; gap:2px; background:rgba(255,255,255,.7); border-radius:14px; padding:8px 10px; min-width:52px; flex:1; }
+.weather-label { font-size:11px; font-weight:700; color:var(--muted); }
+.weather-icon { font-size:20px; line-height:1; }
+.weather-temp { font-size:12px; font-weight:700; color:var(--ink); }
+.weather-min { color:var(--muted); }
+/* ── Packing List ── */
+.packing-header { margin-bottom:16px; }
+.packing-progress-bar { height:6px; background:rgba(23,50,77,.1); border-radius:3px; margin-bottom:6px; }
+.packing-progress-fill { height:100%; border-radius:3px; background:var(--palm); transition:width .4s; }
+.packing-progress-text { font-size:13px; font-weight:700; color:var(--muted); }
+.packing-category { border-radius:16px; overflow:hidden; background:rgba(255,255,255,.7); margin-bottom:10px; }
+.packing-category summary { padding:12px 16px; cursor:pointer; display:flex; justify-content:space-between; font-size:14px; align-items:center; }
+.packing-cat-count { color:var(--muted); font-size:12px; }
+.packing-items { padding:4px 16px 12px; display:grid; gap:4px; }
+.packing-item { display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer; padding:4px 0; }
+.packing-item.done span { text-decoration:line-through; color:var(--muted); }
+.packing-add-row { display:flex; gap:8px; margin-top:8px; }
+.packing-custom-input { flex:1; border:1px solid var(--line); border-radius:10px; padding:6px 10px; font-size:13px; background:var(--paper); }
+/* ── Currency Converter ── */
+.currency-widget { padding:16px 20px; margin-bottom:16px; }
+.currency-title { display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; margin-bottom:12px; flex-wrap:wrap; }
+.currency-rate-tag { font-size:12px; font-weight:600; background:var(--sand); border-radius:999px; padding:2px 10px; color:var(--ink); }
+.currency-inputs { display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; }
+.currency-field { display:flex; flex-direction:column; gap:4px; flex:1; min-width:100px; }
+.currency-field label { font-size:12px; font-weight:700; color:var(--muted); }
+.currency-field input { border:1.5px solid var(--line); border-radius:12px; padding:10px 12px; font-size:16px; font-weight:700; background:var(--paper); width:100%; }
+.currency-arrow { font-size:18px; padding-bottom:8px; color:var(--muted); }
+/* ── Daily Diary ── */
+.diary-tab { display:grid; gap:16px; }
+.diary-mood-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.diary-label { font-size:13px; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:4px; }
+.diary-moods { display:flex; gap:6px; }
+.mood-btn { font-size:22px; background:transparent; border:2px solid transparent; border-radius:50%; width:42px; height:42px; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; }
+.mood-btn:hover,.mood-btn.active { border-color:var(--teal); background:rgba(0,191,166,.1); transform:scale(1.15); }
+.diary-textarea { width:100%; min-height:160px; border:1.5px solid var(--line); border-radius:16px; padding:14px 16px; font-size:15px; font-family:var(--font-serif); line-height:1.7; resize:vertical; background:var(--paper); box-sizing:border-box; }
+.diary-textarea:focus { outline:none; border-color:var(--teal); }
+.diary-readonly { min-height:80px; padding:14px 16px; font-size:15px; font-family:var(--font-serif); line-height:1.7; color:var(--muted); }
+.diary-meta { font-size:12px; color:var(--muted); text-align:right; }
+/* ── Personal Ledger ── */
+.ledger-stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+.ledger-stat-card { background:rgba(255,255,255,.85); border-radius:20px; padding:16px; text-align:center; box-shadow:0 8px 24px rgba(23,50,77,.08); }
+.ledger-stat-card span { display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:4px; }
+.ledger-stat-card strong { font-size:18px; font-weight:800; }
+.ledger-stat-card.income strong { color:#2e7d32; }
+.ledger-stat-card.expense strong { color:var(--coral); }
+.ledger-stat-card.positive strong { color:#2e7d32; }
+.ledger-stat-card.negative strong { color:var(--coral); }
+.ledger-month-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.ledger-category-bars { padding:16px 20px; margin-bottom:16px; }
+.ledger-entries { display:grid; gap:8px; margin-bottom:80px; }
+.ledger-date-group { background:rgba(255,255,255,.85); border-radius:20px; overflow:hidden; box-shadow:0 6px 18px rgba(23,50,77,.07); }
+.ledger-date-label { padding:10px 16px 4px; font-size:12px; font-weight:700; color:var(--muted); }
+.ledger-entry { display:flex; align-items:center; gap:10px; padding:10px 16px; border-top:1px solid var(--line); }
+.ledger-entry-icon { font-size:20px; }
+.ledger-entry-body { flex:1; min-width:0; }
+.ledger-entry-body strong { font-size:14px; display:block; }
+.ledger-entry-body span { font-size:12px; color:var(--muted); }
+.ledger-entry-amount { font-weight:700; font-size:15px; white-space:nowrap; }
+.ledger-entry-amount.income { color:#2e7d32; }
+.ledger-entry-amount.expense { color:var(--coral); }
+.btn-icon-ghost { border:0; background:transparent; padding:4px; cursor:pointer; color:var(--muted); border-radius:6px; display:inline-flex; align-items:center; }
+.btn-icon-ghost:hover { color:var(--coral); }
+.ledger-cat-grid { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+.ledger-cat-btn { border:1.5px solid var(--line); border-radius:999px; padding:5px 12px; font-size:13px; background:transparent; cursor:pointer; transition:all .15s; }
+.ledger-cat-btn.active { border-color:var(--teal); background:rgba(0,191,166,.1); font-weight:700; }
     .spot-card {
       --spot-rating-color: rgba(23,50,77,.1);
       border-left: 6px solid transparent;
@@ -6573,6 +6641,33 @@
 
     hydrateTimelineMapData();
 
+    const CITY_COORDS = {
+      kaohsiung: { lat: 22.6273, lon: 120.3014, name: "高雄" },
+      kenting:   { lat: 21.9399, lon: 120.8435, name: "墾丁" },
+      taipei:    { lat: 25.0330, lon: 121.5654, name: "台北" }
+    };
+    const WMO_ICONS = { 0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌦",55:"🌧",61:"🌧",63:"🌧",65:"🌧",71:"🌨",73:"🌨",75:"🌨",80:"🌦",81:"🌧",82:"⛈",95:"⛈",96:"⛈",99:"⛈" };
+    const PACKING_TEMPLATE = {
+      "证件📋": ["护照","港澳通行证","信用卡","备用现金(NTD)","保险单"],
+      "衣物👕": ["上衣 x3","裤子 x2","内衣裤 x3","袜子 x3","防晒外套","泳衣"],
+      "电子🔌": ["手机充电器","充电宝","耳机","转接插头(两脚)"],
+      "洗漱🪥": ["牙刷牙膏","洗发水","沐浴露","护肤品","洗脸巾"],
+      "药物💊": ["感冒药","肠胃药","晕车药","创可贴","防蚊液","防晒霜SPF50"],
+      "其他🎒": ["墨镜","雨伞","水杯","零食"]
+    };
+    const PERSONAL_LEDGER_CATEGORIES = [
+      { id:"餐饮", emoji:"🍜", color:"#FF6B5A" },
+      { id:"交通", emoji:"🚇", color:"#1CA7EC" },
+      { id:"购物", emoji:"🛍", color:"#9B59B6" },
+      { id:"娱乐", emoji:"🎬", color:"#FFD166" },
+      { id:"住房", emoji:"🏠", color:"#00BFA6" },
+      { id:"医疗", emoji:"💊", color:"#E74C3C" },
+      { id:"收入", emoji:"💰", color:"#2ECC71" },
+      { id:"工资", emoji:"💼", color:"#27AE60" },
+      { id:"其他", emoji:"📝", color:"#95A5A6" }
+    ];
+    let weatherCache = {};
+    let exchangeRates = { HKD_NTD: 4.35, NTD_HKD: 0.230, fetchedAt: 0 };
     let currentUser = null;
     let currentMembership = null;
     let tripMembers = [];
@@ -6639,7 +6734,11 @@
       typeFilter: "all",
       drawer: null,
       modal: null,
-      toast: ""
+      toast: "",
+      packingList: {},
+      dayDiaries: {},
+      personalLedger: [],
+      personalLedgerMonth: ""
     };
 
     let appState = loadState();
@@ -6830,6 +6929,7 @@
         const state = normalizeState(saved ? { ...defaultState, ...saved } : { ...defaultState }, saved?.designVersion, saved?.homeSeenVersion);
         state.expenses = mergeExpenseLists(state.expenses, loadExpensesFromLocalStorage());
         persistExpensesToLocalStorage(state.expenses);
+        if (!state.personalLedgerMonth) state.personalLedgerMonth = new Date().toISOString().slice(0, 7);
         if (!sessionStorage.getItem(SESSION_HOME_KEY)) {
           sessionStorage.setItem(SESSION_HOME_KEY, "1");
           // If the user has a cached auth token AND a previously loaded trip view,
@@ -7000,6 +7100,206 @@
       return `<span class="role-pill ${esc(safeRole)}">${icon(role === "viewer" ? "eye" : role === "editor" ? "pencil" : "hard-drive", "icon-sm")} ${esc(roleLabel(role))}</span>`;
     }
 
+    // ── Weather ──
+    async function loadWeather(cityId) {
+      const now = Date.now();
+      const cached = weatherCache[cityId];
+      if (cached && now - cached.fetchedAt < 3600000) return cached.data;
+      const c = CITY_COORDS[cityId];
+      if (!c) return null;
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTaipei&forecast_days=5`;
+        const res = await fetch(url);
+        const json = await res.json();
+        const data = json.daily;
+        const days = data.time.map((date, i) => ({
+          date, icon: WMO_ICONS[data.weathercode[i]] || "🌡",
+          max: Math.round(data.temperature_2m_max[i]),
+          min: Math.round(data.temperature_2m_min[i])
+        }));
+        weatherCache[cityId] = { data: days, fetchedAt: now };
+        return days;
+      } catch { return null; }
+    }
+    function renderWeatherWidget(cityId) {
+      const cached = weatherCache[cityId];
+      if (!cached) {
+        loadWeather(cityId).then(d => { if (d) render(); });
+        return `<div class="weather-widget weather-loading">${icon("cloud","icon-sm")} 天气加载中…</div>`;
+      }
+      const days = cached.data;
+      return `<div class="weather-widget">${days.map((d,i) => {
+        const label = i===0?"今天":i===1?"明天":new Date(d.date+"T12:00:00").toLocaleDateString("zh-TW",{weekday:"short"});
+        return `<div class="weather-day"><span class="weather-label">${label}</span><span class="weather-icon">${d.icon}</span><span class="weather-temp">${d.max}°/<span class="weather-min">${d.min}°</span></span></div>`;
+      }).join("")}</div>`;
+    }
+    // ── Currency ──
+    async function fetchExchangeRates() {
+      try {
+        const res = await fetch("https://api.frankfurter.app/latest?from=HKD&to=TWD");
+        const json = await res.json();
+        const rate = json.rates?.TWD;
+        if (rate) exchangeRates = { HKD_NTD: rate, NTD_HKD: 1/rate, fetchedAt: Date.now() };
+        render();
+      } catch {}
+    }
+    function renderCurrencyWidget() {
+      if (!exchangeRates.fetchedAt) fetchExchangeRates();
+      const rate = exchangeRates.HKD_NTD;
+      const rateBack = exchangeRates.NTD_HKD;
+      return `<div class="currency-widget card">
+        <div class="currency-title">${icon("arrow-left-right","icon-sm")} 汇率换算 <span class="currency-rate-tag">1 HKD ≈ ${rate.toFixed(2)} NTD</span></div>
+        <div class="currency-inputs">
+          <div class="currency-field"><label>港元 HKD</label><input type="number" id="currency-hkd" placeholder="0" oninput="const v=parseFloat(this.value)||0;const el=document.getElementById('currency-ntd');if(el)el.value=v?(v*${rate}).toFixed(0):'';" /></div>
+          <span class="currency-arrow">⇄</span>
+          <div class="currency-field"><label>台币 NTD</label><input type="number" id="currency-ntd" placeholder="0" oninput="const v=parseFloat(this.value)||0;const el=document.getElementById('currency-hkd');if(el)el.value=v?(v*${rateBack}).toFixed(1):'';" /></div>
+        </div>
+      </div>`;
+    }
+    // ── Packing List ──
+    function packingStats() {
+      let total=0,done=0;
+      Object.entries(PACKING_TEMPLATE).forEach(([cat,items]) => {
+        const catState = appState.packingList[cat]||{};
+        const custom = Object.keys(catState).filter(k=>!items.includes(k));
+        [...items,...custom].forEach(item => { total++; if(catState[item]) done++; });
+      });
+      return {total,done};
+    }
+    function togglePackingItem(cat,item) {
+      if(!requireEditor("修改打包清单")) return;
+      const catItems={...(appState.packingList[cat]||{})};
+      catItems[item]=!catItems[item];
+      setState({packingList:{...appState.packingList,[cat]:catItems}});
+    }
+    function addPackingCustomItem(cat) {
+      const input=document.getElementById(`packing-custom-${cat}`);
+      const val=input?.value?.trim();
+      if(!val) return;
+      togglePackingItem(cat,val);
+      if(input) input.value="";
+    }
+    function renderPackingListDrawer() {
+      const stats=packingStats();
+      const pct=stats.total?Math.round(stats.done/stats.total*100):0;
+      return `<div class="packing-header">
+        <div class="packing-progress-bar"><div class="packing-progress-fill" style="width:${pct}%"></div></div>
+        <span class="packing-progress-text">${stats.done}/${stats.total} 已打包 · ${pct}%</span>
+      </div>
+      ${Object.entries(PACKING_TEMPLATE).map(([cat,items])=>{
+        const catState=appState.packingList[cat]||{};
+        const custom=Object.keys(catState).filter(k=>!items.includes(k));
+        const all=[...items,...custom];
+        const done=all.filter(i=>catState[i]).length;
+        return `<details class="packing-category" open><summary><strong>${esc(cat)}</strong><span class="packing-cat-count">${done}/${all.length}</span></summary>
+          <div class="packing-items">${all.map(item=>`<label class="packing-item ${catState[item]?"done":""}"><input type="checkbox" ${catState[item]?"checked":""} onchange="togglePackingItem('${escAttr(cat)}','${escAttr(item)}')" /><span>${esc(item)}</span></label>`).join("")}
+          <div class="packing-add-row"><input id="packing-custom-${escAttr(cat)}" class="packing-custom-input" placeholder="添加自定义…" onkeydown="if(event.key==='Enter')addPackingCustomItem('${escAttr(cat)}')" /><button class="btn btn-small btn-ghost" onclick="addPackingCustomItem('${escAttr(cat)}')">${icon("plus","icon-sm")}</button></div>
+          </div></details>`;
+      }).join("")}`;
+    }
+    // ── Diary ──
+    const MOOD_OPTIONS = [{id:"great",emoji:"🌟",label:"很棒"},{id:"good",emoji:"😊",label:"开心"},{id:"okay",emoji:"😌",label:"平静"},{id:"tired",emoji:"😴",label:"很累"},{id:"bad",emoji:"🌧",label:"糟糕"}];
+    function saveDayDiary(dayId,field,value) {
+      if(!requireEditor("编辑日记")) return;
+      const diary={...(appState.dayDiaries[dayId]||{}),[field]:value,updatedAt:new Date().toISOString()};
+      setState({dayDiaries:{...appState.dayDiaries,[dayId]:diary}});
+    }
+    function renderDiaryTab(day) {
+      const diary=appState.dayDiaries[day.id]||{};
+      const canEdit=canEditTrip();
+      return `<div class="diary-tab">
+        <div class="diary-mood-row"><span class="diary-label">${icon("heart","icon-sm")} 今天的心情</span>
+          <div class="diary-moods">${MOOD_OPTIONS.map(m=>`<button class="mood-btn ${diary.mood===m.id?"active":""}" onclick="saveDayDiary('${escAttr(day.id)}','mood','${m.id}')" title="${m.label}" ${!canEdit?"disabled":""}>${m.emoji}</button>`).join("")}</div>
+        </div>
+        ${canEdit
+          ?`<textarea class="diary-textarea" placeholder="今天发生了什么？有什么让你印象深刻的？写下来吧…" oninput="saveDayDiary('${escAttr(day.id)}','text',this.value)">${esc(diary.text||"")}</textarea>`
+          :`<div class="diary-readonly">${esc(diary.text||"今天还没有日记。")}</div>`}
+        ${diary.updatedAt?`<div class="diary-meta">最后更新 ${new Date(diary.updatedAt).toLocaleString("zh-TW",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div>`:""}
+      </div>`;
+    }
+    // ── Personal Ledger ──
+    function openPersonalLedger() { setState({currentView:"personal-ledger",drawer:null,fabOpen:false}); }
+    function openAddPersonalEntryModal(type="expense") { setState({modal:{type:"add-personal-entry",entryType:type}}); }
+    function addPersonalEntry(entry) {
+      if(!requireEditor("添加账单")) return;
+      const newEntry={id:`pl-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,type:entry.type||"expense",amount:parseFloat(entry.amount)||0,currency:entry.currency||"HKD",category:entry.category||"其他",note:entry.note||"",date:entry.date||new Date().toISOString().slice(0,10),createdAt:new Date().toISOString()};
+      setState({personalLedger:[newEntry,...(appState.personalLedger||[])],modal:null});
+    }
+    function deletePersonalEntry(id) {
+      if(!requireEditor("删除账单")) return;
+      setState({personalLedger:(appState.personalLedger||[]).filter(e=>e.id!==id)});
+    }
+    function personalLedgerMonthEntries() {
+      const month=appState.personalLedgerMonth||new Date().toISOString().slice(0,7);
+      return (appState.personalLedger||[]).filter(e=>e.date.startsWith(month));
+    }
+    function personalLedgerStats(entries) {
+      const income=entries.filter(e=>e.type==="income").reduce((s,e)=>s+e.amount,0);
+      const expense=entries.filter(e=>e.type==="expense").reduce((s,e)=>s+e.amount,0);
+      const byCategory={};
+      entries.filter(e=>e.type==="expense").forEach(e=>{byCategory[e.category]=(byCategory[e.category]||0)+e.amount;});
+      return {income,expense,balance:income-expense,byCategory};
+    }
+    function submitPersonalEntry() {
+      const amount=parseFloat(document.getElementById("pl-amount")?.value)||0;
+      if(!amount) return;
+      addPersonalEntry({type:appState.modal?.entryType||"expense",amount,currency:document.getElementById("pl-currency")?.value||"HKD",category:document.getElementById("pl-category")?.value||"其他",note:document.getElementById("pl-note")?.value?.trim()||"",date:document.getElementById("pl-date")?.value||new Date().toISOString().slice(0,10)});
+    }
+    function renderPersonalLedgerPage() {
+      const month=appState.personalLedgerMonth||new Date().toISOString().slice(0,7);
+      const entries=personalLedgerMonthEntries();
+      const stats=personalLedgerStats(entries);
+      const allMonths=[...new Set((appState.personalLedger||[]).map(e=>e.date.slice(0,7)))].sort().reverse();
+      if(!allMonths.includes(month)) allMonths.unshift(month);
+      const grouped={};
+      entries.forEach(e=>{if(!grouped[e.date])grouped[e.date]=[];grouped[e.date].push(e);});
+      const sortedDates=Object.keys(grouped).sort().reverse();
+      return `<section class="page-hero">
+        <div class="crumb-row"><button class="btn btn-small btn-ghost" onclick="goDashboard()">${icon("chevron-left","icon-sm")} 返回</button></div>
+        <div class="page-title-row">
+          <div><span class="tag sage">${icon("wallet","icon-sm")} 日常账本</span><h1 class="page-title serif">💰 个人记账</h1><p class="page-intro">随时记录收入支出，不限于旅行。</p></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost" onclick="openAddPersonalEntryModal('expense')">${icon("minus","icon-sm")} 记支出</button>
+            <button class="btn btn-primary" onclick="openAddPersonalEntryModal('income')">${icon("plus","icon-sm")} 记收入</button>
+          </div>
+        </div>
+      </section>
+      <div class="ledger-stats-row">
+        <div class="ledger-stat-card income"><span>收入</span><strong>+${stats.income.toFixed(1)}</strong></div>
+        <div class="ledger-stat-card expense"><span>支出</span><strong>-${stats.expense.toFixed(1)}</strong></div>
+        <div class="ledger-stat-card ${stats.balance>=0?"positive":"negative"}"><span>结余</span><strong>${stats.balance>=0?"+":""}${stats.balance.toFixed(1)}</strong></div>
+      </div>
+      <div class="ledger-month-tabs">${allMonths.slice(0,6).map(m=>`<button class="chip ${m===month?"active":""}" onclick="setState({personalLedgerMonth:'${m}'})">${m}</button>`).join("")}</div>
+      ${Object.entries(stats.byCategory).length?`<section class="ledger-category-bars card"><h3 style="margin:0 0 12px;">${icon("pie-chart","icon-sm")} 支出分类</h3>${Object.entries(stats.byCategory).sort((a,b)=>b[1]-a[1]).map(([cat,amount])=>{const meta=PERSONAL_LEDGER_CATEGORIES.find(c=>c.id===cat)||{emoji:"📝",color:"#95A5A6"};const pct=stats.expense?Math.round(amount/stats.expense*100):0;return `<div class="category-bar-row"><div class="category-bar-label"><span>${meta.emoji} ${esc(cat)}</span><b>${pct}%</b></div><div class="category-bar-track"><div class="category-bar-fill" style="width:${Math.max(pct,3)}%;background:${meta.color};"></div></div></div>`;}).join("")}</section>`:""}
+      <div class="ledger-entries">${sortedDates.length===0?`<div class="empty-state card"><h2 class="serif">本月还没有记录</h2><p>点击"记支出"或"记收入"开始记账。</p></div>`:sortedDates.map(date=>`<div class="ledger-date-group"><div class="ledger-date-label">${new Date(date+"T12:00:00").toLocaleDateString("zh-TW",{month:"long",day:"numeric",weekday:"short"})}</div>${grouped[date].map(e=>{const meta=PERSONAL_LEDGER_CATEGORIES.find(c=>c.id===e.category)||{emoji:"📝"};const isIncome=e.type==="income";return `<div class="ledger-entry"><span class="ledger-entry-icon">${meta.emoji}</span><div class="ledger-entry-body"><strong>${esc(e.category)}</strong>${e.note?`<span>${esc(e.note)}</span>`:""}</div><div class="ledger-entry-amount ${isIncome?"income":"expense"}">${isIncome?"+":"-"}${e.amount.toFixed(1)} ${esc(e.currency)}</div>${canEditTrip()?`<button class="btn-icon-ghost" onclick="deletePersonalEntry('${escAttr(e.id)}')">${icon("trash-2","icon-xs")}</button>`:""}</div>`;}).join("")}</div>`).join("")}</div>`;
+    }
+    function renderAddPersonalEntryModal() {
+      const isIncome=appState.modal?.entryType==="income";
+      const today=new Date().toISOString().slice(0,10);
+      const expenseCats=PERSONAL_LEDGER_CATEGORIES.filter(c=>!["收入","工资"].includes(c.id));
+      const incomeCats=PERSONAL_LEDGER_CATEGORIES.filter(c=>["收入","工资","其他"].includes(c.id));
+      const cats=isIncome?incomeCats:expenseCats;
+      return `<div class="modal-overlay" onclick="setState({modal:null})"><div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-head"><h3>${isIncome?"💰 记收入":"💸 记支出"}</h3><button class="btn btn-ghost" onclick="setState({modal:null})">${icon("x","icon-sm")}</button></div>
+        <form onsubmit="event.preventDefault();submitPersonalEntry()">
+          <div class="modal-field"><label>类型</label><div style="display:flex;gap:8px;">
+            <button type="button" class="btn ${!isIncome?"btn-primary":"btn-ghost"}" onclick="setState({modal:{...appState.modal,entryType:'expense'}})">支出</button>
+            <button type="button" class="btn ${isIncome?"btn-primary":"btn-ghost"}" onclick="setState({modal:{...appState.modal,entryType:'income'}})">收入</button>
+          </div></div>
+          <div class="modal-field"><label>金额</label><div style="display:flex;gap:8px;">
+            <input id="pl-amount" type="number" step="0.01" min="0" placeholder="0.00" required style="flex:1;" />
+            <select id="pl-currency"><option value="HKD">HKD</option><option value="NTD">NTD</option><option value="CNY">CNY</option><option value="USD">USD</option></select>
+          </div></div>
+          <div class="modal-field"><label>分类</label>
+            <div class="ledger-cat-grid">${cats.map(c=>`<button type="button" class="ledger-cat-btn" data-cat="${escAttr(c.id)}" onclick="document.getElementById('pl-category').value='${escAttr(c.id)}';document.querySelectorAll('.ledger-cat-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">${c.emoji} ${c.id}</button>`).join("")}</div>
+            <input id="pl-category" type="hidden" value="${isIncome?"收入":"餐饮"}" />
+          </div>
+          <div class="modal-field"><label>备注</label><input id="pl-note" type="text" placeholder="可选说明…" /></div>
+          <div class="modal-field"><label>日期</label><input id="pl-date" type="date" value="${today}" /></div>
+          <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="setState({modal:null})">取消</button><button type="submit" class="btn btn-primary">保存</button></div>
+        </form>
+      </div></div>`;
+    }
     function withTimeout(promise, label = "请求", ms = 12000) {
       let timer;
       const timeout = new Promise((_, reject) => {
@@ -9653,6 +9953,13 @@
     }
 
     function renderShell() {
+      if (appState.currentView === "personal-ledger") {
+        return `<div class="travel-app view-personal-ledger">
+          ${renderTopbar()}
+          <main class="main-stage">${renderPersonalLedgerPage()}</main>
+          ${renderDrawer()}
+        </div>`;
+      }
       if (!isTaiwanTripSelected()) {
         const dynamicMain = ["spot-reviews", "trip-album", "expenses"].includes(appState.currentView)
           ? `<main class="main-stage">${renderMainContent()}</main>`
@@ -10190,6 +10497,7 @@
             </div>
           </div>
         </section>
+        ${renderCurrencyWidget()}
         ${renderExpenseSummaryCard(stats)}
         ${renderExpenseDayGroups(visibleExpenses)}
       `;
@@ -10313,6 +10621,7 @@
               <span class="tag ${city.status === "待规划" ? "orange" : "sage"}">${esc(city.status)}</span>
               <h1 class="page-title serif">${esc(city.name)}</h1>
               <p class="page-intro">${esc(city.intro)}</p>
+              ${appState.selectedCity && CITY_COORDS[appState.selectedCity] ? renderWeatherWidget(appState.selectedCity) : ""}
               <div class="city-tags">${city.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
             </div>
             <div class="soft-card info-card" style="min-width:min(320px,100%);">
@@ -10416,6 +10725,7 @@
           ${renderTabButton("route", "地图", "map")}
           ${renderTabButton("notes", "备注", "notebook-pen")}
           ${renderTabButton("album", "相册", "images")}
+          ${renderTabButton("diary", "日记", "book-open")}
         </section>
         <section class="card panel">${renderSelectedTab(day)}</section>
       `;
@@ -10429,6 +10739,7 @@
       if (!day.planned && appState.selectedTab !== "timeline" && appState.selectedTab !== "notes" && appState.selectedTab !== "route" && appState.selectedTab !== "album") {
         return renderTaipeiEmptyState("day");
       }
+      if (appState.selectedTab === "diary") return renderDiaryTab(day);
       if (appState.selectedTab === "route") return renderRouteTab(day);
       if (appState.selectedTab === "notes") return renderNotesTab(day);
       if (appState.selectedTab === "album") return renderAlbumTab(day);
@@ -10862,6 +11173,7 @@
     function renderDrawer() {
       if (!appState.drawer) return "";
       if (appState.drawer === "checklist") return renderDrawerShell("行程评级", renderChecklistDrawer());
+      if (appState.drawer === "packing") return renderDrawerShell("🧳 打包清单", renderPackingListDrawer());
       if (appState.drawer === "confirm") return renderDrawerShell("待确认中心", renderConfirmDrawer());
       if (appState.drawer === "settings") return renderDrawerShell("设置", renderSettingsDrawer());
       if (appState.drawer === "more") return renderDrawerShell("更多", renderMoreDrawer());
@@ -10903,6 +11215,8 @@
             ${drawerAction("🖼", "旅行相册", "openTripAlbum()")}
             ${drawerAction("📄", "旅行报告", "generateTravelReport()")}
             ${drawerAction("📤", "导出到 Google My Maps", "generateKML()")}
+            ${drawerAction("🧳", "打包清单", "openDrawer('packing')")}
+            ${drawerAction("💰", "日常账本", "openPersonalLedger()")}
           </div>
           <div>
             <div class="drawer-section-title">─── 设置 ───</div>
@@ -11389,6 +11703,7 @@
       if (modal.type === "create-trip") return renderCreateTripModal();
       if (modal.type === "dynamic-day") return renderDynamicDayModal(modal);
       if (modal.type === "dynamic-item") return renderDynamicItemModal(modal);
+      if (appState.modal?.type === "add-personal-entry") return renderAddPersonalEntryModal();
       if (modal.type === "invite-code") {
         return `
           <div class="modal-wrap" onclick="closeModal(event)">
@@ -11610,6 +11925,8 @@
               <button class="fab-sheet-item" onclick="quickAddExpense()"><span class="fab-sheet-icon">💰</span><span>记一笔账</span></button>
               <button class="fab-sheet-item" onclick="quickSpotReviews()"><span class="fab-sheet-icon">⭐</span><span>给地点评级</span></button>
               <button class="fab-sheet-item" onclick="quickEditToday()"><span class="fab-sheet-icon">✏️</span><span>编辑今日行程</span></button>
+              <button class="fab-sheet-item" onclick="openDrawer('packing');setState({fabOpen:false})"><span class="fab-sheet-icon">🧳</span><span>打包清单</span></button>
+              <button class="fab-sheet-item" onclick="openPersonalLedger();setState({fabOpen:false})"><span class="fab-sheet-icon">💰</span><span>日常记账</span></button>
             </div>
             <button class="fab-sheet-cancel" onclick="setState({fabOpen:false})">取消</button>
           </div>
@@ -13827,6 +14144,13 @@ ${folders}
     window.confirmCheckin = confirmCheckin;
     window.openPhotoViewer = openPhotoViewer;
     window.openTripAlbum = openTripAlbum;
+    window.openPersonalLedger = openPersonalLedger;
+    window.openAddPersonalEntryModal = openAddPersonalEntryModal;
+    window.submitPersonalEntry = submitPersonalEntry;
+    window.deletePersonalEntry = deletePersonalEntry;
+    window.togglePackingItem = togglePackingItem;
+    window.addPackingCustomItem = addPackingCustomItem;
+    window.saveDayDiary = saveDayDiary;
 
     async function init() {
       bindInteractionFeedback();
