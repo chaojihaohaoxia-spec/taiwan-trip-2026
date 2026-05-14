@@ -6433,6 +6433,7 @@
     let authStateListener = null;
     let authNotice = "";
     let authOtpTimer = null;
+    let collaborationRefreshPromise = null;
     let checkins = [];
     let checkinsLoading = false;
     let checkinsRealtimeChannel = null;
@@ -7026,12 +7027,15 @@
     async function ensureInitialMembership() {
       if (!supabaseClient || !currentUser || currentMembership) return;
       try {
-        await supabaseClient.from("trip_members").insert({
-          trip_id: activeTripId(),
-          user_id: currentUser.id,
-          email: currentUser.email,
-          role: "editor"
-        });
+        await withTimeout(
+          supabaseClient.from("trip_members").insert({
+            trip_id: activeTripId(),
+            user_id: currentUser.id,
+            email: currentUser.email,
+            role: "editor"
+          }),
+          "初始化成员权限"
+        );
         await loadCurrentMembership();
       } catch {
       }
@@ -7134,6 +7138,9 @@
         const bootstrappedTrips = await loadTripsAfterBootstrap();
         if (bootstrappedTrips.length) userTrips = bootstrappedTrips;
       }
+      if (!userTrips.length && options.allowFallbackTrip !== false) {
+        userTrips = [fallbackTripMeta(TRIP_ID, "editor")];
+      }
       const basePatch = {
         userTrips,
         authLoading: false,
@@ -7181,10 +7188,13 @@
         appState.dynamicItems = [];
         return;
       }
-      const [{ data: days, error: daysError }, { data: items, error: itemsError }] = await Promise.all([
-        supabaseClient.from("trip_days").select("*").eq("trip_id", tripId).order("sort_order"),
-        supabaseClient.from("trip_items").select("*").eq("trip_id", tripId).order("sort_order")
-      ]);
+      const [{ data: days, error: daysError }, { data: items, error: itemsError }] = await withTimeout(
+        Promise.all([
+          supabaseClient.from("trip_days").select("*").eq("trip_id", tripId).order("sort_order"),
+          supabaseClient.from("trip_items").select("*").eq("trip_id", tripId).order("sort_order")
+        ]),
+        "读取行程内容"
+      );
       if (daysError) throw daysError;
       if (itemsError) throw itemsError;
       appState.dynamicDays = days || [];
@@ -7306,12 +7316,15 @@
         return localExpenses;
       }
       try {
-        const { data, error } = await supabaseClient
-          .from("expenses")
-          .select(expenseSelectFields())
-          .eq("trip_id", activeTripId())
-          .order("date", { ascending: true })
-          .order("created_at", { ascending: true });
+        const { data, error } = await withTimeout(
+          supabaseClient
+            .from("expenses")
+            .select(expenseSelectFields())
+            .eq("trip_id", activeTripId())
+            .order("date", { ascending: true })
+            .order("created_at", { ascending: true }),
+          "读取账本"
+        );
         if (error) throw error;
         const merged = mergeExpenseLists(loadExpensesFromLocalStorage(), data || []);
         setState({ expenses: merged }, !silent);
@@ -7435,7 +7448,48 @@
       }
     }
 
-    async function refreshCollaboration(session) {
+    function showAuthenticatedFallback(session) {
+      currentUser = session?.user || currentUser;
+      const tripId = appState.selectedTrip || TRIP_ID;
+      const existingTrips = Array.isArray(appState.userTrips) ? appState.userTrips.filter(Boolean) : [];
+      const fallbackTrip = fallbackTripMeta(tripId, currentRole() || "editor");
+      const userTrips = existingTrips.some(trip => trip.id === fallbackTrip.id)
+        ? existingTrips
+        : [fallbackTrip, ...existingTrips];
+      const todayDayId = tripId === TRIP_ID ? nearestTripDayId() : null;
+      const todayDay = todayDayId ? tripData.daysById[todayDayId] : null;
+      setState({
+        currentView: tripId === TRIP_ID ? "day" : "trip-dashboard",
+        userTrips,
+        selectedTrip: tripId,
+        selectedCity: tripId === TRIP_ID ? (todayDay?.cityId || "kaohsiung") : null,
+        selectedDay: todayDayId,
+        selectedTab: "timeline",
+        selectedMapPoint: null,
+        authLoading: false,
+        authError: "",
+        authMessage: "",
+        drawer: null,
+        modal: null,
+        fabOpen: false
+      });
+    }
+
+    function refreshCollaborationInBackground(session) {
+      if (!session?.user) return Promise.resolve([]);
+      if (collaborationRefreshPromise) return collaborationRefreshPromise;
+      collaborationRefreshPromise = refreshCollaboration(session, { allowFallbackTrip: true })
+        .catch(error => {
+          console.warn("Collaboration refresh skipped.", error);
+          return [];
+        })
+        .finally(() => {
+          collaborationRefreshPromise = null;
+        });
+      return collaborationRefreshPromise;
+    }
+
+    async function refreshCollaboration(session, options = {}) {
       currentUser = session?.user || null;
       currentMembership = null;
       tripMembers = [];
@@ -7455,16 +7509,22 @@
         const joinedTripId = await processPendingInvite();
         if (joinedTripId) return;
       }
-      await routeAfterLogin();
+      await routeAfterLogin(options);
     }
 
     async function initCollaboration() {
       if (!supabaseClient) return;
       try {
         const { data } = await supabaseClient.auth.getSession();
-        await refreshCollaboration(data?.session || null);
+        if (data?.session) {
+          showAuthenticatedFallback(data.session);
+          refreshCollaborationInBackground(data.session);
+        } else {
+          await refreshCollaboration(null);
+        }
         supabaseClient.auth.onAuthStateChange((_event, session) => {
-          refreshCollaboration(session);
+          if (session?.user) refreshCollaborationInBackground(session);
+          else refreshCollaboration(null);
         });
       } catch {
       }
@@ -9040,11 +9100,14 @@
       checkinsLoading = true;
       render();
       try {
-        const { data, error } = await supabaseClient
-          .from("checkins")
-          .select("id,trip_id,user_id,user_email,day_id,item_id,location_name,caption,photo_url,checked_at")
-          .eq("trip_id", activeTripId())
-          .order("checked_at", { ascending: false });
+        const { data, error } = await withTimeout(
+          supabaseClient
+            .from("checkins")
+            .select("id,trip_id,user_id,user_email,day_id,item_id,location_name,caption,photo_url,checked_at")
+            .eq("trip_id", activeTripId())
+            .order("checked_at", { ascending: false }),
+          "读取相册"
+        );
         if (error) throw error;
         checkins = Array.isArray(data) ? data : [];
       } catch (error) {
@@ -11808,7 +11871,12 @@
       );
       if (error) throw error;
       currentUser = data?.session?.user || data?.user || currentUser;
-      await refreshCollaboration(data?.session || null);
+      if (data?.session) {
+        showAuthenticatedFallback(data.session);
+        refreshCollaborationInBackground(data.session);
+      } else {
+        setState({ authLoading: false, authError: "登录没有返回有效会话，请确认邮箱已验证，或改用验证码登录。", authMessage: "" });
+      }
     }
 
     async function signUp(email, password, nickname) {
@@ -11828,7 +11896,8 @@
       if (error) throw error;
       if (data?.session) {
         currentUser = data.session.user;
-        await refreshCollaboration(data.session);
+        showAuthenticatedFallback(data.session);
+        refreshCollaborationInBackground(data.session);
         return;
       }
       setAuthOtpFlow(email, "signup");
@@ -11892,7 +11961,10 @@
         const session = data?.session || (await supabaseClient.auth.getSession()).data?.session || null;
         currentUser = session?.user || data?.user || currentUser;
         clearAuthOtpTimer();
-        await refreshCollaboration(session);
+        if (session) {
+          showAuthenticatedFallback(session);
+          refreshCollaborationInBackground(session);
+        }
         setState({
           authMode: "signin",
           authLoading: false,
@@ -11946,7 +12018,7 @@
         currentUser = session?.user || null;
         if (event === "SIGNED_IN" && currentUser) {
           clearAuthOtpTimer();
-          await refreshCollaboration(session);
+          refreshCollaborationInBackground(session);
         }
         if (event === "SIGNED_OUT") resetAuthState();
       });
@@ -12014,7 +12086,7 @@
             supabaseClient.auth.getSession()
               .then(({ data: { session } }) => {
                 if (!session) { resetAuthState(); return; }
-                const tid = appState.selectedTrip?.id;
+                const tid = appState.selectedTrip;
                 if (tid) {
                   Promise.all([
                     loadCurrentMembership(tid),
@@ -12035,7 +12107,10 @@
         setState({ currentView: "auth", authLoading: false, authError: "", authMessage: "" });
         supabaseClient.auth.getSession()
           .then(({ data: { session } }) => {
-            if (session && !appState.authLoading) return refreshCollaboration(session);
+            if (session && !appState.authLoading) {
+              showAuthenticatedFallback(session);
+              return refreshCollaborationInBackground(session);
+            }
           })
           .catch(() => {/* Supabase cold — user can log in manually when ready */});
         return;
