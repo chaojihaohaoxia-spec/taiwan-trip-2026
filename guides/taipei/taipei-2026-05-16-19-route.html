@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>台北 5/16 与 5/19 两日完整路线</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --ink: #13213a;
+      --muted: #667085;
+      --line: #d8e2f1;
+      --green: #11845b;
+      --blue: #1f6feb;
+      --orange: #d45a1f;
+      --purple: #7a45d1;
+      --red: #c9332b;
+      --bg: #f5f8fc;
+      --card: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    main {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px 18px 42px;
+    }
+    header {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+    h1 { margin: 0 0 8px; font-size: clamp(28px, 4vw, 44px); letter-spacing: 0; }
+    h2 { margin: 0 0 12px; font-size: 22px; letter-spacing: 0; }
+    p { line-height: 1.7; margin: 0; }
+    .lead { color: #41516c; font-size: 17px; }
+    .decision {
+      border: 1px solid #b9d5c9;
+      background: #edf8f3;
+      color: #0c6848;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-weight: 800;
+      line-height: 1.55;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 410px;
+      gap: 16px;
+      align-items: start;
+    }
+    #map {
+      min-height: 720px;
+      border-radius: 14px;
+      border: 1px solid #cdd9eb;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(30, 48, 80, .08);
+      background: #dce8f6;
+    }
+    .panel { display: grid; gap: 14px; }
+    .card {
+      background: var(--card);
+      border: 1px solid #d8e2f1;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(30, 48, 80, .05);
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 900;
+      color: #0c6848;
+      background: #dff4ea;
+    }
+    .tag.orange { color: #9f3e0f; background: #fff0e7; }
+    .tag.purple { color: #5b33a3; background: #f2ecff; }
+    .tag.red { color: #9e241d; background: #fff0ef; }
+    .route-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .route-list li {
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e8eef7;
+    }
+    .route-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+    .time {
+      color: var(--blue);
+      font-weight: 900;
+      line-height: 1.35;
+    }
+    .route-list b { display: block; margin-bottom: 4px; }
+    .route-list span { color: var(--muted); font-size: 14px; line-height: 1.55; }
+    .buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0 0;
+    }
+    a.button {
+      display: inline-flex;
+      text-decoration: none;
+      color: #fff;
+      background: var(--blue);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-weight: 900;
+      font-size: 14px;
+    }
+    a.button.orange { background: var(--orange); }
+    a.button.purple { background: var(--purple); }
+    a.button.red { background: var(--red); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; vertical-align: top; padding: 10px; border-bottom: 1px solid #e8eef7; }
+    th { background: #edf3fb; color: #25446e; }
+    .note {
+      border-left: 4px solid var(--orange);
+      background: #fff7f1;
+      border-radius: 10px;
+      padding: 12px 14px;
+      line-height: 1.65;
+      margin-top: 12px;
+    }
+    .transit-block {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid #dde7f4;
+      border-radius: 12px;
+      background: #f8fbff;
+    }
+    .transit-title {
+      margin: 0 0 8px;
+      font-size: 15px;
+      font-weight: 900;
+    }
+    .transit-subtitle {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .transit-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+    .transit-list li {
+      padding-top: 8px;
+      border-top: 1px solid #e8eef7;
+    }
+    .transit-list li:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+    .transit-list b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    .transit-meta {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .transit-desc {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .legend {
+      position: absolute;
+      z-index: 500;
+      right: 16px;
+      bottom: 16px;
+      background: rgba(255,255,255,.94);
+      border: 1px solid #d8e2f1;
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 24px rgba(30, 48, 80, .12);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .swatch {
+      display: inline-block;
+      width: 22px;
+      height: 4px;
+      border-radius: 999px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .today-line { background: var(--blue); }
+    .may19-line { background: var(--orange); }
+    .airport-line { background: var(--red); }
+    @media (max-width: 980px) {
+      header, .layout { grid-template-columns: 1fr; }
+      #map { min-height: 560px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>台北两日完整路线：5/16 + 5/19</h1>
+      <p class="lead">把你说的点拆成两天：今天完成 101、永康街、女书店、女巫店；台北市政府和竹村改成有时间再加。5/19 完成华山、赤峰街、咖啡、大稻埕鲁肉饭、诚品/取行李、机场。</p>
+    </div>
+    <div class="decision">核心判断：女巫店周一、周二公休，所以不能放 5/19；101 今天晚上更好。5/19 要为 21:25 桃园机场航班留足取行李和交通时间。</div>
+  </header>
+
+  <div class="layout">
+    <div style="position:relative">
+      <div id="map"></div>
+      <div class="legend">
+        <div><span class="swatch today-line"></span>5/16 晚上：101 + 公馆</div>
+        <div><span class="swatch may19-line"></span>5/19 白天：华山 + 赤峰街</div>
+        <div><span class="swatch airport-line"></span>5/19 机场线</div>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <section class="card">
+        <span class="tag">5/16｜今天晚上</span>
+        <h2>101 + 永康街 + 女书店 / 女巫店</h2>
+        <ul class="route-list">
+          <li><div class="time">16:00</div><div><b>台北松山意舍出发</b><span>今天只在最值的两段花车钱：酒店去 101、永康街去公馆。中间能坐捷运就坐捷运。</span></div></li>
+          <li><div class="time">16:25</div><div><b>到台北 101</b><span>买/验 17:00 或 17:30 观景台票。若排队久，就直接改 18:00 场。</span></div></li>
+          <li><div class="time">17:00<br>18:30</div><div><b>101 观景台</b><span>看白天转夜景。最后入场约 20:15，所以今天不要拖到太晚才来。</span></div></li>
+          <li><div class="time">18:40</div><div><b>永康街</b><span>吃点东西、逛巷子、买小吃或甜品，这一站比硬赶市政府/竹村更顺路。</span></div></li>
+          <li><div class="time">20:00</div><div><b>去公馆 / 台大</b><span>从永康街打车过去最省心，也比较不容易拖晚女书店和女巫店。</span></div></li>
+          <li><div class="time">20:20</div><div><b>女书店 Fembooks</b><span>女性主义 / 性别议题书店，停留 30-40 分钟。</span></div></li>
+          <li><div class="time">21:00</div><div><b>女巫店 Witch House</b><span>咖啡餐酒馆 + 小型 live house；当晚餐 / 饮料 / 空间体验。</span></div></li>
+          <li><div class="time">22:15后</div><div><b>回酒店</b><span>直接打车回松山意舍。还饿再去饶河夜市补一点。</span></div></li>
+        </ul>
+        <div class="transit-block">
+          <p class="transit-title">从松山意舍怎么去｜今天最推荐</p>
+          <p class="transit-subtitle">酒店和松山站几乎连在一起，所以原则是：卡 101 时间先打车；101 出来去永康街用捷运；跨到公馆再打车。</p>
+          <ul class="transit-list">
+            <li><b>酒店 → 台北 101</b><span class="transit-meta">推荐：打车 15-20 分钟，约 NT$180-250</span><span class="transit-desc">这是今天最值得花钱的一段，能省掉转乘和找路时间。更省钱备选：从松山站搭捷运到市政府站，官方票价与乘车时间约为 NT$25 / 23 分，再步行 12-15 分到 101。</span></li>
+            <li><b>101 → 永康街</b><span class="transit-meta">推荐：捷运 + 步行，约 15 分钟，车资约 NT$20</span><span class="transit-desc">从台北 101 / 世贸站到东门站，官方票价与乘车时间约为 NT$20 / 8 分，再步行 5-8 分到永康街；这一段用捷运比打车更稳。</span></li>
+            <li><b>永康街 → 女书店 / 女巫店</b><span class="transit-meta">推荐：打车 10-15 分钟，约 NT$120-180</span><span class="transit-desc">永康街吃完直接去公馆最省脑力，不需要再硬转一次捷运。</span></li>
+            <li><b>女巫店 → 松山意舍</b><span class="transit-meta">省钱版：公馆站搭捷运回松山站，官方票价与乘车时间约为 NT$30 / 25 分</span><span class="transit-desc">如果玩到很晚、觉得累，就直接打车回酒店，通常 20-30 分钟，约 NT$260-360。</span></li>
+          </ul>
+        </div>
+        <div class="buttons">
+          <a class="button" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=amba%20Taipei%20Songshan&destination=Witch%20House%20Taipei&waypoints=Taipei%20101%20Observatory%7CYongkang%20Street%20Taipei%7CFembooks%20Taipei&travelmode=driving">打开今日 Google 路线</a>
+          <a class="button purple" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=amba%20Taipei%20Songshan&destination=Taipei%20101%20World%20Trade%20Center%20Station&travelmode=transit">酒店 → 101 省钱捷运版</a>
+          <a class="button purple" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=Taipei%20101%20World%20Trade%20Center%20Station&destination=Dongmen%20Station&travelmode=transit">101 → 永康街 捷运版</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <span class="tag orange">5/19｜回香港日</span>
+        <h2>华山 + 赤峰街 + 鲁肉饭 + 机场</h2>
+        <ul class="route-list">
+          <li><div class="time">09:45</div><div><b>酒店寄存行李后出发</b><span>行李留在台北松山意舍，轻装逛。</span></div></li>
+          <li><div class="time">10:15</div><div><b>华山 1914</b><span>旧酒厂改造的艺文园区，适合看展、逛文创、拍红砖建筑。</span></div></li>
+          <li><div class="time">12:00</div><div><b>去中山/赤峰街</b><span>这段打车最省脑力；如果当天状态很好，也可以用捷运或散步。</span></div></li>
+          <li><div class="time">12:20</div><div><b>赤峰街 + 咖啡店</b><span>选物、古着、生活器物、咖啡。今天慢逛，不打卡式赶路。</span></div></li>
+          <li><div class="time">14:15</div><div><b>大稻埕鲁肉饭</b><span>从赤峰街步行约 12-18 分钟。别太晚，晚上接近 20:00 关门。</span></div></li>
+          <li><div class="time">15:30</div><div><b>诚品生活松菸 / 酒店休息</b><span>如果还有体力，短逛诚品；累了就直接回酒店休息。</span></div></li>
+          <li><div class="time">17:15</div><div><b>回酒店拿行李</b><span>重新整理、上厕所、确认护照和证件。</span></div></li>
+          <li><div class="time">17:35</div><div><b>去桃园机场</b><span>有行李建议直接打车。若车程显示超过 75 分钟，改打车到台北车站搭机场捷运。</span></div></li>
+          <li><div class="time">18:40</div><div><b>抵达桃园机场</b><span>对应 21:25 航班比较稳。</span></div></li>
+        </ul>
+        <div class="transit-block">
+          <p class="transit-title">从松山意舍怎么去｜5/19 最均衡走法</p>
+          <p class="transit-subtitle">这一天的原则是：上午和中午尽量用捷运/步行省钱，最后去机场那段把稳定性放第一位。</p>
+          <ul class="transit-list">
+            <li><b>酒店 → 华山 1914</b><span class="transit-meta">推荐：捷运 + 步行，约 20-25 分钟，车资约 NT$25</span><span class="transit-desc">从松山站出发到忠孝新生站，官方票价与乘车时间约为 NT$25 / 13 分，再步行 8-10 分到华山；这段比打车更省钱，而且不算折腾。</span></li>
+            <li><b>华山 → 赤峰街 / 中山站</b><span class="transit-meta">推荐：打车 10 分钟左右，约 NT$100-140</span><span class="transit-desc">中午这段距离不远，但捷运要绕，打车是时间和方便度最平衡的选项。若想压预算，走到忠孝新生或善导寺搭捷运也行。</span></li>
+            <li><b>赤峰街 → 大稻埕鲁肉饭</b><span class="transit-meta">推荐：步行 12-18 分钟，免费</span><span class="transit-desc">这段街区很适合边走边看，不值得专门叫车。</span></li>
+            <li><b>赤峰街 / 中山站 → 回酒店</b><span class="transit-meta">推荐：中山站搭捷运回松山站，官方票价与乘车时间约为 NT$25 / 11 分</span><span class="transit-desc">如果你们逛完不去松菸，直接这样回酒店最省钱也很快。</span></li>
+            <li><b>酒店 → 桃园机场</b><span class="transit-meta">最稳判断：17:35 先看实时路况</span><span class="transit-desc">若 App 显示开车 55-65 分钟，直接打车去机场最省心；若国道塞到 75 分钟以上，改打车 15-20 分到 A1 台北车站，再搭机场捷运直达车，官方从 A1 到第一航厦约 35 分、第二航厦约 39 分。这样虽然多一次转乘，但晚高峰更稳。</span></li>
+          </ul>
+        </div>
+        <div class="buttons">
+          <a class="button orange" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=amba%20Taipei%20Songshan&destination=amba%20Taipei%20Songshan&waypoints=Huashan%201914%20Creative%20Park%7CChifeng%20Street%20Taipei%7C%E5%A4%A7%E7%A8%BB%E5%9F%95%E9%AD%AF%E8%82%89%E9%A3%AF%7CEslite%20Spectrum%20Songyan&travelmode=driving">打开 5/19 市区路线</a>
+          <a class="button purple" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=amba%20Taipei%20Songshan&destination=Huashan%201914%20Creative%20Park&travelmode=transit">酒店 → 华山 捷运版</a>
+          <a class="button red" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=amba%20Taipei%20Songshan&destination=Taiwan%20Taoyuan%20International%20Airport&travelmode=driving">酒店去机场</a>
+          <a class="button red" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=amba%20Taipei%20Songshan&destination=Taoyuan%20Airport%20MRT%20A1%20Taipei%20Main%20Station&travelmode=driving">酒店 → A1 机捷备选</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <span class="tag red">取舍说明</span>
+        <table>
+          <tr><th>问题</th><th>判断</th></tr>
+          <tr><td>淡水</td><td>这版先不放。要放淡水，5/19 会挤掉华山或赤峰街，而且机场日风险变高。</td></tr>
+          <tr><td>交通</td><td>今天只在两段最值的地方打车；5/19 上午优先捷运/步行，机场段看实时路况决定“直达机场”还是“先到 A1 转机捷”。</td></tr>
+          <tr><td>如果今天 101 排队太久</td><td>直接保留永康街和女书店/女巫店；台北市政府和竹村都先不加，免得整晚一直赶。</td></tr>
+        </table>
+        <div class="note">你刚刚说 101 后面想接永康街，这个调整是成立的，而且路线会更线性：101 在东边、永康街在东门、女书店/女巫店在公馆，一路往西南走就行。台北市政府和竹村先变成可选点，不再硬塞进今晚。</div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const points = {
+    hotel: [25.0493021, 121.5805095],
+    taipei101: [25.0335248, 121.5648104],
+    yongkang: [25.0297, 121.5292],
+    cityhall: [25.0375170, 121.5644506],
+    zhucun: [25.0273, 121.5685],
+    fembooks: [25.0204722, 121.5336631],
+    witch: [25.0204620, 121.5336634],
+    huashan: [25.0441, 121.5294],
+    zhongshan: [25.0526256, 121.5203914],
+    chifeng: [25.0552168, 121.5196301],
+    luroufan: [25.05105, 121.51595],
+    eslite: [25.0444, 121.5607],
+    airport: [25.0797, 121.2342]
+  };
+
+  const map = L.map('map', { scrollWheelZoom: true }).setView([25.045, 121.535], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  function marker(key, title, text, color) {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:30px;height:30px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,.25);"></div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
+    L.marker(points[key], { icon }).addTo(map).bindPopup(`<b>${title}</b><br>${text}`);
+  }
+
+  marker('hotel', '台北松山意舍', '两天的出发点；5/19 也要回来拿行李。', '#11845b');
+  marker('taipei101', '台北 101 观景台', '今天傍晚上楼。', '#1f6feb');
+  marker('yongkang', '永康街', '101 后面更顺路的一站，适合晚餐和散步。', '#1f6feb');
+  marker('cityhall', '台北市政府', '如果 101 提前出来、有体力才补这个快拍点。', '#1f6feb');
+  marker('zhucun', '竹村居酒屋外景', '如果你今天还想拍 101 街景，再加这个可选点。', '#1f6feb');
+  marker('fembooks', '女书店', '和女巫店在同一栋楼上下。', '#7a45d1');
+  marker('witch', '女巫店', '咖啡餐酒馆 + 小型 live house。', '#7a45d1');
+  marker('huashan', '华山 1914', '5/19 上午的艺术园区。', '#d45a1f');
+  marker('zhongshan', '中山站', '赤峰街入口。', '#d45a1f');
+  marker('chifeng', '赤峰街', '选物、咖啡、巷弄慢逛。', '#d45a1f');
+  marker('luroufan', '大稻埕鲁肉饭', '长安西路 220 巷 17 号。', '#d45a1f');
+  marker('eslite', '诚品生活松菸', '5/19 有体力才短逛。', '#d45a1f');
+  marker('airport', '桃园机场', '21:25 航班，18:40 左右到比较稳。', '#c9332b');
+
+  L.polyline([points.hotel, points.taipei101, points.yongkang, points.fembooks, points.witch, points.hotel], {
+    color: '#1f6feb', weight: 5, opacity: .9
+  }).addTo(map).bindPopup('5/16：酒店 → 101 → 永康街 → 女书店/女巫店 → 酒店');
+
+  L.polyline([points.hotel, points.huashan, points.zhongshan, points.chifeng, points.luroufan, points.eslite, points.hotel], {
+    color: '#d45a1f', weight: 5, opacity: .9
+  }).addTo(map).bindPopup('5/19：华山 → 赤峰街 → 大稻埕鲁肉饭 → 诚品/酒店');
+
+  L.polyline([points.hotel, points.airport], {
+    color: '#c9332b', weight: 4, opacity: .75, dashArray: '10 8'
+  }).addTo(map).bindPopup('5/19 机场线：从酒店拿行李后出发');
+
+  const cityKeys = ['hotel', 'taipei101', 'yongkang', 'cityhall', 'zhucun', 'fembooks', 'witch', 'huashan', 'zhongshan', 'chifeng', 'luroufan', 'eslite'];
+  const bounds = L.latLngBounds(cityKeys.map(key => points[key]));
+  map.fitBounds(bounds, { padding: [34, 34] });
+</script>
+</body>
+</html>
