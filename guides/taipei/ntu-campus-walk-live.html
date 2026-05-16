@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>台大校园散步地图</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --ink: #13213a;
+      --muted: #5f708d;
+      --line: #d8e2f1;
+      --green: #11845b;
+      --blue: #1f6feb;
+      --orange: #d45a1f;
+      --bg: #f5f8fc;
+      --card: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    header {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 40px);
+      letter-spacing: 0;
+    }
+    p {
+      margin: 0;
+      line-height: 1.7;
+    }
+    .lead {
+      color: #42526b;
+      font-size: 16px;
+    }
+    .decision {
+      border: 1px solid #cbe6d8;
+      background: #edf8f3;
+      color: #0c6848;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-weight: 800;
+      line-height: 1.6;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 16px;
+      align-items: start;
+    }
+    #map {
+      min-height: 72vh;
+      border: 1px solid #cdd9eb;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(30, 48, 80, .08);
+      background: #dce8f6;
+    }
+    .panel {
+      display: grid;
+      gap: 14px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(30, 48, 80, .05);
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 900;
+      color: #0c6848;
+      background: #dff4ea;
+    }
+    .route-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+    .route-list li {
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e8eef7;
+    }
+    .route-list li:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+    .route-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .route-title b {
+      font-size: 15px;
+    }
+    .route-title span {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .route-desc {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      background: var(--blue);
+      color: #fff;
+    }
+    .button.orange { background: var(--orange); }
+    .button.green { background: var(--green); }
+    .button.ghost {
+      background: #edf3fb;
+      color: #28456d;
+    }
+    .button[disabled] {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f8fbff;
+      border: 1px solid #dde7f4;
+      color: #315172;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .mini-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .legend {
+      position: absolute;
+      z-index: 500;
+      right: 14px;
+      bottom: 14px;
+      background: rgba(255,255,255,.95);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 24px rgba(30, 48, 80, .12);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .swatch {
+      display: inline-block;
+      width: 22px;
+      height: 4px;
+      border-radius: 999px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .walk-line { background: var(--green); }
+    .live-line { background: var(--blue); }
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      #map {
+        min-height: 58vh;
+      }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>台大校园散步地图</h1>
+      <p class="lead">给你一个适合晚上慢慢走的版本：从新体出发，先去醉月湖，再看总图、椰林大道、傅钟、文学院、校史馆外观，最后走到校门。地图可以显示你当前定位，手机上边走边看会更顺。</p>
+    </div>
+    <div class="decision">适合现在这个时间点的重点：看校园轴线、湖景、老建筑群和大学气质。像校史馆这种室内点，今晚只能看外观，白天再进更值。</div>
+  </header>
+
+  <div class="layout">
+    <div style="position:relative">
+      <div id="map"></div>
+      <div class="legend">
+        <div><span class="swatch walk-line"></span>建议散步主线</div>
+        <div><span class="swatch live-line"></span>你的实时定位辅助线</div>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <section class="card">
+        <span class="tag">今晚推荐</span>
+        <ul class="route-list">
+          <li>
+            <div class="route-title"><b>1. 综合体育馆（新体）</b><span>起点</span></div>
+            <div class="route-desc">如果你现在就在运动场 / 新体附近，就从这里直接开始。先不用急着找最漂亮的楼，先把身体和节奏放慢。</div>
+          </li>
+          <li>
+            <div class="route-title"><b>2. 醉月湖</b><span>8-12 分钟</span></div>
+            <div class="route-desc">这是台大最适合散步的水景区之一。夜里不一定最上镜，但很有校园呼吸感，适合慢慢走。</div>
+          </li>
+          <li>
+            <div class="route-title"><b>3. 总图书馆</b><span>8-10 分钟</span></div>
+            <div class="route-desc">这是现代台大的知识核心。外面的开阔空间和建筑体量，晚上看会很安静。</div>
+          </li>
+          <li>
+            <div class="route-title"><b>4. 椰林大道中段</b><span>5-8 分钟</span></div>
+            <div class="route-desc">台大最经典的不是一个点，而是这条轴线。把速度放慢，抬头看树列和远处老建筑。</div>
+          </li>
+          <li>
+            <div class="route-title"><b>5. 傅钟</b><span>3-5 分钟</span></div>
+            <div class="route-desc">台大精神地标。“一天只有21小时，剩下3小时用来思考”，就是这里。</div>
+          </li>
+          <li>
+            <div class="route-title"><b>6. 文学院 / 校史馆外观</b><span>5-8 分钟</span></div>
+            <div class="route-desc">这段最能看出台北帝大到台大的历史层次。老砖墙、拱窗、门廊，比单纯打卡更值得看。</div>
+          </li>
+          <li>
+            <div class="route-title"><b>7. 校门与大学广场</b><span>终点</span></div>
+            <div class="route-desc">如果你们想把今晚收在一个完整句号，这里就是最好的结束点。</div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <span class="tag">互动导航</span>
+        <p>先点“显示我的位置”。地图会在手机上标出你现在站在哪里，并告诉你离哪一站最近。</p>
+        <div class="buttons">
+          <button class="button green" id="locateBtn" type="button">显示我的位置</button>
+          <a class="button" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%E7%B6%9C%E5%90%88%E9%AB%94%E8%82%B2%E9%A4%A8&destination=%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%E6%A0%A1%E9%96%80&waypoints=%E9%86%89%E6%9C%88%E6%B9%96%2C%20%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%7C%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%E5%9C%96%E6%9B%B8%E9%A4%A8%7C%E5%82%85%E9%90%98%2C%20%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%7C%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%E6%96%87%E5%AD%B8%E9%99%A2%7C%E5%9C%8B%E7%AB%8B%E8%87%BA%E7%81%A3%E5%A4%A7%E5%AD%B8%E6%A0%A1%E5%8F%B2%E9%A4%A8&travelmode=walking">打开整条步行路线</a>
+          <a class="button orange" target="_blank" href="./taipei-2026-05-16-19-route.html">回台北两日路线</a>
+        </div>
+        <div class="status" id="statusBox">定位后我会告诉你：你现在离哪个点最近，以及下一站建议往哪里走。</div>
+        <div class="buttons">
+          <a class="button ghost" id="nextNavBtn" target="_blank" href="#" aria-disabled="true">导航到最近点</a>
+        </div>
+        <p class="mini-note">如果浏览器弹出定位权限，请允许。GitHub Pages 是 HTTPS，手机上可以正常用实时定位。</p>
+      </section>
+
+      <section class="card">
+        <span class="tag">台大为什么值得逛</span>
+        <p>台大的好看，不只是一两个热门拍照点。真正让它成立的是三件事：有水、有树、有历史轴线。醉月湖给你校园呼吸感，椰林大道给你大学秩序感，傅钟和老建筑群给你这所学校的精神和时间层次。</p>
+        <p class="mini-note">参考：台大官方地图、访客中心景点简介、校史馆开放资讯。</p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const points = [
+    { key: 'sports', name: '综合体育馆（新体）', subtitle: '起点', coords: [25.01955, 121.53435], place: '國立臺灣大學綜合體育館, Taipei, Taiwan' },
+    { key: 'lake', name: '醉月湖', subtitle: '水景散步区', coords: [25.01855, 121.53920], place: '醉月湖, 國立臺灣大學, Taipei, Taiwan' },
+    { key: 'library', name: '总图书馆', subtitle: '现代台大核心', coords: [25.01755, 121.54065], place: '國立臺灣大學圖書館, Taipei, Taiwan' },
+    { key: 'coconut', name: '椰林大道中段', subtitle: '台大最经典的轴线', coords: [25.01795, 121.53715], place: '椰林大道, 國立臺灣大學, Taipei, Taiwan' },
+    { key: 'bell', name: '傅钟', subtitle: '精神地标', coords: [25.01810, 121.53555], place: '傅鐘, 國立臺灣大學, Taipei, Taiwan' },
+    { key: 'arts', name: '文学院', subtitle: '帝大时期建筑群', coords: [25.01830, 121.53360], place: '國立臺灣大學文學院, Taipei, Taiwan' },
+    { key: 'history', name: '校史馆（旧总图）', subtitle: '今晚看外观，白天再进', coords: [25.01875, 121.53230], place: '國立臺灣大學校史館, Taipei, Taiwan' },
+    { key: 'gate', name: '校门与大学广场', subtitle: '终点', coords: [25.01885, 121.53110], place: '國立臺灣大學校門, Taipei, Taiwan' }
+  ];
+
+  const map = L.map('map', { scrollWheelZoom: true }).setView([25.0185, 121.5358], 16);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  const routeCoords = points.map(item => item.coords);
+  const routeLine = L.polyline(routeCoords, {
+    color: '#11845b',
+    weight: 5,
+    opacity: .9
+  }).addTo(map);
+
+  const markerIcon = color => L.divIcon({
+    className: '',
+    html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,.22);"></div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
+  });
+
+  points.forEach((item, idx) => {
+    const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.place)}&travelmode=walking`;
+    L.marker(item.coords, { icon: markerIcon(idx === 0 ? '#1f6feb' : '#11845b') })
+      .addTo(map)
+      .bindPopup(`<b>${idx + 1}. ${item.name}</b><br>${item.subtitle}<br><a href="${navUrl}" target="_blank">步行导航到这里</a>`);
+  });
+
+  map.fitBounds(L.latLngBounds(routeCoords), { padding: [28, 28] });
+
+  const statusBox = document.getElementById('statusBox');
+  const locateBtn = document.getElementById('locateBtn');
+  const nextNavBtn = document.getElementById('nextNavBtn');
+  let youMarker = null;
+  let youCircle = null;
+  let connectorLine = null;
+  let watchId = null;
+
+  function metersBetween(a, b) {
+    const R = 6371000;
+    const toRad = v => v * Math.PI / 180;
+    const dLat = toRad(b[0] - a[0]);
+    const dLng = toRad(b[1] - a[1]);
+    const lat1 = toRad(a[0]);
+    const lat2 = toRad(b[0]);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function formatMeters(m) {
+    return m < 1000 ? `${Math.round(m)} 米` : `${(m / 1000).toFixed(1)} 公里`;
+  }
+
+  function updateNearest(lat, lng) {
+    let nearest = points[0];
+    let min = Infinity;
+    points.forEach(item => {
+      const d = metersBetween([lat, lng], item.coords);
+      if (d < min) {
+        min = d;
+        nearest = item;
+      }
+    });
+
+    if (connectorLine) {
+      map.removeLayer(connectorLine);
+    }
+    connectorLine = L.polyline([[lat, lng], nearest.coords], {
+      color: '#1f6feb',
+      weight: 3,
+      opacity: .85,
+      dashArray: '8 7'
+    }).addTo(map);
+
+    nextNavBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(nearest.place)}&travelmode=walking`;
+    nextNavBtn.removeAttribute('aria-disabled');
+    nextNavBtn.removeAttribute('disabled');
+
+    statusBox.innerHTML = `你现在离 <b>${nearest.name}</b> 最近，约 <b>${formatMeters(min)}</b>。<br>如果你们就是想慢慢散步，不用急着赶每一站；从最近点接上主线就可以。`;
+  }
+
+  function renderUserPosition(lat, lng, accuracy) {
+    const coords = [lat, lng];
+    if (!youMarker) {
+      youMarker = L.marker(coords, { icon: markerIcon('#1f6feb') }).addTo(map).bindPopup('你现在的位置');
+      youCircle = L.circle(coords, {
+        radius: Math.max(accuracy || 20, 20),
+        color: '#1f6feb',
+        fillColor: '#1f6feb',
+        fillOpacity: .12,
+        weight: 1
+      }).addTo(map);
+    } else {
+      youMarker.setLatLng(coords);
+      youCircle.setLatLng(coords);
+      youCircle.setRadius(Math.max(accuracy || 20, 20));
+    }
+    updateNearest(lat, lng);
+  }
+
+  locateBtn.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      statusBox.textContent = '你的浏览器不支持定位。可以直接点上面的“打开整条步行路线”。';
+      return;
+    }
+    statusBox.textContent = '正在定位你现在的位置…';
+    if (watchId) {
+      navigator.geolocation.clearWatch(watchId);
+    }
+    watchId = navigator.geolocation.watchPosition(
+      position => {
+        const { latitude, longitude, accuracy } = position.coords;
+        renderUserPosition(latitude, longitude, accuracy);
+        map.setView([latitude, longitude], 17);
+      },
+      error => {
+        statusBox.textContent = error.code === 1
+          ? '你没有允许定位权限，所以我没法在图上显示你的位置。可以手动点每一站的 Google 导航。'
+          : '定位暂时失败。你可以稍后再点一次，或者直接打开整条步行路线。';
+      },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
+    );
+  });
+</script>
+</body>
+</html>
