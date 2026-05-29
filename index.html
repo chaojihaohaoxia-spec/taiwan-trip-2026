@@ -13071,16 +13071,11 @@
     }
 
     async function signOut() {
-      if (!supabaseClient) {
-        setState({ currentView: "journey-select", authLoading: false, authError: "", authMessage: "" });
-        return;
-      }
-      try {
-        const { error } = await supabaseClient.auth.signOut({ scope: "local" });
-        if (error) throw error;
-        resetAuthState();
-      } catch (error) {
-        toast(authErrorMessage(error));
+      // Always clear local state first — logout must work even without network
+      resetAuthState();
+      // Then try to notify the server (best-effort, ignore failures)
+      if (supabaseClient) {
+        try { await supabaseClient.auth.signOut({ scope: "local" }); } catch (_) {}
       }
     }
 
