@@ -1,5 +1,6 @@
 // =====================================================================
-// shell/scroll-state.js：顶栏三种状态随滚动怎么变（纯逻辑，Node 里能直接测）。
+// shell/scroll-state.js：顶栏三种状态、底栏收小随滚动怎么变（纯逻辑，Node 里能直接测）。
+// 底栏的规则见文件末尾 createTabbarIntent；两者由 FrameUI.jsx 的同一个滚动处理（rAF 节流）驱动，互不影响。
 //
 //   top   页面最上面：大标题在内容里（它就是标题），顶栏只剩两边的圆按钮，玻璃透明
 //   pill  往下滚过大标题：标题收成顶部正中的小胶囊（行程名 + 箭头，点了打开行程切换面板）
@@ -91,6 +92,62 @@ export function createTopbarIntent({ threshold = 48, up = 28, down = 16 } = {}) 
     },
     get threshold() {
       return threshold;
+    },
+  };
+}
+
+/**
+ * 底栏随滚动收小（Apple Music 的做法，iOS 26 的 tabBarMinimizeBehavior .onScrollDown）：
+ *   const intent = createTabbarIntent();
+ *   onScroll → const compact = intent.update(window.scrollY, maxScroll);
+ * 规则：
+ *   - 离页面顶部不到 minY（默认 96px）→ 完整（回到顶部一定弹回来）；
+ *   - 往下累计滚过 down（默认 24px）→ 收小（标签淡出，只留图标）；
+ *   - 收小时往上累计滚过 up（默认 12px）→ 弹回完整（往上“一点”就够：要找底栏的时候不用滚很多）；
+ *   - 方向一变累计清零；位置先夹在 [0, maxY]（到底的橡皮筋回弹不算往上滚，和顶栏一样）。
+ * 换页以后 reset()：一律从完整开始（点了底栏切过去，底栏应该是展开的）。
+ * @param {{ minY?: number, down?: number, up?: number }} [o]
+ */
+export function createTabbarIntent({ minY = 96, down = 24, up = 12 } = {}) {
+  let lastY = null;
+  let upAcc = 0;
+  let downAcc = 0;
+  let compact = false;
+  return {
+    /** @returns {boolean} 是否收小 */
+    update(rawY, maxY = Infinity) {
+      const y = Math.min(Math.max(Number(rawY) || 0, 0), Math.max(0, maxY));
+      const dy = lastY === null ? 0 : y - lastY;
+      lastY = y;
+      if (dy > 0) {
+        downAcc += dy;
+        upAcc = 0;
+      } else if (dy < 0) {
+        upAcc -= dy;
+        downAcc = 0;
+      }
+      if (y < minY) {
+        compact = false;
+        upAcc = 0;
+        downAcc = 0;
+      } else if (!compact && downAcc > down) {
+        compact = true;
+        downAcc = 0;
+      } else if (compact && upAcc > up) {
+        compact = false;
+        upAcc = 0;
+      }
+      return compact;
+    },
+    reset(y = 0) {
+      lastY = Math.max(0, Number(y) || 0);
+      upAcc = 0;
+      downAcc = 0;
+      compact = false;
+      return compact;
+    },
+    get compact() {
+      return compact;
     },
   };
 }

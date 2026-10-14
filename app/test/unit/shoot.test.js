@@ -66,6 +66,18 @@ test('参数：默认值、--dist 不写目录用构建输出目录、各种写�
   assert.throws(() => parseArgs(['--what']), /不认识的参数/);
 });
 
+test('--scroll 名字=位置（像素 / bottom / 选择器，选择器里的 = 保留）、--scroll-back 往回带；写错给中文提示', () => {
+  const o = parseArgs(['--scroll', 'field=bottom', '--scroll', "photo=img[src*='demo-photo-03']", '--scroll', 'mid=600', '--scroll-back', '24']);
+  assert.deepEqual(o.scrolls, { field: 'bottom', photo: "img[src*='demo-photo-03']", mid: '600' });
+  assert.equal(o.scrollBack, 24);
+  assert.deepEqual(parseArgs([]).scrolls, {});
+  assert.equal(parseArgs([]).scrollBack, 0);
+  assert.throws(() => parseArgs(['--scroll', 'bottom']), /名字=位置/);
+  assert.throws(() => parseArgs(['--scroll', 'x=']), /名字=位置/);
+  assert.throws(() => parseArgs(['--scroll-back', '-3']), /不小于 0/);
+  assert.match(HELP, /--scroll-back/);
+});
+
 test('--real 截到的是真实数据：--out 在仓库里（含 app/、仓库根目录本身）直接报错；仓库外可以', () => {
   for (const inside of [REPO_ROOT, path.join(APP_DIR, 'test', 'e2e', '__shots__'), path.join(REPO_ROOT, 'docs', 'x')]) {
     assert.throws(() => parseArgs(['--real', '--out', inside]), /必须在仓库外/, inside);

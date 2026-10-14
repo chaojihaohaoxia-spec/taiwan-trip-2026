@@ -69,6 +69,7 @@ node scripts/shoot.mjs --routes 'home=#/t/demo-island,d1=#/t/demo-island/day/202
 - `--routes` 是 `名字=#/路由` 的列表（路由里弹层栈 `sheet=a,b` 的逗号没关系）；`--widths`（390→844、375→667、1280→800，也可写 `390x700`）；`--themes light,dark`（模拟系统浅色 / 深色）；`--now` 带时区的时间；默认加 `?demo=1&nosw=1`（`--no-demo` 去掉）；`--full` 截整页（太长自动分段）；`--scale` 设备像素比（默认 2）；`--reduced` 减弱动态效果；`--wait` / `--wait-for` 再等一会儿 / 等某个元素；`--type 名字=文字` 截那个名字的页面前往获得焦点的输入框里打字（搜索有结果：`--routes 'search=#/t/demo-island?sheet=search' --type 'search=pho'`）；`--sheet` 拼一张 `sheet.png` 总览；`--out` 默认系统临时目录。
 - 每张图都是全新的浏览器上下文；截之前等第一页渲染完、`document.fonts.ready`、网络空闲（开发服务器的自动刷新长连接不算）、所有动画播完。文件名 `<名字>-<宽度>-<主题>.png`，另有 `shots.json` 记下每张的问题。
 - 外网请求一律拦下；控制台报错、页面异常、被拦的外网请求最后列出来（照样出图）。
+- `--scroll 名字=位置`：截那个名字的页面前先滚到某处——像素、`bottom`（滚到底）或选择器（把它滚到底栏后面：元素中心对准底栏中心）；`--scroll-back 像素` 再往回（往上）带一下，像手指往回滑：底栏从收小弹回完整。例：看底栏后面是深色照片、光场 `--routes 'photo=#/t/demo-cities/journal?view=album,field=#/t/demo-cities' --scroll 'field=bottom' --scroll-back 30`。
 - `--real`：本机真实数据预览（见下文），`--out` 必须在仓库外，否则直接报错退出。
 
 ## 本机真实数据预览：`npm run dev -- --real`

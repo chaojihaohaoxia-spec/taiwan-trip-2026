@@ -28,12 +28,12 @@ DOM 顺序 = 键盘 Tab / 读屏的顺序：顶栏（返回、搜索）→ 页�
 | 文件 | 内容 |
 |---|---|
 | `Frame.jsx` | 骨架：按路由摆好 `.shell` / `<main>` / `.shell-page`，下载 `FrameUI.jsx`；导出 `frameReady`（`main.jsx` 等它再淡出启动画面） |
-| `FrameUI.jsx` | `HeadArea`（大标题 + 分段条）、`Chrome`（`<main>` 前面：滚动边缘、顶栏、同步条）、`ChromeBottom`（`<main>` 后面：底栏、搜索结果层）、`Field`；滚动处理（大标题淡出、边缘、顶栏状态，rAF 节流）、装换页动效、预加载弹层 |
+| `FrameUI.jsx` | `HeadArea`（大标题 + 分段条）、`Chrome`（`<main>` 前面：滚动边缘、顶栏、同步条）、`ChromeBottom`（`<main>` 后面：底栏、搜索结果层）、`Field`；滚动处理（大标题淡出、边缘、顶栏状态、底栏收小，rAF 节流）、装换页动效、预加载弹层 |
 | `chrome.js` | **`usePageChrome()`**（见下）+ 转出 `rules.js` 的规则；首屏也要读的两个信号：`topbarState`（top / pill / bar）、`syncSpace`（同步条让出的高度） |
 | `rules.js` | 纯函数：`chromeKind`、`activeTab`、`tabIndex`、`hasTabBar`、`dayStripIndex`、`defaultChrome`、`mergeChrome`、`transitionPlan` |
 | `view-rules.js` | 纯函数：`dayStripCells`、`fabActions`、`menuStatuses`、`syncBanner`、`switchTarget`、`mixHex`（OKLab 混色）、`mixHexOklch`（OKLCH 短色相路径混色，换行程的主题色补间用） |
 | `format.js` | 纯函数：`splitTripTitle`（大标题 = 行程名第一段）、`dayLabel`、`dateRangeLabel`（`10-16 周五 – 10-19 周一`）、`tripSubtitle`、`switcherDates`、`phaseChip`、`pillPhrase`（胶囊里的「5 天后出发」）、`overviewLabel` |
-| `scroll-state.js` | 纯逻辑：顶栏 top / pill / bar 随滚动怎么变（`createTopbarIntent`） |
+| `scroll-state.js` | 纯逻辑：顶栏 top / pill / bar 随滚动怎么变（`createTopbarIntent`）；底栏随滚动收小（`createTabbarIntent`） |
 | `launch.js` | 纯函数：打开网站去哪（`launchTarget`，`pages/launch/LaunchPage.jsx` 用） |
 | `trip-state.js` | 当前行程（`tripStore`、`tripInfo`）、行程列表（`tripsState`、`ensureTripsLoaded`）、上次打开的行程、「行程」tab 停在哪；**整页行程主题色**（`<html>` 上只写终值一次，外壳部件 `[data-accent-follow]` 跟着光场补间，见「光场和主题色」）；动态下载数据层（`dataApi`） |
 | `search-state.js` | 搜索框的文字（`searchQuery`）、最近搜索（本机存，每趟行程一份，可清除）、`searchExiting`（结果层正在收起：顶栏这段时间仍浮在遮罩上面） |
@@ -41,7 +41,8 @@ DOM 顺序 = 键盘 Tab / 读屏的顺序：顶栏（返回、搜索）→ 页�
 | `TopBar.jsx` + `topbar.css` | 顶栏：返回、胶囊 / 整条（连续形变）、页面按钮、搜索 |
 | `PageHead.jsx` | 页面大标题（宋体 40，放不下退到 28）+ 副标题；行程里整块是切换按钮 |
 | `DayStrip.jsx` + `daystrip.css` | 天数分段条（**导出给页面用**） |
-| `TabBar.jsx` + `tabbar.css` | 底栏胶囊（指示块弹簧、＋、更多） |
+| `TabBar.jsx` + `tabbar.css` | 底栏：液态玻璃胶囊（选中块拉伸弹簧、按下透镜浮起、按住拖动选择、滚动收小、＋、更多），见下面「底栏」 |
+| `tabbar-motion.js` | 底栏的动效参数（`TABBAR_MOTION`）和纯函数：哪些格能拖着选（`isSelectable`、`selectableRange`）、透镜下的放大（`magnifyAt`）、按距离调回弹（`lensSpring`）、不出底栏（`lensEdge`）、从 ＋ 后面穿过变淡（`plusFade`） |
 | `SyncBar.jsx` + `syncbar.css` | 同步状态条 |
 | `CoverDot.jsx` | 行程封面小圆点 / 方块（主题色渐变 + emoji） |
 | `glyphs.jsx` | 首屏用的 5 个线条图标（样稿同一套笔法；按需加载的面板用 `kit/Glyph.jsx`） |
@@ -133,9 +134,70 @@ import { DayStrip } from '../../shell/DayStrip.jsx';
 
 ## 底栏（`TabBar.jsx`）
 
-行程 / 地图 / ＋ / 账本 / 更多。指示块弹簧跟随；「行程」点回上次在行程 tab 里停的地方（概览或某一天），已经在那里就回到概览 / 顶部；
+行程 / 地图 / ＋ / 账本 / 更多。手感照 iOS 26 Apple Music 的 Liquid Glass 底栏（10-14 用户：“液态玻璃透明度高一点、点击的互动做好一点”）。
+「行程」点回上次在行程 tab 里停的地方（概览或某一天），已经在那里就回到概览 / 顶部；
 ＋ 是 56px 的实心主题色圆钮（`IconButton variant="filled"`，`aria-haspopup="dialog"`），从它长出 ＋ 面板，加号转 ×；
 「更多」三横线 ↔ ×、标签「更多」↔「关闭」两个字叠在一起交叉淡化（来的那个晚 `--dur-instant` 出来，跟图标变形的中点对齐）。
+
+**玻璃**（同屏 backdrop-filter 还是只有 `.tabbar__glass` 一层）：
+- 通透：`--material-tabbar`（浅色 40% → 24% 的白，以前是 80% → 60%；深色 28% → 36%）+ `--tabbar-glass-filter`（模糊 14px、饱和度 190%、亮度 1.08；
+  深色 180% / 0.82），后面内容的颜色和形状看得见。底部滚动边缘层（`frame.css` 的 `.shell-edge--bottom`）用淡得多的 `--color-edge-tint-bottom`
+  （浅色 25%、深色 30%），不先把内容洗白。实测透过率（底栏后面垫纯黑 / 纯白，算玻璃像素差，含滚动边缘层）：浅色 0.47–0.59（改前 0.20–0.24）、
+  深色 0.39–0.51（改前 0.21–0.24）；
+- 折射边：`::before` 1px 渐变描边（上沿最亮、两侧渐隐、下沿暗）+ `--shadow-tabbar-edge`（上沿内侧一道亮带、下沿内侧一道暗带）；内侧上半部极淡的光泽；`--shadow-tabbar` 大而软的悬浮投影；
+- “活力”：字和图标后面一层贴着字形的晕，浅色是白晕、深色是暗晕（`--color-tabbar-halo`；选中那格 `--color-tabbar-halo-strong` 更足）。
+  字是四层 `text-shadow`（1 / 1.5 / 3 / 7px）；图标是垫在下面的同一个图形 `.tabbar__halo`（描粗到 `--tabbar-halo-stroke`、虚化 `--tabbar-halo-blur`）——
+  贴着图形走，不是一圈光斑；后面是浅色内容时白晕本来就看不出来，只有后面变深时才托住字。
+  选中那格的字用 `--color-tabbar-accent`（浅色模式比 `--color-accent-text` 再深一点：亮度压到 0.42；深色模式不变）。
+  晕的颜色只跟 `aria-current` 走、不跟拖动时的 `data-hover`：拖动时换格只改颜色，改自定义属性会让 Chrome 每次换格都重新布局一次。
+  对比度在真实渲染上实测（`tabbar-liquid.e2e` 用 `test/e2e/lib/contrast.mjs`：同一块截有字 / 字透明两张，逐像素算字形下面那一点的对比度；
+  图标的晕是单独的元素，量图标时晕还在）：纯白、纯黑、彩色条纹、黑白格垫在滚动边缘层下面和**上面**（最坏情况：玻璃直接看到纯黑 / 纯白）、
+  白卡片、深色照片、光场上，平时和按住，浅色 / 深色的字最低都 ≥4.5:1、图标 ≥3:1。
+
+**选中块**（一块更亮、更透的玻璃药丸；`.tabbar__ind` 管位置、拉伸和透明度，`.tabbar__lens` 管浮起）：
+- 切 tab：`motion/liquid.js` 的 `stretchSpring`——位置走弹簧（感知 0.48s、回弹 0.24，停下前过冲约 2.5%；跨得远时回弹按距离调小，
+  静止出发的过冲最多 0.05 格，`tabbar-motion.js` 的 `lensSpring`），每一帧按此刻的速度沿运动方向拉长
+  （最多 22%，`vRef` 6 格/秒：切一格峰值 13.5%、跨两格 18.7%、跨三格约 20%）、竖向按拉长量的 45% 压扁、往后拖拉长量的 30%——像一滴液体被拖着走。
+  拉伸是派生通道，跟着采样进 WAAPI 关键帧（合成线程，只动 transform）；半路再切从当前位置、当前速度接着走。
+- 从 ＋ 后面穿过时变淡（`plusFade`：中心离第 2 格不到 0.6 格时变淡，正中 0.5；也是派生通道，进关键帧）——选中块比 ＋ 大一圈，不淡会在 ＋ 周围露出一圈白边。
+- 不出底栏：渲染时两头按橡皮筋收住（`lensEdge`：选中块的边最多再出去 0.06 格、越往外越难，离底栏的边还有约 4px），弹簧回弹、拖到头、甩出去都收得住。
+- 按下（行程 / 地图 / 账本，或二级页面时的「更多」）：透镜等比浮起放大 1.15（两头还是正圆，上下各超出底栏约 1.8px；按下 0.26s 几乎不回弹，松手 0.42s 回弹 0.32），
+  底色变淡、亮边和顶部高光出来（`data-lens-up`）；按在别的格子上，选中块**按下那一刻**就用同一条 `stretchSpring` 滑到手指下（合成线程跑，不追手指），
+  松手时已经在去那一格的路上、不重启——真人轻点（按 40–90ms）和 0ms 点击的过冲一样（以前追手指的弹簧把速度交给松手的弹簧，三格能冲出去 26px、冲出底栏）。
+  透镜下的图标和字放大（正下方 1.12，离透镜中心 0.75 格以外不放大）；手指下那一格高亮（`data-tracking` + `data-hover`，颜色跟着手指，不跟 `aria-current`）。
+- 按住左右拖（`trackSlideSelect`，超过 6px 算拖）：从弹簧此刻的位置、速度接过来改成跟手——透镜被一根很短的弹簧（感知 0.2s、阻尼比 0.86）拽着走，拉伸来自跟随的速度；
+  经过的格子高亮、换格 `haptic('selection')`。换格有迟滞：越过两格中线 0.12 格才换（`nearestSelectable`），停在中线上手指抖也不会来回闪、来回震。
+  松手停在高亮的那格（按松手速度外推 0.08 秒再用同样的迟滞判断：停着松手就是高亮的那格，甩一下能甩过去）并切过去（`haptic('selection')`）；
+  交回弹簧的速度限制在 ±6 格/秒。＋ 不参与：拖过它时透镜在它后面变淡，停在 ＋ 正中两侧 0.12 格以内松手回到高亮的那格（来的那格）；
+  「更多」平时是打开菜单的按钮、不是一页，拖不上去（过了账本橡皮筋收住）。
+  手指离开底栏左右 24px、上下 28px 以外 = 滑出去了：透镜落下、回到原来那格，这时松手就是取消（不切页、不算点击）。
+- 轻点在**松手那一刻**就切：`tabEl.click()` 走 `go()`（切页 / 点当前格回到顶部 / 二级页面时「更多」打开菜单），再 `suppressNextClick` 拦掉浏览器随后的原生 click（只切一次）。
+  原因：iOS Safari 上按住超过约 0.7 秒松手不发 click，链接还会被系统的“拖拽链接”接管（灰色卡片跟着手指走、松手不切页）。
+  所以 tab 关掉了拖拽（`draggable={false}`、`-webkit-user-drag: none`、行上取消 `dragstart`）。原生 click 只留给键盘（回车 / 空格）和读屏；修饰键点开新窗口照旧。
+  iOS 26.4 模拟器里实测：轻点、按 750ms / 1000ms 松手、按 800ms 再拖都能切，没有系统的拖拽卡片。
+- 新页面的代码还在下载时（第一次进某一页）：松手后颜色先跟着选中块到新那格（`<nav data-pending>`、那一格 `data-pending-tab`），旧那格不会再亮回来；
+  路由到了（`index` 变了）或这次导航结束（到了、被顶掉、没走成）撤掉；没走成就回到当前页那一格。
+- 拖动时按下那一刻量好各格位置，之后每帧只写 transform / scale / opacity（不读布局；放大的 scale 按住期间一直写着数值，
+  不在“有 / 没有 scale”之间切——每切一次 Chrome 都要重新布局）；4 倍降速时拖动、切 tab、收小的帧间隔 p95 都是 16.7–16.8ms，拖动期间只布局 1 次（按下那一刻）。
+- ＋ 和「更多」（不是当前页时）按下是放大（＋ 1.1、其他 1.06，`--tabbar-fab-press-grow` / `--tabbar-press-grow`），松手弹簧回弹。
+
+**滚动收小**（Apple Music，iOS 26 `tabBarMinimizeBehavior .onScrollDown`；规则在 `scroll-state.js` 的 `createTabbarIntent`，和顶栏同一个滚动处理、各算各的）：
+- 离顶部 96px 以上、往下累计滚过 24px → 收小：整条等比缩到 0.8（贴着底边缩，玻璃两头还是正圆，＋ 跟着缩到 44.8px），
+  标签在前 60% 淡出，图标反向放大 1.18（净 0.94）并挪到格子正中；往上累计 12px 或回到顶部 → 弹回完整；换页一律从完整开始。
+- 一条弹簧（感知 0.46s、回弹 0.12）驱动整条、图标、标签（`animateSpringGroup`），连续形变、可以半路反向；只动 scale / transform / opacity。
+- ＋ 面板、更多菜单开着（底栏浮在上面，「关闭」要看得见）、键盘焦点在底栏里、减弱动态效果时一直是完整的；
+  软键盘弹起时照样沉下去（`data-shown` 去掉），收起来回到原来的样子。
+- 收小时打开 ＋ 面板 / 更多菜单：底栏用快一点的弹簧（0.3s）展开，面板 / 圆形扩散从按钮**展开以后**的位置长出来
+  （`<nav data-anchor-unscale>`，`overlay/dom.js` 的 `layoutRect` 量按钮时不算底栏的 scale），起点和按钮不错开；
+  关掉以后底栏保持完整（`FrameUI.jsx` 打开时把收小的规则重置），再往下滚才收——面板收回到按钮时按钮就在原位。
+
+**键盘**：Tab 进来，← → 在五个按钮之间移动焦点（和天数分段条一样，不绕回），Home / End 到第一个 / 最后一个，回车 / 空格切换；
+焦点环照全站 `:focus-visible`；`<nav aria-label="主导航">`、当前格 `aria-current="page"` 都照旧。
+
+**减弱动态效果**：只淡入淡出和换颜色——选中块不滑、不拉伸，直接放到新格子淡入（`--dur-fast`）；按下透镜不放大、图标不放大（只换颜色）：
+按在当前那格亮边亮起，按在别的格只给手指下那格换颜色（选中块还在原来那格，亮边不亮——亮边和颜色不会分在两格）；
+拖动时透镜跳格淡入；不收小；＋ 和按钮按下不缩放。
+
 ＋ 面板、更多菜单开着时底栏**浮在它们上面**（z-index 抬到弹层之上、不被设成 inert，和样稿一样一直清楚可点）；其他弹层、搜索开着时在遮罩下面、不可交互（inert，Tab 不会跳进去）。
 从 ＋ 面板直接换成别的弹层（＋ →「记一笔」）：底栏先在上层淡出（`data-sinking`，160ms）再沉到遮罩下面淡回来，第一帧不会从清楚跳成虚化。
 安全区：离底 `--safe-bottom + --tabbar-inset`；软键盘弹起（`keyboard.js`）时沉下去。宽屏最宽 440px、居中。
@@ -223,8 +285,8 @@ import { DayStrip } from '../../shell/DayStrip.jsx';
 
 ## 测试
 
-- 单元：`test/unit/shell.test.js`（文字格式、外框规则、顶栏状态、启动规则、换页动效种类、分段条、＋ 面板、菜单状态、同步条、换行程去哪、OKLab 混色）；
+- 单元：`test/unit/tabbar.test.js`（底栏的拉伸、追手指的弹簧、拖动选择的格子换算和迟滞、按距离调回弹、不出底栏、从 ＋ 后面穿过变淡、滚动收小的规则、哪些格能选、透镜放大）；`test/unit/shell.test.js`（文字格式、外框规则、顶栏状态、启动规则、换页动效种类、分段条、＋ 面板、菜单状态、同步条、换行程去哪、OKLab 混色）；
   `test/unit/shell-review.test.js`（外壳评审修过的：OKLCH 补间不发灰、胶囊短语、`collapse: 'never'`、光场曲线和减弱动态效果……）。
-- e2e：`test/e2e/shell-frame.e2e.mjs`（切 tab、切天、开关各面板、返回手势关面板、启动跳转、搜索、无横向溢出、触控区、同屏玻璃数、滚动顶栏帧率）；`test/e2e/shell.e2e.mjs`（登录守卫、外壳整合）；
+- e2e：`test/e2e/tabbar-liquid.e2e.mjs`（底栏：玻璃、切 tab 半路拉伸和过冲、从 ＋ 后面穿过变淡、真人轻点不过冲不出底栏、长按松手照样切、tab 不能被拖走、一次轻点只切一次、拖动换格迟滞、网络慢时颜色不先回旧格、按下透镜、拖动选择、滑出取消、键盘、滚动收小、收小时打开面板的起点、＋、减弱动态效果、触控区、对比度实测、4 倍降速帧间隔，截图在 `__shots__/tabbar-liquid/`）；`test/e2e/shell-frame.e2e.mjs`（切 tab、切天、开关各面板、返回手势关面板、启动跳转、搜索、无横向溢出、触控区、同屏玻璃数、滚动顶栏帧率）；`test/e2e/shell.e2e.mjs`（登录守卫、外壳整合）；
   `test/e2e/shell-review.e2e.mjs`（外壳评审的回归：10 格分段条的滑块、换行程不叠影 / `<html>` 只写一次 / 光场垫底、连点分段条、搜索收起和 inert、
   ＋ 面板收回和衔接、「更多」换字和一屏放下、切换面板键盘、给司机看收回和误双击、下车点、演示角标……）。

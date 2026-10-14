@@ -48,6 +48,7 @@ export function rectOf(el) {
 /**
  * 元素“排版上”的矩形：尺寸不算 transform（按钮正被按下缩到 0.96 时量出来也是原尺寸），
  * 位置按视觉中心算（缩放围绕中心，中心不变）。“从按钮长出来”的起点、替身按钮的位置都用它。
+ * 按钮所在的容器写了 data-anchor-unscale（底栏）：容器的 scale 也不算（按容器原大时按钮的位置）。
  */
 export function layoutRect(el) {
   const r = el.getBoundingClientRect();
@@ -65,7 +66,22 @@ export function layoutRect(el) {
     w += extra('paddingLeft', 'paddingRight') + extra('borderLeftWidth', 'borderRightWidth');
     h += extra('paddingTop', 'paddingBottom') + extra('borderTopWidth', 'borderBottomWidth');
   }
-  return { left: r.left + r.width / 2 - w / 2, top: r.top + r.height / 2 - h / 2, width: w, height: h };
+  let cx = r.left + r.width / 2;
+  let cy = r.top + r.height / 2;
+  // 按钮在一个正在缩放回原大的容器里（底栏收小时打开 ＋ 面板 / 更多菜单：底栏同时在展开，data-anchor-unscale）：
+  // 按容器不缩放的样子量——面板从按钮展开以后的位置长出来，不会起点和按钮错开。容器的 transform-origin 是 50% 100%（底边中点不动）
+  const host = el.closest?.('[data-anchor-unscale]');
+  if (host) {
+    const s = parseFloat(getComputedStyle(host).scale);
+    if (Number.isFinite(s) && s > 0 && Math.abs(s - 1) > 1e-3) {
+      const hr = host.getBoundingClientRect();
+      const ox = hr.left + hr.width / 2;
+      const oy = hr.bottom;
+      cx = ox + (cx - ox) / s;
+      cy = oy + (cy - oy) / s;
+    }
+  }
+  return { left: cx - w / 2, top: cy - h / 2, width: w, height: h };
 }
 
 /** 触发按钮的实际圆角（px，不超过短边的一半） */

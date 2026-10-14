@@ -10,7 +10,7 @@
 export { SPRINGS, SPRING_NAMES, spring, solveSpring, springToLinear, supportsLinearEasing, SPRING_FALLBACKS } from './springs.js';
 export { prefersReducedMotion } from './reduced-motion.js';
 export {
-  resolveSpring, springMotion, springGroup, sampleFrames, rubberBand, projectMomentum, VelocityTracker,
+  resolveSpring, springMotion, springGroup, deriveGroup, sampleFrames, rubberBand, projectMomentum, VelocityTracker,
   cubicBezier, parseCubicBezier, lerp, clamp, stage, num, resolveRadius,
 } from './physics.js';
 export { timeScale, getTimeScale, setTimeScale, cssDuration, cssEasing } from './time.js';
@@ -25,6 +25,9 @@ export {
 export { shapeProgress, morphTintAt, morphContentAt, MORPH_TINT_RANGE, MORPH_CONTENT_RANGE } from './morph-shape.js';
 export { attachPress, delegatePress, autoPressScale, suppressNextClick } from './press.js';
 export { trackDrag, momentumScroll, MOMENTUM_DECELERATION } from './gesture.js';
+export {
+  LIQUID_STRETCH, liquidStretch, stretchSpring, followSpring, slotPosition, nearestSelectable, rubberClamp, trackSlideSelect,
+} from './liquid.js';
 export { usePress, useFlip, useHeightFlip, useReducedMotion, usePrevious, useResizeObserver, useLatest } from './hooks.js';
 export { holdPosition } from './anchor.js';
 export { inheritPressScale, pressScaleOf, continuePressFrom } from './press-handoff.js';

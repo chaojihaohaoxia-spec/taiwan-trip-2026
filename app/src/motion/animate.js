@@ -37,7 +37,7 @@
 //   不等下一帧才开始——否则反向那一刻会原地停一帧（见 startNow）。
 // =====================================================================
 
-import { springGroup, sampleFrames, parseCubicBezier } from './physics.js';
+import { springGroup, deriveGroup, sampleFrames, parseCubicBezier } from './physics.js';
 import { prefersReducedMotion } from './reduced-motion.js';
 import { getTimeScale, cssDuration, cssEasing } from './time.js';
 
@@ -144,6 +144,8 @@ class SpringBase {
     this.k = getTimeScale();
     this.reduced = reducedMode(o.reduced);
     this.group = springGroup(o.spring ?? 'smooth', o.from || o.to, o.to, this.reduced ? {} : o.velocity, o.precision);
+    // 派生通道（按速度拉长之类，见 physics.js 的 deriveGroup）：跟着采样、交给 render，不参与接力
+    if (typeof o.derive === 'function') this.group = deriveGroup(this.group, o.derive, o.deriveScale);
     this.delay = Math.max(0, o.delay || 0) * this.k;
     this.ease = null;
     this.duration = 0;
@@ -338,6 +340,9 @@ function handoff(el, o) {
  *   current?: () => Record<string, number>, 没有正在播的动画时，读当前值
  *   inheritVelocity?: boolean,              默认 true
  *   id?: string,
+ *   derive?: (values, velocities) => Record<string, number>,   派生通道（例如按速度拉长，motion/liquid.js 的 stretchSpring）：
+ *                                           每一帧由值和速度算出，跟着进关键帧、交给 render；不参与接力
+ *   deriveScale?: Record<string, number>,   派生通道的幅度（关键帧折线简化按它归一）
  * }} options
  * @returns {SpringAnimation}
  */

@@ -10,13 +10,14 @@
 | 文件 | 职责 | 主要导出 |
 |---|---|---|
 | `springs.js` | 三条具名弹簧的参数（唯一来源）、`linear()` 采样（生成 tokens.css）、旧 Safari 的近似贝塞尔 | `SPRINGS`、`spring(name)`、`solveSpring(spec, v)`、`springToLinear`、`SPRING_FALLBACKS` |
-| `physics.js` | **纯函数**：任意单位的弹簧通解（带初速度）、多通道、采样成关键帧、橡皮筋、惯性投射、手指速度、贝塞尔、圆角换算、分段进度 | `springMotion`、`springGroup`、`sampleFrames`、`rubberBand`、`projectMomentum`、`VelocityTracker`、`cubicBezier`、`resolveRadius`、`clamp`、`lerp`、`stage`、`num` |
+| `physics.js` | **纯函数**：任意单位的弹簧通解（带初速度）、多通道、派生通道（`deriveGroup`：按值和速度算出来的量跟着进关键帧）、采样成关键帧、橡皮筋、惯性投射、手指速度、贝塞尔、圆角换算、分段进度 | `springMotion`、`springGroup`、`sampleFrames`、`rubberBand`、`projectMomentum`、`VelocityTracker`、`cubicBezier`、`resolveRadius`、`clamp`、`lerp`、`stage`、`num` |
 | `animate.js` | **WAAPI 封装**：弹簧动画（关键帧 / rAF 两种）、一组元素共用一条弹簧、普通补间；同通道打断接力（位置、速度连续，接手那一帧不停顿） | `animateSpring`、`animateSpringGroup`、`springValue`、`animateTween`、`stopAnimation`、`getAnimation` |
 | `flip.js` | **FLIP**：记录 → 改 DOM → 反算 → 弹簧播回；平移 / 缩放（圆角修正）/ 等比裁切；新元素进场、删掉的“幽灵”离场；整块变高变矮 | `captureLayout`、`playFlip`、`flip`、`invertFor`、`needsRadiusCorrection`、`captureHeight`、`playHeight` |
 | `morph.js` | **共享元素形变**：从一个元素的位置和圆角长成另一个元素、原路收回（颜色、内容跟着形状走）；圆形扩散 | `morphFrom`、`morphTo`、`revealCircle`、`measure`、`clipFollower` |
 | `morph-shape.js` | **纯函数**：形变的“形状进度”，色层 / 内容的不透明度随形状变化的规则 | `shapeProgress`、`morphTintAt`、`morphContentAt`、`MORPH_TINT_RANGE`、`MORPH_CONTENT_RANGE` |
 | `press.js` + `press.css` | **按压反馈**：按下即缩、滑出取消、滑回再按（浮层按钮触屏上也行）、松手弹簧回弹、键盘按下态、嵌套只认最里层；全局委托（任何带 `data-press` 的元素） | `attachPress`、`delegatePress`、`autoPressScale`、`suppressNextClick` |
 | `press-handoff.js` | **按压回弹的交接**：按钮还在回弹途中被替身 / 输入框换掉时，新元素从同样的缩放接着弹 | `pressScaleOf`、`continuePressFrom`、`inheritPressScale` |
+| `liquid.js` | **液态玻璃**（iOS 26 Liquid Glass）：带拉伸的弹簧位移（按速度沿运动方向拉长、竖向略扁、往后拖；还能加只依赖位置的派生通道，例如透明度）、横向按住拖动选择（每帧换算第几格、带迟滞的最近可选格、松手按速度外推落点、滑出取消）、追手指的弹簧；纯函数可在 Node 里测 | `stretchSpring`、`trackSlideSelect`、`liquidStretch`、`followSpring`、`slotPosition`、`nearestSelectable`、`rubberClamp`、`LIQUID_STRETCH` |
 | `gesture.js` | **拖动手势**：方向锁定、阈值、指针捕获、松手速度、`onFinish`；拖过后的那次 click 作废；接管手势后的惯性滚动 | `trackDrag`、`momentumScroll`、`MOMENTUM_DECELERATION` |
 | `anchor.js` | **滚动锚定**（自己做，iOS Safari 没有 `overflow-anchor`）：布局变化期间某个元素在屏幕上不动 | `holdPosition` |
 | `hooks.js` | Preact hooks | `usePress`、`useFlip`、`useHeightFlip`、`useReducedMotion`、`useResizeObserver`、`useLatest`、`usePrevious` |
@@ -74,6 +75,16 @@ animateSpringGroup([
   [fullTitle, ({ p }) => ({ opacity: num(1 - stage(p, 0, 0.35)) })],      // 旧标题 0–35% 淡出
   [compactTitle, ({ p }) => ({ opacity: num(stage(p, 0.25, 0.75)) })],    // 新标题 25–75% 淡入（错开，不重影）
 ], { channel: 'ch-morph', current: () => ({ p: 0 }), to: { p: 1 }, spring: 'smooth', commit: 'clear' });
+```
+
+**派生通道**（`derive`）：每一帧由弹簧的值和速度算出来的量，跟着采样进关键帧、交给 render，但不参与接力（下一段动画只认 `to` 里的通道）。
+底栏选中块的“按速度拉长”就是这么做的（`liquid.js` 的 `stretchSpring` 包了一层）：
+
+```js
+animateSpring(el, { channel: 'ind', to: { x: 3 }, spring: 'bouncy',
+  derive: ({ x }, v) => ({ sx: 1 + Math.min(0.2, Math.abs(v.x) / 30) }),       // v：此刻的速度（单位/秒）
+  deriveScale: { sx: 0.2 },                                                       // 派生通道的幅度（关键帧简化按它归一）
+  render: ({ x, sx }) => ({ transform: `translateX(${x * 100}%) scale(${sx}, 1)` }) });
 ```
 
 `stage(p, a, b)`：进度 p 在 [a, b] 这一段走了多少（两端平滑）。顶栏收胶囊（`ui/CollapsingHeader`）、搜索框展开（`ui/SearchExpand`）、步进器（`ui/Stepper`）都是这么做的：以前它们是 CSS 过渡，被打断时速度归零；现在和面板、分段控件一样能接力速度。
@@ -185,6 +196,42 @@ el.addEventListener('pointerdown', (e) => trackDrag(e, {
 `onFinish`：无论这次按下有没有变成拖动，松手 / 取消时都调用（分段控件用它在“按住选中块没拖”时也能撤掉按下态）。
 `momentumScroll(scroller, velocity)`：手势被你接管（preventDefault）后浏览器不会再惯性滚动，松手时用它按手指速度接着滚（底部面板拉到最高档后，同一个手势接着滚内容）；手指再按下就停。
 
+### 7b. 液态玻璃：带拉伸的弹簧、按住拖动选择（`liquid.js`，底栏 `shell/TabBar.jsx` 在用）
+
+```js
+import { stretchSpring, trackSlideSelect, followSpring, liquidStretch, rubberClamp } from '../motion/liquid.js';
+
+// 选中块滑到第 3 格：位置走弹簧（可打断、速度接力），每帧按速度拉长（最多 22%）、竖向略扁、往后拖一点
+stretchSpring(thumb, { channel: 'thumb', current: () => 0, to: 3, spring: { duration: 0.48, bounce: 0.24 },
+  stretch: { max: 0.22, vRef: 6 },                                     // vRef 和位置同一单位（格/秒）
+  extra: (x) => ({ o: x > 1.4 && x < 2.6 ? 0.5 : 1 }), extraScale: { o: 0.5 },   // 可选：只依赖位置的派生通道（底栏：从 ＋ 后面穿过时变淡）
+  render: ({ x, sx, sy, shift, o }) => ({ transform: `translateX(${(x + shift) * 100}%) scale(${sx}, ${sy})`, opacity: o }) });
+
+// 按住左右拖：按下时量好各格中心和可拖区域，之后每帧（rAF）给出“第几格”（小数），不再读布局
+row.addEventListener('pointerdown', (e) => {
+  const f = { x: current, v: 0 };
+  trackSlideSelect(e, {
+    centers, bounds: bar.getBoundingClientRect(), selectable: (i) => i !== 2,     // 中间的 ＋ 不能选
+    onFrame: ({ u, inside, dt }) => {                                            // 跟手：一根很短的弹簧拽着走，速度就是拉伸
+      followSpring(f, inside ? rubberClamp(u, 0, 3) : current, dt);
+      Object.assign(thumb.style, render({ x: f.x, ...liquidStretch(f.v) }));
+    },
+    onHover: (i) => haptic('selection'),                                         // 高亮的格变了（越过两格中线 bias 0.12 格才换，抖不闪）
+    onEnd: ({ nearest, inside, dragging }) => { /* nearest：高亮的格按松手速度外推 0.08 秒的落点；inside=false：滑出去松手 = 取消；
+                                                   dragging=false：轻点，调用方自己决定怎么切（底栏在这里直接切，不等原生 click） */ },
+  });
+});
+```
+
+- `trackSlideSelect` 的“滑出去”：手指离开 `bounds` 左右 `slop.x`（24）、上下 `slop.y`（28）以外；拖过以后要自己 `suppressNextClick`（底栏是这么做的）。
+- 可拖的元素写 `touch-action: none`（底栏整条都是：上面的手指从来不用来滚页面）。
+- 拖动时只写 transform / scale；放大这类 `scale` 按住期间一直写数值，别在“有 / 没有”之间切（Chrome 每切一次重新布局一次）。
+  换格时也别改自定义属性（`--x` 这类）：Chrome 改一次自定义属性就重新布局一次，换格时直接改 color 这类属性。
+- 还没拖之前（按下、可能是轻点）别用追手指的弹簧去追：它的速度很大，松手交给弹簧时会甩出去。底栏的做法是按下时就用 `stretchSpring` 送过去，
+  `onDragStart` 再从弹簧此刻的值和速度接过来跟手；交回弹簧时速度限制在 ±vRef。
+- iOS Safari：按住链接超过约 0.7 秒松手不发 click，还会启动系统的“拖拽链接”。按住拖动选择的元素如果是 `<a>`，要关掉拖拽
+  （`draggable={false}`、`-webkit-user-drag: none`、取消 `dragstart`），轻点在 `onEnd` 里直接处理（`el.click()` + `suppressNextClick(el)`）。
+
 ### 8. 布局变化时元素不跑（滚动锚定）
 
 ```js
@@ -220,5 +267,6 @@ const stop = holdPosition(headerEl, { minMs: 700 });   // 之后每一帧量它�
 ## 测试
 
 - 单元测试 `test/unit/motion.physics.test.js`：弹簧通解和 `solveSpring` 一致、速度连续接力、采样误差、橡皮筋、惯性、手指速度、贝塞尔、FLIP 反算、圆角修正的取舍、形变起点、按压缩放；`test/unit/motion.test.js`：tokens.css 曲线同步、旧 Safari 贝塞尔的拟合精度、形变“跟着形状走”的规则（`morph-shape.js`）。
+- 单元测试 `test/unit/tabbar.test.js`：`liquid.js` 的拉伸、追手指的弹簧、格子换算和迟滞（中线上抖不换格）、橡皮筋，`deriveGroup` 的派生通道（起点终点不拉伸、中途拉伸、不参与接力；位置派生的透明度在折线简化后留得住）；e2e `test/e2e/tabbar-liquid.e2e.mjs` 在底栏上验证它们（半路截图、真人轻点的过冲、长按、拖动、抖动、4 倍降速帧间隔）。
 - e2e `test/e2e/interactions.e2e.mjs`：每个交互截「开始 / 半路 / 结束」三张图到 `test/e2e/__shots__/motion/`，断言半路的几何量介于两端之间；`test/e2e/lib/motion-shots.mjs` 的 `captureAt()` 把触发后的**所有**动画拨到同一时刻，半路截图和真实播放时看到的一致。
 - e2e `test/e2e/motion-review.e2e.mjs`：动效评审 19 条里每一条的回归测试（连点不残留、甩动落点、手风琴不跑、搜索第 0 帧重合、面板颜色跟着形状、反向速度连续、浮层按钮滑回触发……），半路截图在 `__shots__/motion/review-*.png`。

@@ -50,7 +50,7 @@ reset < tokens < base < vendor < motion < ui < overlay < shell < pages < dev
 | | 内容卡片 | 悬浮层（真玻璃） |
 |---|---|---|
 | 用在 | 概览卡片、时间轴卡片、列表 / 网格卡片、开发页区块……所有铺在光场上的内容 | 顶栏、底栏胶囊、悬浮加号、搜索框、底部面板、从按钮长出来的面板、全屏菜单、确认框、小菜单、Toast |
-| 背景 | `background: var(--material-card)` | `background: var(--material-glass-strong)`（顶栏、底栏）/ `var(--material-glass-dense)`（弹层，更不透明）/ `var(--material-glass)`（更通透） |
+| 背景 | `background: var(--material-card)` | `background: var(--material-glass-strong)`（顶栏）/ `var(--material-tabbar)`（底栏，最通透，见下）/ `var(--material-glass-dense)`（弹层，更不透明）/ `var(--material-glass)`（更通透） |
 | 模糊 | **不开**：卡片下面是平滑的光场，模糊了也看不出差别；iPhone 上几十个 backdrop-filter 会掉帧 | `-webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter);`（小圆按钮 `--glass-filter-sm`，全屏菜单 `--glass-filter-xl`）。**同一屏不超过 8 个** |
 | 边 | `box-shadow: var(--material-card-edge)`（顶部高光 + 底部暗边 + 细描边 + 内发光） | `box-shadow: var(--shadow-3 或 4), var(--shadow-glass-edge), var(--shadow-glass-glow)`（内侧柔光可选，大面积的面板加） |
 | 折射描边 | `::before` + `--material-rim`（见 materials.css） | 同左 |
@@ -97,7 +97,8 @@ reset < tokens < base < vendor < motion < ui < overlay < shell < pages < dev
 | `glass-lift` | 叠在 `glass-strong-2` 底色上把左上角提亮的那层（`--material-glass-lift`：底色要被 JS 插值的玻璃用，例如顶栏） |
 | `glass-border` / `glass-highlight` / `glass-shade` / `glass-glow` | 玻璃的细描边 / 顶部高光 / 底部暗边 / 内发光 |
 | `rim` / `rim-2` / `sheen` | 折射描边的左上 / 右下颜色、左上角的镜面光斑 |
-| `edge-tint` | 内容滑进顶栏、底栏下面时渐隐用的底色 |
+| `edge-tint` / `edge-tint-bottom` | 内容滑进顶栏、底栏下面时渐隐用的底色；底栏那头淡得多（浅色 25%、深色 30%：底栏的玻璃要看得见后面的内容，不能先被它洗白） |
+| `tabbar-*` | **底栏的液态玻璃**（照 iOS 26 Apple Music，比顶栏、弹层通透得多）：`tabbar-glass` / `-2` 上下两端的薄色（浅色 40% → 24% 白，深色 28% → 36%）、`tabbar-sheen` 内侧上半部的光泽、`tabbar-rim` 上沿亮边 / `tabbar-rim-shade` 下沿暗边、`tabbar-border` 细描边、`tabbar-lens` / `-2` 选中块（浅色 64% → 46% 白、深色 10% → 6%）、`tabbar-lens-clear` / `tabbar-lens-ring` 按住时浮起的透镜、`tabbar-ink` 没选中的字和图标、`tabbar-halo` 字和图标后面贴着字形的“活力”晕（浅色白晕、深色暗晕）/ `tabbar-halo-strong` 选中那格的晕、`tabbar-accent` 选中那格的强调色（在强调色派生那一节：浅色模式把 `accent-text` 的亮度再压到 `--tabbar-accent-lmax` 0.42）、`tabbar-shadow` 悬浮阴影。对比度是在真实渲染上实测的（`test/e2e/tabbar-liquid.e2e.mjs`：纯白、纯黑、彩色条纹、黑白格垫在滚动边缘层下面和上面、深色照片、光场上，平时和按住，浅色 / 深色的字都 ≥4.5:1、图标 ≥3:1） |
 | `thumb` | 控件滑块（分段控件的白色选中块、开关的圆钮）；深色是 12% 的白（滑块上的强调色小字——底栏选中的「行程」、分段条的「今天」——才 ≥4.5:1） |
 | `text` / `text-2` / `text-3` | 正文 / 次要说明（≥4.5:1）/ 占位、禁用、装饰（≥3:1，**不要用于正文**）。次要文字是半透明的墨色，放在玻璃上会带一点底下的颜色 |
 | `text-inverse` | 反色文字 |
@@ -147,6 +148,7 @@ reset < tokens < base < vendor < motion < ui < overlay < shell < pages < dev
 | `--material-glass` / `--material-glass-strong` | 玻璃（普通 / 厚）：光斑 + 渐变，配 `--glass-filter` |
 | `--material-glass-dense` | 弹层默认的玻璃（`surface-raised` 渐变，最不透明） |
 | `--material-glass-lift` | 只有高光那一半（底色另给，见 `glass-lift`） |
+| `--material-tabbar` / `--material-tabbar-rim` / `--material-tabbar-lens` / `--material-tabbar-lens-clear` | 底栏：薄玻璃 + 光泽 / 上亮下暗的 1px 折射边 / 选中块 / 按住时的透镜；配 `--tabbar-glass-filter`（`blur(14px) saturate(190%) brightness(1.08)`，深色 `saturate(180%) brightness(0.82)`）和 `--shadow-tabbar`、`--shadow-tabbar-edge`、`--shadow-tabbar-lens(-clear)` |
 | `--material-sheen` | 只有左上角的光斑 |
 | `--material-rim` | 折射描边的渐变（配 `::before` + mask） |
 | `--material-accent` | 强调色实心按钮的渐变（左上亮、右下暗）：悬浮加号、主按钮、提交按钮 |

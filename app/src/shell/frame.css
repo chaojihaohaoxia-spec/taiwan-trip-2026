@@ -200,7 +200,8 @@ button.shell-head__title {
   bottom: 0;
   z-index: calc(var(--z-tabbar) - 1);
   height: calc(var(--safe-bottom) + var(--tabbar-h) + 32px);
-  background: linear-gradient(transparent, var(--color-edge-tint));
+  /* 底栏的玻璃要看得见后面的内容：这里只淡淡一层（--color-edge-tint-bottom），不先把内容洗白 */
+  background: linear-gradient(transparent, var(--color-edge-tint-bottom));
   -webkit-mask-image: linear-gradient(transparent, var(--color-text) 62%);
   mask-image: linear-gradient(transparent, var(--color-text) 62%);
 }

@@ -46,6 +46,10 @@ export const HELP = `截图工具：在真实浏览器（本机 Chrome）里按�
   --wait-for <选择器>  等这个元素出现再截（比如数据加载完才有的元素）
   --type <名字>=<文字> 截这个名字的页面前，往获得焦点的输入框里打这些字（例如搜索有结果：
                        --routes 'search=#/t/demo-island?sheet=search' --type 'search=pho'）；可以写几次
+  --scroll <名字>=<位置> 截这个名字的页面前先滚到某处；可以写几次。位置：像素（600）、bottom（滚到底）、
+                       或 CSS 选择器（把这个元素滚到底栏后面：元素中心对准底栏中心，没有底栏就对准屏幕底边），
+                       例如看底栏后面是深色照片：--scroll "photo=img[src*='demo-photo-03']"
+  --scroll-back <像素> 滚到位置以后再往回（往上）滚这么多，像手指往回带一下：底栏从收小的样子弹回完整（默认 0）
   --sheet              另外生成一张拼图总览 sheet.png（每个页面一行，各宽度、主题并排，带标注）
   --help               显示这段说明
 
@@ -102,6 +106,7 @@ export function parseArgs(argv) {
   const o = {
     base: null, dist: null, routes: 'trips=#/trips', widths: '390', themes: 'light', now: null, real: false, demo: true,
     full: false, out: null, scale: 2, reduced: false, wait: 0, waitFor: null, sheet: false, help: false, types: {},
+    scrolls: {}, scrollBack: 0,
   };
   const take = (i, flag) => {
     const v = argv[i + 1];
@@ -145,6 +150,14 @@ export function parseArgs(argv) {
         o.types[v.slice(0, at)] = v.slice(at + 1);
         break;
       }
+      case '--scroll': {
+        const v = value();
+        const at = v.indexOf('=');
+        if (at <= 0 || at === v.length - 1) throw new Error(`--scroll 要写成 名字=位置（像素、bottom 或选择器）：${v}`);
+        o.scrolls[v.slice(0, at)] = v.slice(at + 1);
+        break;
+      }
+      case '--scroll-back': o.scrollBack = Number(value()); break;
       case '--sheet': o.sheet = true; break;
       default: throw new Error(`不认识的参数：${a}（--help 看用法）`);
     }
@@ -155,6 +168,7 @@ export function parseArgs(argv) {
   if (o.real && !o.demo) throw new Error('--real 是演示模式的一种，不能和 --no-demo 一起用');
   if (!Number.isFinite(o.scale) || o.scale < 1 || o.scale > 4) throw new Error('--scale 要在 1 到 4 之间');
   if (!Number.isFinite(o.wait) || o.wait < 0) throw new Error('--wait 要是不小于 0 的毫秒数');
+  if (!Number.isFinite(o.scrollBack) || o.scrollBack < 0) throw new Error('--scroll-back 要是不小于 0 的像素数');
   if (o.now && (Number.isNaN(Date.parse(o.now)) || !/(Z|[+-]\d{2}:\d{2})$/.test(o.now))) {
     throw new Error(`--now 要写带时区的 ISO 时间，如 2027-01-11T10:00:00+07:00（现在是 ${o.now}）`);
   }
@@ -298,6 +312,34 @@ async function shootOne(browser, { url, origin, viewport, theme, o, file, name }
       });
       await page.keyboard.type(typing, { delay: 20 });
       await new Promise((r) => setTimeout(r, 400));
+    }
+    // --scroll：滚到某处（再按 --scroll-back 往回带一下），两步之间隔两帧，页面的滚动处理（顶栏、底栏）都看得到
+    const scrollTo = name ? o.scrolls?.[name] : null;
+    if (scrollTo) {
+      const twoFrames = () => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+      await page.evaluate(() => document.fonts.ready.then(() => undefined));
+      const at = await page.evaluate((where) => {
+        const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        if (where === 'bottom') return { y: max, max };
+        if (/^\d+$/.test(where)) return { y: Math.min(max, Number(where)), max };
+        const el = document.querySelector(where);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        const bar = document.querySelector('[data-testid="shell-tabbar"]')?.getBoundingClientRect();
+        const anchor = bar && bar.height ? (bar.top + bar.bottom) / 2 : window.innerHeight;
+        return { y: Math.max(0, Math.min(max, Math.round(window.scrollY + (r.top + r.bottom) / 2 - anchor))), max };
+      }, scrollTo);
+      if (!at) problems.push(`--scroll 的选择器没找到元素：${scrollTo}`);
+      else {
+        // 往回带：先滚过头一点（到底了就停在底），再往上回 scrollBack
+        const first = Math.min(at.max, at.y + (o.scrollBack || 0));
+        await page.evaluate((v) => window.scrollTo(0, v), first);
+        await twoFrames();
+        if (o.scrollBack) {
+          await page.evaluate((v) => window.scrollTo(0, v), Math.max(0, first - o.scrollBack));
+          await twoFrames();
+        }
+      }
     }
     await page.evaluate(() => document.fonts.ready.then(() => undefined));
     const pending = await waitIdle();

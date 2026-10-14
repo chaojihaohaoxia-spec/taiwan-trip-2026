@@ -11,6 +11,7 @@
 // =====================================================================
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { signal } from '@preact/signals';
 import { route, router, back, navigate } from '../router/index.js';
 import { isOverlayOpen, closeOverlay, layers } from '../overlay/manager.js';
 import { useOverlayTrigger } from '../overlay/binding.js';
@@ -20,7 +21,7 @@ import { prefersReducedMotion } from '../lib/media.js';
 import { haptic } from '../lib/native.js';
 import { chromeKind, defaultChrome, mergeChrome, declaredChrome, activeTab, hasTabBar, dayStripIndex, topbarState, syncSpace } from './chrome.js';
 import { tripInfo, currentTripId, loadData, ensureTripsLoaded } from './trip-state.js';
-import { createTopbarIntent } from './scroll-state.js';
+import { createTopbarIntent, createTabbarIntent } from './scroll-state.js';
 import { installPageTransitions } from './transitions.js';
 import { preloadShellOverlays, loadSearchLayer } from './overlays.js';
 import { searchQuery, searchExiting } from './search-state.js';
@@ -39,6 +40,10 @@ const LIFT_OVER = new Set(['fab', 'menu']);
 
 /** 大标题元素（Chrome 的滚动处理逐帧写它的透明度） */
 const headEl = { current: null };
+/** 底栏是否随滚动收小（Chrome 的滚动处理写，ChromeBottom 的底栏读；状态变了才改） */
+const tabbarCompact = signal(false);
+/** 底栏收小的滚动规则（Chrome 建、ChromeBottom 打开 ＋ 面板 / 更多菜单时重置） */
+const barIntent = { current: null };
 // 顶栏状态 topbarState、同步条让出的高度 syncSpace 在 chrome.js（首屏代码的演示角标也要读）
 export { syncSpace };
 
@@ -114,6 +119,8 @@ export function Chrome() {
   if (!intent.current) {
     intent.current = createTopbarIntent();
     topbarState.value = intent.current.reset(typeof window === 'undefined' ? 0 : window.scrollY, { collapse: chrome.collapse });
+    barIntent.current = createTabbarIntent();
+    barIntent.current.reset(typeof window === 'undefined' ? 0 : window.scrollY);
   }
   // 数据层、换页动效、弹层预加载（启动时一次）
   useEffect(() => {
@@ -155,6 +162,9 @@ export function Chrome() {
     }
     const next = intent.current.update(y, max, { collapse: c.collapse });
     if (next !== topbarState.peek()) topbarState.value = next;
+    // 底栏收小（Apple Music）：和顶栏同一个滚动处理、各算各的
+    const compact = barIntent.current.update(y, max);
+    if (compact !== tabbarCompact.peek()) tabbarCompact.value = compact;
   };
 
   useLayoutEffect(() => {
@@ -171,6 +181,8 @@ export function Chrome() {
     const off = router.onAfterChange((ctx) => {
       if (ctx.kind !== 'page') return;
       topbarState.value = intent.current.reset(window.scrollY, { collapse: chromeRef.current.collapse });
+      // 换了页底栏一律展开（点底栏切过去的，底栏应该是完整的）
+      tabbarCompact.value = barIntent.current.reset(window.scrollY);
       requestAnimationFrame(read);
     });
     read();
@@ -267,6 +279,13 @@ export function ChromeBottom() {
   const { lifted, open: overlayOpen } = liftState(layers.value);
   const [SearchLayer, setSearchLayer] = useState(null);
 
+  // 从收小的底栏打开 ＋ 面板 / 更多菜单：底栏展开，而且关掉以后也保持完整（到再往下滚才收）——
+  // 面板收回到按钮时按钮就在原大的位置，不会一边收回、底栏一边又缩小
+  useLayoutEffect(() => {
+    if (!lifted || !tabbarCompact.peek()) return;
+    tabbarCompact.value = barIntent.current ? barIntent.current.reset(window.scrollY) : false;
+  }, [lifted]);
+
   // 搜索结果层：第一次打开时下载
   useEffect(() => {
     if (searchOpen && !SearchLayer) loadSearchLayer().then((m) => setSearchLayer(() => m.default)).catch(() => {});
@@ -281,6 +300,7 @@ export function ChromeBottom() {
         lifted={lifted}
         inert={(overlayOpen && !lifted) || searchOpen}
         routeName={r?.name}
+        compact={tabbarCompact.value}
       />
       {SearchLayer && <SearchLayer />}
     </>

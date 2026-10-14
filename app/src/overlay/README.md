@@ -78,7 +78,7 @@ const more = useOverlayTrigger('row-more', { arg: item.id, haspopup: 'menu' });
 | `inert.js` | 背景 inert（`data-overlay-exempt` 的元素例外） |
 | `focus.js` | 可 Tab 元素、Tab 循环、iOS 叫键盘（`primeKeyboard`） |
 | `keyboard.js` | visualViewport → 被键盘挡住的高度（信号） |
-| `dom.js` | 挂载点、视口 + 安全区、按钮的排版矩形和圆角（`anchorRect`）、唯一 id |
+| `dom.js` | 挂载点、视口 + 安全区、按钮的排版矩形和圆角（`anchorRect`：按钮自己的按压缩放不算；按钮所在容器写了 `data-anchor-unscale` 时容器的 scale 也不算——底栏收小时打开 ＋ 面板 / 更多菜单，面板从按钮展开以后的位置长出来）、唯一 id |
 | `overlay.css` | 共用样式：层、遮罩、锁滚动、关闭按钮、替身、按压的过渡、菜单行 |
 
 **不在这里的东西**（整合时去掉了重复实现，统一用别的模块的那一份）：动画引擎和弹簧（`motion/animate.js`、`motion/physics.js`）、按压行为（`motion/press.js`，弹层里的按钮写 `data-press="scale"`）、

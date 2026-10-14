@@ -157,6 +157,37 @@ export function springGroup(spring, from, to, velocity = {}, precision = {}) {
 }
 
 /**
+ * 在一组弹簧上加“派生通道”：每一时刻由弹簧的值和速度算出来的量（例如液态玻璃的选中块按速度拉长：motion/liquid.js）。
+ * 派生通道跟着采样成关键帧、交给 render，但不参与接力：values() 照样带着它们，下一段动画只认 to 里的通道。
+ * @param {ReturnType<typeof springGroup>} group
+ * @param {(values: Record<string, number>, velocities: Record<string, number>) => Record<string, number>} derive
+ * @param {Record<string, number>} [scales] 派生通道的“幅度”（折线简化按它归一；默认 1）
+ */
+export function deriveGroup(group, derive, scales = {}) {
+  const rest = Object.fromEntries(group.keys.map((k) => [k, 0]));
+  const extraOf = (values, velocities) => derive(values, velocities) || {};
+  const extraKeys = Object.keys(extraOf(group.to, rest));
+  const motions = { ...group.motions };
+  for (const k of extraKeys) motions[k] = { scale: Math.max(scales[k] ?? 1, 1e-9) };
+  return {
+    ...group,
+    keys: [...group.keys, ...extraKeys],
+    motions,
+    from: { ...group.from, ...extraOf(group.from, group.velocityAt(0)) },
+    to: { ...group.to, ...extraOf(group.to, rest) },
+    at(t) {
+      const v = group.at(t);
+      return { ...v, ...extraOf(v, group.velocityAt(t)) };
+    },
+    velocityAt(t) {
+      const out = group.velocityAt(t);
+      for (const k of extraKeys) out[k] = 0;
+      return out;
+    },
+  };
+}
+
+/**
  * 采样成关键帧序列，并在误差内去掉多余的帧（Ramer–Douglas–Peucker，按各通道的幅度归一后取最大偏差）。
  * @param {ReturnType<typeof springGroup>} group
  * @param {{ fps?: number, tolerance?: number, maxFrames?: number }} [o]
