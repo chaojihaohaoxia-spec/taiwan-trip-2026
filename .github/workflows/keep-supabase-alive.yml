@@ -24,14 +24,18 @@ jobs:
             exit 1
           fi
 
+          # v2 起 anon 读不了任何表，改调专门的 ping 函数（POST /rest/v1/rpc/ping，只返回一个字符串）。
+          # 任何非 2xx 都算失败，这样 GitHub 会发邮件提醒，而不是悄悄“成功”。
           response_code="$(curl -sS -o /tmp/supabase-response.txt -w "%{http_code}" \
-            "${SUPABASE_URL%/}/rest/v1/trips?select=id&limit=1" \
+            -X POST "${SUPABASE_URL%/}/rest/v1/rpc/ping" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")"
+            -H "Content-Type: application/json" \
+            -d '{}')"
 
           echo "Supabase responded with HTTP ${response_code}."
           cat /tmp/supabase-response.txt || true
+          echo
 
-          if [ "${response_code}" = "000" ] || [ "${response_code}" -ge 500 ]; then
+          if [ "${response_code}" -lt 200 ] || [ "${response_code}" -ge 300 ]; then
             exit 1
           fi
