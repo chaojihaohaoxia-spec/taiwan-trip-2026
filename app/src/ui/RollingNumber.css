@@ -1,0 +1,38 @@
+/* =====================================================================
+   ui/RollingNumber.css：滚动数字（.roll）。每一位是一个裁切框（.roll__slot），
+   字符在框里上下滚；上下边缘用遮罩渐隐，滚动时像从“窗口”里进出。
+   ===================================================================== */
+
+.roll {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.roll__digits {
+  display: inline-flex;
+}
+
+.roll__slot {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  /* 上下多留一点空间给字形，再用负外边距抵消，不影响行高 */
+  padding: 0.14em 0;
+  margin: -0.14em 0;
+  white-space: pre;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, var(--color-text) 16%, var(--color-text) 84%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, var(--color-text) 16%, var(--color-text) 84%, transparent);
+}
+
+.roll__char {
+  display: block;
+}
+
+/* 正在滚出去的旧字符：叠在新字符上，不占位置 */
+.roll__char--out {
+  position: absolute;
+  top: 0.14em;
+  left: 0;
+}

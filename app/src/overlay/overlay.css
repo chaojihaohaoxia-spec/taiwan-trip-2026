@@ -1,0 +1,227 @@
+/* =====================================================================
+   overlay/overlay.css：弹层共用样式（层、遮罩、锁滚动、关闭按钮、替身按钮、按压反馈的过渡、菜单行）。
+   触发按钮上会变形的图标（加号 ↔ ×、三横线 ↔ ×、箭头上 ↔ 下）用 ui/MorphIcon，不在这里。
+   只用 tokens.css 的变量；构建时自动进 overlay 层（盖过 ui 层，被 shell / pages 层覆盖）。
+   动画大多由 JS（Web Animations）驱动，这里只写静止状态和少量 CSS 过渡。
+   A 皮肤：遮罩是带一点青灰的半透明 + 轻微虚化（--scrim-filter），弹层本身是真玻璃（各自的 CSS）；
+   关闭按钮是凸起的白圆；菜单行的图标在强调色浅底的小方块里，末尾的箭头在凸起的白圆里。
+   ===================================================================== */
+
+/* ---------- 挂载点 ---------- */
+/* 每个 Portal 的容器：不产生盒子、不建层叠上下文，层的 z-index 直接和外壳的顶栏、底栏比高低 */
+.ov-portal {
+  display: contents;
+}
+
+/* 一层弹层：铺满视口；自己不接收点击（遮罩、面板各自接收） */
+.ov-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  /* 每层自己的层叠上下文：遮罩、面板、替身按钮的先后只在层内比较 */
+  isolation: isolate;
+  /* 层就是视口那么大：超出去的部分（形状层的余量、面板下面延伸的底色、阴影）裁掉，不会产生滚动 */
+  overflow: hidden;
+}
+
+/* 退场中：点击直接穿透到下面（关闭动画期间就能操作页面） */
+.ov-layer[data-state="closing"],
+.ov-layer[data-state="closing"] * {
+  pointer-events: none !important;
+}
+
+/* ---------- 遮罩 ---------- */
+.ov-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--color-scrim);
+  /* 背后的页面轻轻虚化（样稿：弹层打开时整页像隔了一层磨砂） */
+  -webkit-backdrop-filter: var(--scrim-filter);
+  backdrop-filter: var(--scrim-filter);
+  pointer-events: auto;
+  /* 遮罩上的手势不滚动、不缩放页面 */
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 透明遮罩（小菜单）：看不见，但点它会关闭 */
+.ov-scrim--clear {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* ---------- 锁滚动（scroll-lock.js 加在 <html> 上；不改 scrollY） ---------- */
+html[data-ov-scroll-lock] {
+  overflow: hidden;
+}
+
+/* 原来有经典滚动条（Windows 桌面）：保留滚动条的位置，内容不左右跳 */
+html[data-ov-scroll-gutter] {
+  scrollbar-gutter: stable;
+}
+
+/* ---------- 叫键盘用的隐藏输入框（focus.js 的 primeKeyboard） ---------- */
+.ov-keyboard-proxy {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  /* ≥16px：iOS 聚焦时不放大页面 */
+  font-size: 16px;
+  caret-color: transparent;
+  pointer-events: none;
+}
+
+/* 打开期间真触发按钮透明（替身按钮浮在遮罩上面代替它；透明而不是隐藏，焦点还能回到它身上） */
+[data-overlay-anchor-hidden] {
+  opacity: 0 !important;
+  transition: none !important;
+}
+
+/* ---------- 按压反馈 ----------
+   行为全站一套：motion/press.js（按下即缩、滑出取消、松手弹簧回弹），弹层里的按钮只要写 data-press="scale"
+   （main.jsx 装的全局委托会接管）；缩放用独立的 scale 属性（motion/press.css），不和定位、动画的 transform 打架。
+   这里只补上底色、文字色的过渡（写法见 motion/README.md：先写 var(--press-transition)） */
+.ov-layer [data-press],
+.ov-toasts [data-press] {
+  transition:
+    var(--press-transition),
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+/* ---------- 关闭按钮（凸起的白圆 ×，样稿「记一笔」右上角） ---------- */
+.ov-close {
+  position: relative;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border-radius: var(--radius-round);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text);
+}
+
+.ov-close[data-pressed] {
+  background: var(--color-raised-pressed);
+}
+
+@media (hover: hover) {
+  .ov-close:hover:not([data-pressed]) {
+    background: var(--color-raised-hover);
+  }
+}
+
+/* ---------- 替身按钮（真按钮的样子由使用者传入的 class 决定） ---------- */
+.ov-anchor-proxy {
+  pointer-events: auto;
+  z-index: var(--z-raised);
+}
+
+/* ---------- 菜单行（小菜单、全屏菜单、长出来的面板共用） ---------- */
+.ov-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ov-menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font: var(--type-callout);
+  font-weight: var(--weight-semibold);
+  text-align: start;
+  text-decoration: none;
+}
+
+.ov-menu-item__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-tile);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+.ov-menu-item__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ov-menu-item__label {
+  overflow-wrap: anywhere;
+}
+
+.ov-menu-item__detail {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+}
+
+/* 末尾的小箭头放在凸起的白圆里：一眼看得出能点 */
+.ov-menu-item__chevron {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-round);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-accent-text);
+}
+
+.ov-menu-item[data-tone="danger"] {
+  color: var(--color-danger-text);
+}
+
+.ov-menu-item[data-tone="danger"] .ov-menu-item__icon {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
+}
+
+.ov-menu-item[aria-current="page"] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+/* 整行宽的元素缩 0.96 太晃：很轻的缩放 + 底色变深 */
+.ov-menu-item[data-pressed] {
+  scale: 0.985;
+  background: var(--color-fill-pressed);
+}
+
+.ov-menu-item:focus-visible {
+  outline-offset: -2px;
+}
+
+@media (hover: hover) {
+  .ov-menu-item:hover:not([data-pressed]) {
+    background: var(--color-fill);
+  }
+}
+
+.ov-menu-separator {
+  height: 0;
+  margin: var(--space-1) var(--space-3);
+  border: 0;
+  border-top: 1px solid var(--color-separator);
+}

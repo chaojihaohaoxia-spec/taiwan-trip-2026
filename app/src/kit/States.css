@@ -1,0 +1,125 @@
+/* =====================================================================
+   kit/States.css：页面级空状态 / 出错（.k-empty）+ 线条插图（.k-ill）。
+   插图三种颜色角色：主线条次要文字色、强调线条强调色、衬底强调色浅底（出错时换成危险色浅底）。
+   ===================================================================== */
+
+.k-empty {
+  --k-ill-line: var(--color-text-2);
+  --k-ill-acc: var(--color-accent-text);
+  --k-ill-soft: var(--color-accent-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 340px;
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-4);
+  text-align: center;
+  animation: k-empty-rise var(--spring-smooth-duration) var(--spring-smooth) both;
+}
+
+.k-empty--compact {
+  padding: var(--space-5) var(--space-3);
+}
+
+.k-empty--error {
+  --k-ill-acc: var(--color-danger-text);
+  --k-ill-soft: var(--color-danger-soft);
+}
+
+.k-empty[data-preset="offline"] {
+  --k-ill-acc: var(--color-warning-text);
+  --k-ill-soft: var(--color-warning-soft);
+}
+
+.k-ill {
+  width: 120px;
+  height: 96px;
+  margin-bottom: var(--space-3);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.k-empty--compact .k-ill {
+  width: 88px;
+  height: 70px;
+  margin-bottom: var(--space-2);
+}
+
+.k-ill__line {
+  stroke: var(--k-ill-line);
+}
+
+.k-ill__acc {
+  stroke: var(--k-ill-acc);
+}
+
+.k-ill__dot {
+  fill: var(--k-ill-acc);
+  stroke: none;
+}
+
+.k-ill__soft {
+  fill: var(--k-ill-soft);
+  stroke: none;
+}
+
+.k-empty__title {
+  color: var(--color-text);
+  font: var(--type-title-2);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.k-empty--compact .k-empty__title {
+  font: var(--type-title-3);
+  font-size: var(--text-title-4);
+  letter-spacing: var(--tracking-title);
+}
+
+.k-empty__desc {
+  margin-top: var(--space-2);
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  line-height: 1.6;
+  text-wrap: balance;
+}
+
+.k-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+@keyframes k-empty-rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k-empty {
+    animation-name: k-empty-fade;
+  }
+}
+
+@keyframes k-empty-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

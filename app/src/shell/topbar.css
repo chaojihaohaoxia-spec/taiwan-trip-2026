@@ -1,0 +1,339 @@
+/* =====================================================================
+   shell/topbar.css：常驻顶栏（TopBar.jsx，样稿 .topbar）。
+   - 整条（bar）：离屏幕两边 --tb-x、离顶 --topbar-inset（+ 安全区）、高 --topbar-bar-h 的玻璃条，圆角 = 半高；
+   - 胶囊（pill）：玻璃条正中 44px 高（--tb-pill-h）的小胶囊，宽度按内容量（JS 写 --tb-pill-w）；
+   - 页面最上面（top）：玻璃、阴影透明，只剩两边的圆按钮。
+   只有一层玻璃 .tb__glass：几种状态的静止样式写在这里；状态之间的过程由 TopBar.jsx 用弹簧逐帧改它的
+   实际形状（top / left / right / bottom / 圆角），所以这些属性不写过渡（会和 JS 打架）。
+   .tb__probe 和整条状态的玻璃同一组定位（看不见），JS 量它拿到像素值。
+   整条顶栏不吃点击（pointer-events: none），只有看得见的按钮吃。
+   ===================================================================== */
+
+.tb {
+  /* 顶栏横带的左右边：手机离屏幕边 --gutter；宽屏和内容列对齐（大标题、底栏同一个算法） */
+  --tb-x: max(var(--gutter), calc((100% - var(--content-max)) / 2 + var(--gutter)));
+  /* 右边按钮区的宽度（TopBar.jsx 量好写在这里和外层 .shell 上；大标题也让出这么多） */
+  --tb-trail-w: 0px;
+  --tb-pill-h: 44px;
+  --tb-pill-w: 160px;
+  --tb-btn-gap: var(--space-2);
+  /* 圆按钮的位置：玻璃条里离边 8px、竖直居中 */
+  --tb-btn-x: calc(var(--tb-x) + var(--space-2));
+  --tb-btn-y: calc(var(--safe-top) + var(--topbar-inset) + (var(--topbar-bar-h) - var(--tap-min)) / 2);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-topbar);
+  height: calc(var(--safe-top) + var(--topbar-h));
+  color: var(--color-text);
+  pointer-events: none;
+}
+
+/* 搜索展开时：顶栏（搜索框）浮在搜索结果的遮罩上面 */
+.tb[data-lifted] {
+  z-index: calc(var(--z-scrim) + 2);
+}
+
+/* ---------- 玻璃、阴影、探针 ---------- */
+.tb__glass,
+.tb__shadow,
+.tb__probe {
+  position: absolute;
+  top: calc(var(--safe-top) + var(--topbar-inset));
+  right: var(--tb-x);
+  bottom: 0;
+  left: var(--tb-x);
+  border-radius: calc(var(--topbar-bar-h) / 2);
+  pointer-events: none;
+}
+
+.tb__probe {
+  visibility: hidden;
+}
+
+.tb__glass {
+  overflow: hidden;
+  background: var(--material-glass-strong);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  transform-origin: 50% 50%;
+}
+
+.tb__shadow {
+  box-shadow: var(--shadow-3);
+  transform-origin: 50% 50%;
+}
+
+/* 高光细边 + 内侧柔光 + 折射描边 */
+.tb__edge {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
+}
+
+.tb__edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--material-rim);
+  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
+  -webkit-mask-composite: xor;
+  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
+}
+
+/* 页面最上面：没有玻璃（大标题就是标题） */
+.tb[data-state="top"] .tb__glass,
+.tb[data-state="top"] .tb__shadow {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* 看不见的玻璃不做背景模糊（iPhone 上每一层 backdrop-filter 都要算）：淡出动画（--dur-base）播完再关掉，
+   淡出途中还是磨砂的；从 top 出来时没有延迟，第一帧就是磨砂 */
+.tb[data-state="top"] .tb__glass {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition: -webkit-backdrop-filter 0s linear var(--dur-base), backdrop-filter 0s linear var(--dur-base);
+}
+
+/* 胶囊的静止样式（和动画终点一模一样） */
+.tb[data-state="pill"] .tb__glass,
+.tb[data-state="pill"] .tb__shadow {
+  top: calc(var(--safe-top) + var(--topbar-inset) + (var(--topbar-bar-h) - var(--tb-pill-h)) / 2);
+  bottom: calc((var(--topbar-bar-h) - var(--tb-pill-h)) / 2);
+  left: calc(50% - var(--tb-pill-w) / 2);
+  right: calc(50% - var(--tb-pill-w) / 2);
+  border-radius: var(--radius-pill);
+}
+
+/* 按胶囊：玻璃、阴影和字一起轻轻一缩 */
+.tb[data-state="pill"]:has(.tb__pill[data-pressed]) .tb__glass,
+.tb[data-state="pill"]:has(.tb__pill[data-pressed]) .tb__shadow {
+  scale: var(--press-scale);
+  transition: scale var(--press-duration) var(--ease-out);
+}
+
+.tb[data-state="pill"] .tb__glass,
+.tb[data-state="pill"] .tb__shadow {
+  transition: scale var(--spring-bouncy-duration) var(--spring-bouncy);
+}
+
+/* ---------- 整条：行程按钮（封面点 + 名字 / 日期 + 箭头）或页面名 ---------- */
+.tb__row {
+  position: absolute;
+  top: calc(var(--safe-top) + var(--topbar-inset));
+  left: calc(var(--tb-x) + var(--space-2));
+  right: calc(var(--tb-x) + var(--space-2) + var(--tap-min) + var(--tb-btn-gap) + var(--tb-trail-w));
+  display: flex;
+  align-items: center;
+  height: var(--topbar-bar-h);
+  opacity: 0;
+  visibility: hidden;
+  transform-origin: 30% 50%;
+}
+
+.tb[data-back] .tb__row {
+  left: calc(var(--tb-x) + var(--space-2) + var(--tap-min) + var(--tb-btn-gap));
+}
+
+.tb[data-kind="root"] .tb__row,
+.tb[data-kind="settings"] .tb__row {
+  right: calc(var(--tb-x) + var(--space-2) + var(--tb-trail-w));
+}
+
+.tb[data-state="bar"]:not([data-covered]) .tb__row {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.tb__switch {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  height: var(--tap-min);
+  padding: 0 9px 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.tb[data-kind]:not([data-kind="tab"]) .tb__switch {
+  padding-left: var(--space-4);
+}
+
+.tb__switch[data-pressed] {
+  background: var(--color-raised-pressed);
+}
+
+.tb__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.tb__text b,
+.tb__text i {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tb__text b {
+  font: var(--weight-serif) var(--text-headline) / 1.2 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+}
+
+.tb__text i {
+  color: var(--color-text-2);
+  font: var(--weight-medium) var(--text-caption-1) / 1.3 var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 胶囊：封面点 + 名字 + 箭头（行程里）/ 页面名 ---------- */
+.tb__pill {
+  position: absolute;
+  top: calc(var(--safe-top) + var(--topbar-inset) + (var(--topbar-bar-h) - var(--tb-pill-h)) / 2);
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: calc(100% - 2 * (var(--tb-btn-x) + var(--tap-min) + var(--tb-btn-gap)) - var(--tb-trail-w));
+  height: var(--tb-pill-h);
+  padding: 0 var(--space-2) 0 9px;
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font: var(--weight-serif) var(--text-callout) / 1.2 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%);
+  cursor: pointer;
+  transition: var(--press-transition);
+}
+
+.tb[data-kind]:not([data-kind="tab"]) .tb__pill {
+  padding: 0 var(--space-4);
+}
+
+.tb[data-state="pill"]:not([data-covered]) .tb__pill {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.tb__skel {
+  display: block;
+  width: 72px;
+  height: 14px;
+  border-radius: var(--radius-xs);
+  background: var(--color-skeleton);
+}
+
+.tb__pill-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 行程名后面的阶段短语（「 · 5 天后出发」）：同一行宋体，次要色，放不下先省略它 */
+.tb__pill-phrase {
+  color: var(--color-text-2);
+}
+
+/* ---------- 两边的圆按钮：返回（左）、页面按钮和搜索（右） ---------- */
+.tb__lead {
+  position: absolute;
+  top: var(--tb-btn-y);
+  left: var(--tb-btn-x);
+  display: flex;
+  pointer-events: auto;
+}
+
+.tb__trail {
+  position: absolute;
+  top: var(--tb-btn-y);
+  right: calc(var(--tb-btn-x) + var(--tap-min) + var(--tb-btn-gap));
+  display: flex;
+  gap: var(--tb-btn-gap);
+  pointer-events: auto;
+  transition: opacity var(--dur-base) var(--ease-out), visibility 0s;
+}
+
+.tb[data-kind="root"] .tb__trail,
+.tb[data-kind="settings"] .tb__trail {
+  right: var(--tb-btn-x);
+}
+
+.tb[data-covered] .tb__lead,
+.tb[data-covered] .tb__trail {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--dur-fast) var(--ease-out), visibility 0s linear var(--dur-fast);
+}
+
+/* 不是二级页面：返回按钮淡出、藏好（读屏、Tab 都到不了） */
+.tb__lead[data-hidden] {
+  opacity: 0;
+  visibility: hidden;
+  scale: 0.8;
+  transition: opacity var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out), visibility 0s linear var(--dur-fast);
+}
+
+.tb__lead:not([data-hidden]) {
+  transition: opacity var(--dur-base) var(--ease-out), scale var(--spring-bouncy-duration) var(--spring-bouncy), visibility 0s;
+}
+
+/* 浮在内容上的按钮：从它开始的滑动不滚动页面（motion/press.css 的 data-press-float） */
+.tb__btn {
+  touch-action: none;
+}
+
+/* ---------- 搜索（ui/SearchExpand 的玻璃版，整条横带宽；收起时只有右边的放大镜） ---------- */
+.tb__search.search-x {
+  position: absolute;
+  top: var(--tb-btn-y);
+  left: var(--tb-btn-x);
+  right: var(--tb-btn-x);
+  pointer-events: none;
+}
+
+.tb__search .search-x__trigger,
+.tb__search[data-state="open"] .search-x__field,
+.tb__search[data-state="open"] .search-x__cancel {
+  pointer-events: auto;
+}
+
+.tb__search .search-x__trigger {
+  box-shadow: var(--shadow-btn), var(--shadow-glass-edge);
+}
+
+/* 减弱动态效果：不变形，玻璃和字只淡入淡出 */
+@media (prefers-reduced-motion: reduce) {
+  .tb__glass,
+  .tb__shadow,
+  .tb__row,
+  .tb__pill {
+    transition: opacity var(--dur-fast) var(--ease-out), visibility 0s linear var(--dur-fast);
+  }
+
+  .tb[data-state="pill"] .tb__pill,
+  .tb[data-state="bar"] .tb__row,
+  .tb:not([data-state="top"]) .tb__glass,
+  .tb:not([data-state="top"]) .tb__shadow {
+    transition: opacity var(--dur-fast) var(--ease-out), visibility 0s;
+  }
+}

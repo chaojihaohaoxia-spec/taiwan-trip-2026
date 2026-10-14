@@ -1,0 +1,10 @@
+# 依赖
+node_modules/
+# e2e 截图和临时产物（每次运行重新生成）
+test/e2e/__screenshots__/
+test/e2e/__shots__/
+test/e2e/__artifacts__/
+# 本地缓存
+.cache/
+*.log
+.DS_Store

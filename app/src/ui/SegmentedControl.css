@@ -1,0 +1,170 @@
+/* =====================================================================
+   ui/SegmentedControl.css：分段控件（.seg）。A 液态玻璃：
+   轨道 = 往下凹的浅灰胶囊（--color-fill，卡片、面板里用）；选中块 = 近乎不透明的白色滑块（--color-thumb）
+   + 投影 + 顶部高光（--shadow-thumb），浮在轨道上。
+   直接放在光场上时加 class="seg--glass"：轨道换成真玻璃胶囊（backdrop-filter，样稿顶部的「概览 · D1 … D4」）。
+   选中块的位置：translateX(calc(--seg-index × 100%))（块宽 = 一段的宽），首帧无需 JS；
+   动画和拖动期间由 JS 写内联 transform，结束后清掉。
+   尺寸：sm 36 / md 44 / lg 52（含 4px 内边距）；每段的可点区域都 ≥44px（不够的用 ::after 往上下扩）。
+   ===================================================================== */
+
+.seg {
+  --seg-h: var(--tap-min);
+  --seg-pad: 4px;
+  --seg-n: 2;
+  --seg-index: 0;
+  /* 每段的可点区域上下各扩多少（视觉高度 − 2×内边距 + 2×扩展 ≥ 44） */
+  --seg-hit: -4px;
+  position: relative;
+  display: inline-grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  align-items: stretch;
+  min-height: var(--seg-h);
+  padding: var(--seg-pad);
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  isolation: isolate;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.seg--block {
+  display: grid;
+  width: 100%;
+}
+
+/* 不撑满：放在 grid / flex 容器里也保持内容宽度 */
+.seg:not(.seg--block) {
+  justify-self: start;
+  align-self: center;
+}
+
+.seg--sm {
+  --seg-h: 36px;
+  --seg-pad: 3px;
+  --seg-hit: -7px;
+}
+
+.seg--lg {
+  --seg-h: 52px;
+  --seg-pad: 4px;
+  --seg-hit: 0px;
+}
+
+/* 放在光场上：真玻璃胶囊（顶部的天数分段条、地图上的筛选） */
+.seg--glass {
+  background: var(--material-glass);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
+}
+
+.seg[aria-disabled="true"] {
+  opacity: 0.45;
+}
+
+.seg__thumb {
+  position: absolute;
+  z-index: var(--z-below);
+  top: var(--seg-pad);
+  bottom: var(--seg-pad);
+  left: var(--seg-pad);
+  width: calc((100% - 2 * var(--seg-pad)) / var(--seg-n));
+  border-radius: var(--radius-pill);
+  background: var(--color-thumb);
+  box-shadow: var(--shadow-thumb);
+  transform: translateX(calc(var(--seg-index) * 100%));
+  /* 拖动时选中块微微缩一下（独立的 scale 属性，不和 transform 打架） */
+  transition: scale var(--spring-snappy-duration) var(--spring-snappy), box-shadow var(--dur-fast) var(--ease-out);
+  will-change: transform;
+}
+
+.seg__thumb[data-pressed] {
+  scale: var(--press-scale);
+  box-shadow: var(--shadow-pressed);
+  /* 按下：短缓出立刻缩（和全站按压一致）；松手回到上面的弹簧 */
+  transition: scale var(--press-duration) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.seg__item {
+  position: relative;
+  z-index: var(--z-raised);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-2);
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+
+.seg--sm .seg__item {
+  font-size: var(--text-footnote);
+}
+
+.seg--lg .seg__item {
+  font-size: var(--text-callout);
+}
+
+/* 视觉高度不足 44 的，用 ::after 把可点区域扩上下 */
+.seg__item::after {
+  content: "";
+  position: absolute;
+  inset: var(--seg-hit) 0;
+}
+
+.seg__item[aria-checked="true"] {
+  color: var(--color-text);
+}
+
+/* 拖动中：选中色跟着“块下面的那一段”走 */
+.seg[data-dragging] .seg__item[aria-checked="true"]:not([data-under]) {
+  color: var(--color-text-2);
+}
+
+.seg[data-dragging] .seg__item[data-under] {
+  color: var(--color-text);
+}
+
+/* 按下没选中的段：文字变淡（iOS 的写法），选中块不动 */
+.seg__item[data-pressed]:not([aria-checked="true"]) {
+  opacity: 0.55;
+}
+
+.seg__item:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.seg__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seg__icon {
+  display: inline-grid;
+  place-items: center;
+}
+
+/* 选中那一段的图标用强调色（样稿的列表 / 网格切换） */
+.seg__item[aria-checked="true"] .seg__icon {
+  color: var(--color-accent-text);
+}
+
+.seg__item:focus-visible {
+  outline-offset: -2px;
+}
+
+@media (hover: hover) {
+  .seg__item:not([aria-checked="true"]):not(:disabled):hover {
+    color: var(--color-text);
+  }
+}

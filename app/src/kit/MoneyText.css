@@ -1,0 +1,81 @@
+/* =====================================================================
+   kit/MoneyText.css：金额（.k-money）。小号用标签字体（Geist 等宽数字），大号用 Instrument Serif（--font-figure，
+   「1」由 P2 Figure One 顶替；万、越南盾这些中文回到思源宋体）。「约 HK$…」次要色小一号。
+   ===================================================================== */
+
+.k-money {
+  display: inline;
+  color: var(--color-text);
+  font-family: var(--font-label);
+  font-size: var(--text-callout);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.k-money--sm {
+  font-size: var(--text-footnote);
+}
+
+.k-money__hkd {
+  color: var(--color-text-2);
+  font-size: 0.86em;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+/* 大号数字 */
+.k-money--figure {
+  font-family: var(--font-figure);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: lining-nums;
+  letter-spacing: var(--tracking-figure);
+  line-height: 1.1;
+}
+
+.k-money--lg { font-size: var(--text-figure-4); }
+.k-money--xl { font-size: var(--text-figure-3); }
+.k-money--2xl { font-size: var(--text-figure-2); }
+.k-money--3xl { font-size: var(--text-figure-1); }
+
+/* 大号数字后面的中文单位（「万越南盾」）：小一号的宋体（宋体不小于 15px），和数字之间留一点空 */
+.k-money__unit {
+  margin-left: 0.12em;
+  font-family: var(--font-serif);
+  font-size: max(var(--text-callout), 0.5em);
+  font-weight: var(--weight-serif);
+  letter-spacing: var(--tracking-title);
+}
+
+/* 大号金额下面的「约 HK$…」回到标签字体的小字 */
+.k-money--figure .k-money__hkd {
+  font-family: var(--font-label);
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* 换到下一行（两行时按 align 对齐） */
+.k-money--stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.k-money--stack.k-money--end {
+  align-items: flex-end;
+}
+
+.k-money--stack .k-money__hkd {
+  font-size: var(--text-caption-1);
+}
+
+.k-money--figure.k-money--stack .k-money__hkd {
+  font-size: var(--text-footnote);
+}
+
+.k-money--positive .k-money__main { color: var(--color-success-text); }
+.k-money--negative .k-money__main { color: var(--color-danger-text); }
+.k-money--muted .k-money__main { color: var(--color-text-2); }

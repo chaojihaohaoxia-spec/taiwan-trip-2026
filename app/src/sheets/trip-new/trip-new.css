@@ -1,0 +1,368 @@
+/* =====================================================================
+   sheets/trip-new/trip-new.css：新建行程弹层（.tnf）。
+   预览卡（主题色渐变封面 + 宋体名字）→ 名字 → 日期（两格并排）→ 时区芯片 + 搜索 → 币种芯片 → 封面色块和 emoji。
+   每一项：小标签（Geist）+ 控件 + 下面一行说明（出错时换成红字）；输入框是往下凹的浅灰块，字号 16px（iOS 聚焦不放大）。
+   ===================================================================== */
+
+.tnf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-bottom: var(--space-3);
+}
+
+/* ---------- 预览 ---------- */
+.tnf-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: var(--radius-xl);
+}
+
+.tnf-preview__cover {
+  position: relative;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+}
+
+.tnf-preview__cover .cover-dot__emoji {
+  font-size: 30px;
+}
+
+.tnf-preview__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tnf-preview__text b {
+  overflow: hidden;
+  font: var(--weight-serif) var(--text-title-4) / 1.3 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tnf-preview__text span {
+  color: var(--color-accent-text);
+  font: var(--weight-semibold) var(--text-footnote) / 1.3 var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 一项 ---------- */
+.tnf-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.tnf-label {
+  padding: 0 4px;
+  color: var(--color-text-2);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  letter-spacing: var(--tracking-label);
+}
+
+.tnf-hint {
+  margin: 0;
+  padding: 0 4px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
+  text-wrap: pretty;
+}
+
+.tnf-field[data-error] .tnf-hint {
+  color: var(--color-danger-text);
+  font-weight: var(--weight-medium);
+}
+
+.tnf-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  margin: 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-fill);
+  color: var(--color-text);
+  font: var(--type-body);
+  outline: none;
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tnf-input::placeholder {
+  color: var(--color-text-3);
+}
+
+.tnf-input:focus {
+  box-shadow: inset 0 0 0 1.5px var(--color-accent-text);
+}
+
+.tnf-field[data-error] .tnf-input {
+  box-shadow: inset 0 0 0 1.5px var(--color-danger);
+}
+
+.tnf-input--title {
+  min-height: 54px;
+  font-size: var(--text-title-4);
+  font-weight: var(--weight-semibold);
+}
+
+.tnf-input--code {
+  max-width: 200px;
+  font-family: var(--font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ---------- 日期：两格并排 ---------- */
+.tnf-dates {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--space-2);
+}
+
+.tnf-date {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tnf-date > span {
+  padding: 0 4px;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+}
+
+.tnf-input--date {
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+  line-height: 48px;
+}
+
+.tnf-input--date::-webkit-date-and-time-value {
+  min-height: 1.2em;
+  text-align: left;
+}
+
+.tnf-dates__arrow {
+  display: grid;
+  place-items: center;
+  height: 48px;
+  color: var(--color-text-3);
+}
+
+/* ---------- 芯片 ---------- */
+.tnf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* ---------- 时区搜索 ---------- */
+.tnf-zsearch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tnf-zlist {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  list-style: none;
+}
+
+.tnf-zrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name check"
+    "sub check";
+  align-items: center;
+  column-gap: var(--space-2);
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.tnf-zrow[aria-pressed="true"] {
+  background: var(--color-accent-soft);
+}
+
+.tnf-zrow .glyph {
+  grid-area: check;
+  color: var(--color-accent-text);
+}
+
+.tnf-zrow__name {
+  grid-area: name;
+  font: var(--weight-semibold) var(--text-callout) / 1.3 var(--font-sans);
+}
+
+.tnf-zrow__sub {
+  grid-area: sub;
+  color: var(--color-text-2);
+  font: var(--text-caption-1) / 1.3 var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.tnf-zempty {
+  padding: 12px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+/* ---------- 封面：主题色色块 + emoji ---------- */
+.tnf-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: var(--space-2);
+}
+
+.tnf-swatch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-round);
+  background: transparent;
+  cursor: pointer;
+  transition: var(--press-transition);
+}
+
+.tnf-swatch__fill {
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  background: linear-gradient(150deg, var(--color-accent) 30%, var(--color-accent-2));
+  box-shadow: var(--shadow-highlight), var(--shadow-1);
+}
+
+.tnf-swatch[aria-checked="true"] {
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+.tnf-swatch__check {
+  position: relative;
+  display: grid;
+  place-items: center;
+  color: var(--color-on-accent);
+}
+
+.tnf-emojis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: var(--space-2);
+}
+
+.tnf-emoji {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.tnf-emoji[aria-checked="true"] {
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised), inset 0 0 0 2px var(--color-accent-text);
+}
+
+.tnf-fine {
+  margin: 0;
+  padding: 0 4px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  text-wrap: pretty;
+}
+
+/* ---------- 底部 ---------- */
+.tnf-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tnf-foot__note,
+.tnf-foot__error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0 4px;
+  font: var(--type-footnote);
+}
+
+.tnf-foot__note {
+  color: var(--color-warning-text);
+}
+
+.tnf-foot__error {
+  color: var(--color-danger-text);
+  font-weight: var(--weight-medium);
+}
+
+/* 日期还没选：系统的「年 / 月 / 日」占位字藏起来（Chrome 显示 mm/dd/yyyy，iOS 什么都不显示），统一写「选日期」 */
+.tnf-date {
+  position: relative;
+}
+
+.tnf-date__ph {
+  position: absolute;
+  bottom: 0;
+  left: 14px;
+  z-index: 1;
+  color: var(--color-text-3);
+  font: var(--type-body);
+  font-style: normal;
+  line-height: 48px;
+  pointer-events: none;
+}
+
+.tnf-input--date[data-empty]::-webkit-datetime-edit {
+  color: transparent;
+}
+
+.tnf-input--date[data-empty]:focus::-webkit-datetime-edit {
+  color: var(--color-text);
+}
+
+.tnf-date:focus-within .tnf-date__ph {
+  display: none;
+}

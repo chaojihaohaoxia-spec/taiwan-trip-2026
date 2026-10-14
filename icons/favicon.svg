@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 浏览器标签页小图标（简化版，同 icon.svg 的图形） -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B8EFF"/>
+      <stop offset="1" stop-color="#0057C2"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
+  <path d="M32 54C26 47.5 15 38 15 26.5a17 17 0 0 1 34 0C49 38 38 47.5 32 54z" fill="#FFFFFF"/>
+  <path d="M32 34.5s-7.5-4.6-7.5-9.3c0-2.6 2-4.4 4.2-4.4 1.6 0 2.6.8 3.3 1.8.7-1 1.7-1.8 3.3-1.8 2.2 0 4.2 1.8 4.2 4.4 0 4.7-7.5 9.3-7.5 9.3z" fill="#0A6AE0"/>
+</svg>

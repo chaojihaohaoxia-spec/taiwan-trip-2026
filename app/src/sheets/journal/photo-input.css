@@ -1,0 +1,50 @@
+/* =====================================================================
+   sheets/journal/photo-input.css：按钮上叠一层透明的 file input（.jn-pi）。
+   input 铺满整个按钮：手指点到的就是它（iOS 才一定会弹相机）；键盘焦点也在它上面，焦点环画在按钮的形状上。
+   ===================================================================== */
+
+.jn-pi {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.jn-pi--block {
+  display: flex;
+  width: 100%;
+}
+
+.jn-pi > .btn {
+  pointer-events: none;
+}
+
+.jn-pi__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.jn-pi__input:disabled,
+.jn-pi--disabled .jn-pi__input {
+  cursor: not-allowed;
+}
+
+/* 焦点环画在按钮上（input 本身透明） */
+.jn-pi:has(> .jn-pi__input:focus-visible) > .btn {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* 按住 input 时按钮跟着缩（全局按压委托只认 data-press，这里补一下） */
+.jn-pi:has(> .jn-pi__input:active) > .btn {
+  scale: var(--press-scale);
+}

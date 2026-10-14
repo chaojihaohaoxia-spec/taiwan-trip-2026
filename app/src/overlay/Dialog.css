@@ -1,0 +1,149 @@
+/* =====================================================================
+   overlay/Dialog.css：居中确认框（iOS 提示框风格）。
+   出场 / 退场的缩放和淡入淡出由 Dialog.jsx 驱动。
+   A 皮肤：真玻璃卡片（圆角 --radius-2xl）+ 高光细边 + 折射描边；标题宋体；按钮是胶囊：
+   取消 = 凸起的白，确认 = 强调色渐变，危险操作 = 红色浅底红字（横排两个、竖排一列，中间留 8px）。
+   ===================================================================== */
+
+.ov-dialog-wrap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding:
+    calc(var(--safe-top) + var(--space-6))
+    calc(var(--safe-right) + var(--space-6))
+    calc(var(--safe-bottom) + var(--space-6))
+    calc(var(--safe-left) + var(--space-6));
+  pointer-events: none;
+}
+
+.ov-dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(320px, 100%);
+  max-height: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+  background: var(--material-glass-dense);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--shadow-4), var(--shadow-glass-edge), var(--shadow-glass-glow);
+  color: var(--color-text);
+  text-align: center;
+  pointer-events: auto;
+  outline: none;
+}
+
+/* 折射高光描边 */
+.ov-dialog::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--material-rim);
+  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
+  -webkit-mask-composite: xor;
+  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
+  pointer-events: none;
+}
+
+.ov-dialog__content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-6) var(--space-5) var(--space-4);
+}
+
+.ov-dialog__title {
+  font: var(--type-title-3);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.ov-dialog__message {
+  margin-top: var(--space-2);
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  line-height: 1.6;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.ov-dialog__actions {
+  flex: none;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-4) var(--space-4);
+}
+
+.ov-dialog__actions[data-layout="row"] {
+  grid-template-columns: 1fr 1fr;
+}
+
+.ov-dialog__action {
+  --dlg-bg: var(--color-raised);
+  --dlg-fg: var(--color-text);
+  position: relative;
+  min-height: 48px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background-color: var(--dlg-bg);
+  box-shadow: var(--shadow-raised);
+  color: var(--dlg-fg);
+  font: var(--type-label);
+  font-size: var(--text-callout);
+  letter-spacing: var(--tracking-label);
+  text-align: center;
+}
+
+.ov-dialog__action[data-preferred] {
+  font-weight: var(--weight-bold);
+}
+
+/* 确认类的默认操作：强调色渐变胶囊 */
+.ov-dialog__action[data-role="default"][data-preferred] {
+  --dlg-bg: var(--color-accent);
+  --dlg-fg: var(--color-on-accent);
+  background-image: var(--material-accent);
+  box-shadow: var(--shadow-accent);
+}
+
+.ov-dialog__action[data-role="destructive"] {
+  --dlg-bg: var(--color-danger-soft);
+  --dlg-fg: var(--color-danger-text);
+  box-shadow: none;
+}
+
+/* 按下：底色变深（按压缩放由 data-press 负责） */
+.ov-dialog__action[data-pressed] {
+  --dlg-bg: var(--color-raised-pressed);
+}
+
+.ov-dialog__action[data-role="default"][data-preferred][data-pressed] {
+  --dlg-bg: var(--color-accent-pressed);
+  background-image: linear-gradient(var(--color-fill-pressed), var(--color-fill-pressed)), var(--material-accent);
+}
+
+.ov-dialog__action[data-role="destructive"][data-pressed] {
+  --dlg-bg: color-mix(in srgb, var(--color-danger-soft), var(--color-danger) 16%);
+}
+
+@media (hover: hover) {
+  .ov-dialog__action:hover:not([data-pressed]) {
+    --dlg-bg: var(--color-raised-hover);
+  }
+
+  .ov-dialog__action[data-role="default"][data-preferred]:hover:not([data-pressed]) {
+    --dlg-bg: var(--color-accent-hover);
+  }
+
+  .ov-dialog__action[data-role="destructive"]:hover:not([data-pressed]) {
+    --dlg-bg: color-mix(in srgb, var(--color-danger-soft), var(--color-danger) 8%);
+  }
+}

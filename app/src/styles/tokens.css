@@ -1,0 +1,835 @@
+/* =====================================================================
+   styles/tokens.css：设计变量（唯一的取值来源）
+
+   皮肤：A「液态玻璃 · 海岛光」+ P2「杂志宋体」（样稿 $S/design/fontpairs/P2-serif/）。
+   - 页面铺在“光场”上（每趟行程一套主题色光斑，见第 9 节 --field-* 和 styles/field.css 的 .light-field）；
+   - 内容卡片是高不透明度的磨砂白（深色是磨砂深灰）：半透明底 + 细描边 + 顶部高光模拟玻璃，**不开 backdrop-filter**
+     （--material-card，styles/materials.css 的 .material-card）；
+   - 真玻璃（backdrop-filter）只给悬浮层：顶栏、底栏、悬浮按钮、弹层、菜单（--material-glass / --material-glass-strong、.material-glass）；
+   - 字体：标题思源宋体 600、大号数字 Instrument Serif、小号数字和标签 Geist、正文系统字体（第 5 节）。
+
+   规则：
+   - 组件只能用 var(--…) 取颜色、圆角、阴影、模糊、字体、字号、间距、层级、动效；
+     不写具体颜色值（单元测试会扫描 src 下除本文件以外的 CSS，发现 #hex / rgb() / hsl() 就报错）。
+   - 深色模式：跟随系统时用 @media (prefers-color-scheme: dark)；用户在设置里强制浅色/深色时，
+     <html data-theme="light|dark"> 优先（lib/theme.js 负责写这个属性）。
+   - 行程主题色（trips.cover.accent / accent_2）：整页换色用 lib/theme.js 的 setTripAccent(hex)（写在 <html> 的 --trip-accent）；
+     第二主题色（光场下半部分的暖色）写 --trip-accent-2（不写就用默认的珊瑚色）。
+     只给某个容器换色（例如行程列表里每张卡片各用各的色、光场的每一层），在容器上设置
+     style="--trip-accent: #…; --trip-accent-2: #…" 并加 class="accent-scope"。不设置就用默认的海岛青绿。
+   - --spring-* 那一段由 src/motion/springs.js 生成（npm run tokens），不要手改。
+
+   构建脚本会从这里读取 --color-canvas 的浅色/深色值，写进 manifest 和 <meta name="theme-color">。
+   ===================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------
+     1. 颜色（语义命名，浅色）
+     --------------------------------------------------------------- */
+
+  /* 页面底色：光场最上面的那层薄荷色（theme-color、PWA 启动底色、iOS 回弹时露出来的底）。
+     页面本身铺在光场上（.light-field），canvas 平时看不见 */
+  --color-canvas: #dff1ed;
+  /* 卡片：高不透明度的磨砂白。这里是平均色（给“只要一个颜色”的地方用）；完整材质（渐变 + 高光 + 描边）用 --material-card */
+  --color-surface: rgba(255, 255, 255, 0.66);
+  /* 卡片里再分层：往下凹的浅灰（输入框底、数字格、统计块） */
+  --color-surface-2: rgba(10, 28, 35, 0.04);
+  --color-surface-3: rgba(10, 28, 35, 0.07);
+  /* 浮层面（弹层、菜单、确认框）：配合 backdrop-filter 用（--material-glass-strong） */
+  --color-surface-raised: rgba(255, 255, 255, 0.82);
+  /* 控件滑块（分段控件的选中块、开关的圆钮）：近乎不透明的白，浮在玻璃胶囊上 */
+  --color-thumb: rgba(255, 255, 255, 0.94);
+
+  /* 文字：text = 正文；text-2 = 次要说明（≥4.5:1）；text-3 = 占位、禁用、装饰（≥3:1，不要用于正文）。
+     次要文字用半透明的墨色：放在玻璃、光场上会带一点底下的颜色，比纯灰更融 */
+  --color-text: #0a1c23;
+  --color-text-2: rgba(10, 28, 35, 0.74);
+  --color-text-3: rgba(10, 28, 35, 0.6);
+  --color-text-inverse: #ffffff;
+
+  /* 线 */
+  --color-border: rgba(10, 28, 35, 0.12);
+  --color-border-strong: rgba(10, 28, 35, 0.3);
+  --color-separator: rgba(10, 28, 35, 0.09);
+  /* 轨道：开关的底、时间轴的竖线、路线底色 */
+  --color-rail: rgba(10, 28, 35, 0.16);
+
+  /* 中性填充（往下凹）：输入框底、分段控件的轨道、标签、列表行按下（半透明，叠在任何面上都成立） */
+  --color-fill: rgba(10, 28, 35, 0.055);
+  --color-fill-hover: rgba(10, 28, 35, 0.08);
+  --color-fill-pressed: rgba(10, 28, 35, 0.11);
+  /* 凸起的白（往上浮）：次要按钮、图标按钮、筛选胶囊、卡片里的小方块（配 --shadow-raised 的顶部高光和细边） */
+  --color-raised: rgba(255, 255, 255, 0.7);
+  --color-raised-hover: rgba(255, 255, 255, 0.84);
+  --color-raised-pressed: rgba(255, 255, 255, 0.52);
+
+  /* 卡片材质的两端（左上 → 右下的渐变，不开 backdrop-filter） */
+  --color-card: rgba(255, 255, 255, 0.74);
+  --color-card-2: rgba(255, 255, 255, 0.56);
+
+  /* 玻璃材质（只用在悬浮层，配合 backdrop-filter）：glass = 普通玻璃两端；glass-strong = 顶栏、弹层用的厚一点的玻璃两端 */
+  --color-glass: rgba(255, 255, 255, 0.7);
+  --color-glass-2: rgba(255, 255, 255, 0.5);
+  --color-glass-strong: rgba(255, 255, 255, 0.8);
+  --color-glass-strong-2: rgba(255, 255, 255, 0.6);
+  /* 叠在 glass-strong-2 上、把左上角提亮到 glass-strong 的那层（--material-glass-lift 用） */
+  --color-glass-lift: rgba(255, 255, 255, 0.5);
+  /* 玻璃的边：细描边 / 顶部高光 / 底部暗边 / 内发光 */
+  --color-glass-border: rgba(255, 255, 255, 0.55);
+  --color-glass-highlight: rgba(255, 255, 255, 0.95);
+  --color-glass-shade: rgba(255, 255, 255, 0.3);
+  --color-glass-glow: rgba(255, 255, 255, 0.22);
+  /* 边缘折射高光（左上亮、右下次亮的 1px 渐变描边）和左上角的镜面光斑 */
+  --color-rim: #ffffff;
+  --color-rim-2: rgba(255, 255, 255, 0.65);
+  --color-sheen: rgba(255, 255, 255, 0.42);
+  /* 滚动边缘：内容滑进顶栏、底栏下面时渐隐用的底色 */
+  --color-edge-tint: rgba(232, 244, 241, 0.55);
+
+  /* 强调色：accent 用作实心底（主按钮、选中态、进度）；accent-text 用作文字和小图标（在玻璃上 ≥4.5:1）；
+     on-accent 是放在 accent 实心底上的文字色；accent-soft 是浅色底（选中的标签、高亮行）；
+     accent-2 是第二主题色（光场的暖色、天气图标、路线的终点）。
+     派生色在文件后面的「强调色派生」一节里计算（那一节同时作用于 .accent-scope），这里只放默认色和派生参数。 */
+  --trip-accent: initial;
+  --trip-accent-2: initial;
+  --color-accent-default: #0a7c75;
+  --color-accent-2-default: #e85d3f;
+  --color-on-accent: #ffffff;
+  /* 行程主题色当实心底时：浅色压暗一点（白字才清楚）；深色提亮（深底上才看得清、才配得上深色字）。
+     所有浏览器：和黑 / 白混合；支持相对颜色语法的浏览器：在 OKLCH 里把亮度夹在 [lmin, lmax]、彩度乘 c（见后面 @supports） */
+  --accent-solid-mix: 88%;
+  --accent-solid-toward: #000000;
+  --accent-solid-lmin: 0;
+  --accent-solid-lmax: 0.55;
+  --accent-solid-c: 1;
+  --accent-hover-mix: 90%;
+  --accent-hover-toward: #000000;
+  --accent-pressed-mix: 82%;
+  --accent-soft-mix: 13%;
+  --accent-text-mix: 76%;
+  --accent-text-toward: #000000;
+  /* 支持 OKLCH 时：强调色文字的亮度夹在这个范围（浅色 ≤0.48 才在玻璃上 ≥4.5:1；深色 ≥0.9：深色的选中块
+     （白色滑块 --color-thumb）叠在光场最亮处时，上面的强调色小字——底栏选中的「行程」、分段条的「今天」——也 ≥4.5:1） */
+  --accent-text-lmin: 0;
+  --accent-text-lmax: 0.48;
+  --accent-glow-mix: 40%;
+
+  /* 状态色：solid 实心底 / soft 浅底 / text 文字 / on 实心底上的文字 */
+  --color-success: #0f7a57;
+  --color-success-soft: rgba(15, 127, 92, 0.14);
+  --color-success-text: #0a5e45;
+  --color-on-success: #ffffff;
+
+  --color-warning: #e8921e;
+  --color-warning-soft: rgba(232, 146, 30, 0.2);
+  --color-warning-text: #7a4100;
+  --color-on-warning: #0a1c23;
+
+  --color-danger: #c8372d;
+  --color-danger-soft: rgba(200, 55, 45, 0.12);
+  --color-danger-text: #a8261d;
+  --color-on-danger: #ffffff;
+
+  --color-info: #1b64a8;
+  --color-info-soft: rgba(27, 100, 168, 0.13);
+  --color-info-text: #17558c;
+  --color-on-info: #ffffff;
+
+  /* 遮罩（弹层后面那层，带一点青灰；配合 --scrim-filter 把页面压暗、虚化） */
+  --color-scrim: rgba(14, 36, 44, 0.22);
+
+  /* 骨架屏、加载占位 */
+  --color-skeleton: rgba(10, 28, 35, 0.07);
+  --color-skeleton-shine: rgba(255, 255, 255, 0.55);
+
+  /* 评级五档（reviews.rating）：5 夯 / 4 顶级 / 3 人上人 / 2 NPC / 1 拉完了。实心底，配白字 */
+  --color-rating-5: #c8371f;
+  --color-rating-4: #7a45cf;
+  --color-rating-3: #1b64a8;
+  --color-rating-2: #4d6470;
+  --color-rating-1: #6a7377;
+  --color-on-rating: #ffffff;
+
+  /* 分类色（图表、记账分类、地图上的分段）。和面的对比度 ≥3:1 */
+  --color-cat-1: #1b64a8;
+  --color-cat-2: #d24a14;
+  --color-cat-3: #0f7a57;
+  --color-cat-4: #7a45cf;
+  --color-cat-5: #c2255c;
+  --color-cat-6: #0a7c75;
+  --color-cat-7: #a35c00;
+  --color-cat-8: #56656b;
+  
+  /* ＋ 面板图标块的渐变（左上亮 → 右下深，白图标；照样稿 03 的 .ft-ico：记一笔青绿、拍照珊瑚、日记蓝、加条目琥珀；
+     加待办的紫按同样的明度另配）。分类色是为了“在面上 ≥3:1”调深的，拿来做渐变会发泥，所以单独一套 */
+  --color-tile-teal-1: #38d1b8;
+  --color-tile-teal-2: #0a7c75;
+  --color-tile-coral-1: #ffb38a;
+  --color-tile-coral-2: #b8462c;
+  --color-tile-blue-1: #8fb8ff;
+  --color-tile-blue-2: #4a6fd8;
+  --color-tile-amber-1: #ffc85a;
+  --color-tile-amber-2: #c98309;
+  --color-tile-violet-1: #c4a6ff;
+  --color-tile-violet-2: #7a4fd6;
+  --color-on-tile: #ffffff;
+  /* 第几天的颜色（全站一套：概览的 D1–D4 徽章、地图的图钉 / 路线 / 筛选小点、以后日记账本的 D 徽章都用它；
+     视觉评审 P1-2：以前概览是 青蓝珊瑚紫、地图是 蓝橙绿紫，同一天两处颜色相反）。
+     --color-day-N：跟主题走（浅色是深色调、配白字 / --color-text-inverse；深色模式换成同一色相的浅色调、配深色字），图钉、路线、小点用；
+     --color-day-N-deep：两种主题都一样的深色调，白字（--color-on-tile）≥ 4.5:1，徽章这种白字压在色块上的用。
+     顺序：青、蓝、珊瑚、紫、玫红、琥珀、绿（7 天一轮）。 */
+  --color-day-1: #0a7c75;
+  --color-day-2: #4a6fd8;
+  --color-day-3: #b8462c;
+  --color-day-4: #7a4fd6;
+  --color-day-5: #c2255c;
+  --color-day-6: #a35c00;
+  --color-day-7: #0f7a57;
+  --color-day-1-deep: #0a7c75;
+  --color-day-2-deep: #4a6fd8;
+  --color-day-3-deep: #b8462c;
+  --color-day-4-deep: #7a4fd6;
+  --color-day-5-deep: #c2255c;
+  --color-day-6-deep: #a35c00;
+  --color-day-7-deep: #0f7a57;
+
+  /* ---------------------------------------------------------------
+     2. 圆角（大致同心：外层圆角 ≈ 内层圆角 + 内边距）
+     --------------------------------------------------------------- */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 26px;
+  /* 悬浮面板（从加号长出来的面板、行程切换面板） */
+  --radius-2xl: 32px;
+  /* 底部面板（四边离屏幕 8px 的浮动卡片，和 iPhone 屏幕圆角同心） */
+  --radius-sheet: 38px;
+  --radius-pill: 999px;
+  --radius-round: 50%;
+  /* 图标小方块（40 / 34 / 30px 见方）：圆角约为边长的三分之一（13 / 11 / 10px），只用在正方形上 */
+  --radius-tile: 32%;
+
+  /* ---------------------------------------------------------------
+     3. 阴影（四级：贴面 → 卡片 → 悬浮 → 弹层）。光场上的卡片几乎不投影，靠材质的高光和描边分层
+     --------------------------------------------------------------- */
+  --shadow-1: 0 1px 2px rgba(12, 52, 62, 0.06);
+  --shadow-2: 0 6px 16px -6px rgba(12, 52, 62, 0.22);
+  --shadow-3: 0 18px 40px -16px rgba(12, 52, 62, 0.35), 0 4px 12px -4px rgba(12, 52, 62, 0.12);
+  --shadow-4: 0 28px 64px -20px rgba(12, 52, 62, 0.42), 0 8px 22px -8px rgba(12, 52, 62, 0.16);
+  /* 按下时：阴影变浅，配合缩放 */
+  --shadow-pressed: 0 2px 6px -3px rgba(12, 52, 62, 0.25);
+  /* 浮在光场上的小圆按钮（顶栏搜索） */
+  --shadow-btn: 0 8px 20px -10px rgba(12, 52, 62, 0.38);
+  /* 滑块（分段控件的白色选中块）：外阴影 + 顶部高光 + 细边 */
+  --shadow-thumb: 0 6px 16px -6px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 0.5px rgba(255, 255, 255, 0.6);
+  /* 玻璃的边：顶部高光 + 底部暗边 + 细描边（inset，叠在 shadow-* 后面用：box-shadow: var(--shadow-3), var(--shadow-glass-edge)） */
+  --shadow-glass-edge: inset 0 1px 0.5px var(--color-glass-highlight), inset 0 -1px 0.5px var(--color-glass-shade), inset 0 0 0 0.5px var(--color-glass-border);
+  /* 凸起的白（--color-raised）的边：顶部高光 + 细描边 */
+  --shadow-raised: inset 0 1px 0 var(--color-glass-highlight), inset 0 0 0 0.5px var(--color-glass-border);
+  /* 玻璃内侧的柔光（顶栏、分段控件、底部面板、确认框；叠在 --shadow-glass-edge 后面） */
+  --shadow-glass-glow: inset 0 0 26px var(--color-glass-glow);
+  /* 实心小色块顶上的一道细高光（头像、计数徽章、勾上的圆） */
+  --shadow-highlight: inset 0 1px 0 color-mix(in srgb, var(--color-glass-highlight) 38%, transparent);
+  /* 实心小按钮的立体感：顶部细高光 + 底部往里暗一点（数量步进器收起时的加号） */
+  --shadow-bevel: var(--shadow-highlight), inset 0 -2px 6px color-mix(in srgb, var(--color-text) 10%, transparent);
+
+  /* ---------------------------------------------------------------
+     4. 模糊（backdrop-filter）和材质
+     --------------------------------------------------------------- */
+  --blur-sm: 8px;
+  --blur-md: 20px;
+  --blur-lg: 28px;
+  --blur-xl: 40px;
+  --glass-saturate: 190%;
+  /* 玻璃的完整滤镜；写的时候带上 -webkit- 前缀：
+     -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); */
+  --glass-filter: blur(var(--blur-lg)) saturate(var(--glass-saturate));
+  /* 小块玻璃（顶栏的圆按钮）：模糊半径小一点 */
+  --glass-filter-sm: blur(var(--blur-md)) saturate(185%);
+  /* 全屏菜单：整屏铺满，模糊得更重 */
+  --glass-filter-xl: blur(var(--blur-xl)) saturate(var(--glass-saturate));
+  /* 遮罩：轻轻虚化背后的页面 */
+  --scrim-filter: blur(6px) saturate(120%);
+
+  /* 材质（background 的值，不是颜色）：左上角的镜面光斑 + 左上 → 右下的渐变。
+     card：内容卡片，不开 backdrop-filter；glass / glass-strong：悬浮层，配合 --glass-filter。
+     对应的边：卡片 --material-card-edge（box-shadow），玻璃 --shadow-glass-edge；折射高光描边 --material-rim（见 styles/materials.css） */
+  --material-sheen: radial-gradient(130% 90% at 18% 0%, var(--color-sheen), transparent 55%);
+  --material-card: var(--material-sheen), linear-gradient(155deg, var(--color-card), var(--color-card-2));
+  --material-card-edge: inset 0 1px 0.5px var(--color-glass-highlight), inset 0 -1px 0.5px var(--color-glass-shade), inset 0 0 0 0.5px var(--color-glass-border), inset 0 0 26px var(--color-glass-glow);
+  --material-glass: var(--material-sheen), linear-gradient(155deg, var(--color-glass), var(--color-glass-2));
+  --material-glass-strong: var(--material-sheen), linear-gradient(155deg, var(--color-glass-strong), var(--color-glass-strong-2));
+  /* 弹层（底部面板、从按钮长出来的面板、确认框、小菜单）的默认材质：比 glass-strong 更厚、更不透明的玻璃，表单、长内容好读 */
+  --material-glass-dense: var(--material-sheen), linear-gradient(155deg, var(--color-surface-raised), color-mix(in srgb, var(--color-surface-raised) 86%, transparent));
+  /* 只有高光的那一半（叠在 background-color: var(--color-glass-strong-2) 上 = glass-strong 的效果）：
+     底色要被 JS 插值的玻璃（顶栏）用它，底色照样能动 */
+  --material-glass-lift: var(--material-sheen), linear-gradient(155deg, var(--color-glass-lift), transparent 75%);
+  --material-rim: linear-gradient(140deg, var(--color-rim) 0%, transparent 30%, transparent 68%, var(--color-rim-2) 100%);
+  /* 成功色实心按钮的材质（提交按钮打勾那一刻） */
+  --material-success: linear-gradient(140deg, color-mix(in srgb, var(--color-success) 72%, #ffffff), var(--color-success) 55%, color-mix(in srgb, var(--color-success) 88%, #000000));
+  /* 遮罩用的“整块不透明”（mask 只看透明度）：折射高光描边用它挖掉中间、只留 1px 的边 */
+  --mask-fill: linear-gradient(#000000 0 0);
+
+  /* ---------------------------------------------------------------
+     5. 字体（P2「杂志宋体」，@font-face 在 styles/fonts.css，文件在 app/static/fonts/）
+     --------------------------------------------------------------- */
+  /* 正文、说明、用户输入：系统字体（苹方优先），保证清晰 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", "Noto Sans SC",
+    "Helvetica Neue", Arial, sans-serif;
+  /* 标题、卡片标题、行程名、菜单 / 面板标题、大按钮：思源宋体 600。只在 ≥15px 用；中文标题字距 --tracking-display */
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
+  /* 大号数字（航班时间、金额、天气、数量）：Instrument Serif；它的「1」像小写 l、又没有越南盾符号「₫」，
+     前面叠一个只管「1」「₫」的思源宋体 Regular 字形（P2 Figure One） */
+  --font-figure: "P2 Figure One", "Instrument Serif", var(--font-serif);
+  /* 斜体大号数字（倒计时）：同样叠 P2 Figure One 的斜体（按 Instrument Serif 斜体的角度斜切），「1 天」不读成「l 天」 */
+  --font-figure-italic: "P2 Figure One", "Instrument Serif", var(--font-serif);
+  /* 小号数字、日期、计数、标签里的拉丁字母：Geist（配 tabular-nums）；中文仍走系统字体 */
+  --font-label: "Geist", var(--font-sans);
+  /* 旧名：大标题 = 宋体；圆体数字 = 大号数字 */
+  --font-display: var(--font-serif);
+  --font-rounded: var(--font-figure);
+  /* 等宽（订单号、代码） */
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-heavy: 800;
+  /* 宋体只有 600 一个字重（标题统一用它） */
+  --weight-serif: 600;
+
+  /* 字号阶梯（标题照样稿放大、列表文字照样稿收紧一号；行高按中文阅读放宽）。
+     --text-<级别> 是字号，--leading-<级别> 是行高，--type-<级别> 是可直接用于 font 简写的组合。
+     large-title / title-1 / title-2 / title-3 / title-4 是宋体（思源宋体 600），其余是系统字体。 */
+  --text-large-title: 40px;
+  --leading-large-title: 46px;
+  --text-title-1: 28px;
+  --leading-title-1: 36px;
+  --text-title-2: 21px;
+  --leading-title-2: 29px;
+  --text-title-3: 18px;
+  --leading-title-3: 26px;
+  /* 宋体小标题（只有字号，行高跟着用处走）：大按钮、全屏菜单项、顶栏收起后的标题、天数分段的 D1（样稿里宋体的 17px） */
+  --text-title-4: 17px;
+  --text-headline: 16px;
+  --leading-headline: 22px;
+  --text-body: 16px;
+  --leading-body: 25px;
+  --text-callout: 15px;
+  --leading-callout: 22px;
+  --text-subhead: 14px;
+  --leading-subhead: 20px;
+  --text-footnote: 13px;
+  --leading-footnote: 19px;
+  --text-caption-1: 12px;
+  --leading-caption-1: 17px;
+  --text-caption-2: 11px;
+  --leading-caption-2: 15px;
+
+  --type-large-title: var(--weight-serif) var(--text-large-title) / var(--leading-large-title) var(--font-display);
+  --type-title-1: var(--weight-serif) var(--text-title-1) / var(--leading-title-1) var(--font-display);
+  --type-title-2: var(--weight-serif) var(--text-title-2) / var(--leading-title-2) var(--font-display);
+  --type-title-3: var(--weight-serif) var(--text-title-3) / var(--leading-title-3) var(--font-display);
+  --type-headline: var(--weight-semibold) var(--text-headline) / var(--leading-headline) var(--font-sans);
+  --type-body: var(--weight-regular) var(--text-body) / var(--leading-body) var(--font-sans);
+  --type-callout: var(--weight-regular) var(--text-callout) / var(--leading-callout) var(--font-sans);
+  --type-subhead: var(--weight-regular) var(--text-subhead) / var(--leading-subhead) var(--font-sans);
+  --type-footnote: var(--weight-regular) var(--text-footnote) / var(--leading-footnote) var(--font-sans);
+  --type-caption-1: var(--weight-regular) var(--text-caption-1) / var(--leading-caption-1) var(--font-sans);
+  --type-caption-2: var(--weight-medium) var(--text-caption-2) / var(--leading-caption-2) var(--font-sans);
+  /* 标签：小按钮、分段、胶囊（拉丁和数字走 Geist，中文走系统字体） */
+  --type-label: var(--weight-semibold) var(--text-subhead) / 1.2 var(--font-label);
+  /* 眉标：卡片上方的小栏目名（「距离出发还有」「快速添加」），字距 --tracking-eyebrow */
+  --type-eyebrow: var(--weight-semibold) var(--text-caption-1) / var(--leading-caption-1) var(--font-label);
+
+  /* 大号数字（Instrument Serif，只有 400，分量靠字号补；斜体用 --font-figure-italic） */
+  --text-figure-hero: 84px;
+  --text-figure-1: 48px;
+  --text-figure-2: 40px;
+  --text-figure-3: 27px;
+  --text-figure-4: 22px;
+  /* 小号数字：日出日落、小号数量 */
+  --text-figure-5: 19px;
+
+  /* 字距：宋体标题放开（读起来像杂志标题），系统字体小字略放，眉标大字距 */
+  --tracking-display: 0.04em;
+  --tracking-title: 0.03em;
+  /* 旧名：大标题字距（A 皮肤的大标题是宋体，放开而不是收紧） */
+  --tracking-tight: var(--tracking-display);
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+  --tracking-label: 0.03em;
+  --tracking-tab: 0.08em;
+  --tracking-eyebrow: 0.12em;
+  --tracking-button: 0.08em;
+  --tracking-button-lg: 0.14em;
+  --tracking-figure: -0.005em;
+
+  /* ---------------------------------------------------------------
+     6. 间距（4pt 网格）与布局
+     --------------------------------------------------------------- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
+
+  /* 页面左右留白（手机 16px）、内容最大宽度（桌面居中） */
+  --gutter: 16px;
+  --content-max: 720px;
+  --content-max-wide: 1120px;
+  /* 最小触控尺寸：所有能点的东西 ≥ 44×44 */
+  --tap-min: 44px;
+  /* 常驻框架：顶栏、底栏都是浮在光场上的玻璃胶囊（离屏幕边 16px）。
+     --topbar-h / --tabbar-h = 给内容留出来的高度（胶囊本身 + 离屏幕边的距离，不含安全区）；
+     胶囊本身的高度和离边距离分开给，外壳摆位置用 */
+  --topbar-bar-h: 60px;
+  --topbar-inset: 10px;
+  --topbar-h: calc(var(--topbar-bar-h) + var(--topbar-inset));
+  --tabbar-bar-h: 70px;
+  --tabbar-inset: 14px;
+  --tabbar-h: calc(var(--tabbar-bar-h) + var(--tabbar-inset));
+
+  /* 安全区（刘海、Home 指示条、横屏两侧） */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  /* ---------------------------------------------------------------
+     7. 层级（z-index）。从低到高；同一层里再叠加用 calc(var(--z-x) + n)，n < 10
+     --------------------------------------------------------------- */
+  --z-below: -1;
+  --z-base: 0;
+  --z-raised: 1;
+  --z-sticky: 100;
+  --z-topbar: 200;
+  --z-tabbar: 300;
+  --z-fab: 310;
+  /* 页面自己的遮罩（不经过弹层系统的，例如以后顶栏展开时压暗页面）；overlay/ 的遮罩在每一层弹层内部，跟着那一层的 z-index */
+  --z-scrim: 400;
+  --z-sheet: 500;
+  --z-menu: 600;
+  --z-popover: 700;
+  --z-toast: 800;
+  --z-update: 850;
+  --z-dev: 900;
+
+  /* ---------------------------------------------------------------
+     8. 动效
+     --------------------------------------------------------------- */
+  /* 普通时长 */
+  --dur-instant: 90ms;
+  --dur-fast: 160ms;
+  --dur-base: 240ms;
+  --dur-slow: 360ms;
+  --dur-slower: 520ms;
+  /* 光场换色（切换行程时两层交叉淡入） */
+  --dur-field: 1100ms;
+  /* 光场光斑漂一个来回（很慢，几乎察觉不到在动；每个光斑在这个基础上乘不同的倍数） */
+  --dur-drift: 28s;
+
+  /* 普通缓动 */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.55, 0, 0.75, 0.2);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* 光场换色（切换行程）：样稿 07-ui.js Field.show 的曲线；外壳的主题色补间（shell/trip-state.js）用同一条、同样长 */
+  --ease-field: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 按压反馈：按下用 --press-duration + --ease-out 缩到 --press-scale；松手用 --spring-bouncy 回弹 */
+  --press-scale: 0.96;
+  --press-duration: 90ms;
+  /* 按压的过渡（motion/press.css 用；组件写 transition: var(--press-transition), 其他过渡…）。
+     这里是松手的弹簧回弹；元素按下时 press.css 在元素上把它换成 --press-duration 的缓出 */
+  --press-transition: scale var(--spring-bouncy-duration) var(--spring-bouncy);
+
+  /* 弹簧（linear() 采样，物理参数见 src/motion/springs.js） */
+  /* <springs:generated> 由 `npm run tokens` 生成，勿手改 */
+  /* snappy：感知 320ms，bounce 0.15，停稳 460ms，最大过冲 0.6% */
+  --spring-snappy: linear(0, 0.0052 1.17%, 0.0224 2.5%, 0.0532 4%, 0.0931 5.5%, 0.1342 6.83%, 0.1849 8.33%, 0.4152 14.67%, 0.5185 17.67%, 0.6166 20.83%, 0.6975 23.83%, 0.7662 26.83%, 0.8261 30%, 0.8763 33.33%, 0.9168 36.83%, 0.9481 40.5%, 0.9726 44.67%, 0.9898 49.33%, 1.0004 54.67%, 1.0063 66.17%, 1);
+  --spring-snappy-duration: 460ms;
+  /* bouncy：感知 450ms，bounce 0.3，停稳 740ms，最大过冲 4.6% */
+  --spring-bouncy: linear(0, 0.0069 1.17%, 0.0259 2.33%, 0.0599 3.67%, 0.1102 5.17%, 0.156 6.33%, 0.2208 7.83%, 0.4777 13.33%, 0.5884 15.83%, 0.6947 18.5%, 0.786 21.17%, 0.8573 23.67%, 0.9182 26.33%, 0.9672 29.17%, 1.0021 32%, 1.0218 34.33%, 1.0354 36.83%, 1.0433 39.5%, 1.046 42.67%, 1.0408 47.83%, 1.0117 62.5%, 1.0027 70.17%, 0.998 82%, 1);
+  --spring-bouncy-duration: 740ms;
+  /* smooth：感知 420ms，bounce 0，停稳 620ms，最大过冲 0% */
+  --spring-smooth: linear(0, 0.0054 1.17%, 0.0203 2.33%, 0.0462 3.67%, 0.0794 5%, 0.1597 7.67%, 0.3672 13.83%, 0.4625 16.83%, 0.5578 20.17%, 0.6366 23.33%, 0.7072 26.67%, 0.7659 30%, 0.8184 33.67%, 0.8618 37.5%, 0.9005 42%, 0.9306 46.83%, 0.9544 52.33%, 0.9717 58.5%, 0.9835 65.33%, 0.9916 73.67%, 1);
+  --spring-smooth-duration: 620ms;
+  /* </springs:generated> */
+
+  /* ---------------------------------------------------------------
+     9. 光场（页面背景：每趟行程一套主题色光斑 + 细颗粒，styles/field.css 的 .light-field 用）
+     颜色由主题色派生（见后面「强调色派生」一节）；这里只放和主题色无关的参数
+     --------------------------------------------------------------- */
+  /* 光斑的整体不透明度、颗粒的不透明度（深色下光斑压暗、颗粒略重） */
+  --field-blob-opacity: 0.9;
+  --field-grain-opacity: 0.07;
+  /* 光场底色的三个点往哪边混：浅色混向近白，深色混向近黑 */
+  --field-base-toward: #f6fbfa;
+  --field-base-mid: #f1f4ee;
+  --field-base-warm-toward: #fffaf6;
+  --field-base-mix: 11%;
+  --field-base-warm-mix: 14%;
+  /* 细颗粒（SVG 噪点，叠加模式 overlay） */
+  --field-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* 「更多」全屏菜单上主题色光晕的强度 */
+  --field-menu-glow: 22%;
+}
+
+/* ---------------------------------------------------------------------
+   强调色派生：同时作用于 :root 和 .accent-scope。
+   自定义属性在声明处就算好值再往下继承，所以只在某个容器上改 --trip-accent，
+   :root 上算好的 --color-accent 不会跟着变；给那个容器加 class="accent-scope"，
+   这一节会在容器上重新计算一遍。整页换行程主题色用 lib/theme.js 的 setTripAccent()。
+   没设 --trip-accent 时，--trip-accent-solid 这类引用了它的变量整个失效，var(…, 默认值) 落到默认色（浅色、深色各一套手调的值）。
+   --------------------------------------------------------------------- */
+:root,
+.accent-scope {
+  --trip-accent-solid: color-mix(in srgb, var(--trip-accent) var(--accent-solid-mix), var(--accent-solid-toward));
+  --trip-accent-2-solid: color-mix(in srgb, var(--trip-accent-2) var(--accent-solid-mix), var(--accent-solid-toward));
+  --color-accent: var(--trip-accent-solid, var(--color-accent-default));
+  --color-accent-2: var(--trip-accent-2-solid, var(--color-accent-2-default));
+  --color-accent-hover: color-mix(in srgb, var(--color-accent) var(--accent-hover-mix), var(--accent-hover-toward));
+  --color-accent-pressed: color-mix(in srgb, var(--color-accent) var(--accent-pressed-mix), #000000);
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) var(--accent-soft-mix), transparent);
+  --color-accent-text: color-mix(in srgb, var(--color-accent) var(--accent-text-mix), var(--accent-text-toward));
+  /* 实心强调色下面的柔光（主按钮、悬浮加号、选中的胶囊） */
+  --color-accent-glow: color-mix(in srgb, var(--color-accent) var(--accent-glow-mix), transparent);
+  /* 焦点环（键盘操作时出现） */
+  --color-focus-ring: var(--color-accent-text);
+  /* 强调色实心按钮的材质：左上亮、右下暗的渐变（悬浮加号、提交按钮、主按钮） */
+  --material-accent: linear-gradient(140deg, color-mix(in srgb, var(--color-accent) 74%, #ffffff), var(--color-accent) 48%, color-mix(in srgb, var(--color-accent) 84%, #000000));
+  --shadow-accent: 0 10px 24px -8px var(--color-accent-glow), inset 0 1.5px 1px rgba(255, 255, 255, 0.5), inset 0 -2px 6px rgba(0, 0, 0, 0.12);
+  /* 小号强调色柔光（勾上的圆、标签页下划线、选中的小胶囊） */
+  --shadow-accent-sm: 0 4px 10px -4px var(--color-accent-glow);
+
+  /* 光场：底色三个点 + 五个光斑（左上大块主题色 / 右上偏冷 / 左中浅 / 右下第二主题色浅 / 底部第二主题色）。
+     这里是所有浏览器都认的近似（和白混合）；支持相对颜色语法的浏览器在下面的 @supports 里换成更鲜亮的版本 */
+  --field-base-top: color-mix(in srgb, var(--color-accent) var(--field-base-mix), var(--field-base-toward));
+  --field-base-bottom: color-mix(in srgb, var(--color-accent-2) var(--field-base-warm-mix), var(--field-base-warm-toward));
+  --field-base: linear-gradient(172deg, var(--field-base-top) 0%, var(--field-base-mid) 46%, var(--field-base-bottom) 100%);
+  --field-1: color-mix(in srgb, color-mix(in srgb, var(--color-accent) 58%, #ffffff) 78%, transparent);
+  --field-2: color-mix(in srgb, color-mix(in srgb, var(--color-accent) 36%, #8ec5f0) 60%, transparent);
+  --field-3: color-mix(in srgb, color-mix(in srgb, var(--color-accent) 34%, #ffffff) 55%, transparent);
+  --field-4: color-mix(in srgb, color-mix(in srgb, var(--color-accent-2) 46%, #ffffff) 70%, transparent);
+  --field-5: color-mix(in srgb, color-mix(in srgb, var(--color-accent-2) 74%, #ffffff) 62%, transparent);
+}
+
+/* 支持相对颜色语法（iOS 18 / Safari 18、Chrome 119 起）：
+   - 行程主题色当实心底：在 OKLCH 里只调亮度（浅色最亮 0.55、深色最暗 0.78），色相不变，任何主题色都配得上白字 / 深色字；
+   - 强调色文字：同样只调亮度（浅色最亮 0.48、深色最暗 0.84），放在玻璃、卡片上都 ≥4.5:1；
+   - 光斑：按主题色的色相、在 OKLCH 里提亮，颜色更鲜、更像样稿（参数照样稿富国岛那一套的五个光斑反推） */
+@supports (color: oklch(from red l c h)) {
+  :root,
+  .accent-scope {
+    --trip-accent-solid: oklch(from var(--trip-accent) clamp(var(--accent-solid-lmin), l, var(--accent-solid-lmax)) calc(c * var(--accent-solid-c)) h);
+    --trip-accent-2-solid: oklch(from var(--trip-accent-2) clamp(var(--accent-solid-lmin), l, var(--accent-solid-lmax)) calc(c * var(--accent-solid-c)) h);
+    --color-accent-text: oklch(from var(--color-accent) clamp(var(--accent-text-lmin), l, var(--accent-text-lmax)) c h);
+    --field-1: oklch(from var(--color-accent) 0.74 calc(c * 1.38) h / 0.78);
+    --field-2: oklch(from var(--color-accent) 0.73 calc(c * 1.3) calc(h + 50) / 0.6);
+    --field-3: oklch(from var(--color-accent) 0.87 calc(c * 1.08) calc(h - 15) / 0.55);
+    --field-4: oklch(from var(--color-accent-2) 0.82 calc(c * 0.62) calc(h + 16) / 0.7);
+    --field-5: oklch(from var(--color-accent-2) 0.72 calc(c * 0.98) h / 0.62);
+  }
+}
+
+/* 不支持 linear() 的浏览器（iOS 17.2 以前）：换成近似贝塞尔（取值同 springs.js 的 SPRING_FALLBACKS） */
+@supports not (transition-timing-function: linear(0, 1)) {
+  :root {
+    --spring-snappy: cubic-bezier(0.32, 0.59, 0.01, 1.07);
+    --spring-bouncy: cubic-bezier(0.48, 1.61, 0.07, 0.83);
+    --spring-smooth: cubic-bezier(0.28, 0.47, 0.03, 1.01);
+  }
+}
+
+/* 系统设置了“减弱动态效果”：弹簧换成不回弹的短缓出；大位移动画由组件自己改成淡入淡出 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --spring-snappy: var(--ease-out);
+    --spring-bouncy: var(--ease-out);
+    --spring-smooth: var(--ease-out);
+    --spring-snappy-duration: var(--dur-fast);
+    --spring-bouncy-duration: var(--dur-fast);
+    --spring-smooth-duration: var(--dur-fast);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   深色（两处写同一套值：跟随系统 + 用户强制深色）。
+   改深色时两处要一起改；单元测试会核对两处完全一致，并且覆盖了浅色里的每个颜色变量。
+   --------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-canvas: #04161c;
+    --color-surface: rgba(28, 40, 48, 0.66);
+    --color-surface-2: rgba(255, 255, 255, 0.05);
+    --color-surface-3: rgba(255, 255, 255, 0.08);
+    --color-surface-raised: rgba(30, 43, 52, 0.84);
+    --color-thumb: rgba(255, 255, 255, 0.12);
+    --color-text: #eef6f7;
+    --color-text-2: rgba(238, 246, 247, 0.8);
+    --color-text-3: rgba(238, 246, 247, 0.62);
+    --color-text-inverse: #0a1c23;
+    --color-border: rgba(255, 255, 255, 0.14);
+    --color-border-strong: rgba(255, 255, 255, 0.32);
+    --color-separator: rgba(255, 255, 255, 0.1);
+    --color-rail: rgba(255, 255, 255, 0.18);
+    --color-fill: rgba(255, 255, 255, 0.06);
+    --color-fill-hover: rgba(255, 255, 255, 0.09);
+    --color-fill-pressed: rgba(255, 255, 255, 0.13);
+    --color-raised: rgba(255, 255, 255, 0.11);
+    --color-raised-hover: rgba(255, 255, 255, 0.15);
+    --color-raised-pressed: rgba(255, 255, 255, 0.07);
+    --color-card: rgba(40, 54, 63, 0.7);
+    --color-card-2: rgba(16, 25, 33, 0.62);
+    --color-glass: rgba(38, 52, 61, 0.68);
+    --color-glass-2: rgba(14, 22, 30, 0.58);
+    --color-glass-strong: rgba(46, 61, 71, 0.74);
+    --color-glass-strong-2: rgba(20, 29, 37, 0.66);
+    --color-glass-lift: rgba(84, 104, 116, 0.3);
+    --color-glass-border: rgba(255, 255, 255, 0.1);
+    --color-glass-highlight: rgba(255, 255, 255, 0.24);
+    --color-glass-shade: rgba(255, 255, 255, 0.05);
+    --color-glass-glow: rgba(255, 255, 255, 0.03);
+    --color-rim: rgba(255, 255, 255, 0.48);
+    --color-rim-2: rgba(255, 255, 255, 0.14);
+    --color-sheen: rgba(255, 255, 255, 0.09);
+    --color-edge-tint: rgba(6, 18, 24, 0.5);
+    --color-accent-default: #4fd8c9;
+    --color-accent-2-default: #ff9576;
+    --color-on-accent: #08191b;
+    --accent-solid-mix: 58%;
+    --accent-solid-toward: #ffffff;
+    --accent-solid-lmin: 0.78;
+    --accent-solid-lmax: 1;
+    --accent-solid-c: 1.15;
+    --accent-hover-mix: 90%;
+    --accent-hover-toward: #ffffff;
+    --accent-pressed-mix: 84%;
+    --accent-soft-mix: 18%;
+    --accent-text-mix: 45%;
+    --accent-text-toward: #ffffff;
+    --accent-text-lmin: 0.9;
+    --accent-text-lmax: 1;
+    --accent-glow-mix: 34%;
+    --color-success: #34c38f;
+    --color-success-soft: rgba(95, 220, 174, 0.14);
+    --color-success-text: #80ecc4;
+    --color-on-success: #08191b;
+    --color-warning: #f2a93b;
+    --color-warning-soft: rgba(255, 175, 80, 0.16);
+    --color-warning-text: #ffc77a;
+    --color-on-warning: #0a1c23;
+    --color-danger: #ff7466;
+    --color-danger-soft: rgba(255, 110, 100, 0.16);
+    --color-danger-text: #ff9a90;
+    --color-on-danger: #08191b;
+    --color-info: #6cb2ff;
+    --color-info-soft: rgba(120, 180, 255, 0.14);
+    --color-info-text: #9dcdff;
+    --color-on-info: #08191b;
+    --color-scrim: rgba(0, 0, 0, 0.4);
+    --color-skeleton: rgba(255, 255, 255, 0.08);
+    --color-skeleton-shine: rgba(255, 255, 255, 0.07);
+    --color-rating-5: #c8371f;
+    --color-rating-4: #7a45cf;
+    --color-rating-3: #1b64a8;
+    --color-rating-2: #4d6470;
+    --color-rating-1: #6a7377;
+    --color-on-rating: #ffffff;
+    --color-cat-1: #6cb2ff;
+    --color-cat-2: #ff8f5c;
+    --color-cat-3: #4fd8a4;
+    --color-cat-4: #bb92ff;
+    --color-cat-5: #ff6f9e;
+    --color-cat-6: #4fd8c9;
+    --color-cat-7: #f2b04a;
+    --color-cat-8: #a4b2b8;
+    /* ＋ 面板图标块：深色也用样稿的亮渐变（深色面上更跳），白图标 */
+    --color-tile-teal-1: #38d1b8;
+    --color-tile-teal-2: #0a7c75;
+    --color-tile-coral-1: #ffb38a;
+    --color-tile-coral-2: #b8462c;
+    --color-tile-blue-1: #8fb8ff;
+    --color-tile-blue-2: #4a6fd8;
+    --color-tile-amber-1: #ffc85a;
+    --color-tile-amber-2: #c98309;
+    --color-tile-violet-1: #c4a6ff;
+    --color-tile-violet-2: #7a4fd6;
+    --color-on-tile: #ffffff;
+    --color-day-1: #4fd8c9;
+    --color-day-2: #8fb8ff;
+    --color-day-3: #ff9a78;
+    --color-day-4: #bb92ff;
+    --color-day-5: #ff6f9e;
+    --color-day-6: #f2b04a;
+    --color-day-7: #4fd8a4;
+  --color-day-1-deep: #0a7c75;
+  --color-day-2-deep: #4a6fd8;
+  --color-day-3-deep: #b8462c;
+  --color-day-4-deep: #7a4fd6;
+  --color-day-5-deep: #c2255c;
+  --color-day-6-deep: #a35c00;
+  --color-day-7-deep: #0f7a57;
+    --color-day-1-deep: #0a7c75;
+    --color-day-2-deep: #4a6fd8;
+    --color-day-3-deep: #b8462c;
+    --color-day-4-deep: #7a4fd6;
+    --color-day-5-deep: #c2255c;
+    --color-day-6-deep: #a35c00;
+    --color-day-7-deep: #0f7a57;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-2: 0 6px 16px -6px rgba(0, 0, 0, 0.5);
+    --shadow-3: 0 18px 40px -14px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.3);
+    --shadow-4: 0 28px 64px -18px rgba(0, 0, 0, 0.7), 0 8px 22px -8px rgba(0, 0, 0, 0.35);
+    --shadow-pressed: 0 2px 6px -3px rgba(0, 0, 0, 0.5);
+    --shadow-btn: 0 8px 20px -10px rgba(0, 0, 0, 0.6);
+    --shadow-thumb: 0 6px 16px -6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+    --field-blob-opacity: 0.42;
+    --field-grain-opacity: 0.09;
+    --field-base-toward: #03131a;
+    --field-base-mid: #08151f;
+    --field-base-warm-toward: #170c12;
+    --field-base-mix: 6%;
+    --field-base-warm-mix: 7%;
+    --field-menu-glow: 10%;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-canvas: #04161c;
+  --color-surface: rgba(28, 40, 48, 0.66);
+  --color-surface-2: rgba(255, 255, 255, 0.05);
+  --color-surface-3: rgba(255, 255, 255, 0.08);
+  --color-surface-raised: rgba(30, 43, 52, 0.84);
+  --color-thumb: rgba(255, 255, 255, 0.12);
+  --color-text: #eef6f7;
+  --color-text-2: rgba(238, 246, 247, 0.8);
+  --color-text-3: rgba(238, 246, 247, 0.62);
+  --color-text-inverse: #0a1c23;
+  --color-border: rgba(255, 255, 255, 0.14);
+  --color-border-strong: rgba(255, 255, 255, 0.32);
+  --color-separator: rgba(255, 255, 255, 0.1);
+  --color-rail: rgba(255, 255, 255, 0.18);
+  --color-fill: rgba(255, 255, 255, 0.06);
+  --color-fill-hover: rgba(255, 255, 255, 0.09);
+  --color-fill-pressed: rgba(255, 255, 255, 0.13);
+  --color-raised: rgba(255, 255, 255, 0.11);
+  --color-raised-hover: rgba(255, 255, 255, 0.15);
+  --color-raised-pressed: rgba(255, 255, 255, 0.07);
+  --color-card: rgba(40, 54, 63, 0.7);
+  --color-card-2: rgba(16, 25, 33, 0.62);
+  --color-glass: rgba(38, 52, 61, 0.68);
+  --color-glass-2: rgba(14, 22, 30, 0.58);
+  --color-glass-strong: rgba(46, 61, 71, 0.74);
+  --color-glass-strong-2: rgba(20, 29, 37, 0.66);
+  --color-glass-lift: rgba(84, 104, 116, 0.3);
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+  --color-glass-highlight: rgba(255, 255, 255, 0.24);
+  --color-glass-shade: rgba(255, 255, 255, 0.05);
+  --color-glass-glow: rgba(255, 255, 255, 0.03);
+  --color-rim: rgba(255, 255, 255, 0.48);
+  --color-rim-2: rgba(255, 255, 255, 0.14);
+  --color-sheen: rgba(255, 255, 255, 0.09);
+  --color-edge-tint: rgba(6, 18, 24, 0.5);
+  --color-accent-default: #4fd8c9;
+  --color-accent-2-default: #ff9576;
+  --color-on-accent: #08191b;
+  --accent-solid-mix: 58%;
+  --accent-solid-toward: #ffffff;
+  --accent-solid-lmin: 0.78;
+  --accent-solid-lmax: 1;
+  --accent-solid-c: 1.15;
+  --accent-hover-mix: 90%;
+  --accent-hover-toward: #ffffff;
+  --accent-pressed-mix: 84%;
+  --accent-soft-mix: 18%;
+  --accent-text-mix: 45%;
+  --accent-text-toward: #ffffff;
+  --accent-text-lmin: 0.9;
+  --accent-text-lmax: 1;
+  --accent-glow-mix: 34%;
+  --color-success: #34c38f;
+  --color-success-soft: rgba(95, 220, 174, 0.14);
+  --color-success-text: #80ecc4;
+  --color-on-success: #08191b;
+  --color-warning: #f2a93b;
+  --color-warning-soft: rgba(255, 175, 80, 0.16);
+  --color-warning-text: #ffc77a;
+  --color-on-warning: #0a1c23;
+  --color-danger: #ff7466;
+  --color-danger-soft: rgba(255, 110, 100, 0.16);
+  --color-danger-text: #ff9a90;
+  --color-on-danger: #08191b;
+  --color-info: #6cb2ff;
+  --color-info-soft: rgba(120, 180, 255, 0.14);
+  --color-info-text: #9dcdff;
+  --color-on-info: #08191b;
+  --color-scrim: rgba(0, 0, 0, 0.4);
+  --color-skeleton: rgba(255, 255, 255, 0.08);
+  --color-skeleton-shine: rgba(255, 255, 255, 0.07);
+  --color-rating-5: #c8371f;
+  --color-rating-4: #7a45cf;
+  --color-rating-3: #1b64a8;
+  --color-rating-2: #4d6470;
+  --color-rating-1: #6a7377;
+  --color-on-rating: #ffffff;
+  --color-cat-1: #6cb2ff;
+  --color-cat-2: #ff8f5c;
+  --color-cat-3: #4fd8a4;
+  --color-cat-4: #bb92ff;
+  --color-cat-5: #ff6f9e;
+  --color-cat-6: #4fd8c9;
+  --color-cat-7: #f2b04a;
+  --color-cat-8: #a4b2b8;
+  /* ＋ 面板图标块：深色也用样稿的亮渐变（深色面上更跳），白图标 */
+  --color-tile-teal-1: #38d1b8;
+  --color-tile-teal-2: #0a7c75;
+  --color-tile-coral-1: #ffb38a;
+  --color-tile-coral-2: #b8462c;
+  --color-tile-blue-1: #8fb8ff;
+  --color-tile-blue-2: #4a6fd8;
+  --color-tile-amber-1: #ffc85a;
+  --color-tile-amber-2: #c98309;
+  --color-tile-violet-1: #c4a6ff;
+  --color-tile-violet-2: #7a4fd6;
+  --color-on-tile: #ffffff;
+  --color-day-1: #4fd8c9;
+  --color-day-2: #8fb8ff;
+  --color-day-3: #ff9a78;
+  --color-day-4: #bb92ff;
+  --color-day-5: #ff6f9e;
+  --color-day-6: #f2b04a;
+  --color-day-7: #4fd8a4;
+  --color-day-1-deep: #0a7c75;
+  --color-day-2-deep: #4a6fd8;
+  --color-day-3-deep: #b8462c;
+  --color-day-4-deep: #7a4fd6;
+  --color-day-5-deep: #c2255c;
+  --color-day-6-deep: #a35c00;
+  --color-day-7-deep: #0f7a57;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 6px 16px -6px rgba(0, 0, 0, 0.5);
+  --shadow-3: 0 18px 40px -14px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.3);
+  --shadow-4: 0 28px 64px -18px rgba(0, 0, 0, 0.7), 0 8px 22px -8px rgba(0, 0, 0, 0.35);
+  --shadow-pressed: 0 2px 6px -3px rgba(0, 0, 0, 0.5);
+  --shadow-btn: 0 8px 20px -10px rgba(0, 0, 0, 0.6);
+  --shadow-thumb: 0 6px 16px -6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+  --field-blob-opacity: 0.42;
+  --field-grain-opacity: 0.09;
+  --field-base-toward: #03131a;
+  --field-base-mid: #08151f;
+  --field-base-warm-toward: #170c12;
+  --field-base-mix: 6%;
+  --field-base-warm-mix: 7%;
+  --field-menu-glow: 10%;
+}

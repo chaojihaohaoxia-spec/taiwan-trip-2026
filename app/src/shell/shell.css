@@ -1,0 +1,240 @@
+/* =====================================================================
+   shell/shell.css：外壳（主内容区、出错页、更新提示、演示角标）的样式。
+   只用 tokens.css 的变量。
+   ===================================================================== */
+
+.app-main {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ---------- 外壳里的通用按钮（出错页用；正式按钮组件见 ui/） ---------- */
+.shell-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-text);
+  font: var(--type-headline);
+  /* 按压：data-press（motion/press.js 的全局委托），缩放走独立的 scale 属性 */
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.shell-btn[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+.shell-btn--primary {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.shell-btn--primary[data-pressed] {
+  background: var(--color-accent-pressed);
+}
+
+@media (hover: hover) {
+  .shell-btn:hover:not([data-pressed]) {
+    background: var(--color-fill-hover);
+  }
+
+  .shell-btn--primary:hover:not([data-pressed]) {
+    background: var(--color-accent-hover);
+  }
+}
+
+/* ---------- 页面出错 ---------- */
+.shell-error {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: calc(var(--safe-top) + var(--space-9)) var(--gutter) calc(var(--safe-bottom) + var(--space-9));
+}
+
+.shell-error__title {
+  font: var(--type-title-1);
+  letter-spacing: var(--tracking-tight);
+}
+
+.shell-error__text {
+  margin-top: var(--space-2);
+  color: var(--color-text-2);
+}
+
+.shell-error__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.shell-error__details {
+  margin-top: var(--space-6);
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.shell-error__details summary {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--color-accent-text);
+}
+
+.shell-error__details pre {
+  overflow-x: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font: var(--type-caption-1);
+  font-family: var(--font-mono);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ---------- 有新版本 ---------- */
+.update-prompt {
+  position: fixed;
+  left: 50%;
+  /* 放在底栏上方（底栏高 --tabbar-h），没有底栏的页面也一样，位置固定好找 */
+  bottom: calc(var(--safe-bottom) + var(--tabbar-h) + var(--space-3));
+  z-index: var(--z-update);
+  transform: translateX(-50%);
+  max-width: calc(100vw - 2 * var(--gutter));
+  animation: update-prompt-in var(--spring-bouncy-duration) var(--spring-bouncy) both;
+}
+
+.update-prompt__button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-5) 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-glass-strong);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--shadow-3), var(--shadow-glass-edge);
+  color: var(--color-accent-text);
+  font: var(--type-headline);
+  white-space: nowrap;
+  /* 按压：data-press（motion/press.js），缩放走独立的 scale 属性 */
+  transition: var(--press-transition);
+}
+
+.update-prompt__button:disabled {
+  cursor: progress;
+}
+
+.update-prompt__icon {
+  flex: none;
+}
+
+@keyframes update-prompt-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 24px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes update-prompt-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+}
+
+/* ---------- 演示模式角标 ---------- */
+.demo-badge {
+  position: fixed;
+  top: calc(var(--safe-top) + var(--space-2));
+  right: calc(var(--safe-right) + var(--space-2));
+  z-index: var(--z-dev);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+  font: var(--type-caption-2);
+  box-shadow: var(--shadow-2);
+}
+
+/* 角标本身只有 28px 高，用伪元素把可点区域扩到 44px */
+.demo-badge::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+/* 有顶栏的页面：放在右上角搜索按钮的下面（不挡搜索、不挡大标题），小一号；
+   层级只比顶栏高一点：弹层（面板、菜单、搜索结果）盖得住它 */
+/* 没有副标题的页面挪到大标题那一行（DemoBadge.jsx 量好挪多少，写在元素的 style 上盖过这里的 0） */
+.demo-badge[data-framed] {
+  --demo-badge-dx: 0px;
+  --demo-badge-dy: 0px;
+  translate: var(--demo-badge-dx) var(--demo-badge-dy);
+  z-index: calc(var(--z-topbar) + 3);
+  top: calc(var(--safe-top) + var(--topbar-h) + var(--space-1));
+  right: calc(var(--safe-right) + var(--gutter));
+  min-height: 22px;
+  padding: 0 var(--space-2);
+  opacity: 0.92;
+}
+
+/* 22px 高，可点区域上下扩到 44px */
+.demo-badge[data-framed]::after {
+  inset: -11px -6px;
+}
+
+/* 有顶栏的页面：往下滚了、弹层 / 搜索开着、同步条在显示、放哪儿都会挡东西时淡出、点不到（DemoBadge.jsx） */
+.demo-badge[data-framed] {
+  transition: opacity var(--dur-fast) var(--ease-out), visibility 0s;
+}
+
+.demo-badge[data-framed][data-hidden] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease-out), visibility 0s linear var(--dur-fast);
+}
+
+/* 真实数据预览：换成提示蓝，和虚构的演示数据分开 */
+.demo-badge[data-real] {
+  background: var(--color-info);
+  color: var(--color-on-info);
+}
+
+.demo-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-round);
+  background: currentColor;
+}
+
+/* 不透明的全屏层（大图浏览、给司机看）盖住整页的时候：底下看不见的毛玻璃全部关掉
+   （overlay/dom.js 的 setPageCovered 写 <html data-covered>；iPhone 上每层 backdrop-filter 每帧都要算，交互评审 P2-9） */
+:root[data-covered] .shell,
+:root[data-covered] .shell * {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}

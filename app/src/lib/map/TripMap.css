@@ -1,0 +1,482 @@
+/* =====================================================================
+   lib/map/TripMap.css：地图组件的样式（tm- 前缀）。只用 tokens.css 的变量。
+   Leaflet 自带的 leaflet.css 在 vendor 层，这里的规则所在层更高，直接覆盖，不用比拼优先级。
+   ===================================================================== */
+
+/* ---------- 外框 ---------- */
+.tm-map {
+  /* 局部变量：高度和圆角可以由使用方覆盖（<TripMap height={360}> 会写 --tm-height） */
+  --tm-height: 320px;
+  --tm-radius: var(--radius-lg);
+  position: relative;
+  height: var(--tm-height);
+  overflow: hidden;
+  border-radius: var(--tm-radius);
+  background: var(--color-surface-2);
+  box-shadow: var(--shadow-1);
+  /* Leaflet 内部的层级是 400–1000：关进自己的层叠上下文，不会盖住顶栏、弹层 */
+  isolation: isolate;
+  z-index: var(--z-base);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tm-map__canvas {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  isolation: isolate;
+}
+
+.tm-map .leaflet-container {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font: var(--type-footnote);
+  font-family: var(--font-sans);
+}
+
+.tm-map .leaflet-container:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+/* 没加载底图（演示模式）：淡淡的方格纸，告诉人这里是地图 */
+.tm-map--no-tiles .leaflet-container {
+  background-color: var(--color-surface-2);
+  background-image:
+    linear-gradient(var(--color-separator) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-separator) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
+}
+
+/* 底图淡入（切换深浅色时新底图盖上来，旧的随后撤掉） */
+.tm-map .tm-tiles {
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+
+/* 没有 CARTO key、用 OSM 底图时的深色：反相 + 转回原来的色相，再压低对比和饱和度（水是深蓝、路是深灰） */
+.tm-map .tm-tiles--filter-dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.55);
+}
+
+/* ---------- 叠在地图上的东西 ---------- */
+.tm-map__badge {
+  position: absolute;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  z-index: var(--z-raised);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-glass);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  color: var(--color-text-2);
+  font: var(--type-caption-2);
+  pointer-events: none;
+}
+
+.tm-map__fit {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: var(--z-raised);
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-2);
+  color: var(--color-accent-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  animation: tm-pop-in var(--spring-bouncy-duration) var(--spring-bouncy) both;
+  /* 按压：data-press（motion/press.js 的全局委托），缩放走独立的 scale 属性，不和进场动画的 transform 打架 */
+  transition: var(--press-transition);
+}
+
+/* 36px 高的胶囊，可点区域扩到 44px */
+.tm-map__fit::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+.tm-map__hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: var(--z-raised);
+  max-width: calc(100% - var(--space-8));
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-3);
+  color: var(--color-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-medium);
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.92);
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--spring-snappy-duration) var(--spring-snappy);
+}
+
+.tm-map__hint[data-show="true"] {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.tm-map__hint:empty {
+  visibility: hidden;
+}
+
+/* ---------- Leaflet 控件换皮 ---------- */
+.tm-map .leaflet-bar {
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-2);
+}
+
+.tm-map .leaflet-bar a,
+.tm-map .leaflet-touch .leaflet-bar a {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border-bottom: 0.5px solid var(--color-separator);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: var(--type-title-3);
+  line-height: var(--tap-min);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.tm-map .leaflet-bar a:last-child {
+  border-bottom: 0;
+}
+
+.tm-map .leaflet-bar a:active {
+  background: var(--color-fill-pressed);
+}
+
+.tm-map .leaflet-bar a.leaflet-disabled {
+  color: var(--color-text-3);
+  background: var(--color-surface-raised);
+}
+
+@media (hover: hover) {
+  .tm-map .leaflet-bar a:hover {
+    background: var(--color-fill-hover);
+    color: var(--color-text);
+  }
+}
+
+/* 手机上用双指缩放，不显示缩放按钮（省地方） */
+@media (hover: none) {
+  .tm-map .leaflet-control-zoom {
+    display: none;
+  }
+}
+
+.tm-map .leaflet-top.leaflet-right .leaflet-control {
+  margin-top: var(--space-3);
+  margin-right: var(--space-3);
+}
+
+.tm-map .leaflet-control-attribution {
+  padding: 1px var(--space-2);
+  border-top-left-radius: var(--radius-sm);
+  background: var(--color-glass);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  color: var(--color-text-2);
+  font: var(--type-caption-2);
+}
+
+.tm-map .leaflet-control-attribution a {
+  color: var(--color-accent-text);
+}
+
+/* ---------- 标记（图钉） ---------- */
+.tm-map .tm-marker {
+  border: 0;
+  background: none;
+  outline: none;
+}
+
+.tm-pin {
+  --tm-pin: var(--color-accent);
+  --tm-pin-on: var(--color-on-accent);
+  --tm-enter-delay: 0ms;
+  position: absolute;
+  inset: 0;
+  /* 以图钉尖为原点缩放：选中时“从地面长高” */
+  transform-origin: 22px 41px;
+  transition: transform var(--spring-bouncy-duration) var(--spring-bouncy), opacity var(--dur-fast) var(--ease-out);
+}
+
+.tm-pin[data-tone="1"] { --tm-pin: var(--color-cat-1); --tm-pin-on: var(--color-text-inverse); }
+.tm-pin[data-tone="2"] { --tm-pin: var(--color-cat-2); --tm-pin-on: var(--color-text-inverse); }
+.tm-pin[data-tone="3"] { --tm-pin: var(--color-cat-3); --tm-pin-on: var(--color-text-inverse); }
+.tm-pin[data-tone="4"] { --tm-pin: var(--color-cat-4); --tm-pin-on: var(--color-text-inverse); }
+.tm-pin[data-tone="5"] { --tm-pin: var(--color-cat-5); --tm-pin-on: var(--color-text-inverse); }
+.tm-pin[data-tone="6"] { --tm-pin: var(--color-cat-6); --tm-pin-on: var(--color-text-inverse); }
+.tm-pin[data-tone="7"] { --tm-pin: var(--color-cat-7); --tm-pin-on: var(--color-text-inverse); }
+.tm-pin[data-tone="8"] { --tm-pin: var(--color-cat-8); --tm-pin-on: var(--color-text-inverse); }
+
+/* 水滴形：正方形三个角圆、一个角尖，旋转 -45° 让尖角朝下 */
+.tm-pin__body {
+  position: absolute;
+  left: 7px;
+  top: 4px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--tm-pin);
+  box-shadow: 0 0 0 2px var(--color-surface-raised), var(--shadow-2);
+  transform: rotate(-45deg);
+  transition: box-shadow var(--dur-fast) var(--ease-out), transform var(--press-duration) var(--ease-out);
+}
+
+.tm-pin__label {
+  transform: rotate(45deg);
+  color: var(--tm-pin-on);
+  font: var(--type-caption-1);
+  font-family: var(--font-rounded);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* 没有序号：中间一个小圆点 */
+.tm-pin[data-empty="true"] .tm-pin__label {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-round);
+  background: var(--tm-pin-on);
+}
+
+/* 位置不精确：图钉尖下面一圈虚线 */
+.tm-pin__halo {
+  position: absolute;
+  left: 6px;
+  top: 25px;
+  width: 32px;
+  height: 32px;
+  border: 1.5px dashed var(--tm-pin);
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--spring-snappy-duration) var(--spring-snappy);
+}
+
+.tm-pin[data-precision="approximate"] .tm-pin__halo,
+.tm-pin[data-precision="city"] .tm-pin__halo,
+.tm-pin[data-precision="unknown"] .tm-pin__halo {
+  opacity: 0.55;
+  transform: scale(1);
+}
+
+/* 只精确到城市 / 位置未知：空心图钉 */
+.tm-pin[data-precision="city"] .tm-pin__body,
+.tm-pin[data-precision="unknown"] .tm-pin__body {
+  background: var(--color-surface-raised);
+  box-shadow: inset 0 0 0 2px var(--tm-pin), var(--shadow-2);
+}
+
+.tm-pin[data-precision="city"] .tm-pin__label,
+.tm-pin[data-precision="unknown"] .tm-pin__label {
+  color: var(--tm-pin);
+}
+
+.tm-pin[data-precision="unknown"][data-empty="true"] .tm-pin__label {
+  background: var(--tm-pin);
+}
+
+/* 选中时显示的名字（图钉下方） */
+.tm-pin__name {
+  position: absolute;
+  left: 50%;
+  top: 46px;
+  max-width: 168px;
+  overflow: hidden;
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-2);
+  color: var(--color-text);
+  font: var(--type-caption-1);
+  font-weight: var(--weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, -4px) scale(0.9);
+  transform-origin: top center;
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--spring-snappy-duration) var(--spring-snappy);
+  pointer-events: none;
+}
+
+.tm-pin__name:empty {
+  display: none;
+}
+
+.tm-pin.is-selected {
+  transform: translateY(-2px) scale(1.18);
+}
+
+.tm-pin.is-selected .tm-pin__body {
+  box-shadow: 0 0 0 2.5px var(--color-surface-raised), 0 0 0 5px var(--tm-pin), var(--shadow-3);
+}
+
+.tm-pin.is-selected .tm-pin__name {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(calc(1 / 1.18));
+}
+
+.tm-pin[data-muted="true"] {
+  opacity: 0.5;
+  transform: scale(0.85);
+}
+
+.tm-pin[data-muted="true"].is-selected {
+  opacity: 1;
+  transform: translateY(-2px) scale(1.18);
+}
+
+/* 按下即反馈（图钉带 data-press="none"：按压行为来自 motion/press.js，样式在这里——只缩图钉头，尖不动） */
+.tm-marker[data-pressed] .tm-pin__body {
+  transform: rotate(-45deg) scale(0.92);
+}
+
+.tm-marker:focus-visible .tm-pin__body {
+  box-shadow: 0 0 0 2px var(--color-surface-raised), 0 0 0 5px var(--color-focus-ring), var(--shadow-2);
+}
+
+@media (hover: hover) {
+  .tm-marker:hover .tm-pin:not(.is-selected) {
+    transform: translateY(-1px) scale(1.06);
+  }
+}
+
+/* 新出现的图钉：从上方落下、弹一下 */
+.tm-pin--enter {
+  animation: tm-pin-drop var(--spring-bouncy-duration) var(--spring-bouncy) var(--tm-enter-delay) both;
+}
+
+@keyframes tm-pin-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.6);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tm-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- 路线 ---------- */
+.tm-map .tm-route {
+  --tm-route: var(--color-accent);
+  fill: none;
+  stroke: var(--tm-route);
+  stroke-width: 4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tm-map .tm-route-casing {
+  fill: none;
+  stroke: var(--color-surface-raised);
+  stroke-width: 8px;
+  stroke-opacity: 0.9;
+}
+
+.tm-map .tm-route--tone-1 { --tm-route: var(--color-cat-1); }
+.tm-map .tm-route--tone-2 { --tm-route: var(--color-cat-2); }
+.tm-map .tm-route--tone-3 { --tm-route: var(--color-cat-3); }
+.tm-map .tm-route--tone-4 { --tm-route: var(--color-cat-4); }
+.tm-map .tm-route--tone-5 { --tm-route: var(--color-cat-5); }
+.tm-map .tm-route--tone-6 { --tm-route: var(--color-cat-6); }
+.tm-map .tm-route--tone-7 { --tm-route: var(--color-cat-7); }
+.tm-map .tm-route--tone-8 { --tm-route: var(--color-cat-8); }
+
+.tm-map .tm-route--dashed {
+  stroke-dasharray: 10 9;
+}
+
+/* 步行：圆点线（线段长度接近 0 + 圆头 = 圆点） */
+.tm-map .tm-route--dotted {
+  stroke-dasharray: 0.1 9;
+  stroke-width: 5px;
+}
+
+.tm-map .tm-route--muted {
+  stroke-opacity: 0.35;
+}
+
+/* 实线路线画出来（pathLength=1，见 TripMap.jsx） */
+.tm-map .tm-route--draw {
+  stroke-dasharray: 1;
+  animation: tm-route-draw var(--dur-slower) var(--ease-in-out) both;
+}
+
+@keyframes tm-route-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* 减弱动态效果：不弹不落，只做淡入淡出 */
+@media (prefers-reduced-motion: reduce) {
+  .tm-pin,
+  .tm-pin__name,
+  .tm-pin__halo,
+  .tm-map__hint {
+    transition-property: opacity;
+  }
+
+  .tm-pin.is-selected,
+  .tm-pin[data-muted="true"].is-selected {
+    transform: none;
+  }
+
+  .tm-pin.is-selected .tm-pin__name {
+    transform: translate(-50%, 0);
+  }
+
+  .tm-map__hint,
+  .tm-map__hint[data-show="true"] {
+    transform: translate(-50%, -50%);
+  }
+
+  .tm-pin--enter,
+  .tm-map__fit,
+  .tm-map .tm-route--draw {
+    animation: none;
+  }
+}

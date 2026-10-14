@@ -1,0 +1,30 @@
+/* =====================================================================
+   kit/KindIcon.css：种类图标的方块（.k-tile）。样稿 .e-ico / .pk-ico：40px、圆角 13px（--radius-tile）、
+   往下凹的浅灰底 + 强调色图标。
+   ===================================================================== */
+
+.k-tile {
+  --k-tile: 40px;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--k-tile);
+  height: var(--k-tile);
+  border-radius: var(--radius-tile);
+  background: var(--color-fill);
+  color: var(--color-accent-text);
+}
+
+.k-tile--neutral {
+  color: var(--color-text-2);
+}
+
+.k-tile--soft {
+  background: var(--color-accent-soft);
+}
+
+.k-tile--solid {
+  background: var(--material-accent);
+  box-shadow: var(--shadow-accent-sm);
+  color: var(--color-on-accent);
+}

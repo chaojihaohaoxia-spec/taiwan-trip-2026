@@ -1,0 +1,54 @@
+{
+  "_说明": "演示行程「几乎空的」：只有行程本身和两天，没有条目、预订、记账，给各页面的空状态用。内容全部虚构。",
+  "trip": {
+    "id": "demo-empty",
+    "title": "山雾镇 · 周末",
+    "subtitle": "还没开始计划",
+    "start_date": "2027-04-03",
+    "end_date": "2027-04-04",
+    "timezone": "Asia/Taipei",
+    "home_currency": "HKD",
+    "local_currency": "TWD",
+    "cover": {
+      "emoji": "⛰️",
+      "accent": "#5C7C3A",
+      "accent_2": "#C9B458"
+    },
+    "status": "planning",
+    "sort": 30,
+    "owner_id": "@jeremy",
+    "extra": {
+      "party_size": 2
+    }
+  },
+  "members": [
+    {
+      "ref": "jeremy",
+      "email": "jeremy@example.com",
+      "role": "owner",
+      "display_name": "Jeremy",
+      "color": "#2F6FDE"
+    },
+    {
+      "ref": "cathy",
+      "email": "cathy@example.com",
+      "role": "editor",
+      "display_name": "Cathy",
+      "color": "#D9480F"
+    }
+  ],
+  "days": [
+    {
+      "id": "day:d1",
+      "date": "2027-04-03",
+      "title": "",
+      "planning_status": "tbd"
+    },
+    {
+      "id": "day:d2",
+      "date": "2027-04-04",
+      "title": "",
+      "planning_status": "tbd"
+    }
+  ]
+}

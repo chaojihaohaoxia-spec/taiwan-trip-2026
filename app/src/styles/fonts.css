@@ -1,0 +1,489 @@
+/* =====================================================================
+   styles/fonts.css：网页字体的 @font-face（scripts/fonts/build-fonts.py 生成，别手改）
+   字体文件在 app/static/fonts/，构建时 esbuild 按这里的 url() 把它们带进 assets/（文件名加内容哈希）。
+   全部 SIL OFL 1.1，授权原文在 app/static/fonts/licenses/，来源和版本见 app/static/fonts/README.md。
+   用法见 styles/README.md「字体」：标题 var(--font-serif) / 大号数字 var(--font-figure) / 小号数字和标签 var(--font-label)。
+
+   思源宋体 Noto Serif SC 600 一共 4043 个码位，切成 54 片（合计 881 KB）：
+   浏览器按 unicode-range 只下载页面上真的用到的那几片。@font-face 后声明的先匹配：
+   区块（不太常用的字，区间连续）写在前面，常用字分片（精确列字）写在后面，一个字只会去下载它所在的那一片。
+   ===================================================================== */
+
+/* ---------- 思源宋体 Noto Serif SC 2.003 · SemiBold 600 · 区块 → 常用字分片 → 扩展拉丁 → 拉丁 ---------- */
+/* b01 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b01.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+2E80-4F09;
+}  /* 10.6 KB */
+/* b02 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b02.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+4F0A-5178;
+}  /* 16.5 KB */
+/* b03 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b03.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5179-5305;
+}  /* 17.3 KB */
+/* b04 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b04.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5306-5447;
+}  /* 13.3 KB */
+/* b05 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b05.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5448-55FC;
+}  /* 16.1 KB */
+/* b06 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b06.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+55FD-58C0;
+}  /* 18.1 KB */
+/* b07 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b07.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+58C1-5B84;
+}  /* 18.8 KB */
+/* b08 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b08.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5B85-5D28;
+}  /* 16.0 KB */
+/* b09 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b09.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5D29-5FBC;
+}  /* 17.1 KB */
+/* b10 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b10.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5FBD-6166;
+}  /* 17.8 KB */
+/* b11 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b11.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+6167-62E6;
+}  /* 17.8 KB */
+/* b12 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b12.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+62E7-6446;
+}  /* 19.5 KB */
+/* b13 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b13.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+6447-667D;
+}  /* 19.6 KB */
+/* b14 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b14.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+667E-68A6;
+}  /* 15.6 KB */
+/* b15 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b15.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+68A7-6C1A;
+}  /* 20.5 KB */
+/* b16 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b16.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+6C1B-6D9C;
+}  /* 16.3 KB */
+/* b17 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b17.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+6D9D-6FD1;
+}  /* 21.9 KB */
+/* b18 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b18.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+6FD2-72DD;
+}  /* 19.2 KB */
+/* b19 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b19.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+72DE-75AA;
+}  /* 18.6 KB */
+/* b20 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b20.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+75AB-77E1;
+}  /* 17.8 KB */
+/* b21 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b21.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+77E2-7A73;
+}  /* 18.1 KB */
+/* b22 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b22.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+7A74-7EB0;
+}  /* 21.4 KB */
+/* b23 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b23.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+7EB1-8037;
+}  /* 21.3 KB */
+/* b24 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b24.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+8038-81C1;
+}  /* 17.4 KB */
+/* b25 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b25.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+81C2-83DF;
+}  /* 16.2 KB */
+/* b26 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b26.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+83E0-86C6;
+}  /* 20.6 KB */
+/* b27 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b27.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+86C7-8BB2;
+}  /* 21.2 KB */
+/* b28 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b28.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+8BB3-8D59;
+}  /* 18.8 KB */
+/* b29 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b29.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+8D5A-8FC3;
+}  /* 19.6 KB */
+/* b30 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b30.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+8FC4-94A6;
+}  /* 19.0 KB */
+/* b31 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b31.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+94A7-96B5;
+}  /* 18.5 KB */
+/* b32 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b32.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+96B6-9A85;
+}  /* 20.5 KB */
+/* b33 · 区块 · 76 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b33.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+9A86-FF11;
+}  /* 21.9 KB */
+/* b34 · 区块 · 75 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-b34.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+FF12-FFFF;
+}  /* 6.8 KB */
+/* t113c · 常用字（Google 第 113 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t113c.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+7A33,U+7A3F,U+7A97,U+7ADE-7ADF,U+7B26,U+7E41,U+7EC3,U+7F3A,U+8089,U+80DC,U+811A,U+8131,U+8138,U+821E,U+8349,U+83DC,U+8457,U+867D,U+86CB,U+8A89,U+8BA8,U+8BAD,U+8BEF,U+8BFE,U+8C6A,U+8D1D,U+8D4F,U+8D62,U+8DD1,U+8DF3,U+8F6E,U+8FF9,U+900F,U+9014,U+9057,U+9192,U+91CE,U+9488,U+94A2,U+9547,U+955C,U+95F2,U+9644,U+964D,U+96C4-96C5,U+96E8,U+96F6-96F7,U+9732,U+9759,U+9760,U+987A,U+989C,U+9910,U+996D-996E,U+9B54,U+9E21,U+9EBB,U+9F50;
+}  /* 16.9 KB */
+/* t113b · 常用字（Google 第 113 片） · 61 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t113b.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+6076,U+613F,U+6258,U+6263,U+6267,U+6298,U+62A2,U+62E5,U+62EC,U+6311,U+6377,U+6388-6389,U+63A2,U+63D2,U+641E,U+642D,U+654F,U+6551,U+6597,U+65CF,U+65D7,U+65E7,U+6682,U+66F2,U+671D,U+672B,U+6740,U+6751,U+6768,U+6811,U+6863,U+6982,U+6BD2,U+6CF0,U+6D0B,U+6D17,U+6D59,U+6DD8,U+6DFB,U+6E7E,U+6F6E,U+6FB3,U+706F,U+719F,U+72AF,U+72D0,U+72D7,U+732B,U+732E,U+7389,U+73E0,U+7530,U+7687,U+76D6,U+76DB,U+7840,U+786C,U+79CB,U+79D2,U+7A0E;
+}  /* 15.0 KB */
+/* t113a · 常用字（Google 第 113 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t113a.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+4E4E,U+4E61,U+4E71,U+4EBF,U+4F26,U+5012,U+51AC,U+51B0,U+51B2,U+51B7,U+5218,U+521A,U+5220,U+5237,U+523B,U+526F,U+5385,U+53BF,U+53E5,U+53EB,U+53F3,U+53F6,U+5409,U+5438,U+54C8,U+54E5,U+552F,U+5584,U+5706,U+5723,U+5750,U+575A,U+5987-5988,U+59B9,U+59D0,U+59D4,U+5B88,U+5B9C,U+5BDF,U+5BFB,U+5C01,U+5C04,U+5C3E,U+5C4B,U+5C4F,U+5C9B,U+5CF0,U+5DDD,U+5DE6,U+5DE8,U+5E01,U+5E78,U+5E7B,U+5E9C,U+5EAD,U+5EF6,U+5F39,U+5FD8,U+6000,U+6025,U+604B;
+}  /* 12.4 KB */
+/* t114c · 常用字（Google 第 114 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t114c.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+7A81,U+7AE5,U+7B14,U+7C89,U+7D27,U+7EAF,U+7EB3,U+7EB8,U+7EC7,U+7EE7,U+7EFF,U+7F57,U+7FFB,U+805A,U+80A1,U+822C,U+82CF,U+82E5,U+8363,U+836F,U+84DD,U+878D,U+8840,U+8857,U+8863,U+8865,U+8B66,U+8BB2,U+8BDA,U+8C01,U+8C08,U+8C46,U+8D1F,U+8D35,U+8D5B,U+8D5E,U+8DA3,U+8DDF,U+8F93,U+8FDD,U+8FF0,U+8FF7,U+8FFD,U+9000,U+9047,U+9152,U+949F,U+94C1,U+94F6,U+9646,U+9648,U+9669,U+969C,U+96EA,U+97E9,U+987B,U+987E,U+989D,U+9970,U+9986,U+9C7C,U+9C9C;
+}  /* 16.2 KB */
+/* t114b · 常用字（Google 第 114 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t114b.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5E86,U+5E8F,U+5EA7,U+5F02,U+5F52,U+5F81,U+5FF5,U+60CA,U+60E0,U+6279,U+62C5,U+62FF,U+63CF,U+6444,U+64CD,U+653B,U+65BD,U+65E9,U+665A,U+66B4,U+66FE,U+6728,U+6742,U+677E,U+67B6,U+680F,U+68A6,U+68C0,U+699C,U+6B4C,U+6B66,U+6B7B,U+6BCD,U+6BDB,U+6C38,U+6C47,U+6C49,U+6CB3,U+6CB9,U+6CE2,U+6D32,U+6D3E,U+6D4F,U+6E56,U+6FC0,U+7075,U+7206,U+725B,U+72C2,U+73ED,U+7565,U+7591,U+7597,U+75C5,U+76AE,U+76D1,U+76DF,U+7834,U+7968,U+7981,U+79C0,U+7A7F;
+}  /* 14.6 KB */
+/* t114a · 常用字（Google 第 114 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t114a.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+4E03,U+4E25,U+4E30,U+4E34,U+4E45,U+4E5D,U+4E89,U+4EAE,U+4ED8,U+4F11,U+4F19,U+4F24,U+4F34,U+4F59,U+4F73,U+4F9D,U+4FB5,U+5047,U+505C,U+5170,U+519C,U+51CF,U+5267,U+5356,U+5374,U+5382,U+538B,U+53E6,U+5426,U+542B,U+542F,U+5462,U+5473,U+554A,U+5566,U+5708,U+571F,U+5757,U+57DF,U+57F9,U+5802,U+590F,U+591C,U+591F,U+592B,U+5965,U+5979,U+5A01,U+5A5A,U+5B63,U+5B69,U+5B81,U+5BA1,U+5BA3,U+5C3C,U+5C42,U+5C81,U+5DE7,U+5DEE,U+5E0C,U+5E10,U+5E55;
+}  /* 12.8 KB */
+/* t115c · 常用字（Google 第 115 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t115c.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+79EF,U+79FB,U+7A76,U+7B11,U+7B54,U+7B56,U+7B97,U+7BC7,U+7C73,U+7D20,U+7EAA,U+7EC8,U+7EDD,U+7EED,U+7EFC,U+7FA4,U+804C,U+8058,U+80CC,U+8111,U+817E,U+826F,U+8303,U+843D,U+89C9,U+89D2,U+8BA2,U+8BBF,U+8BC9,U+8BCD,U+8BE6,U+8C22,U+8C61,U+8D22,U+8D26-8D27,U+8D8A,U+8F6F,U+8F7B,U+8F83,U+8F91,U+8FB9,U+8FD4,U+8FDC,U+9002,U+94B1,U+9519,U+95ED,U+961F,U+9632-9633,U+963F,U+968F-9690,U+96BE,U+9876,U+9884,U+98DE,U+9988,U+9999,U+9EC4,U+FF1B;
+}  /* 15.6 KB */
+/* t115b · 常用字（Google 第 115 片） · 63 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t115b.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5C40,U+5C45,U+5C5E,U+5DF4,U+5E72,U+5E95,U+5F80,U+5F85,U+5FB7,U+5FD7,U+601D,U+626B,U+627F,U+62C9,U+62CD,U+6309,U+63A7,U+6545,U+65AD,U+65AF,U+65C5,U+666E,U+667A,U+670B,U+671B,U+674E,U+677F,U+6781,U+6790,U+6797,U+6821,U+6838-6839,U+697C,U+6B27,U+6B62,U+6BB5,U+6C7D,U+6C99,U+6D4B,U+6D4E,U+6D6A,U+6E29,U+6E2F,U+6EE1,U+6F14,U+6F2B,U+72B6,U+72EC,U+7387,U+7533,U+753B,U+76CA,U+76D8,U+7701,U+773C,U+77ED,U+77F3,U+7814,U+793C,U+79BB,U+79C1,U+79D8;
+}  /* 14.3 KB */
+/* t115a · 常用字（Google 第 115 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t115a.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+4E14,U+4E1D,U+4E3D,U+4E49,U+4E60,U+4E9A,U+4EB2,U+4EC5,U+4EFD,U+4F3C,U+4F4F,U+4F8B,U+4FBF,U+5019,U+5145,U+514B,U+516B,U+516D,U+5174,U+5178,U+517B,U+5199,U+519B,U+51B3,U+51B5,U+5207,U+5212,U+5219,U+521D,U+52BF,U+533B,U+5343,U+5347,U+534A,U+536B,U+5370,U+53E4,U+53F2,U+5403,U+542C,U+547D,U+54A8,U+54CD,U+54EA,U+552E,U+56F4,U+5747,U+575B,U+5883,U+589E,U+5931,U+5947,U+5956-5957,U+5A92,U+5B83,U+5BA4,U+5BB3,U+5BCC,U+5C14,U+5C1A,U+5C3D;
+}  /* 12.3 KB */
+/* t116c · 常用字（Google 第 116 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t116c.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+7AEF,U+7B7E,U+7BB1,U+7EA2,U+7EA6,U+7EC4,U+7EC6,U+7ECD,U+7EDC,U+7EF4,U+8003,U+80B2,U+81F3-81F4,U+822A,U+827A,U+82F1,U+83B7,U+8425,U+89C2,U+89C8,U+8BA9,U+8BB8,U+8BC6,U+8BD5,U+8BE2,U+8BE5,U+8BED,U+8C03,U+8D23,U+8D2D,U+8D34,U+8D70,U+8DB3,U+8FBE,U+8FCE,U+8FD1,U+8FDE,U+9001,U+901F-9020,U+90A3,U+914D,U+91C7,U+94FE,U+9500,U+952E,U+9605,U+9645,U+9662,U+9664,U+9700,U+9752,U+975E,U+97F3,U+9879,U+9886,U+98DF,U+9A6C,U+9A8C,U+9ED1,U+9F99;
+}  /* 14.5 KB */
+/* t116b · 常用字（Google 第 116 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t116b.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5DF1,U+5E08,U+5E26,U+5E2E,U+5E93,U+5E97,U+5EB7,U+5F15,U+5F20,U+5F3A,U+5F62,U+5F69,U+5F88,U+5F8B,U+5FC5,U+600E,U+620F,U+6218,U+623F,U+627E,U+628A,U+62A4,U+62DB,U+62E9,U+6307,U+6362,U+636E,U+64AD,U+6539,U+653F,U+6548,U+6574,U+6613,U+6625,U+663E,U+666F,U+672A,U+6750,U+6784,U+6A21,U+6B3E,U+6B65,U+6BCF,U+6C11,U+6C5F,U+6DF1,U+706B,U+7167,U+724C,U+738B,U+73A9,U+73AF,U+7403,U+7537,U+754C,U+7559,U+767D,U+7740,U+786E,U+795E,U+798F,U+79F0;
+}  /* 13.9 KB */
+/* t116a · 常用字（Google 第 116 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t116a.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+3000,U+300A-300B,U+4E16,U+4E66,U+4E70,U+4E91-4E92,U+4E94,U+4E9B,U+4EC0,U+4ECA,U+4F01,U+4F17-4F18,U+4F46,U+4F4E,U+4F9B,U+4FEE,U+503C,U+5065,U+50CF,U+513F,U+5148,U+518D,U+51C6,U+51E0,U+5217,U+529E-529F,U+5341,U+534F,U+5361,U+5386,U+53C2,U+53C8,U+53CC,U+53D7-53D8,U+53EA,U+5404,U+5411,U+5417,U+5427,U+5468,U+559C,U+5668,U+56E0,U+56E2,U+56ED,U+5740,U+57FA,U+58EB,U+5904,U+592A,U+59CB,U+5A31,U+5B58,U+5B9D,U+5BC6,U+5C71,U+5DDE;
+}  /* 11.2 KB */
+/* t117c · 常用字（Google 第 117 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t117c.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+7801,U+793A,U+79CD,U+7A0B,U+7A7A,U+7ACB,U+7AE0,U+7B2C,U+7B80,U+7BA1,U+7CBE,U+7D22,U+7EA7,U+7ED3,U+7ED9,U+7EDF,U+7F16,U+7F6E,U+8001,U+800C,U+8272,U+8282,U+82B1,U+8350,U+88AB,U+88C5,U+897F,U+89C1,U+89C4,U+89E3,U+8A00,U+8BA1,U+8BA4,U+8BAE-8BB0,U+8BBE,U+8BC1,U+8BC4,U+8BFB,U+8D28,U+8D39,U+8D77,U+8D85,U+8DEF,U+8EAB,U+8F66,U+8F6C,U+8F7D,U+8FD0,U+9009,U+90AE,U+90FD,U+91CC-91CD,U+91CF,U+95FB,U+9650,U+96C6,U+9891,U+98CE,U+FF1F;
+}  /* 14.1 KB */
+/* t117b · 常用字（Google 第 117 片） · 61 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t117b.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5B8C,U+5B98,U+5BB9,U+5BFC,U+5C06,U+5C11,U+5C31,U+5C55,U+5DF2,U+5E03,U+5E38,U+5E76,U+5E94,U+5EFA,U+5F71,U+5F97,U+5FEB,U+6001,U+603B,U+60F3,U+611F,U+6216,U+624D,U+6253,U+6295,U+6301,U+6392,U+641C,U+652F,U+653E,U+6559,U+6599,U+661F,U+671F,U+672F,U+6761,U+67E5,U+6807,U+6837,U+683C,U+6848,U+6B22,U+6B64,U+6BD4,U+6C14,U+6C34,U+6C42,U+6CA1,U+6D41,U+6D77,U+6D88,U+6E05,U+6E38,U+6E90,U+7136,U+7231,U+7531,U+767E,U+76EE,U+76F4,U+771F;
+}  /* 13.9 KB */
+/* t117a · 常用字（Google 第 117 片） · 62 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t117a.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+3010-3011,U+4E07,U+4E1C,U+4E24,U+4E3E,U+4E48,U+4E50,U+4E5F,U+4E8B-4E8C,U+4EA4,U+4EAB-4EAC,U+4ECB,U+4ECE,U+4ED6,U+4EE3,U+4EF6-4EF7,U+4EFB,U+4F20,U+4F55,U+4F7F,U+4FDD,U+505A,U+5143,U+5149,U+514D,U+5171,U+5177,U+518C,U+51FB,U+521B,U+5229,U+522B,U+52A9,U+5305,U+5317,U+534E,U+5355,U+5357,U+535A,U+5373,U+539F,U+53BB,U+53CA,U+53CD,U+53D6,U+53E3,U+53F0,U+5458,U+5546,U+56DB,U+573A,U+578B,U+57CE,U+58F0,U+590D,U+5934,U+5973,U+5B57;
+}  /* 11.4 KB */
+/* t119-118c · 常用字（Google 第 119、118 片） · 66 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t119-118c.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+6CD5,U+6CE8,U+6D3B,U+70B9,U+70ED,U+7247-7248,U+7269,U+7279,U+73B0,U+7406,U+751F,U+7528,U+7535,U+767B,U+7684,U+76F8,U+770B,U+77E5,U+793E,U+79D1,U+7AD9,U+7B49,U+7C7B,U+7CFB,U+7EBF,U+7ECF,U+7F51,U+7F8E,U+8005,U+8054,U+80FD,U+81EA,U+85CF,U+884C,U+8868,U+8981,U+89C6,U+8BBA,U+8BDD,U+8BF4,U+8BF7,U+8D44,U+8FC7,U+8FD8-8FD9,U+8FDB,U+901A,U+9053,U+90E8,U+91D1,U+957F,U+95E8,U+95EE,U+95F4,U+9762,U+9875,U+9898,U+9996,U+9AD8,U+FF01,U+FF08-FF09,U+FF0C,U+FF0E,U+FF1A;
+}  /* 13.6 KB */
+/* t119-118b · 常用字（Google 第 119、118 片） · 65 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t119-118b.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+5927,U+5929,U+597D,U+5982,U+5B50,U+5B66,U+5B89,U+5B9A,U+5B9E,U+5BA2,U+5BB6,U+5BF9,U+5C0F,U+5DE5,U+5E02,U+5E73-5E74,U+5E7F,U+5EA6,U+5F00,U+5F0F,U+5F53,U+5F55,U+5FAE,U+5FC3,U+6027,U+606F,U+60A8,U+60C5,U+610F,U+6210-6211,U+6237,U+6240,U+624B,U+6280,U+62A5,U+63A5,U+63A8,U+63D0,U+6536,U+6570,U+6587,U+65B0,U+65B9,U+65E0,U+65E5,U+65F6,U+660E,U+662D,U+662F,U+66F4,U+6700,U+6708-6709,U+670D,U+672C,U+673A,U+6743,U+6765,U+679C,U+682A,U+6B21,U+6B63,U+6CBB;
+}  /* 12.6 KB */
+/* t119-118a · 常用字（Google 第 119、118 片） · 66 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-t119-118a.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+3001-3002,U+30FB,U+4E00,U+4E09-4E0B,U+4E0D-4E0E,U+4E13,U+4E1A,U+4E2A,U+4E2D,U+4E3A-4E3B,U+4E4B,U+4E86,U+4E8E,U+4EA7,U+4EBA,U+4EE4-4EE5,U+4EEC,U+4F1A,U+4F4D,U+4F53,U+4F5C,U+4F60,U+4FE1,U+5165,U+5168,U+516C,U+5173,U+5176,U+5185,U+51FA,U+5206,U+5230,U+5236,U+524D,U+529B,U+52A0-52A1,U+52A8,U+5316,U+533A,U+53CB,U+53D1,U+53EF,U+53F7-53F8,U+5408,U+540C-540E,U+544A,U+548C,U+54C1,U+56DE,U+56FD-56FE,U+5728,U+5730,U+5907,U+5916,U+591A;
+}  /* 10.2 KB */
+/* ext · 越南语 / 扩展拉丁 / 符号 · 134 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-ext.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+100-2E7F;
+}  /* 7.6 KB */
+/* latin · 拉丁 · 220 字 */
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("../../static/fonts/noto-serif-sc-600-latin.woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+20-7E,U+A0-FF,U+304,U+2010-2016,U+2018-201A,U+201C-201E,U+2020-2022,U+2025-2027,U+2030,U+2032-2033,U+203B,U+20AC,U+2122,U+2191,U+2193,U+2212;
+}  /* 18.3 KB */
+
+/* ---------- Instrument Serif 1.000 · 400 正体 / 斜体（大号数字；不写 unicode-range；正体预加载，斜体用到时才下载） ---------- */
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("../../static/fonts/instrument-serif-400.woff2");
+  font-weight: 400;
+  font-display: swap;
+}  /* 15.5 KB */
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("../../static/fonts/instrument-serif-400-italic.woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}  /* 15.9 KB */
+
+/* ---------- Geist 1.800 · 可变字重 100–900（小号数字、标签；预加载，不写 unicode-range） ---------- */
+@font-face {
+  font-family: "Geist";
+  src: url("../../static/fonts/geist.woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}  /* 38.0 KB */
+
+/* ---------- P2 Figure One：思源宋体 Regular 的「1」和「₫」 ----------
+   Instrument Serif 的 1 像小写 l（"05-11" 读成 "05-ll"），而且没有 ₫（越南盾符号回退到思源宋体 600，在细数字旁边特别黑）：
+   大号数字里这两个字用它顶替（--font-figure / --font-figure-italic 的第一个字体）；size-adjust 92% 让它和 Instrument Serif 的
+   数字一样高。斜体是同样两个字按 Instrument Serif 斜体的角度（13°）斜切出来的（倒计时「1 天」不会读成「l 天」）。 */
+@font-face {
+  font-family: "P2 Figure One";
+  src: url("../../static/fonts/p2-figure-one.woff2");
+  font-weight: 400;
+  font-display: swap;
+  size-adjust: 92%;
+  unicode-range: U+31,U+20AB;
+}  /* 1.3 KB */
+@font-face {
+  font-family: "P2 Figure One";
+  src: url("../../static/fonts/p2-figure-one-italic.woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  size-adjust: 92%;
+  unicode-range: U+31,U+20AB;
+}  /* 1.2 KB */

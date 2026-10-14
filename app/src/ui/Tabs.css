@@ -1,0 +1,133 @@
+/* =====================================================================
+   ui/Tabs.css：标签页（.tabs）。指示条由三段拼成：左圆头、中间一段（基准宽 100px，横向缩放到实际长度）、右圆头，
+   位置全部由 JS 写 transform（只动 transform，在合成线程跑），圆头是独立的小圆点，永远是圆的。
+   A 皮肤：标签字体（拉丁走 Geist）、字距 .03em；选中强调色字 + 强调色指示条（带一点同色柔光）；底线是细分隔线。
+   ===================================================================== */
+
+.tabs {
+  position: relative;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  /* 两端渐隐：滚动时提示还有更多 */
+  -webkit-mask-image: linear-gradient(to right, transparent, var(--color-text) var(--space-3), var(--color-text) calc(100% - var(--space-3)), transparent);
+  mask-image: linear-gradient(to right, transparent, var(--color-text) var(--space-3), var(--color-text) calc(100% - var(--space-3)), transparent);
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs__list {
+  position: relative;
+  display: flex;
+  gap: var(--space-1);
+  width: max-content;
+  min-width: 100%;
+  padding: 0 var(--space-3);
+  border-bottom: 0.5px solid var(--color-separator);
+}
+
+.tabs__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  color: var(--color-text-2);
+  font: var(--type-label);
+  font-size: var(--text-callout);
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), opacity var(--press-duration) var(--ease-out);
+}
+
+.tabs--lg .tabs__tab {
+  min-height: 48px;
+  font-size: var(--text-headline);
+}
+
+.tabs__tab[aria-selected="true"] {
+  color: var(--color-accent-text);
+}
+
+/* 按下：文字变淡（iOS 的写法；不出现一块“文件夹页签”形状的灰底） */
+.tabs__tab[data-pressed] {
+  opacity: 0.6;
+}
+
+.tabs__tab:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.tabs__tab:focus-visible {
+  outline-offset: -2px;
+}
+
+@media (hover: hover) {
+  .tabs__tab:not([aria-selected="true"]):not(:disabled):hover {
+    color: var(--color-text);
+  }
+}
+
+.tabs__badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--color-fill-pressed);
+  color: var(--color-text-2);
+  font: var(--type-caption-2);
+  font-family: var(--font-label);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.tabs__tab[aria-selected="true"] .tabs__badge {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+.tabs__ink {
+  --tabs-ink-h: 3px;
+  position: absolute;
+  left: 0;
+  bottom: -0.5px;
+  width: 0;
+  height: var(--tabs-ink-h);
+  pointer-events: none;
+  /* JS 量好位置之前先藏起来 */
+  visibility: hidden;
+}
+
+.tabs__ink[data-placed] {
+  visibility: visible;
+}
+
+.tabs__ink-cap,
+.tabs__ink-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: var(--tabs-ink-h);
+  background: var(--color-accent);
+  box-shadow: var(--shadow-accent-sm);
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.tabs__ink-cap {
+  width: var(--tabs-ink-h);
+  border-radius: var(--radius-round);
+}
+
+.tabs__ink-bar {
+  width: 100px;
+}

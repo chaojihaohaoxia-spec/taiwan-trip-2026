@@ -1,0 +1,86 @@
+/* =====================================================================
+   kit/RatingChips.css：评级胶囊（成员首字小圆点 + 档位名，五档颜色白字）。类名沿用地点页阶段的 pl-rate。
+   颜色只用设计变量。
+   ===================================================================== */
+
+/* ---------- 评级胶囊：成员首字小圆点 + 档位名（五档颜色，白字） ---------- */
+.pl-rates {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.pl-rate {
+  --pl-rate-bg: var(--color-fill);
+  --pl-rate-h: 22px;
+  --pl-who-size: 18px;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  height: var(--pl-rate-h);
+  padding: 0 9px 0 2px;
+  border-radius: var(--radius-pill);
+  background: var(--pl-rate-bg);
+  box-shadow: var(--shadow-highlight);
+  color: var(--color-on-rating);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-label);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.pl-rate--md {
+  --pl-rate-h: 28px;
+  --pl-who-size: 22px;
+  gap: 6px;
+  padding-right: 11px;
+  padding-left: 3px;
+  font-size: var(--text-footnote);
+}
+
+.pl-rate--r5 { --pl-rate-bg: var(--color-rating-5); }
+.pl-rate--r4 { --pl-rate-bg: var(--color-rating-4); }
+.pl-rate--r3 { --pl-rate-bg: var(--color-rating-3); }
+.pl-rate--r2 { --pl-rate-bg: var(--color-rating-2); }
+.pl-rate--r1 { --pl-rate-bg: var(--color-rating-1); }
+
+/* 只要档位（旁边已经有头像） */
+.pl-rate--bare {
+  padding-left: 11px;
+}
+
+/* 只写了评语、没选档位 */
+.pl-rate--note {
+  color: var(--color-text-2);
+  font-weight: var(--weight-semibold);
+}
+
+/* --pl-who：成员颜色，组件在元素上用 style 写（数据里的颜色或按名字取的分类色），这里是没写时的默认 */
+.pl-rate__who {
+  --pl-who: var(--color-cat-8);
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--pl-who-size);
+  height: var(--pl-who-size);
+  border-radius: var(--radius-round);
+  background: var(--pl-who);
+  box-shadow: 0 0 0 1.5px var(--color-glass-highlight);
+  color: var(--color-on-rating);
+  font: var(--weight-bold) var(--text-caption-2) / 1 var(--font-label);
+  letter-spacing: 0;
+}
+
+.pl-rate--md .pl-rate__who {
+  font-size: var(--text-caption-1);
+}
+
+.pl-rate__name {
+  font-weight: var(--weight-semibold);
+}
+

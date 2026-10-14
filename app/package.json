@@ -1,0 +1,36 @@
+{
+  "name": "rs7885-app",
+  "version": "2.0.0",
+  "private": true,
+  "description": "热爱生活7885 v2：两个人一起用的旅行手帐（Preact + signals + esbuild）",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/preview.mjs",
+    "test": "node --test --test-reporter=spec \"test/unit/**/*.test.js\"",
+    "e2e": "node scripts/e2e.mjs",
+    "check": "npm run build && npm test && npm run e2e",
+    "demo": "node scripts/demo.mjs",
+    "images": "node scripts/images.mjs",
+    "tokens": "node scripts/tokens.mjs"
+  },
+  "dependencies": {
+    "@preact/signals": "2.11.2",
+    "@supabase/supabase-js": "2.117.2",
+    "idb-keyval": "6.3.0",
+    "leaflet": "1.9.4",
+    "lucide-preact": "1.48.0",
+    "preact": "10.29.8"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "puppeteer-core": "25.12.0"
+  },
+  "allowScripts": {
+    "esbuild": false
+  }
+}

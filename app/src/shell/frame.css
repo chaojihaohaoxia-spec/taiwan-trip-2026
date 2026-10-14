@@ -1,0 +1,290 @@
+/* =====================================================================
+   shell/frame.css：常驻框架（Frame.jsx）的版面：主内容区、页面大标题、天数分段条的位置、滚动边缘、换页幽灵、
+   封面小圆点、标题旁的圆形箭头。顶栏见 topbar.css，底栏 tabbar.css，分段条 daystrip.css，同步条 syncbar.css。
+   只用 tokens.css 的变量。几何（离边、离顶、高度）全部来自 --gutter、--topbar-*、--tabbar-*、--safe-*：
+   大标题和顶栏是同一条横带（离顶 --topbar-inset、高 --topbar-bar-h），顶栏里的圆按钮和大标题左右对齐。
+   ===================================================================== */
+
+.shell {
+  /* 同步状态条出现时大标题下面让出的高度（SyncBar 量好、Frame 写） */
+  --shell-sync-space: 0px;
+  /* 顶栏右边按钮区的宽度（TopBar 量好写在 .tb 上；大标题右边让出这么多） */
+  --tb-trail-w: 0px;
+}
+
+/* ---------- 主内容区 ---------- */
+.shell-main {
+  display: block;
+  /* 换页时内容从旁边滑进来（transitions.js）：横向超出的部分裁掉，不撑宽页面（iOS 上整页会左右晃）。
+     clip 不生成滚动容器，页面里的 position: sticky 照常 */
+  overflow-x: clip;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-bottom: calc(var(--safe-bottom) + var(--space-6));
+}
+
+.shell:not([data-kind="bare"]) .shell-main {
+  padding-top: calc(var(--safe-top) + var(--topbar-inset));
+}
+
+/* 一直是胶囊（不显示大标题）：内容从顶栏下面开始 */
+.shell[data-collapse="always"]:not([data-kind="bare"]) .shell-main {
+  padding-top: calc(var(--safe-top) + var(--topbar-h) + var(--space-2));
+}
+
+.shell[data-tabbar] .shell-main {
+  padding-bottom: calc(var(--safe-bottom) + var(--tabbar-h) + var(--space-6));
+}
+
+/* ---------- 页面大标题（在内容里，随页面滚走） ---------- */
+.shell-head {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  /* 同步状态条出现时在副标题下面让出它的高度（以前让在大标题和副标题中间，副标题被顶开，视觉评审 P2-2） */
+  padding: 0 var(--gutter) calc(var(--space-3) + var(--shell-sync-space));
+  transition: padding-bottom var(--spring-smooth-duration) var(--spring-smooth);
+}
+
+.shell-head__band {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--topbar-bar-h);
+  /* 左边比卡片多缩进 4px（样稿 .lt）；右边让出搜索 / 页面按钮（在顶栏里，固定不动） */
+  padding-left: var(--space-1);
+  padding-right: calc(var(--tap-min) + var(--space-3) + var(--tb-trail-w));
+  transform-origin: 0 50%;
+}
+
+.shell-head[data-back] .shell-head__band {
+  padding-left: calc(var(--tap-min) + var(--space-4));
+}
+
+.shell[data-kind="root"] .shell-head__band,
+.shell[data-kind="settings"] .shell-head__band {
+  padding-right: calc(var(--tb-trail-w) + var(--space-3));
+}
+
+.shell-head__h1 {
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  font: inherit;
+}
+
+.shell-head__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  /* 往左伸出 6px（按下时的底色和字有边距），最宽也要把这 6px 算回来，不然名字会被挤掉一截 */
+  max-width: calc(100% + 6px);
+  min-height: 52px;
+  margin-left: -6px;
+  padding: 0 6px;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font: var(--weight-serif) var(--text-large-title) / 1 var(--font-serif);
+  letter-spacing: var(--tracking-display);
+  text-align: left;
+  transition: var(--press-transition), opacity var(--dur-fast) var(--ease-out);
+}
+
+button.shell-head__title {
+  cursor: pointer;
+}
+
+.shell-head__name {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 一行放不下 40px：退到 28px（PageHead 量出来写 data-fit） */
+.shell-head__band[data-fit="sm"] .shell-head__title {
+  font-size: var(--text-title-1);
+  letter-spacing: var(--tracking-title);
+}
+
+/* 搜索框 / 切换面板盖在上面：标题淡掉，免得透过玻璃叠字 */
+/* 被行程切换面板 / 搜索盖住：标题慢一点淡出（先透过半透明的面板还看得见，样稿 12-帧条 60ms），和面板交叉淡化 */
+.shell-head[data-covered] .shell-head__title {
+  opacity: 0;
+  transition: var(--press-transition), opacity var(--dur-base) var(--ease-in-out);
+}
+
+.shell-head__sub {
+  margin: 2px 0 0;
+  padding: 0 0 0 var(--space-1);
+  overflow: hidden;
+  color: var(--color-text-2);
+  /* 常规字重（样稿 14.5px / 400）：日期区间是辅助信息，不和大标题抢 */
+  font: var(--weight-regular) var(--text-subhead) / var(--leading-subhead) var(--font-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shell-head[data-back] .shell-head__sub {
+  margin-top: -2px;
+  padding-left: calc(var(--tap-min) + var(--space-4));
+}
+
+/* 骨架（行程数据还没到） */
+.shell-head__skel {
+  display: block;
+  border-radius: var(--radius-xs);
+  background: var(--color-skeleton);
+}
+
+.shell-head__skel--title {
+  position: absolute;
+  left: var(--space-1);
+  width: min(52%, 200px);
+  height: 36px;
+}
+
+.shell-head[data-back] .shell-head__skel--title {
+  left: calc(var(--tap-min) + var(--space-4));
+}
+
+.shell-head__skel--sub {
+  width: min(70%, 260px);
+  height: 14px;
+  margin-top: 4px;
+}
+
+/* ---------- 天数分段条的位置（外观见 daystrip.css） ---------- */
+.shell-strip {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  /* 和大标题之间一共 16px（大标题下边留了 12px）：样稿 .days-seg 的 margin-top */
+  padding: var(--space-1) var(--gutter) var(--space-2);
+}
+
+/* 页面区：换页动效的旧内容（幽灵）定位用 */
+.shell-page {
+  position: relative;
+}
+
+/* ---------- 滚动边缘：内容滑进顶栏、底栏下面时渐隐 + 轻模糊（样稿 .edge） ---------- */
+.shell-edge {
+  position: fixed;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+  backdrop-filter: blur(var(--blur-sm));
+}
+
+.shell-edge--top {
+  top: 0;
+  z-index: calc(var(--z-topbar) - 1);
+  height: calc(var(--safe-top) + var(--topbar-h) + 22px);
+  opacity: 0;
+  background: linear-gradient(var(--color-edge-tint), transparent);
+  -webkit-mask-image: linear-gradient(var(--color-text) 50%, transparent);
+  mask-image: linear-gradient(var(--color-text) 50%, transparent);
+}
+
+/* 页面在最上面（顶部边缘完全透明）：不做背景模糊 */
+.shell-edge[data-off] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.shell-edge--bottom {
+  bottom: 0;
+  z-index: calc(var(--z-tabbar) - 1);
+  height: calc(var(--safe-bottom) + var(--tabbar-h) + 32px);
+  background: linear-gradient(transparent, var(--color-edge-tint));
+  -webkit-mask-image: linear-gradient(transparent, var(--color-text) 62%);
+  mask-image: linear-gradient(transparent, var(--color-text) 62%);
+}
+
+/* ---------- 换页的旧内容（幽灵）：fixed 在原位，播完删掉 ---------- */
+.shell-ghost {
+  position: fixed;
+  z-index: var(--z-raised);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ---------- 封面小圆点 / 方块（行程主题色的渐变 + emoji） ---------- */
+.cover-dot {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: var(--radius-round);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-accent) 70%, var(--color-thumb)), var(--color-accent) 58%, var(--color-accent-2));
+  box-shadow: 0 0 0 1.5px var(--color-glass-highlight), var(--shadow-highlight);
+}
+
+.cover-dot--sm {
+  width: 26px;
+  height: 26px;
+}
+
+.cover-dot--tile {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  box-shadow: var(--shadow-highlight);
+}
+
+.cover-dot__emoji {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.cover-dot--sm .cover-dot__emoji {
+  font-size: 13px;
+}
+
+.cover-dot--tile .cover-dot__emoji {
+  font-size: 30px;
+}
+
+/* ---------- 标题旁的圆形箭头（样稿 .chev-chip） ---------- */
+.chev-chip {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+.chev-chip--sm {
+  width: 24px;
+  height: 24px;
+}
+
+.chev-chip--lg {
+  width: 32px;
+  height: 32px;
+  margin-top: 2px;
+  margin-left: -0.04em;
+}
+
+@media (hover: hover) {
+  button.shell-head__title:hover:not([data-pressed]) .chev-chip {
+    background: color-mix(in srgb, var(--color-accent-soft), var(--color-accent) 10%);
+  }
+}
+
+/* 减弱动态效果：副标题让位不做过渡 */
+@media (prefers-reduced-motion: reduce) {
+  .shell-head__sub {
+    transition: none;
+  }
+}

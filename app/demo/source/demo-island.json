@@ -1,0 +1,4015 @@
+{
+  "_说明": "演示行程「海岛 4 天」（未开始；把“现在”拨到 2027-01-11 就是进行中的第 2 天）。照真实海岛行程的密度和情况编的：每个整天 10–15 条、交通和费用估算、备选和雨天方案、路线卡和取舍说明、各种预订状态和免费取消截止、四个清单、贴士和越南语常用语、联系人、记账、日记和评级。内容全部虚构，只用于本机演示模式和测试；格式同 docs/数据结构.md 的 B 部分。订单号一律 DEMO-xxxx，电话一律 +00 000 …，邮箱一律 @example.com，地址都标“虚构地址”。",
+  "trip": {
+    "id": "demo-island",
+    "title": "椰影岛 · 冬日海岛",
+    "subtitle": "四天三晚，浮潜、环岛、看日落",
+    "description": "演示用的未开始行程（把“现在”拨到 2027-01-11 就是进行中）。两家酒店、浮潜、电动车环岛、南岬落日。",
+    "start_date": "2027-01-10",
+    "end_date": "2027-01-13",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "home_currency": "HKD",
+    "local_currency": "VND",
+    "cover": {
+      "emoji": "🏝️",
+      "accent": "#0E8A8A",
+      "accent_2": "#F2A65A",
+      "image_path": "demo-island/@jeremy/covers/demo-photo-08.jpg"
+    },
+    "status": "ready",
+    "sort": 10,
+    "owner_id": "@jeremy",
+    "extra": {
+      "party_size": 2
+    }
+  },
+  "members": [
+    {
+      "ref": "jeremy",
+      "email": "jeremy@example.com",
+      "role": "owner",
+      "display_name": "Jeremy",
+      "color": "#2F6FDE"
+    },
+    {
+      "ref": "cathy",
+      "email": "cathy@example.com",
+      "role": "editor",
+      "display_name": "Cathy",
+      "color": "#D9480F"
+    }
+  ],
+  "segments": [
+    {
+      "id": "segment:town",
+      "name": "椰影镇",
+      "name_en": "Coco Town",
+      "start_date": "2027-01-10",
+      "end_date": "2027-01-12",
+      "center_lat": 8.6833,
+      "center_lng": 106.6085,
+      "intro": "岛上唯一的小镇，码头、夜市、潜水中心都在步行范围内。",
+      "tags": [
+        "小镇",
+        "夜市",
+        "浮潜"
+      ],
+      "accent": "#0E8A8A",
+      "icon": "⛵"
+    },
+    {
+      "id": "segment:south",
+      "name": "南岬",
+      "name_en": "South Cape",
+      "start_date": "2027-01-12",
+      "end_date": "2027-01-13",
+      "center_lat": 8.6512,
+      "center_lng": 106.5634,
+      "intro": "岛的西南角，人少，海景屋正对落日。",
+      "tags": [
+        "落日",
+        "海景"
+      ],
+      "accent": "#D9480F",
+      "icon": "🌅"
+    }
+  ],
+  "places": [
+    {
+      "id": "place:airport",
+      "name": "椰影岛机场",
+      "name_local": "Sân bay Đảo Dừa",
+      "name_en": "Coco Island Airport",
+      "kind": "hub",
+      "lat": 8.7317,
+      "lng": 106.629,
+      "segment_id": "segment:town",
+      "address": "Đường Sân Bay, Xã Cỏ Ống, Huyện Đảo Dừa（虚构地址）",
+      "description": "小机场，只有一条跑道，出口就是停车场。",
+      "tags": [
+        "机场"
+      ]
+    },
+    {
+      "id": "place:pier",
+      "name": "椰影码头",
+      "name_local": "Bến tàu Dừa",
+      "kind": "hub",
+      "lat": 8.6866,
+      "lng": 106.6158,
+      "segment_id": "segment:town",
+      "aliases": [
+        "码头",
+        "渡轮码头"
+      ],
+      "address": "Bến tàu số 1, Thị trấn Dừa（虚构地址）",
+      "opening_hours": "06:00–18:00（最后一班船 17:30）",
+      "tags": [
+        "渡轮"
+      ]
+    },
+    {
+      "id": "place:hotel-a",
+      "name": "椰影湾酒店",
+      "name_local": "Khách sạn Vịnh Dừa",
+      "name_en": "Coco Bay Hotel",
+      "kind": "hotel",
+      "lat": 8.68,
+      "lng": 106.606,
+      "coord_precision": "approximate",
+      "segment_id": "segment:town",
+      "address": "27 Đường Hoa Sứ, Khu phố 3, Thị trấn Dừa（虚构地址）",
+      "phone": "+00 000 0000 0001",
+      "opening_hours": "前台 24 小时",
+      "links": [
+        {
+          "label": "酒店官网",
+          "url": "https://example.com/coco-bay",
+          "kind": "booking"
+        }
+      ],
+      "tags": [
+        "泳池",
+        "近夜市"
+      ]
+    },
+    {
+      "id": "place:hotel-b",
+      "name": "南岬海景屋",
+      "name_local": "Nhà Nghỉ Hướng Biển Mũi Nam",
+      "name_en": "South Cape Seaview",
+      "kind": "hotel",
+      "lat": 8.647,
+      "lng": 106.569,
+      "coord_precision": "approximate",
+      "segment_id": "segment:south",
+      "address": "8 Đường Bờ Biển, Ấp Mũi Nam（虚构地址）",
+      "phone": "+00 000 0000 0011",
+      "tags": [
+        "海景",
+        "落日"
+      ]
+    },
+    {
+      "id": "place:night-market",
+      "name": "椰影夜市",
+      "name_local": "Chợ đêm Dừa",
+      "kind": "market",
+      "lat": 8.6833,
+      "lng": 106.6085,
+      "segment_id": "segment:town",
+      "address": "Đường Bạch Đằng, Thị trấn Dừa（虚构地址）",
+      "opening_hours": "17:00–23:00",
+      "description": "烤海鲜、椰子冰、手作小摊，晚上八点最热闹。",
+      "tags": [
+        "夜市",
+        "海鲜"
+      ]
+    },
+    {
+      "id": "place:morning-market",
+      "name": "椰影早市",
+      "name_local": "Chợ Sáng Dừa",
+      "kind": "market",
+      "lat": 8.685,
+      "lng": 106.6095,
+      "segment_id": "segment:town",
+      "address": "Đường Nguyễn Trãi, Thị trấn Dừa（虚构地址）",
+      "opening_hours": "05:30–10:00",
+      "description": "渔船六点靠岸，鱼摊和水果摊最新鲜。",
+      "tags": [
+        "早市",
+        "水果"
+      ]
+    },
+    {
+      "id": "place:beach-north",
+      "name": "北滩",
+      "name_local": "Bãi Bắc",
+      "name_en": "North Beach",
+      "kind": "beach",
+      "lat": 8.71,
+      "lng": 106.625,
+      "segment_id": "segment:town",
+      "tags": [
+        "散步",
+        "细沙"
+      ]
+    },
+    {
+      "id": "place:beach-sunset",
+      "name": "落日滩",
+      "name_local": "Bãi Hoàng Hôn",
+      "name_en": "Sunset Beach",
+      "kind": "beach",
+      "lat": 8.656,
+      "lng": 106.56,
+      "segment_id": "segment:south",
+      "tags": [
+        "日落"
+      ]
+    },
+    {
+      "id": "place:coral-islet",
+      "name": "珊瑚小岛",
+      "name_local": "Hòn San Hô",
+      "kind": "beach",
+      "lat": 8.7051,
+      "lng": 106.6402,
+      "segment_id": "segment:town",
+      "wishlist": true,
+      "description": "码头坐船 25 分钟，水最清；只有上午两班船。",
+      "tags": [
+        "浮潜",
+        "坐船"
+      ]
+    },
+    {
+      "id": "place:seafood",
+      "name": "老码头海鲜",
+      "name_local": "Hải sản Bến Cũ",
+      "kind": "food",
+      "lat": 8.6815,
+      "lng": 106.611,
+      "segment_id": "segment:town",
+      "address": "3 Đường Bến Cũ, Thị trấn Dừa（虚构地址）",
+      "phone": "+00 000 0000 0021",
+      "opening_hours": "11:00–22:00，周三休息",
+      "links": [
+        {
+          "label": "菜单",
+          "url": "https://example.com/seafood-menu",
+          "kind": "menu"
+        }
+      ],
+      "tags": [
+        "海鲜",
+        "现捞"
+      ]
+    },
+    {
+      "id": "place:sunset-grill",
+      "name": "落日烧烤屋",
+      "name_local": "Quán Nướng Hoàng Hôn",
+      "kind": "food",
+      "lat": 8.6572,
+      "lng": 106.5621,
+      "coord_precision": "approximate",
+      "segment_id": "segment:south",
+      "address": "Bãi Hoàng Hôn, Ấp Mũi Nam（虚构地址）",
+      "opening_hours": "16:00–22:00",
+      "tags": [
+        "烧烤",
+        "海边"
+      ]
+    },
+    {
+      "id": "place:pho-shop",
+      "name": "清晨粉店",
+      "name_local": "Quán phở Sáng",
+      "kind": "food",
+      "segment_id": "segment:town",
+      "description": "本地人推荐的粉店，位置还没确认（地图上显示在镇中心）。",
+      "tags": [
+        "粉",
+        "本地"
+      ]
+    },
+    {
+      "id": "place:banh-mi",
+      "name": "码头法棍摊",
+      "name_local": "Bánh mì Bến Tàu",
+      "kind": "food",
+      "lat": 8.6858,
+      "lng": 106.6142,
+      "segment_id": "segment:town",
+      "address": "Cổng bến tàu số 1, Thị trấn Dừa（虚构地址）",
+      "opening_hours": "06:00–20:00",
+      "description": "烤肉法棍和鸡蛋法棍，排队的大多是本地人。",
+      "tags": [
+        "法棍",
+        "便宜"
+      ]
+    },
+    {
+      "id": "place:cafe",
+      "name": "椰子咖啡",
+      "name_local": "Cà phê Dừa",
+      "kind": "cafe",
+      "lat": 8.679,
+      "lng": 106.604,
+      "segment_id": "segment:town",
+      "address": "45 Đường Hoa Sứ, Thị trấn Dừa（虚构地址）",
+      "opening_hours": "06:30–18:00",
+      "tags": [
+        "早餐",
+        "椰子咖啡"
+      ]
+    },
+    {
+      "id": "place:coconut-ice",
+      "name": "椰子冰三姐",
+      "name_local": "Kem Dừa Cô Ba",
+      "kind": "cafe",
+      "lat": 8.6829,
+      "lng": 106.6077,
+      "segment_id": "segment:town",
+      "opening_hours": "10:00–22:00",
+      "tags": [
+        "甜品"
+      ]
+    },
+    {
+      "id": "place:south-cafe",
+      "name": "悬崖咖啡",
+      "name_local": "Cà phê Vách Đá",
+      "name_en": "Cliffside Café",
+      "kind": "cafe",
+      "lat": 8.6491,
+      "lng": 106.5662,
+      "segment_id": "segment:south",
+      "address": "Dốc Vách Đá, Ấp Mũi Nam（虚构地址）",
+      "opening_hours": "07:00–19:00",
+      "description": "露台正对海，能寄放行李。",
+      "tags": [
+        "海景",
+        "午餐"
+      ]
+    },
+    {
+      "id": "place:bar",
+      "name": "海风酒吧",
+      "name_local": "Quán Gió Biển",
+      "kind": "bar",
+      "lat": 8.682,
+      "lng": 106.604,
+      "segment_id": "segment:town",
+      "opening_hours": "18:00–01:00"
+    },
+    {
+      "id": "place:rooftop-bar",
+      "name": "屋顶酒吧",
+      "name_local": "Sky Bar Đảo Dừa",
+      "kind": "bar",
+      "lat": 8.6845,
+      "lng": 106.6055,
+      "segment_id": "segment:town",
+      "opening_hours": "17:00–24:00",
+      "description": "镇上最高的楼，看得到整个港湾的灯。",
+      "tags": [
+        "夜景"
+      ]
+    },
+    {
+      "id": "place:viewpoint",
+      "name": "望海岭",
+      "name_local": "Đồi Ngắm Biển",
+      "kind": "sight",
+      "lat": 8.695,
+      "lng": 106.59,
+      "segment_id": "segment:town",
+      "description": "小山顶，步行上去 20 分钟，能看到整个椰影湾。",
+      "tags": [
+        "观景",
+        "日落"
+      ]
+    },
+    {
+      "id": "place:old-street",
+      "name": "椰影老街",
+      "name_local": "Phố Cổ Dừa",
+      "kind": "sight",
+      "lat": 8.6826,
+      "lng": 106.6068,
+      "segment_id": "segment:town",
+      "description": "两层的老骑楼，一楼是杂货铺和咖啡馆。",
+      "tags": [
+        "散步",
+        "拍照"
+      ]
+    },
+    {
+      "id": "place:temple",
+      "name": "海神庙",
+      "name_local": "Miếu Bà Biển",
+      "kind": "sight",
+      "lat": 8.6841,
+      "lng": 106.6101,
+      "segment_id": "segment:town",
+      "opening_hours": "06:00–21:00",
+      "description": "渔民出海前来拜的小庙，进去要脱鞋。",
+      "tags": [
+        "寺庙"
+      ]
+    },
+    {
+      "id": "place:museum",
+      "name": "椰影岛历史馆",
+      "name_local": "Bảo tàng Đảo Dừa",
+      "kind": "sight",
+      "lat": 8.6809,
+      "lng": 106.6052,
+      "segment_id": "segment:town",
+      "address": "1 Đường Lê Lợi, Thị trấn Dừa（虚构地址）",
+      "opening_hours": "08:00–11:30、13:30–17:00，周一闭馆",
+      "description": "免费，但要提前在网上预约时段。",
+      "tags": [
+        "室内",
+        "雨天"
+      ]
+    },
+    {
+      "id": "place:coconut-grove",
+      "name": "西岸椰林",
+      "name_local": "Rừng Dừa Bờ Tây",
+      "kind": "sight",
+      "lat": 8.6712,
+      "lng": 106.5701,
+      "segment_id": "segment:town",
+      "description": "环岛西线的补给点，有椰子摊和吊床。",
+      "tags": [
+        "补给",
+        "椰子"
+      ]
+    },
+    {
+      "id": "place:fishing-village",
+      "name": "南岬渔村",
+      "name_local": "Làng chài Mũi Nam",
+      "kind": "sight",
+      "lat": 8.6533,
+      "lng": 106.5598,
+      "segment_id": "segment:south",
+      "description": "彩色渔船停在浅滩，傍晚收网。",
+      "tags": [
+        "拍照"
+      ]
+    },
+    {
+      "id": "place:lighthouse",
+      "name": "白灯塔",
+      "name_local": "Hải đăng Trắng",
+      "kind": "sight",
+      "lat": 8.7235,
+      "lng": 106.5812,
+      "coord_precision": "approximate",
+      "segment_id": "segment:town",
+      "wishlist": true,
+      "description": "单程徒步约 1 小时，路有点陡。",
+      "tags": [
+        "徒步"
+      ]
+    },
+    {
+      "id": "place:snorkel-center",
+      "name": "椰影潜水中心",
+      "name_local": "Trung tâm Lặn Biển Dừa",
+      "kind": "activity",
+      "lat": 8.688,
+      "lng": 106.617,
+      "segment_id": "segment:town",
+      "address": "Bến tàu số 2, Thị trấn Dừa（虚构地址）",
+      "tags": [
+        "浮潜"
+      ]
+    },
+    {
+      "id": "place:pepper-farm",
+      "name": "胡椒园",
+      "name_local": "Vườn Tiêu Gia Đình",
+      "kind": "activity",
+      "lat": 8.693,
+      "lng": 106.5755,
+      "segment_id": "segment:town",
+      "opening_hours": "08:00–17:00",
+      "description": "可以免费参观、试吃胡椒糖，卖散装胡椒。",
+      "tags": [
+        "手信",
+        "免费"
+      ]
+    },
+    {
+      "id": "place:souvenir",
+      "name": "手作市集",
+      "name_local": "Chợ Thủ Công",
+      "kind": "shop",
+      "lat": 8.6838,
+      "lng": 106.6079,
+      "segment_id": "segment:town",
+      "wishlist": true,
+      "opening_hours": "09:00–13:00（只有周三、周日）",
+      "tags": [
+        "手信"
+      ]
+    },
+    {
+      "id": "place:fish-sauce",
+      "name": "老林鱼露作坊",
+      "name_local": "Nhà Thùng Nước Mắm Ông Lâm",
+      "kind": "shop",
+      "lat": 8.6748,
+      "lng": 106.5822,
+      "segment_id": "segment:town",
+      "address": "Tổ 7, Ấp Rạch Vẹm, Xã Gành Dầu, Đường ven biển Tây Bắc nối dài, gần cổng Khu du lịch sinh thái Rừng Dừa Xanh, Huyện Đảo Dừa, Tỉnh Biển Nam（虚构地址）",
+      "phone": "+00 000 0000 0031",
+      "opening_hours": "07:30–17:00",
+      "description": "看大木桶发酵，可以买小瓶装（上飞机要托运）。",
+      "tags": [
+        "手信",
+        "参观"
+      ]
+    },
+    {
+      "id": "place:convenience",
+      "name": "24 小时便利店",
+      "name_local": "Cửa hàng Tiện Lợi 24h",
+      "kind": "shop",
+      "lat": 8.682,
+      "lng": 106.609,
+      "segment_id": "segment:town",
+      "tags": [
+        "补给"
+      ]
+    },
+    {
+      "id": "place:spa",
+      "name": "椰叶按摩",
+      "name_local": "Spa Lá Dừa",
+      "kind": "other",
+      "lat": 8.678,
+      "lng": 106.607,
+      "segment_id": "segment:town",
+      "address": "12 Đường Hoa Sứ, Thị trấn Dừa（虚构地址）",
+      "phone": "+00 000 0000 0041",
+      "opening_hours": "10:00–23:00",
+      "tags": [
+        "按摩"
+      ]
+    },
+    {
+      "id": "place:resort-lobby",
+      "name": "椰林度假村大堂",
+      "name_local": "Sảnh Khu nghỉ dưỡng Rừng Dừa",
+      "name_en": "Coco Grove Resort Lobby",
+      "kind": "hotel",
+      "lat": 8.6902,
+      "lng": 106.5987,
+      "segment_id": "segment:town",
+      "address": "Khu nghỉ dưỡng Rừng Dừa, Bãi Bắc, Thị trấn Dừa（虚构地址）",
+      "phone": "+00 000 0000 0051",
+      "opening_hours": "24 小时",
+      "tags": [
+        "下车点",
+        "电瓶车"
+      ]
+    },
+    {
+      "id": "place:garden-kitchen",
+      "name": "园中厨房",
+      "name_local": "Bếp Vườn Dừa",
+      "kind": "food",
+      "lat": 8.6921,
+      "lng": 106.6003,
+      "segment_id": "segment:town",
+      "address": "Trong khuôn viên Khu nghỉ dưỡng Rừng Dừa, Bãi Bắc（虚构地址）",
+      "opening_hours": "11:00–22:00",
+      "description": "在度假村园区深处，车开不进去：在大堂下车，坐园区的免费电瓶车约 5 分钟。",
+      "tags": [
+        "园区里",
+        "要换电瓶车"
+      ],
+      "extra": {
+        "ride_via": "place:resort-lobby",
+        "ride_note": "在度假村大堂下车，园区里坐免费电瓶车过去"
+      }
+    },
+    {
+      "id": "place:cable-station",
+      "name": "日出缆车站",
+      "name_local": "Ga cáp treo Bình Minh",
+      "name_en": "Sunrise Cable Car Station",
+      "kind": "hub",
+      "lat": 8.6455,
+      "lng": 106.5902,
+      "segment_id": "segment:south",
+      "address": "Ga cáp treo Bình Minh, Ấp Mũi Nam（虚构地址）",
+      "opening_hours": "08:00–17:30（最后一班回程 18:00）",
+      "tags": [
+        "缆车",
+        "下车点"
+      ]
+    },
+    {
+      "id": "place:cloud-isle",
+      "name": "云屿",
+      "name_local": "Hòn Mây",
+      "kind": "beach",
+      "lat": 8.6301,
+      "lng": 106.6044,
+      "coord_precision": "approximate",
+      "segment_id": "segment:south",
+      "description": "只能坐缆车过去的小岛，岛上有海滩和水上乐园。",
+      "tags": [
+        "缆车",
+        "海滩"
+      ],
+      "extra": {
+        "ride_via": "place:cable-station",
+        "ride_note": "在缆车站售票口下车",
+        "no_road": true,
+        "access_note": "开车到不了：在日出缆车站坐缆车过海，单程约 15 分钟"
+      }
+    },
+    {
+      "id": "place:bridge-deck",
+      "name": "相思桥南岸看台",
+      "name_local": "Đài ngắm Cầu Tương Tư",
+      "name_en": "Love Bridge Viewing Deck",
+      "kind": "sight",
+      "lat": 8.6571,
+      "lng": 106.5574,
+      "segment_id": "segment:south",
+      "address": "Đài ngắm cầu, Bãi Hoàng Hôn, Ấp Mũi Nam（虚构地址）",
+      "description": "海边的木头看台，车可以开到看台门口，从这里沿栈道走上相思桥。",
+      "tags": [
+        "看台",
+        "下车点"
+      ]
+    },
+    {
+      "id": "place:love-bridge",
+      "name": "相思桥",
+      "name_local": "Cầu Tương Tư",
+      "name_en": "Love Bridge",
+      "kind": "sight",
+      "lat": 8.6586,
+      "lng": 106.5553,
+      "segment_id": "segment:south",
+      "address": "Ngoài khơi Bãi Hoàng Hôn, Ấp Mũi Nam（虚构地址）",
+      "opening_hours": "全天开放，日落前后人最多",
+      "description": "伸进海里的两段弯桥，中间留一道缝，日落时两头的人隔着缝拍照。桥在海上，坐标是桥中间，车只能停在南岸看台。",
+      "tags": [
+        "日落",
+        "海上"
+      ],
+      "extra": {
+        "ride_via": "place:bridge-deck",
+        "ride_note": "在南岸看台下车，沿栈道走上桥约 5 分钟"
+      }
+    },
+    {
+      "id": "place:pharmacy",
+      "name": "平安药房",
+      "name_local": "Nhà thuốc Bình An",
+      "kind": "other",
+      "lat": 8.6815,
+      "lng": 106.6072,
+      "segment_id": "segment:town",
+      "opening_hours": "07:00–22:00",
+      "tags": [
+        "药房"
+      ]
+    },
+    {
+      "id": "place:money-exchange",
+      "name": "金发换汇店",
+      "name_local": "Tiệm Vàng Đổi Tiền Kim Phát",
+      "kind": "other",
+      "lat": 8.6837,
+      "lng": 106.6088,
+      "segment_id": "segment:town",
+      "opening_hours": "08:00–20:00",
+      "description": "港币现钞汇率比机场好，要带护照。",
+      "tags": [
+        "换钱"
+      ]
+    },
+    {
+      "id": "place:hospital",
+      "name": "椰影医院",
+      "name_local": "Bệnh viện Quân Dân Y Đảo Dừa",
+      "kind": "other",
+      "lat": 8.679,
+      "lng": 106.612,
+      "segment_id": "segment:town",
+      "address": "2 Đường Nguyễn Huệ, Thị trấn Dừa（虚构地址）",
+      "phone": "+00 000 0000 0051",
+      "opening_hours": "急诊 24 小时",
+      "tags": [
+        "急诊"
+      ]
+    }
+  ],
+  "bookings": [
+    {
+      "id": "booking:flight-out",
+      "kind": "flight",
+      "title": "去程 DM801",
+      "provider": "Trip.com",
+      "confirmation_code": "DEMO-FL01",
+      "status": "booked",
+      "start_at": "2027-01-10T08:05:00+08:00",
+      "start_tz": "Asia/Hong_Kong",
+      "end_at": "2027-01-10T10:20:00+07:00",
+      "end_tz": "Asia/Ho_Chi_Minh",
+      "price_amount": 1460,
+      "price_currency": "CNY",
+      "payment_status": "paid",
+      "paid_by_user_id": "@jeremy",
+      "payment_method": "微信",
+      "attachments": [
+        {
+          "path": "demo-island/@jeremy/bookings/demo-confirmation.pdf",
+          "name": "去程确认单.pdf",
+          "mime": "application/pdf",
+          "size": 18432
+        }
+      ],
+      "links": [
+        {
+          "label": "管理订单",
+          "url": "https://example.com/manage/DEMO-FL01",
+          "kind": "booking"
+        }
+      ],
+      "details": {
+        "flight_no": "DM801",
+        "airline": "示例航空",
+        "from_iata": "HKG",
+        "to_iata": "VCS",
+        "from_terminal": "T1",
+        "cabin": "经济舱",
+        "seats": [
+          "21A",
+          "21B"
+        ],
+        "meal": false,
+        "passengers": 2,
+        "baggage": {
+          "carry_on_kg": 7,
+          "checked_kg": 0,
+          "addons": [
+            {
+              "label": "托运 20kg × 1",
+              "price": {
+                "amount": 280,
+                "currency": "CNY"
+              },
+              "paid_by_user_id": "@jeremy",
+              "paid_at": "2026-12-20"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "booking:flight-back",
+      "kind": "flight",
+      "title": "回程 DM802",
+      "provider": "Trip.com",
+      "confirmation_code": "DEMO-FL02",
+      "status": "booked",
+      "start_at": "2027-01-13T16:40:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "end_at": "2027-01-13T20:35:00+08:00",
+      "end_tz": "Asia/Hong_Kong",
+      "price_amount": 1380,
+      "price_currency": "CNY",
+      "payment_status": "paid",
+      "paid_by_user_id": "@jeremy",
+      "payment_method": "微信",
+      "details": {
+        "flight_no": "DM802",
+        "airline": "示例航空",
+        "from_iata": "VCS",
+        "to_iata": "HKG",
+        "to_terminal": "T1",
+        "cabin": "经济舱",
+        "passengers": 2,
+        "baggage": {
+          "carry_on_kg": 7,
+          "checked_kg": 20,
+          "checked_pieces": 1
+        }
+      }
+    },
+    {
+      "id": "booking:hotel-a",
+      "kind": "hotel",
+      "title": "椰影湾酒店 · 园景房",
+      "provider": "Agoda",
+      "confirmation_code": "DEMO-HT01",
+      "status": "booked",
+      "place_id": "place:hotel-a",
+      "start_at": "2027-01-10T14:00:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "end_at": "2027-01-12T12:00:00+07:00",
+      "end_tz": "Asia/Ho_Chi_Minh",
+      "price_amount": 2400000,
+      "price_currency": "VND",
+      "payment_status": "pay_at_property",
+      "free_cancel_until": "2027-01-05T23:59:00+07:00",
+      "links": [
+        {
+          "label": "管理订单",
+          "url": "https://example.com/manage/DEMO-HT01",
+          "kind": "booking"
+        }
+      ],
+      "details": {
+        "nights": 2,
+        "room_type": "园景房",
+        "rooms": 1,
+        "guests": 2,
+        "bed": "大床",
+        "breakfast": true,
+        "check_in_time": "14:00",
+        "check_out_time": "12:00",
+        "features": "泳池、步行到夜市 5 分钟",
+        "deposit": {
+          "amount": 500000,
+          "currency": "VND"
+        }
+      },
+      "notes": "到店付款，可以刷卡。押金 50 万越南盾退房时退。"
+    },
+    {
+      "id": "booking:hotel-b",
+      "kind": "hotel",
+      "title": "南岬海景屋 · 海景房",
+      "provider": "官网",
+      "confirmation_code": "DEMO-HT02",
+      "status": "pending",
+      "place_id": "place:hotel-b",
+      "start_at": "2027-01-12T14:00:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "end_at": "2027-01-13T11:00:00+07:00",
+      "end_tz": "Asia/Ho_Chi_Minh",
+      "price_amount": 680,
+      "price_currency": "HKD",
+      "payment_status": "partial",
+      "paid_amount": 200,
+      "paid_by_user_id": "@cathy",
+      "payment_method": "信用卡",
+      "free_cancel_until": "2027-01-08T23:59:00+07:00",
+      "details": {
+        "nights": 1,
+        "room_type": "海景房",
+        "guests": 2,
+        "view": "正对落日",
+        "breakfast": false,
+        "check_in_time": "14:00",
+        "check_out_time": "11:00"
+      },
+      "notes": "已付订金，等商家邮件确认。1 月 8 日前没确认就退订、在椰影湾续住。"
+    },
+    {
+      "id": "booking:snorkel",
+      "kind": "activity",
+      "title": "半日浮潜团",
+      "provider": "Klook",
+      "confirmation_code": "DEMO-AC01",
+      "status": "booked",
+      "place_id": "place:snorkel-center",
+      "start_at": "2027-01-11T08:30:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "end_at": "2027-01-11T12:30:00+07:00",
+      "end_tz": "Asia/Ho_Chi_Minh",
+      "price_amount": 1800000,
+      "price_currency": "VND",
+      "payment_status": "paid",
+      "paid_by_user_id": "@cathy",
+      "payment_method": "信用卡",
+      "free_cancel_until": "2027-01-10T08:30:00+07:00",
+      "links": [
+        {
+          "label": "电子凭证",
+          "url": "https://example.com/voucher/DEMO-AC01",
+          "kind": "booking"
+        }
+      ],
+      "details": {
+        "meeting_point": "潜水中心门口",
+        "meeting_place_id": "place:snorkel-center",
+        "meeting_time": "08:15",
+        "pax": 2,
+        "includes": [
+          "接送",
+          "浮潜装备",
+          "水果"
+        ],
+        "voucher": "qr"
+      }
+    },
+    {
+      "id": "booking:transfer-airport",
+      "kind": "transfer",
+      "title": "机场接机",
+      "provider": "酒店",
+      "confirmation_code": "DEMO-TR01",
+      "status": "booked",
+      "start_at": "2027-01-10T10:45:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "price_amount": 250000,
+      "price_currency": "VND",
+      "payment_status": "unpaid",
+      "details": {
+        "from_place_id": "place:airport",
+        "to_place_id": "place:hotel-a",
+        "vehicle": "5 座车",
+        "pax": 2,
+        "driver_contact_id": "contact:driver"
+      },
+      "notes": "上车付现金。"
+    },
+    {
+      "id": "booking:spa",
+      "kind": "activity",
+      "title": "椰叶按摩 · 90 分钟",
+      "provider": "电话预约",
+      "status": "pending",
+      "place_id": "place:spa",
+      "start_at": "2027-01-10T21:00:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "end_at": "2027-01-10T22:30:00+07:00",
+      "end_tz": "Asia/Ho_Chi_Minh",
+      "price_amount": 700000,
+      "price_currency": "VND",
+      "payment_status": "unpaid",
+      "free_cancel_until": "2027-01-10T18:00:00+07:00",
+      "details": {
+        "pax": 2,
+        "includes": [
+          "精油",
+          "热石"
+        ]
+      },
+      "notes": "店家说当天下午会再发消息确认。"
+    },
+    {
+      "id": "booking:scooter",
+      "kind": "car_rental",
+      "title": "电动车租半天",
+      "provider": "阿强租车",
+      "confirmation_code": "DEMO-SC01",
+      "status": "booked",
+      "start_at": "2027-01-11T14:45:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "end_at": "2027-01-11T19:00:00+07:00",
+      "end_tz": "Asia/Ho_Chi_Minh",
+      "price_amount": 150000,
+      "price_currency": "VND",
+      "payment_status": "unpaid",
+      "free_cancel_until": "2027-01-11T12:00:00+07:00",
+      "details": {
+        "pickup_place_id": "place:hotel-a",
+        "dropoff_place_id": "place:hotel-a",
+        "vehicle": "电动车 × 1（两个头盔）"
+      },
+      "notes": "送车到酒店门口，还车时付现金；要押护照复印件。"
+    },
+    {
+      "id": "booking:museum",
+      "kind": "ticket",
+      "title": "历史馆预约 · 08:45 场",
+      "provider": "官网",
+      "confirmation_code": "DEMO-TK01",
+      "status": "booked",
+      "place_id": "place:museum",
+      "start_at": "2027-01-12T08:45:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "payment_status": "free",
+      "details": {
+        "pax": 2,
+        "voucher": "name"
+      },
+      "notes": "免费，报名字入场。"
+    },
+    {
+      "id": "booking:transfer-south",
+      "kind": "transfer",
+      "title": "南岬接驳车",
+      "provider": "海景屋",
+      "confirmation_code": "DEMO-TR02",
+      "status": "booked",
+      "start_at": "2027-01-12T11:30:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "price_amount": 300000,
+      "price_currency": "VND",
+      "payment_status": "unpaid",
+      "free_cancel_until": "2027-01-11T20:00:00+07:00",
+      "details": {
+        "from_place_id": "place:hotel-a",
+        "to_place_id": "place:hotel-b",
+        "vehicle": "7 座车",
+        "pax": 2,
+        "driver_contact_id": "contact:transfer-south"
+      },
+      "notes": "在椰影湾酒店大堂等，上车付现金。"
+    },
+    {
+      "id": "booking:dinner",
+      "kind": "restaurant",
+      "title": "海边晚餐订位",
+      "status": "idea",
+      "place_id": "place:sunset-grill",
+      "start_at": "2027-01-12T18:30:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "details": {
+        "pax": 2
+      },
+      "notes": "还没订，想要靠海的位子。"
+    },
+    {
+      "id": "booking:transfer-back",
+      "kind": "transfer",
+      "title": "回程送机",
+      "provider": "海景屋",
+      "status": "pending",
+      "start_at": "2027-01-13T13:30:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "price_amount": 280000,
+      "price_currency": "VND",
+      "payment_status": "unpaid",
+      "free_cancel_until": "2027-01-12T20:00:00+07:00",
+      "details": {
+        "from_place_id": "place:hotel-b",
+        "to_place_id": "place:airport",
+        "vehicle": "5 座车",
+        "pax": 2
+      },
+      "notes": "前台说入住时再确认车。"
+    },
+    {
+      "id": "booking:sunset-cruise",
+      "kind": "activity",
+      "title": "夕阳游船（已取消）",
+      "provider": "Klook",
+      "confirmation_code": "DEMO-AC02",
+      "status": "cancelled",
+      "start_at": "2027-01-11T16:30:00+07:00",
+      "start_tz": "Asia/Ho_Chi_Minh",
+      "end_at": "2027-01-11T18:30:00+07:00",
+      "end_tz": "Asia/Ho_Chi_Minh",
+      "price_amount": 360,
+      "price_currency": "HKD",
+      "payment_status": "refunded",
+      "paid_by_user_id": "@cathy",
+      "payment_method": "信用卡",
+      "details": {
+        "meeting_point": "椰影码头 2 号闸口",
+        "meeting_place_id": "place:pier",
+        "pax": 2,
+        "voucher": "qr"
+      },
+      "notes": "改成电动车环岛看日落，已全额退款。"
+    },
+    {
+      "id": "booking:insurance",
+      "kind": "insurance",
+      "title": "旅游保险",
+      "provider": "示例保险",
+      "confirmation_code": "DEMO-IN01",
+      "status": "booked",
+      "start_at": "2027-01-10T00:00:00+08:00",
+      "start_tz": "Asia/Hong_Kong",
+      "end_at": "2027-01-13T23:59:00+08:00",
+      "end_tz": "Asia/Hong_Kong",
+      "price_amount": 98,
+      "price_currency": "HKD",
+      "payment_status": "paid",
+      "paid_by_user_id": "@jeremy",
+      "details": {
+        "coverage": "医疗 + 行程延误",
+        "insured": 2
+      }
+    }
+  ],
+  "days": [
+    {
+      "id": "day:d1",
+      "date": "2027-01-10",
+      "title": "落地 · 椰影镇",
+      "segment_id": "segment:town",
+      "summary": "上午落地，下午北滩散步，傍晚望海岭看日落，晚上老街走到夜市。",
+      "pace": "relaxed",
+      "planning_status": "planned",
+      "stay_booking_id": "booking:hotel-a",
+      "icon": "🛬",
+      "route_plan": {
+        "title": "落地第一天：镇上步行圈",
+        "subtitle": "除了去北滩打车，其余都在步行 15 分钟内",
+        "mode": "walk",
+        "metrics": [
+          {
+            "label": "步行",
+            "value": "约 4 km"
+          },
+          {
+            "label": "打车",
+            "value": "2 段"
+          },
+          {
+            "label": "停留点",
+            "value": "6 个"
+          }
+        ],
+        "maps_url": "https://example.com/route/day1-town",
+        "button_label": "打开路线",
+        "stops": [
+          {
+            "name": "椰影湾酒店",
+            "note": "寄存行李",
+            "place_id": "place:hotel-a"
+          },
+          {
+            "name": "清晨粉店",
+            "note": "午饭",
+            "place_id": "place:pho-shop"
+          },
+          {
+            "name": "北滩",
+            "note": "打车去",
+            "place_id": "place:beach-north"
+          },
+          {
+            "name": "望海岭",
+            "note": "日落",
+            "place_id": "place:viewpoint"
+          },
+          {
+            "name": "椰影老街",
+            "place_id": "place:old-street"
+          },
+          {
+            "name": "椰影夜市",
+            "note": "晚饭",
+            "place_id": "place:night-market"
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "question": "机场怎么去酒店？",
+          "answer": "酒店接机，约 20 分钟，不用在出口排队。",
+          "alternatives": [
+            "打车：要等车，价格差不多",
+            "Grab：机场信号差，叫车慢"
+          ]
+        },
+        {
+          "question": "第一天要不要排浮潜？",
+          "answer": "不排。早班机起得早，第一天只在镇上走走，浮潜放第二天上午。",
+          "alternatives": [
+            "下午就去浮潜：太赶，而且下午浪大"
+          ]
+        }
+      ],
+      "extra": {
+        "sun": {
+          "sunrise": "06:12",
+          "golden_hour": "17:08",
+          "sunset": "17:41",
+          "blue_hour": "17:58"
+        },
+        "weather_note": "旱季，晴为主，最高 31°C；傍晚风大。"
+      }
+    },
+    {
+      "id": "day:d2",
+      "date": "2027-01-11",
+      "title": "浮潜 + 西线环岛",
+      "segment_id": "segment:town",
+      "summary": "早市 → 半日浮潜 → 海鲜午餐 → 下午骑电动车走西线，西岸椰林看日落。",
+      "pace": "packed",
+      "planning_status": "planned",
+      "stay_booking_id": "booking:hotel-a",
+      "icon": "🤿",
+      "route_plan": {
+        "title": "西线电动车环游",
+        "subtitle": "从酒店出发，约 3 小时，日落后沿海边公路骑回",
+        "mode": "scooter",
+        "metrics": [
+          {
+            "label": "总距离",
+            "value": "31 km"
+          },
+          {
+            "label": "骑行",
+            "value": "约 1.5 小时"
+          },
+          {
+            "label": "停留点",
+            "value": "4 个"
+          }
+        ],
+        "maps_url": "https://example.com/route/west-loop",
+        "button_label": "打开路线",
+        "stops": [
+          {
+            "name": "椰影湾酒店",
+            "note": "取车",
+            "place_id": "place:hotel-a"
+          },
+          {
+            "name": "胡椒园",
+            "note": "短停",
+            "place_id": "place:pepper-farm"
+          },
+          {
+            "name": "老林鱼露作坊",
+            "note": "买手信",
+            "place_id": "place:fish-sauce"
+          },
+          {
+            "name": "西岸椰林",
+            "note": "看日落",
+            "place_id": "place:coconut-grove"
+          },
+          {
+            "name": "望海岭山脚",
+            "note": "拍照 / 短停",
+            "lat": 8.6921,
+            "lng": 106.5934
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "question": "下午骑车还是包车？",
+          "answer": "骑电动车，自由、便宜。",
+          "alternatives": [
+            "包车：不晒，但贵 3 倍",
+            "夕阳游船：已经退了，船上看不到椰林"
+          ]
+        },
+        {
+          "question": "浮潜选上午还是下午？",
+          "answer": "上午：浪小、水清，下午常起风。"
+        },
+        {
+          "question": "晚饭在哪吃？",
+          "answer": "码头法棍 + 夜市烤串，简单吃，留肚子给第三天的烧烤。",
+          "alternatives": [
+            "老码头海鲜再吃一次：中午已经吃过"
+          ]
+        }
+      ],
+      "extra": {
+        "sun": {
+          "sunrise": "06:12",
+          "golden_hour": "17:09",
+          "sunset": "17:42",
+          "blue_hour": "17:59"
+        },
+        "weather_note": "晴，午后东北风 4 级；浮潜最好在 11 点前。"
+      }
+    },
+    {
+      "id": "day:d3",
+      "date": "2027-01-12",
+      "title": "换酒店 · 南岬落日",
+      "segment_id": "segment:south",
+      "summary": "上午历史馆，中午换到南岬，下午渔村和泳池，傍晚落日滩、海边烧烤。",
+      "pace": "medium",
+      "planning_status": "partial",
+      "stay_booking_id": "booking:hotel-b",
+      "icon": "🌅",
+      "route_plan": {
+        "title": "换酒店：北岸 → 南岬",
+        "subtitle": "接驳车 35 分钟，行李跟车走",
+        "mode": "car",
+        "metrics": [
+          {
+            "label": "车程",
+            "value": "约 35 分钟"
+          },
+          {
+            "label": "距离",
+            "value": "14 km"
+          },
+          {
+            "label": "步行",
+            "value": "约 2 km"
+          }
+        ],
+        "maps_url": "https://example.com/route/day3-south",
+        "button_label": "打开路线",
+        "stops": [
+          {
+            "name": "椰影湾酒店",
+            "note": "退房",
+            "place_id": "place:hotel-a"
+          },
+          {
+            "name": "悬崖咖啡",
+            "note": "午饭、寄行李",
+            "place_id": "place:south-cafe"
+          },
+          {
+            "name": "南岬渔村",
+            "place_id": "place:fishing-village"
+          },
+          {
+            "name": "南岬海景屋",
+            "note": "入住",
+            "place_id": "place:hotel-b"
+          },
+          {
+            "name": "落日滩",
+            "note": "日落 17:42",
+            "place_id": "place:beach-sunset"
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "question": "去南岬坐什么？",
+          "answer": "海景屋的接驳车，行李多也方便。",
+          "alternatives": [
+            "Grab：南岬那边回程叫不到车",
+            "电动车：带不了两个行李箱"
+          ]
+        },
+        {
+          "question": "海景屋还没确认怎么办？",
+          "answer": "1 月 8 日前没收到确认就退订，第三晚续住椰影湾，第三天改成南岬一日游。"
+        }
+      ],
+      "extra": {
+        "sun": {
+          "sunrise": "06:13",
+          "golden_hour": "17:09",
+          "sunset": "17:42",
+          "blue_hour": "17:59"
+        },
+        "weather_note": "多云转晴，傍晚可能有一阵雨（30%）。"
+      }
+    },
+    {
+      "id": "day:d4",
+      "date": "2027-01-13",
+      "title": "返程",
+      "segment_id": "segment:south",
+      "summary": "上午最后游一次泳、退房，手作市集买手信，13:30 出发去机场。",
+      "pace": "relaxed",
+      "planning_status": "tbd",
+      "icon": "🛫",
+      "route_plan": {
+        "title": "最后半天：市集 → 机场",
+        "subtitle": "送机车 13:30 在海景屋门口",
+        "mode": "car",
+        "metrics": [
+          {
+            "label": "到机场",
+            "value": "约 40 分钟"
+          },
+          {
+            "label": "提前到",
+            "value": "2.5 小时"
+          }
+        ],
+        "stops": [
+          {
+            "name": "南岬海景屋",
+            "place_id": "place:hotel-b"
+          },
+          {
+            "name": "手作市集",
+            "place_id": "place:souvenir"
+          },
+          {
+            "name": "椰影岛机场",
+            "place_id": "place:airport"
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "question": "手信什么时候买？",
+          "answer": "周三上午手作市集开门，最后一天正好；鱼露第二天在作坊买好。"
+        }
+      ],
+      "extra": {
+        "sun": {
+          "sunrise": "06:13",
+          "golden_hour": "17:10",
+          "sunset": "17:43",
+          "blue_hour": "18:00"
+        },
+        "weather_note": "晴；回程航班 16:40，机场小，提前 2 小时到就够。"
+      }
+    }
+  ],
+  "items": [
+    {
+      "id": "item:d1-1020",
+      "day_id": "day:d1",
+      "start_time": "10:20",
+      "kind": "flight",
+      "title": "抵达椰影岛",
+      "place_id": "place:airport",
+      "booking_id": "booking:flight-out",
+      "status": "done",
+      "actual_time": "10:32",
+      "actual_note": "晚点 12 分钟，行李很快。"
+    },
+    {
+      "id": "item:d1-1045",
+      "day_id": "day:d1",
+      "start_time": "10:45",
+      "end_time": "11:10",
+      "kind": "transport",
+      "title": "接机去酒店",
+      "place_id": "place:hotel-a",
+      "booking_id": "booking:transfer-airport",
+      "status": "done",
+      "actual_time": "10:55",
+      "transport_in": {
+        "summary": "酒店接机约 20 分钟",
+        "options": [
+          {
+            "mode": "car",
+            "label": "推荐",
+            "duration_min": 20,
+            "distance_km": 9,
+            "cost": {
+              "amount": 250000,
+              "currency": "VND",
+              "per": "total"
+            },
+            "recommended": true,
+            "note": "司机在出口举牌"
+          },
+          {
+            "mode": "taxi",
+            "label": "备选",
+            "duration_min": 25,
+            "cost": {
+              "amount": 200000,
+              "currency": "VND",
+              "amount_max": 300000
+            },
+            "note": "出口排队"
+          },
+          {
+            "mode": "grab",
+            "duration_min": 25,
+            "cost": {
+              "amount": 180000,
+              "currency": "VND",
+              "amount_max": 220000
+            },
+            "note": "机场信号差，叫车可能要等"
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d1-1120",
+      "day_id": "day:d1",
+      "start_time": "11:20",
+      "kind": "hotel",
+      "title": "寄存行李",
+      "description": "14:00 才能入住，先把行李寄存在前台，顺便问电动车和按摩。",
+      "place_id": "place:hotel-a",
+      "booking_id": "booking:hotel-a",
+      "status": "done"
+    },
+    {
+      "id": "item:d1-1200",
+      "day_id": "day:d1",
+      "start_time": "12:00",
+      "end_time": "12:45",
+      "kind": "food",
+      "title": "清晨粉店吃粉",
+      "place_id": "place:pho-shop",
+      "status": "done",
+      "cost_estimate": {
+        "amount": 60000,
+        "currency": "VND",
+        "per": "person",
+        "note": "一碗粉 + 饮料"
+      },
+      "transport_in": {
+        "summary": "步行约 8 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 8,
+            "recommended": true,
+            "distance_km": 0.6
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d1-1300",
+      "day_id": "day:d1",
+      "start_time": "13:00",
+      "kind": "cafe",
+      "title": "椰子冰",
+      "place_id": "place:coconut-ice",
+      "status": "done",
+      "cost_estimate": {
+        "amount": 35000,
+        "currency": "VND",
+        "per": "person"
+      },
+      "transport_in": {
+        "summary": "步行约 5 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 5,
+            "recommended": true,
+            "distance_km": 0.4
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d1-1400",
+      "day_id": "day:d1",
+      "start_time": "14:00",
+      "kind": "hotel",
+      "title": "办理入住",
+      "description": "押金 50 万越南盾，可以刷卡。",
+      "place_id": "place:hotel-a",
+      "booking_id": "booking:hotel-a",
+      "status": "done",
+      "transport_in": {
+        "summary": "步行约 6 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 6,
+            "recommended": true,
+            "distance_km": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d1-1430",
+      "day_id": "day:d1",
+      "start_time": "14:30",
+      "end_time": "15:15",
+      "kind": "free",
+      "title": "泳池 + 午睡",
+      "place_id": "place:hotel-a",
+      "status": "done"
+    },
+    {
+      "id": "item:d1-1530",
+      "day_id": "day:d1",
+      "start_time": "15:30",
+      "end_time": "17:00",
+      "kind": "beach",
+      "title": "北滩散步",
+      "place_id": "place:beach-north",
+      "status": "skipped",
+      "actual_note": "太晒了，改在酒店泳池多待一会儿。",
+      "transport_in": {
+        "summary": "打车约 10 分钟",
+        "options": [
+          {
+            "mode": "grab",
+            "duration_min": 10,
+            "distance_km": 4.2,
+            "cost": {
+              "amount": 80000,
+              "currency": "VND"
+            },
+            "recommended": true
+          },
+          {
+            "mode": "scooter",
+            "label": "省钱版",
+            "duration_min": 12,
+            "note": "酒店可以租电动车"
+          }
+        ]
+      },
+      "cost_estimate": {
+        "amount": 0,
+        "currency": "VND",
+        "note": "海滩免费，躺椅 5 万一张"
+      }
+    },
+    {
+      "id": "item:d1-1530-backup",
+      "day_id": "day:d1",
+      "time_label": "下午",
+      "kind": "free",
+      "title": "太晒就在泳池多待一会儿",
+      "variant": "backup",
+      "parent_item_id": "item:d1-1530",
+      "place_id": "place:hotel-a"
+    },
+    {
+      "id": "item:d1-1730",
+      "day_id": "day:d1",
+      "start_time": "17:15",
+      "end_time": "18:10",
+      "time_label": "日落前",
+      "kind": "sunset",
+      "title": "望海岭看日落",
+      "place_id": "place:viewpoint",
+      "tags": [
+        "拍照"
+      ],
+      "status": "done",
+      "description": "日落 17:41，提前 25 分钟到；山顶没有路灯，下山带手电。",
+      "transport_in": {
+        "summary": "打车到山脚 + 步行 20 分钟",
+        "options": [
+          {
+            "mode": "grab",
+            "duration_min": 8,
+            "distance_km": 3.1,
+            "cost": {
+              "amount": 60000,
+              "currency": "VND"
+            },
+            "recommended": true,
+            "note": "到山脚停车场"
+          },
+          {
+            "mode": "walk",
+            "duration_min": 20,
+            "recommended": true,
+            "distance_km": 1.2,
+            "note": "上坡，穿运动鞋"
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d1-1830",
+      "day_id": "day:d1",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "kind": "walk_route",
+      "title": "老街步行：海神庙 → 老街 → 夜市",
+      "place_id": "place:old-street",
+      "status": "done",
+      "description": "从望海岭下来打车到海神庙，一路走到夜市，约 1.2 km。",
+      "stops": [
+        {
+          "name": "海神庙",
+          "subtitle": "进去要脱鞋",
+          "place_id": "place:temple"
+        },
+        {
+          "name": "椰影老街",
+          "subtitle": "骑楼一楼的杂货铺",
+          "place_id": "place:old-street"
+        },
+        {
+          "name": "金发换汇店",
+          "subtitle": "顺路换点现金",
+          "place_id": "place:money-exchange",
+          "note": "要带护照"
+        },
+        {
+          "name": "椰影夜市",
+          "subtitle": "入口在码头那头",
+          "place_id": "place:night-market"
+        }
+      ],
+      "transport_in": {
+        "summary": "打车约 8 分钟",
+        "options": [
+          {
+            "mode": "grab",
+            "duration_min": 8,
+            "distance_km": 3.0,
+            "cost": {
+              "amount": 55000,
+              "currency": "VND"
+            },
+            "recommended": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d1-1930",
+      "day_id": "day:d1",
+      "start_time": "19:30",
+      "kind": "night_market",
+      "title": "椰影夜市",
+      "place_id": "place:night-market",
+      "status": "done",
+      "cost_estimate": {
+        "amount": 400000,
+        "currency": "VND",
+        "amount_max": 600000,
+        "per": "total",
+        "note": "两人，烤海鲜为主"
+      },
+      "links": [
+        {
+          "label": "夜市攻略",
+          "url": "https://example.com/guide/night-market",
+          "kind": "guide"
+        }
+      ],
+      "transport_in": {
+        "summary": "步行约 3 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 3,
+            "recommended": true,
+            "distance_km": 0.2
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d1-1930-rain",
+      "day_id": "day:d1",
+      "time_label": "晚上",
+      "kind": "food",
+      "title": "下雨就在酒店餐厅吃",
+      "variant": "rain",
+      "parent_item_id": "item:d1-1930",
+      "place_id": "place:hotel-a",
+      "cost_estimate": {
+        "amount": 500000,
+        "currency": "VND",
+        "per": "total"
+      }
+    },
+    {
+      "id": "item:d1-2100",
+      "day_id": "day:d1",
+      "start_time": "21:00",
+      "end_time": "22:30",
+      "kind": "spa",
+      "title": "椰叶按摩 90 分钟",
+      "place_id": "place:spa",
+      "booking_id": "booking:spa",
+      "transport_in": {
+        "summary": "步行约 7 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 7,
+            "recommended": true,
+            "distance_km": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d1-rain-all",
+      "day_id": "day:d1",
+      "time_label": "全天下雨",
+      "kind": "sight",
+      "title": "下雨的话：历史馆 + 老街咖啡馆",
+      "variant": "rain",
+      "place_id": "place:museum",
+      "description": "历史馆周日开到 17:00，免费；对面就是老街。",
+      "cost_estimate": {
+        "amount": 80000,
+        "currency": "VND",
+        "per": "person",
+        "note": "咖啡"
+      }
+    },
+    {
+      "id": "item:d2-0630",
+      "day_id": "day:d2",
+      "start_time": "06:30",
+      "end_time": "07:00",
+      "kind": "shopping",
+      "title": "早市看渔船靠岸",
+      "place_id": "place:morning-market",
+      "cost_estimate": {
+        "amount": 50000,
+        "currency": "VND",
+        "amount_max": 100000,
+        "per": "total",
+        "note": "水果"
+      },
+      "transport_in": {
+        "summary": "步行约 9 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 9,
+            "recommended": true,
+            "distance_km": 0.7
+          }
+        ]
+      },
+      "tags": [
+        "早起"
+      ]
+    },
+    {
+      "id": "item:d2-0700",
+      "day_id": "day:d2",
+      "start_time": "07:05",
+      "kind": "cafe",
+      "title": "早餐：椰子咖啡",
+      "place_id": "place:cafe",
+      "cost_estimate": {
+        "amount": 90000,
+        "currency": "VND",
+        "per": "person"
+      },
+      "transport_in": {
+        "summary": "步行约 10 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 10,
+            "recommended": true,
+            "distance_km": 0.8
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d2-0815",
+      "day_id": "day:d2",
+      "start_time": "08:15",
+      "end_time": "12:30",
+      "kind": "activity",
+      "title": "半日浮潜",
+      "description": "08:15 到潜水中心门口集合，带泳衣和防晒；晕船药提前半小时吃。",
+      "place_id": "place:snorkel-center",
+      "booking_id": "booking:snorkel",
+      "transport_in": {
+        "summary": "步行约 10 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 10,
+            "recommended": true,
+            "distance_km": 0.9
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d2-0815-backup",
+      "day_id": "day:d2",
+      "time_label": "上午",
+      "kind": "sight",
+      "title": "浪大停航就去历史馆",
+      "variant": "backup",
+      "parent_item_id": "item:d2-0815",
+      "place_id": "place:museum",
+      "description": "周一闭馆！只能去老街和海神庙。",
+      "cost_estimate": {
+        "amount": 0,
+        "currency": "VND"
+      }
+    },
+    {
+      "id": "item:d2-1300",
+      "day_id": "day:d2",
+      "start_time": "13:00",
+      "end_time": "14:00",
+      "kind": "food",
+      "title": "老码头海鲜午餐",
+      "place_id": "place:seafood",
+      "cost_estimate": {
+        "amount": 1200000,
+        "currency": "VND",
+        "per": "total",
+        "note": "两人，含饮料"
+      },
+      "transport_in": {
+        "summary": "步行约 6 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 6,
+            "recommended": true,
+            "distance_km": 0.4
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d2-1415",
+      "day_id": "day:d2",
+      "start_time": "14:15",
+      "kind": "hotel",
+      "title": "回酒店冲澡、换衣服",
+      "place_id": "place:hotel-a",
+      "transport_in": {
+        "summary": "打车约 6 分钟",
+        "options": [
+          {
+            "mode": "grab",
+            "duration_min": 6,
+            "distance_km": 1.8,
+            "cost": {
+              "amount": 40000,
+              "currency": "VND"
+            },
+            "recommended": true
+          },
+          {
+            "mode": "walk",
+            "duration_min": 22,
+            "recommended": true,
+            "distance_km": 1.6,
+            "label": "省钱版"
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d2-1445",
+      "day_id": "day:d2",
+      "start_time": "14:45",
+      "end_time": "18:45",
+      "kind": "transport",
+      "title": "取电动车，出发西线",
+      "place_id": "place:hotel-a",
+      "booking_id": "booking:scooter",
+      "description": "按当天路线卡骑行，日落后沿海边公路骑回镇上。车送到酒店门口。"
+    },
+    {
+      "id": "item:d2-1445-backup",
+      "day_id": "day:d2",
+      "time_label": "下午",
+      "kind": "spa",
+      "title": "风大就去按摩",
+      "variant": "backup",
+      "parent_item_id": "item:d2-1445",
+      "place_id": "place:spa",
+      "cost_estimate": {
+        "amount": 350000,
+        "currency": "VND",
+        "per": "person"
+      }
+    },
+    {
+      "id": "item:d2-1515",
+      "day_id": "day:d2",
+      "start_time": "15:15",
+      "end_time": "15:45",
+      "kind": "sight",
+      "title": "胡椒园",
+      "place_id": "place:pepper-farm",
+      "transport_in": {
+        "summary": "电动车约 15 分钟",
+        "options": [
+          {
+            "mode": "scooter",
+            "duration_min": 15,
+            "distance_km": 6.5,
+            "recommended": true
+          }
+        ]
+      },
+      "cost_estimate": {
+        "amount": 0,
+        "currency": "VND",
+        "note": "免费参观"
+      }
+    },
+    {
+      "id": "item:d2-1600",
+      "day_id": "day:d2",
+      "start_time": "16:00",
+      "end_time": "16:40",
+      "kind": "shopping",
+      "title": "鱼露作坊买手信",
+      "place_id": "place:fish-sauce",
+      "transport_in": {
+        "summary": "电动车约 12 分钟",
+        "options": [
+          {
+            "mode": "scooter",
+            "duration_min": 12,
+            "distance_km": 5.1,
+            "recommended": true
+          }
+        ]
+      },
+      "cost_estimate": {
+        "amount": 150000,
+        "currency": "VND",
+        "amount_max": 300000,
+        "per": "total",
+        "note": "小瓶装 2–3 瓶"
+      }
+    },
+    {
+      "id": "item:d2-1715",
+      "day_id": "day:d2",
+      "start_time": "17:05",
+      "end_time": "17:55",
+      "kind": "sunset",
+      "title": "西岸椰林看日落",
+      "place_id": "place:coconut-grove",
+      "description": "日落 17:42；椰子摊 17:30 收，先买。",
+      "cost_estimate": {
+        "amount": 40000,
+        "currency": "VND",
+        "per": "person",
+        "note": "椰子"
+      },
+      "transport_in": {
+        "summary": "电动车约 20 分钟",
+        "options": [
+          {
+            "mode": "scooter",
+            "duration_min": 20,
+            "distance_km": 8.8,
+            "recommended": true,
+            "note": "最后一段是土路，慢点骑"
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d2-1830",
+      "day_id": "day:d2",
+      "start_time": "18:10",
+      "end_time": "18:45",
+      "kind": "transport",
+      "title": "沿海边公路骑回、还车",
+      "place_id": "place:hotel-a",
+      "transport_in": {
+        "summary": "电动车约 30 分钟",
+        "options": [
+          {
+            "mode": "scooter",
+            "duration_min": 30,
+            "distance_km": 11,
+            "recommended": true,
+            "note": "天黑后路灯少，开大灯"
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d2-1915",
+      "day_id": "day:d2",
+      "start_time": "19:15",
+      "kind": "food",
+      "title": "晚饭：码头法棍 + 夜市烤串",
+      "place_id": "place:banh-mi",
+      "cost_estimate": {
+        "amount": 150000,
+        "currency": "VND",
+        "amount_max": 250000,
+        "per": "total"
+      },
+      "transport_in": {
+        "summary": "步行约 12 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 12,
+            "recommended": true,
+            "distance_km": 0.9
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d2-2030",
+      "day_id": "day:d2",
+      "start_time": "20:30",
+      "kind": "free",
+      "title": "海风酒吧小坐",
+      "place_id": "place:bar",
+      "cost_estimate": {
+        "amount": 120000,
+        "currency": "VND",
+        "per": "person",
+        "note": "一杯椰子鸡尾酒"
+      },
+      "transport_in": {
+        "summary": "步行约 10 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 10,
+            "recommended": true,
+            "distance_km": 0.8
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d2-2030-backup",
+      "day_id": "day:d2",
+      "time_label": "晚上",
+      "kind": "free",
+      "title": "换成屋顶酒吧看港湾夜景",
+      "variant": "backup",
+      "parent_item_id": "item:d2-2030",
+      "place_id": "place:rooftop-bar",
+      "cost_estimate": {
+        "amount": 180000,
+        "currency": "VND",
+        "per": "person"
+      }
+    },
+    {
+      "id": "item:d2-2130",
+      "day_id": "day:d2",
+      "start_time": "21:30",
+      "kind": "shopping",
+      "title": "便利店补给（水、零食、晒后修复）",
+      "place_id": "place:convenience",
+      "cost_estimate": {
+        "amount": 100000,
+        "currency": "VND",
+        "per": "total"
+      },
+      "transport_in": {
+        "summary": "步行约 6 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 6,
+            "recommended": true,
+            "distance_km": 0.4
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d2-backup-pool",
+      "day_id": "day:d2",
+      "time_label": "下午",
+      "kind": "free",
+      "title": "太累就整个下午泡在酒店泳池",
+      "variant": "backup",
+      "place_id": "place:hotel-a",
+      "description": "电动车可以当天 12 点前免费取消。"
+    },
+    {
+      "id": "item:d2-rain",
+      "day_id": "day:d2",
+      "time_label": "下雨",
+      "kind": "spa",
+      "title": "下雨：按摩 + 老街咖啡馆",
+      "variant": "rain",
+      "place_id": "place:spa",
+      "cost_estimate": {
+        "amount": 350000,
+        "currency": "VND",
+        "per": "person"
+      }
+    },
+    {
+      "id": "item:d3-0730",
+      "day_id": "day:d3",
+      "start_time": "07:30",
+      "kind": "food",
+      "title": "酒店早餐",
+      "place_id": "place:hotel-a",
+      "description": "含早，餐厅在泳池边。"
+    },
+    {
+      "id": "item:d3-0845",
+      "day_id": "day:d3",
+      "start_time": "08:45",
+      "end_time": "10:00",
+      "kind": "sight",
+      "title": "椰影岛历史馆",
+      "place_id": "place:museum",
+      "booking_id": "booking:museum",
+      "transport_in": {
+        "summary": "步行约 9 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 9,
+            "recommended": true,
+            "distance_km": 0.7
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d3-1015",
+      "day_id": "day:d3",
+      "start_time": "10:15",
+      "kind": "cafe",
+      "title": "老街咖啡",
+      "place_id": "place:old-street",
+      "cost_estimate": {
+        "amount": 45000,
+        "currency": "VND",
+        "per": "person"
+      },
+      "transport_in": {
+        "summary": "步行约 4 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 4,
+            "recommended": true,
+            "distance_km": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d3-1100",
+      "day_id": "day:d3",
+      "start_time": "11:00",
+      "kind": "hotel",
+      "title": "椰影湾酒店退房",
+      "description": "记得拿回 50 万越南盾押金。",
+      "place_id": "place:hotel-a",
+      "booking_id": "booking:hotel-a",
+      "transport_in": {
+        "summary": "步行约 7 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 7,
+            "recommended": true,
+            "distance_km": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d3-1130",
+      "day_id": "day:d3",
+      "start_time": "11:30",
+      "end_time": "12:10",
+      "kind": "transport",
+      "title": "接驳车去南岬",
+      "place_id": "place:south-cafe",
+      "booking_id": "booking:transfer-south",
+      "transport_in": {
+        "summary": "接驳车约 35 分钟",
+        "options": [
+          {
+            "mode": "car",
+            "label": "已订",
+            "duration_min": 35,
+            "distance_km": 14,
+            "cost": {
+              "amount": 300000,
+              "currency": "VND"
+            },
+            "recommended": true,
+            "note": "在大堂等"
+          },
+          {
+            "mode": "taxi",
+            "label": "备选",
+            "duration_min": 35,
+            "distance_km": 14,
+            "cost": {
+              "amount": 300000,
+              "currency": "VND",
+              "amount_max": 350000
+            },
+            "note": "南岬回程不好叫车"
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d3-1220",
+      "day_id": "day:d3",
+      "start_time": "12:20",
+      "end_time": "13:20",
+      "kind": "food",
+      "title": "悬崖咖啡午餐（先寄行李）",
+      "place_id": "place:south-cafe",
+      "cost_estimate": {
+        "amount": 180000,
+        "currency": "VND",
+        "per": "person"
+      }
+    },
+    {
+      "id": "item:d3-1330",
+      "day_id": "day:d3",
+      "start_time": "13:30",
+      "end_time": "14:00",
+      "kind": "sight",
+      "title": "南岬渔村散步",
+      "place_id": "place:fishing-village",
+      "transport_in": {
+        "summary": "步行约 12 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 12,
+            "recommended": true,
+            "distance_km": 0.9
+          }
+        ]
+      },
+      "cost_estimate": {
+        "amount": 0,
+        "currency": "VND"
+      }
+    },
+    {
+      "id": "item:d3-1400",
+      "day_id": "day:d3",
+      "start_time": "14:00",
+      "kind": "hotel",
+      "title": "入住海景屋",
+      "place_id": "place:hotel-b",
+      "booking_id": "booking:hotel-b",
+      "transport_in": {
+        "summary": "步行约 10 分钟（回咖啡馆拿行李后打车）",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 10,
+            "recommended": true,
+            "distance_km": 0.8
+          },
+          {
+            "mode": "taxi",
+            "label": "拿行李",
+            "duration_min": 5,
+            "cost": {
+              "amount": 50000,
+              "currency": "VND"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d3-1500",
+      "day_id": "day:d3",
+      "start_time": "15:00",
+      "end_time": "16:30",
+      "kind": "free",
+      "title": "海景屋泳池",
+      "place_id": "place:hotel-b"
+    },
+    {
+      "id": "item:d3-1700",
+      "day_id": "day:d3",
+      "start_time": "17:00",
+      "kind": "sunset",
+      "title": "落日滩看日落",
+      "place_id": "place:beach-sunset",
+      "description": "日落 17:42；沙滩东边有礁石，适合拍剪影。",
+      "transport_in": {
+        "summary": "步行约 5 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 5,
+            "recommended": true,
+            "distance_km": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d3-1830",
+      "day_id": "day:d3",
+      "start_time": "18:30",
+      "kind": "food",
+      "title": "落日烧烤晚餐",
+      "place_id": "place:sunset-grill",
+      "booking_id": "booking:dinner",
+      "cost_estimate": {
+        "amount": 800000,
+        "currency": "VND",
+        "amount_max": 1000000,
+        "per": "total"
+      },
+      "transport_in": {
+        "summary": "步行约 4 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 4,
+            "recommended": true,
+            "distance_km": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d3-1830-rain",
+      "day_id": "day:d3",
+      "time_label": "晚上",
+      "kind": "food",
+      "title": "下雨改在海景屋餐厅",
+      "variant": "rain",
+      "parent_item_id": "item:d3-1830",
+      "place_id": "place:hotel-b",
+      "cost_estimate": {
+        "amount": 600000,
+        "currency": "VND",
+        "per": "total"
+      }
+    },
+    {
+      "id": "item:d3-2030",
+      "day_id": "day:d3",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "kind": "other",
+      "title": "沙滩看星星",
+      "place_id": "place:beach-sunset",
+      "description": "南岬没有光污染；带防蚊液。",
+      "transport_in": {
+        "summary": "步行约 4 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 4,
+            "recommended": true,
+            "distance_km": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d3-2200",
+      "day_id": "day:d3",
+      "start_time": "22:00",
+      "kind": "other",
+      "title": "收拾行李、网上值机",
+      "place_id": "place:hotel-b"
+    },
+    {
+      "id": "item:d3-backup-stay",
+      "day_id": "day:d3",
+      "time_label": "全天",
+      "kind": "hotel",
+      "title": "海景屋没确认：续住椰影湾，南岬当天来回",
+      "variant": "backup",
+      "place_id": "place:hotel-a",
+      "description": "接驳车改成包车往返（约 60 万越南盾）。",
+      "cost_estimate": {
+        "amount": 1200000,
+        "currency": "VND",
+        "per": "total",
+        "note": "多住一晚 + 包车"
+      }
+    },
+    {
+      "id": "item:d4-0830",
+      "day_id": "day:d4",
+      "time_label": "上午",
+      "kind": "food",
+      "title": "海景屋早餐",
+      "place_id": "place:hotel-b",
+      "cost_estimate": {
+        "amount": 100000,
+        "currency": "VND",
+        "per": "person"
+      }
+    },
+    {
+      "id": "item:d4-0900",
+      "day_id": "day:d4",
+      "start_time": "09:00",
+      "end_time": "09:45",
+      "kind": "beach",
+      "title": "最后游一次泳",
+      "place_id": "place:beach-sunset",
+      "transport_in": {
+        "summary": "步行约 5 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 5,
+            "recommended": true,
+            "distance_km": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d4-1000",
+      "day_id": "day:d4",
+      "start_time": "10:00",
+      "kind": "hotel",
+      "title": "海景屋退房、寄存行李",
+      "place_id": "place:hotel-b",
+      "booking_id": "booking:hotel-b"
+    },
+    {
+      "id": "item:d4-1030",
+      "day_id": "day:d4",
+      "start_time": "10:30",
+      "end_time": "11:30",
+      "kind": "shopping",
+      "title": "手作市集买手信",
+      "place_id": "place:souvenir",
+      "cost_estimate": {
+        "amount": 300000,
+        "currency": "VND",
+        "amount_max": 600000,
+        "per": "total"
+      },
+      "transport_in": {
+        "summary": "打车约 30 分钟",
+        "options": [
+          {
+            "mode": "grab",
+            "duration_min": 30,
+            "distance_km": 13,
+            "cost": {
+              "amount": 220000,
+              "currency": "VND"
+            },
+            "recommended": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d4-1145",
+      "day_id": "day:d4",
+      "start_time": "11:45",
+      "kind": "food",
+      "title": "午餐：码头法棍",
+      "place_id": "place:banh-mi",
+      "cost_estimate": {
+        "amount": 40000,
+        "currency": "VND",
+        "per": "person"
+      },
+      "transport_in": {
+        "summary": "步行约 6 分钟",
+        "options": [
+          {
+            "mode": "walk",
+            "duration_min": 6,
+            "recommended": true,
+            "distance_km": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d4-1230",
+      "day_id": "day:d4",
+      "start_time": "12:30",
+      "kind": "transport",
+      "title": "回海景屋拿行李",
+      "place_id": "place:hotel-b",
+      "transport_in": {
+        "summary": "打车约 30 分钟",
+        "options": [
+          {
+            "mode": "grab",
+            "duration_min": 30,
+            "distance_km": 13,
+            "cost": {
+              "amount": 220000,
+              "currency": "VND"
+            },
+            "recommended": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d4-1330",
+      "day_id": "day:d4",
+      "start_time": "13:30",
+      "end_time": "14:10",
+      "kind": "transport",
+      "title": "去机场",
+      "place_id": "place:airport",
+      "booking_id": "booking:transfer-back",
+      "transport_in": {
+        "summary": "送机约 40 分钟",
+        "options": [
+          {
+            "mode": "car",
+            "label": "已约",
+            "duration_min": 40,
+            "distance_km": 21,
+            "cost": {
+              "amount": 280000,
+              "currency": "VND"
+            },
+            "recommended": true
+          },
+          {
+            "mode": "taxi",
+            "label": "没约到就打车",
+            "duration_min": 40,
+            "cost": {
+              "amount": 250000,
+              "currency": "VND",
+              "amount_max": 320000
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:d4-1410",
+      "day_id": "day:d4",
+      "start_time": "14:10",
+      "kind": "flight",
+      "title": "值机、托运鱼露",
+      "description": "鱼露只能托运，用保鲜膜包两层。",
+      "place_id": "place:airport",
+      "booking_id": "booking:flight-back"
+    },
+    {
+      "id": "item:d4-1440",
+      "day_id": "day:d4",
+      "start_time": "14:40",
+      "kind": "food",
+      "title": "机场吃点东西",
+      "place_id": "place:airport",
+      "cost_estimate": {
+        "amount": 150000,
+        "currency": "VND",
+        "per": "total"
+      }
+    },
+    {
+      "id": "item:d4-1640",
+      "day_id": "day:d4",
+      "start_time": "16:40",
+      "kind": "flight",
+      "title": "回程",
+      "place_id": "place:airport",
+      "booking_id": "booking:flight-back"
+    },
+    {
+      "id": "item:d4-backup-delay",
+      "day_id": "day:d4",
+      "time_label": "航班延误",
+      "kind": "free",
+      "title": "航班延误：机场旁边的椰林咖啡等",
+      "variant": "backup",
+      "place_id": "place:airport",
+      "description": "机场只有一家咖啡店，延误超过 2 小时可以找保险理赔（留好登机牌）。"
+    },
+    {
+      "id": "item:pool-lighthouse",
+      "kind": "sight",
+      "title": "白灯塔徒步",
+      "place_id": "place:lighthouse",
+      "description": "有空的话早上去，单程约 1 小时。",
+      "tags": [
+        "徒步"
+      ],
+      "cost_estimate": {
+        "amount": 0,
+        "currency": "VND"
+      }
+    },
+    {
+      "id": "item:pool-kayak",
+      "kind": "activity",
+      "title": "皮划艇",
+      "cost_estimate": {
+        "amount": 500000,
+        "currency": "VND",
+        "per": "person"
+      }
+    },
+    {
+      "id": "item:pool-coral-day",
+      "kind": "activity",
+      "title": "从椰影码头搭早班渡轮去对面的珊瑚小岛浮潜、在岛上吃海鲜午餐，再绕到白灯塔看日落后搭最后一班船回来（看天气和体力再决定）",
+      "place_id": "place:coral-islet",
+      "description": "只有上午两班船（07:30、09:00），回程最后一班 17:30。",
+      "cost_estimate": {
+        "amount": 1500000,
+        "currency": "VND",
+        "amount_max": 2000000,
+        "per": "person",
+        "note": "船票 + 午餐 + 装备"
+      },
+      "transport_in": {
+        "summary": "渡轮约 25 分钟",
+        "options": [
+          {
+            "mode": "ferry",
+            "duration_min": 25,
+            "distance_km": 7.5,
+            "cost": {
+              "amount": 120000,
+              "currency": "VND",
+              "per": "person"
+            },
+            "recommended": true,
+            "note": "椰影码头 1 号闸口"
+          }
+        ]
+      }
+    },
+    {
+      "id": "item:pool-rooftop",
+      "kind": "free",
+      "title": "屋顶酒吧",
+      "place_id": "place:rooftop-bar",
+      "cost_estimate": {
+        "amount": 180000,
+        "currency": "VND",
+        "per": "person"
+      }
+    }
+  ],
+  "contacts": [
+    {
+      "id": "contact:emergency",
+      "name": "报警（演示）",
+      "category": "emergency",
+      "role": "警察",
+      "phone": "+00 000 0000 0005",
+      "note": "演示数据，真实行程请填当地报警电话。"
+    },
+    {
+      "id": "contact:ambulance",
+      "name": "急救（演示）",
+      "category": "emergency",
+      "role": "救护车",
+      "phone": "+00 000 0000 0006",
+      "note": "演示数据。说“Cấp cứu”（急救）。"
+    },
+    {
+      "id": "contact:hospital",
+      "name": "椰影医院急诊",
+      "category": "emergency",
+      "role": "医院",
+      "phone": "+00 000 0000 0051",
+      "place_id": "place:hospital",
+      "note": "24 小时；英文有限，带翻译 App。"
+    },
+    {
+      "id": "contact:consulate",
+      "name": "领事保护热线（演示）",
+      "category": "emergency",
+      "phone": "+00 000 0000 0007",
+      "email": "consular-demo@example.com",
+      "note": "演示数据。证件丢了先报警拿证明。"
+    },
+    {
+      "id": "contact:hotel-a-desk",
+      "name": "椰影湾酒店前台",
+      "category": "hotel",
+      "role": "前台",
+      "phone": "+00 000 0000 0001",
+      "whatsapp": "+00 000 0000 0001",
+      "email": "frontdesk@example.com",
+      "booking_id": "booking:hotel-a",
+      "place_id": "place:hotel-a",
+      "note": "24 小时，英文可以。"
+    },
+    {
+      "id": "contact:hotel-b",
+      "name": "南岬海景屋",
+      "category": "hotel",
+      "role": "老板娘 阿兰",
+      "phone": "+00 000 0000 0011",
+      "zalo": "+00 000 0000 0011",
+      "email": "stay@example.com",
+      "booking_id": "booking:hotel-b",
+      "place_id": "place:hotel-b",
+      "note": "用 Zalo 回得最快；晚上 10 点后不回。"
+    },
+    {
+      "id": "contact:driver",
+      "name": "接机司机 阿明",
+      "category": "transport",
+      "role": "接机司机",
+      "phone": "+00 000 0000 0002",
+      "zalo": "+00 000 0000 0002",
+      "booking_id": "booking:transfer-airport",
+      "note": "只会简单英文，发消息比打电话快。"
+    },
+    {
+      "id": "contact:transfer-south",
+      "name": "南岬接驳车 阿福",
+      "category": "transport",
+      "role": "接驳司机",
+      "phone": "+00 000 0000 0012",
+      "booking_id": "booking:transfer-south"
+    },
+    {
+      "id": "contact:scooter",
+      "name": "阿强租车",
+      "category": "transport",
+      "role": "电动车出租",
+      "phone": "+00 000 0000 0013",
+      "zalo": "+00 000 0000 0013",
+      "whatsapp": "+00 000 0000 0013",
+      "booking_id": "booking:scooter",
+      "note": "车坏了打他，20 分钟内送新车。"
+    },
+    {
+      "id": "contact:snorkel",
+      "name": "椰影潜水中心",
+      "category": "activity",
+      "whatsapp": "+00 000 0000 0003",
+      "booking_id": "booking:snorkel",
+      "place_id": "place:snorkel-center",
+      "note": "停航会在前一晚 8 点前通知。"
+    },
+    {
+      "id": "contact:spa",
+      "name": "椰叶按摩",
+      "category": "activity",
+      "role": "预约",
+      "phone": "+00 000 0000 0041",
+      "booking_id": "booking:spa",
+      "place_id": "place:spa"
+    },
+    {
+      "id": "contact:seafood",
+      "name": "老码头海鲜",
+      "category": "restaurant",
+      "phone": "+00 000 0000 0021",
+      "place_id": "place:seafood",
+      "note": "周三休息。"
+    },
+    {
+      "id": "contact:grill",
+      "name": "落日烧烤屋",
+      "category": "restaurant",
+      "whatsapp": "+00 000 0000 0022",
+      "booking_id": "booking:dinner",
+      "place_id": "place:sunset-grill",
+      "note": "订海边位子要提前一天。"
+    },
+    {
+      "id": "contact:airline",
+      "name": "示例航空客服",
+      "category": "airline",
+      "phone": "+00 000 0000 0008",
+      "email": "airline-demo@example.com",
+      "booking_id": "booking:flight-back"
+    },
+    {
+      "id": "contact:klook",
+      "name": "Klook 客服",
+      "category": "platform",
+      "phone": "+00 000 0000 0004",
+      "email": "demo-support@example.com"
+    },
+    {
+      "id": "contact:guide",
+      "name": "岛上向导 小林",
+      "category": "guide",
+      "role": "中文向导",
+      "phone": "+00 000 0000 0009",
+      "wechat": "demo_guide_lin",
+      "line": "demo.lin",
+      "note": "会中文，包车一天约 120 万越南盾；有需要再联系。"
+    },
+    {
+      "id": "contact:fish-sauce",
+      "name": "老林鱼露作坊",
+      "category": "other",
+      "phone": "+00 000 0000 0031",
+      "place_id": "place:fish-sauce"
+    }
+  ],
+  "todos": [
+    {
+      "id": "todo:confirm-hotel-b",
+      "list": "confirm",
+      "title": "等南岬海景屋确认订单",
+      "booking_id": "booking:hotel-b",
+      "due_at": "2027-01-08T23:59:00+07:00",
+      "note": "免费取消截止前没确认就退订，第三晚续住椰影湾。",
+      "assignee_user_id": "@cathy"
+    },
+    {
+      "id": "todo:confirm-spa",
+      "list": "confirm",
+      "title": "确认按摩 21:00 的预约",
+      "booking_id": "booking:spa",
+      "due_at": "2027-01-10T18:00:00+07:00",
+      "day_id": "day:d1"
+    },
+    {
+      "id": "todo:confirm-transfer-south",
+      "list": "confirm",
+      "title": "和接驳车确认 11:30 大堂上车",
+      "booking_id": "booking:transfer-south",
+      "due_at": "2027-01-11T20:00:00+07:00",
+      "day_id": "day:d2",
+      "assignee_user_id": "@jeremy"
+    },
+    {
+      "id": "todo:confirm-transfer-back",
+      "list": "confirm",
+      "title": "入住海景屋时约好送机车",
+      "booking_id": "booking:transfer-back",
+      "due_at": "2027-01-12T20:00:00+07:00",
+      "day_id": "day:d3"
+    },
+    {
+      "id": "todo:confirm-hotel-a-pay",
+      "list": "confirm",
+      "title": "椰影湾酒店到店付款",
+      "booking_id": "booking:hotel-a",
+      "note": "可以刷卡，押金另付。"
+    },
+    {
+      "id": "todo:confirm-dinner",
+      "list": "confirm",
+      "title": "订海边晚餐",
+      "booking_id": "booking:dinner",
+      "day_id": "day:d3",
+      "due_at": "2027-01-11T22:00:00+07:00"
+    },
+    {
+      "id": "todo:confirm-driver",
+      "list": "confirm",
+      "title": "把航班号发给接机司机",
+      "booking_id": "booking:transfer-airport",
+      "done": true,
+      "done_by": "@cathy",
+      "done_at": "2026-12-28T20:15:00+08:00"
+    },
+    {
+      "id": "todo:confirm-snorkel-time",
+      "list": "confirm",
+      "title": "确认浮潜集合时间",
+      "booking_id": "booking:snorkel",
+      "done": true,
+      "done_by": "@jeremy",
+      "done_at": "2027-01-02T21:30:00+08:00"
+    },
+    {
+      "id": "todo:todo-checkin-out",
+      "list": "todo",
+      "title": "去程网上值机",
+      "booking_id": "booking:flight-out",
+      "due_at": "2027-01-09T08:05:00+08:00",
+      "assignee_user_id": "@jeremy",
+      "note": "起飞前 24 小时开放，选靠窗。"
+    },
+    {
+      "id": "todo:todo-cash",
+      "list": "todo",
+      "title": "换一点越南盾现金",
+      "note": "接机、电动车、夜市要现金；镇上换汇店比机场划算。",
+      "day_id": "day:d1"
+    },
+    {
+      "id": "todo:todo-esim",
+      "list": "todo",
+      "title": "买 eSIM（4 天 10GB）",
+      "done": true,
+      "done_by": "@cathy",
+      "done_at": "2026-12-29T22:40:00+08:00"
+    },
+    {
+      "id": "todo:todo-grab",
+      "list": "todo",
+      "title": "下载 Grab、绑好信用卡",
+      "assignee_user_id": "@cathy"
+    },
+    {
+      "id": "todo:todo-offline-map",
+      "list": "todo",
+      "title": "下载离线地图",
+      "done": true,
+      "done_by": "@jeremy",
+      "done_at": "2027-01-02T22:10:00+08:00"
+    },
+    {
+      "id": "todo:todo-address-shot",
+      "list": "todo",
+      "title": "两家酒店的越南语地址截图",
+      "note": "给司机看用。"
+    },
+    {
+      "id": "todo:todo-scooter",
+      "list": "todo",
+      "title": "问酒店电动车能不能送到门口",
+      "day_id": "day:d2",
+      "item_id": "item:d2-1445",
+      "booking_id": "booking:scooter"
+    },
+    {
+      "id": "todo:todo-deposit",
+      "list": "todo",
+      "title": "退房拿回押金",
+      "day_id": "day:d3",
+      "item_id": "item:d3-1100",
+      "booking_id": "booking:hotel-a"
+    },
+    {
+      "id": "todo:todo-checkin-back",
+      "list": "todo",
+      "title": "回程网上值机",
+      "booking_id": "booking:flight-back",
+      "due_at": "2027-01-12T16:40:00+07:00",
+      "day_id": "day:d3",
+      "item_id": "item:d3-2200"
+    },
+    {
+      "id": "todo:packing-passport",
+      "list": "packing",
+      "category": "证件",
+      "title": "护照",
+      "qty": 2
+    },
+    {
+      "id": "todo:packing-visa",
+      "list": "packing",
+      "category": "证件",
+      "title": "电子签证打印件",
+      "qty": 2,
+      "done": true,
+      "done_by": "@jeremy",
+      "done_at": "2026-12-30T21:00:00+08:00"
+    },
+    {
+      "id": "todo:packing-card",
+      "list": "packing",
+      "category": "证件",
+      "title": "信用卡",
+      "qty": 2
+    },
+    {
+      "id": "todo:packing-cash",
+      "list": "packing",
+      "category": "证件",
+      "title": "港币现金（换越南盾用）",
+      "qty": 1,
+      "assignee_user_id": "@jeremy"
+    },
+    {
+      "id": "todo:packing-tshirt",
+      "list": "packing",
+      "category": "衣物",
+      "title": "T 恤",
+      "qty": 4,
+      "assignee_user_id": "@jeremy"
+    },
+    {
+      "id": "todo:packing-dress",
+      "list": "packing",
+      "category": "衣物",
+      "title": "连衣裙",
+      "qty": 2,
+      "assignee_user_id": "@cathy"
+    },
+    {
+      "id": "todo:packing-swimsuit",
+      "list": "packing",
+      "category": "衣物",
+      "title": "泳衣",
+      "qty": 2,
+      "assignee_user_id": "@cathy"
+    },
+    {
+      "id": "todo:packing-trunks",
+      "list": "packing",
+      "category": "衣物",
+      "title": "泳裤",
+      "qty": 1,
+      "assignee_user_id": "@jeremy",
+      "done": true,
+      "done_by": "@jeremy",
+      "done_at": "2027-01-08T22:00:00+08:00"
+    },
+    {
+      "id": "todo:packing-socks",
+      "list": "packing",
+      "category": "衣物",
+      "title": "袜子",
+      "qty": 3,
+      "assignee_user_id": "@jeremy"
+    },
+    {
+      "id": "todo:packing-rashguard",
+      "list": "packing",
+      "category": "衣物",
+      "title": "防晒衣",
+      "qty": 2
+    },
+    {
+      "id": "todo:packing-sandals",
+      "list": "packing",
+      "category": "衣物",
+      "title": "拖鞋",
+      "qty": 2
+    },
+    {
+      "id": "todo:packing-hat",
+      "list": "packing",
+      "category": "衣物",
+      "title": "帽子、太阳镜",
+      "qty": 2
+    },
+    {
+      "id": "todo:packing-powerbank",
+      "list": "packing",
+      "category": "电子",
+      "title": "充电宝",
+      "qty": 1
+    },
+    {
+      "id": "todo:packing-adapter",
+      "list": "packing",
+      "category": "电子",
+      "title": "转换插头",
+      "qty": 1,
+      "note": "越南是两脚圆插 / 扁插，220V。"
+    },
+    {
+      "id": "todo:packing-cable",
+      "list": "packing",
+      "category": "电子",
+      "title": "充电线",
+      "qty": 2
+    },
+    {
+      "id": "todo:packing-action-cam",
+      "list": "packing",
+      "category": "电子",
+      "title": "运动相机 + 防水壳",
+      "qty": 1,
+      "assignee_user_id": "@jeremy"
+    },
+    {
+      "id": "todo:packing-sunscreen",
+      "list": "packing",
+      "category": "洗护",
+      "title": "防晒霜",
+      "qty": 1
+    },
+    {
+      "id": "todo:packing-aftersun",
+      "list": "packing",
+      "category": "洗护",
+      "title": "晒后修复",
+      "qty": 1,
+      "assignee_user_id": "@cathy"
+    },
+    {
+      "id": "todo:packing-toothbrush",
+      "list": "packing",
+      "category": "洗护",
+      "title": "牙刷",
+      "qty": 2,
+      "done": true,
+      "done_by": "@cathy",
+      "done_at": "2027-01-08T21:10:00+08:00"
+    },
+    {
+      "id": "todo:packing-motion",
+      "list": "packing",
+      "category": "药品",
+      "title": "晕船药",
+      "qty": 0,
+      "note": "浮潜前吃；家里没有了，要买。"
+    },
+    {
+      "id": "todo:packing-stomach",
+      "list": "packing",
+      "category": "药品",
+      "title": "肠胃药",
+      "qty": 1
+    },
+    {
+      "id": "todo:packing-repellent",
+      "list": "packing",
+      "category": "药品",
+      "title": "驱蚊液",
+      "qty": 1
+    },
+    {
+      "id": "todo:packing-bandage",
+      "list": "packing",
+      "category": "药品",
+      "title": "创可贴",
+      "qty": 6
+    },
+    {
+      "id": "todo:packing-drybag",
+      "list": "packing",
+      "category": "其他",
+      "title": "防水手机袋",
+      "qty": 2
+    },
+    {
+      "id": "todo:packing-raincoat",
+      "list": "packing",
+      "category": "其他",
+      "title": "轻便雨衣",
+      "qty": 2
+    },
+    {
+      "id": "todo:packing-wrap",
+      "list": "packing",
+      "category": "其他",
+      "title": "保鲜膜（包鱼露托运）",
+      "qty": 1,
+      "assignee_user_id": "@cathy"
+    },
+    {
+      "id": "todo:buy-coconut-candy",
+      "list": "buy",
+      "title": "椰子糖",
+      "qty": 3
+    },
+    {
+      "id": "todo:buy-coffee",
+      "list": "buy",
+      "title": "咖啡豆",
+      "qty": 2,
+      "assignee_user_id": "@cathy"
+    },
+    {
+      "id": "todo:buy-fish-sauce",
+      "list": "buy",
+      "title": "鱼露小瓶装",
+      "qty": 2,
+      "note": "只能托运。",
+      "item_id": "item:d2-1600"
+    },
+    {
+      "id": "todo:buy-pepper",
+      "list": "buy",
+      "title": "胡椒",
+      "qty": 3,
+      "assignee_user_id": "@jeremy"
+    },
+    {
+      "id": "todo:buy-cashew",
+      "list": "buy",
+      "title": "腰果",
+      "qty": 2
+    },
+    {
+      "id": "todo:buy-phin",
+      "list": "buy",
+      "title": "越南滴漏咖啡壶",
+      "qty": 1,
+      "done": true,
+      "done_by": "@cathy",
+      "done_at": "2027-01-10T20:15:00+07:00"
+    }
+  ],
+  "tips": [
+    {
+      "id": "tip:warning-taxi",
+      "kind": "warning",
+      "title": "打车先确认计价",
+      "pinned": true,
+      "body": "上车前确认**打表**，或者直接在 App 里下单。\n\n- 机场出口的拉客司机先问价\n- 夜里尽量叫车，不要路边拦",
+      "tags": [
+        "交通"
+      ]
+    },
+    {
+      "id": "tip:warning-night-market",
+      "kind": "warning",
+      "title": "夜市海鲜先问价再称重",
+      "pinned": true,
+      "place_id": "place:night-market",
+      "body": "按**公斤**算的海鲜一定先问单价、看着称。\n\n- 写在纸上让老板确认\n- 小票留着，结账对一下",
+      "tags": [
+        "吃饭"
+      ]
+    },
+    {
+      "id": "tip:warning-sun",
+      "kind": "warning",
+      "title": "中午紫外线很强",
+      "segment_id": "segment:town",
+      "body": "11 点到 15 点尽量待在室内或树荫下，浮潜穿防晒衣。"
+    },
+    {
+      "id": "tip:warning-coral",
+      "kind": "warning",
+      "title": "浮潜别踩珊瑚",
+      "booking_id": "booking:snorkel",
+      "body": "珊瑚很锋利，划伤容易发炎；累了就抓浮板，不要站在礁石上。"
+    },
+    {
+      "id": "tip:warning-deposit",
+      "kind": "warning",
+      "title": "退房当场拿回押金",
+      "booking_id": "booking:hotel-a",
+      "day_id": "day:d3",
+      "body": "押金是现金就当场点清；刷卡的拿预授权取消的小票。"
+    },
+    {
+      "id": "tip:warning-exchange",
+      "kind": "warning",
+      "title": "别在机场换太多钱",
+      "body": "机场汇率差，先换够打车的（约 30 万越南盾），其余到镇上的换汇店换。"
+    },
+    {
+      "id": "tip:tip-snorkel",
+      "kind": "tip",
+      "title": "浮潜前一晚别喝太多",
+      "booking_id": "booking:snorkel",
+      "day_id": "day:d2",
+      "body": "船上会晃，空腹和宿醉都容易晕。晕船药提前半小时吃。"
+    },
+    {
+      "id": "tip:tip-sunset",
+      "kind": "tip",
+      "title": "日落前 30 分钟到",
+      "body": "1 月日落大约 **17:42**；最好看的颜色在日落后 15 分钟，别急着走。"
+    },
+    {
+      "id": "tip:tip-scooter",
+      "kind": "tip",
+      "title": "骑电动车",
+      "booking_id": "booking:scooter",
+      "body": "- 右侧通行，路口慢一点\n- 头盔一定戴\n- 西线最后一段是土路，下雨别去"
+    },
+    {
+      "id": "tip:tip-morning-market",
+      "kind": "tip",
+      "title": "早市 6 点最新鲜",
+      "place_id": "place:morning-market",
+      "day_id": "day:d2",
+      "body": "渔船六点靠岸，七点以后好的鱼就被餐厅收走了。"
+    },
+    {
+      "id": "tip:info-money",
+      "kind": "info",
+      "title": "汇率和付款",
+      "body": "大致按 **1 港币 ≈ 3,300 越南盾** 估算。\n\n- 酒店、潜水中心可以刷卡\n- 夜市、接机、电动车只收现金\n- 小费不是必须的"
+    },
+    {
+      "id": "tip:info-time",
+      "kind": "info",
+      "title": "时差",
+      "body": "比香港**慢 1 小时**。手机会自动切换，航班时间看当地时间。"
+    },
+    {
+      "id": "tip:info-power",
+      "kind": "info",
+      "title": "电压和插头",
+      "body": "220V，插座是两脚圆插和两脚扁插混用；带一个万能转换插头最省事。"
+    },
+    {
+      "id": "tip:info-weather",
+      "kind": "info",
+      "title": "1 月的天气",
+      "body": "旱季，白天 28–31°C，晚上 24°C 左右；偶尔午后阵雨，十几分钟就停。"
+    },
+    {
+      "id": "tip:info-emergency",
+      "kind": "info",
+      "title": "紧急情况（演示）",
+      "body": "演示数据：真实行程请写当地的报警、急救电话和最近的医院。\n\n- 先打急救\n- 联系保险公司的 24 小时热线\n- 证件丢失先报警拿证明"
+    },
+    {
+      "id": "tip:template-early-checkin",
+      "kind": "template",
+      "title": "问酒店能否提前入住",
+      "booking_id": "booking:hotel-a",
+      "body": "落地后发给前台。",
+      "local_text": "Hello! We will arrive around 11:00. Could we check in early or leave our luggage? Thank you!",
+      "local_lang": "en"
+    },
+    {
+      "id": "tip:template-driver-address",
+      "kind": "template",
+      "title": "给司机：请送我到这个地址",
+      "body": "打车时给司机看，地址换成要去的地方。",
+      "local_text": "Xin chào anh, cho tôi đến địa chỉ này: 27 Đường Hoa Sứ, Khu phố 3, Thị trấn Dừa. Cảm ơn anh!",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:template-card",
+      "kind": "template",
+      "title": "问能不能刷卡",
+      "body": "结账前问。",
+      "local_text": "Ở đây có nhận thanh toán bằng thẻ không ạ?",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:template-dinner",
+      "kind": "template",
+      "title": "订海边的位子",
+      "booking_id": "booking:dinner",
+      "place_id": "place:sunset-grill",
+      "body": "用 WhatsApp 发给烧烤屋。",
+      "local_text": "Chào chị, tôi muốn đặt bàn cho 2 người lúc 18:30 tối thứ Ba (12/1), bàn gần biển nếu được. Cảm ơn chị!",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:template-transfer",
+      "kind": "template",
+      "title": "确认接驳车上车点",
+      "booking_id": "booking:transfer-south",
+      "body": "前一天晚上发给海景屋。",
+      "local_text": "Hi! Could you please confirm the pickup tomorrow (12 Jan) at 11:30 in the lobby of Coco Bay Hotel? We have 2 suitcases. Thank you!",
+      "local_lang": "en"
+    },
+    {
+      "id": "tip:phrase-hello",
+      "kind": "phrase",
+      "title": "你好",
+      "body": "对长辈说 chào anh / chào chị 更礼貌。",
+      "local_text": "Xin chào",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:phrase-thanks",
+      "kind": "phrase",
+      "title": "谢谢",
+      "body": "最常用。",
+      "local_text": "Cảm ơn",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:phrase-how-much",
+      "kind": "phrase",
+      "title": "多少钱？",
+      "body": "",
+      "local_text": "Bao nhiêu tiền?",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:phrase-too-expensive",
+      "kind": "phrase",
+      "title": "太贵了",
+      "body": "讲价时笑着说。",
+      "local_text": "Đắt quá!",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:phrase-no-ice",
+      "kind": "phrase",
+      "title": "不要冰",
+      "body": "点饮料时说。",
+      "local_text": "Không đá",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:phrase-less-sugar",
+      "kind": "phrase",
+      "title": "少糖",
+      "body": "越南咖啡默认很甜。",
+      "local_text": "Ít đường",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:phrase-not-spicy",
+      "kind": "phrase",
+      "title": "不要辣",
+      "body": "",
+      "local_text": "Không cay",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:phrase-toilet",
+      "kind": "phrase",
+      "title": "洗手间在哪？",
+      "body": "",
+      "local_text": "Nhà vệ sinh ở đâu?",
+      "local_lang": "vi"
+    },
+    {
+      "id": "tip:phrase-bill",
+      "kind": "phrase",
+      "title": "买单",
+      "body": "",
+      "local_text": "Tính tiền",
+      "local_lang": "vi"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "expense:pre-insurance",
+      "amount": 98,
+      "currency": "HKD",
+      "date": "2026-12-20",
+      "category": "其他",
+      "description": "旅游保险",
+      "home_currency": "HKD",
+      "fx_rate": 1,
+      "amount_home": 98.0,
+      "paid_by_user_id": "@jeremy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "booking_id": "booking:insurance"
+    },
+    {
+      "id": "expense:pre-baggage",
+      "amount": 280,
+      "currency": "CNY",
+      "date": "2026-12-20",
+      "category": "交通",
+      "description": "去程加购托运行李",
+      "home_currency": "HKD",
+      "fx_rate": 1.17,
+      "amount_home": 327.6,
+      "paid_by_user_id": "@jeremy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "booking_id": "booking:flight-out"
+    },
+    {
+      "id": "expense:pre-snorkel",
+      "amount": 1800000,
+      "currency": "VND",
+      "date": "2026-12-22",
+      "category": "活动",
+      "description": "半日浮潜团（Klook 预付）",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 545.4,
+      "paid_by_user_id": "@cathy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "booking_id": "booking:snorkel"
+    },
+    {
+      "id": "expense:pre-hotel-b-deposit",
+      "amount": 200,
+      "currency": "HKD",
+      "date": "2026-12-27",
+      "category": "住宿",
+      "description": "南岬海景屋订金",
+      "home_currency": "HKD",
+      "fx_rate": 1,
+      "amount_home": 200.0,
+      "paid_by_user_id": "@cathy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "booking_id": "booking:hotel-b"
+    },
+    {
+      "id": "expense:d1-transfer",
+      "amount": 250000,
+      "currency": "VND",
+      "date": "2027-01-10",
+      "category": "交通",
+      "description": "机场接机（现金）",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 75.75,
+      "paid_by_user_id": "@jeremy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "booking_id": "booking:transfer-airport",
+      "item_id": "item:d1-1045"
+    },
+    {
+      "id": "expense:d1-pho",
+      "amount": 130000,
+      "currency": "VND",
+      "date": "2027-01-10",
+      "category": "餐饮",
+      "description": "清晨粉店：两碗粉 + 冰茶",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 39.39,
+      "paid_by_user_id": "@cathy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "item_id": "item:d1-1200"
+    },
+    {
+      "id": "expense:d1-ice",
+      "amount": 70000,
+      "currency": "VND",
+      "date": "2027-01-10",
+      "category": "餐饮",
+      "description": "椰子冰",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 21.21,
+      "paid_by_user_id": "@cathy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "item_id": "item:d1-1300"
+    },
+    {
+      "id": "expense:d1-rashguard",
+      "amount": 180000,
+      "currency": "VND",
+      "date": "2027-01-10",
+      "category": "购物",
+      "description": "防晒衣",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 54.54,
+      "paid_by_user_id": "@cathy",
+      "split": {
+        "mode": "personal"
+      }
+    },
+    {
+      "id": "expense:d1-market",
+      "amount": 520000,
+      "currency": "VND",
+      "date": "2027-01-10",
+      "category": "餐饮",
+      "description": "夜市烤海鲜",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 157.56,
+      "paid_by_user_id": "@jeremy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "item_id": "item:d1-1930"
+    },
+    {
+      "id": "expense:d1-market-dup",
+      "amount": 520000,
+      "currency": "VND",
+      "date": "2027-01-10",
+      "category": "餐饮",
+      "description": "夜市烤海鲜（重复记了一笔）",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 157.56,
+      "paid_by_user_id": "@cathy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "deleted_at": "2027-01-10T21:40:00+07:00"
+    },
+    {
+      "id": "expense:d1-spa",
+      "amount": 700000,
+      "currency": "VND",
+      "date": "2027-01-10",
+      "category": "活动",
+      "description": "按摩：Jeremy 热石 90 分钟、Cathy 足疗 60 分钟",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 212.1,
+      "paid_by_user_id": "@cathy",
+      "split": {
+        "mode": "amounts",
+        "shares": [
+          {
+            "user_id": "@jeremy",
+            "amount": 420000
+          },
+          {
+            "user_id": "@cathy",
+            "amount": 280000
+          }
+        ]
+      },
+      "booking_id": "booking:spa",
+      "item_id": "item:d1-2100"
+    },
+    {
+      "id": "expense:d2-breakfast",
+      "amount": 140000,
+      "currency": "VND",
+      "date": "2027-01-11",
+      "category": "餐饮",
+      "description": "椰子咖啡早餐",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 42.42,
+      "paid_by_user_id": "@jeremy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "item_id": "item:d2-0700"
+    },
+    {
+      "id": "expense:d2-lunch",
+      "amount": 1180000,
+      "currency": "VND",
+      "date": "2027-01-11",
+      "category": "餐饮",
+      "description": "老码头海鲜午餐",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 357.54,
+      "paid_by_user_id": "@cathy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "item_id": "item:d2-1300"
+    },
+    {
+      "id": "expense:d2-scooter",
+      "amount": 150000,
+      "currency": "VND",
+      "date": "2027-01-11",
+      "category": "交通",
+      "description": "电动车半天",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 45.45,
+      "paid_by_user_id": "@jeremy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "booking_id": "booking:scooter",
+      "item_id": "item:d2-1445"
+    },
+    {
+      "id": "expense:d2-pepper",
+      "amount": 240000,
+      "currency": "VND",
+      "date": "2027-01-11",
+      "category": "购物",
+      "description": "胡椒 3 包（带回家）",
+      "home_currency": "HKD",
+      "fx_rate": 0.000303,
+      "amount_home": 72.72,
+      "paid_by_user_id": "@jeremy",
+      "split": {
+        "mode": "personal"
+      },
+      "item_id": "item:d2-1515"
+    },
+    {
+      "id": "expense:d2-store",
+      "amount": 35,
+      "currency": "CNY",
+      "date": "2027-01-11",
+      "category": "其他",
+      "description": "便利店补给（支付宝）",
+      "home_currency": "HKD",
+      "fx_rate": 1.17,
+      "amount_home": 40.95,
+      "paid_by_user_id": "@jeremy",
+      "split": {
+        "mode": "equal",
+        "user_ids": [
+          "@jeremy",
+          "@cathy"
+        ]
+      },
+      "item_id": "item:d2-2130"
+    }
+  ],
+  "journal_entries": [
+    {
+      "id": "journal:d1-jeremy",
+      "day_id": "day:d1",
+      "user_id": "@jeremy",
+      "mood": "😎",
+      "body": "飞机晚了一点，接机司机一直在出口等。北滩没去成，太晒了，就在泳池泡了一下午。望海岭的日落很值得，下山的时候天已经全黑了。",
+      "photos": [
+        {
+          "path": "demo-island/@jeremy/journal/demo-photo-01.jpg",
+          "caption": "望海岭",
+          "taken_at": "2027-01-10T17:44:00+07:00",
+          "width": 1200,
+          "height": 900
+        }
+      ]
+    },
+    {
+      "id": "journal:d1-cathy",
+      "day_id": "day:d1",
+      "user_id": "@cathy",
+      "mood": "🥰",
+      "body": "夜市的烤扇贝好吃！按摩差点没去成，店家下午才回消息。",
+      "photos": [
+        {
+          "path": "demo-island/@cathy/journal/demo-photo-02.jpg",
+          "caption": "夜市",
+          "taken_at": "2027-01-10T19:52:00+07:00",
+          "width": 900,
+          "height": 1200
+        },
+        {
+          "path": "demo-island/@cathy/journal/demo-photo-06.jpg",
+          "caption": "椰子冰",
+          "taken_at": "2027-01-10T13:10:00+07:00",
+          "width": 1000,
+          "height": 1000
+        }
+      ]
+    },
+    {
+      "id": "journal:d2-cathy",
+      "day_id": "day:d2",
+      "user_id": "@cathy",
+      "mood": "🤿",
+      "body": "第一次看到这么多鱼。下午骑车有点累，但西岸椰林的日落太美了。",
+      "photos": [
+        {
+          "path": "demo-island/@cathy/journal/demo-photo-04.jpg",
+          "caption": "西岸椰林",
+          "taken_at": "2027-01-11T17:40:00+07:00",
+          "width": 1200,
+          "height": 900
+        }
+      ]
+    }
+  ],
+  "reviews": [
+    {
+      "id": "review:night-market-jeremy",
+      "place_id": "place:night-market",
+      "user_id": "@jeremy",
+      "item_id": "item:d1-1930",
+      "rating": 5,
+      "notes": "烤扇贝和椰子冰必吃，记得先问价。",
+      "visited_at": "2027-01-10T19:40:00+07:00",
+      "food_log": [
+        {
+          "name": "烤扇贝",
+          "price": {
+            "amount": 120000,
+            "currency": "VND"
+          },
+          "qty": 1,
+          "rating": 5
+        },
+        {
+          "name": "烤鱿鱼",
+          "price": {
+            "amount": 150000,
+            "currency": "VND"
+          },
+          "qty": 1,
+          "rating": 4
+        }
+      ],
+      "photos": [
+        {
+          "path": "demo-island/@jeremy/reviews/demo-photo-03.jpg",
+          "width": 1200,
+          "height": 900
+        }
+      ]
+    },
+    {
+      "id": "review:night-market-cathy",
+      "place_id": "place:night-market",
+      "user_id": "@cathy",
+      "item_id": "item:d1-1930",
+      "rating": 4,
+      "notes": "好吃但人太多，九点以后好一点。",
+      "visited_at": "2027-01-10T19:40:00+07:00"
+    },
+    {
+      "id": "review:pho-cathy",
+      "place_id": "place:pho-shop",
+      "user_id": "@cathy",
+      "item_id": "item:d1-1200",
+      "rating": 3,
+      "notes": "汤不错，粉有点软。",
+      "visited_at": "2027-01-10T12:05:00+07:00",
+      "food_log": [
+        {
+          "name": "牛肉粉",
+          "price": {
+            "amount": 55000,
+            "currency": "VND"
+          },
+          "qty": 2,
+          "rating": 3
+        }
+      ]
+    },
+    {
+      "id": "review:viewpoint-jeremy",
+      "place_id": "place:viewpoint",
+      "user_id": "@jeremy",
+      "item_id": "item:d1-1730",
+      "rating": 5,
+      "notes": "整个椰影湾都在脚下。",
+      "visited_at": "2027-01-10T17:30:00+07:00",
+      "photos": [
+        {
+          "path": "demo-island/@jeremy/reviews/demo-photo-05.jpg",
+          "width": 1000,
+          "height": 1000
+        }
+      ]
+    },
+    {
+      "id": "review:coconut-ice-jeremy",
+      "place_id": "place:coconut-ice",
+      "user_id": "@jeremy",
+      "item_id": "item:d1-1300",
+      "rating": 2,
+      "notes": "太甜了，冰沙化得很快。",
+      "visited_at": "2027-01-10T13:05:00+07:00"
+    },
+    {
+      "id": "review:spa-jeremy",
+      "place_id": "place:spa",
+      "user_id": "@jeremy",
+      "item_id": "item:d1-2100",
+      "rating": 1,
+      "notes": "迟到 20 分钟还不打折，热石不热。",
+      "visited_at": "2027-01-10T21:20:00+07:00"
+    },
+    {
+      "id": "review:seafood-cathy",
+      "place_id": "place:seafood",
+      "user_id": "@cathy",
+      "item_id": "item:d2-1300",
+      "rating": 4,
+      "notes": "现捞的石斑很鲜，价格合理。",
+      "visited_at": "2027-01-11T13:10:00+07:00",
+      "food_log": [
+        {
+          "name": "清蒸石斑",
+          "price": {
+            "amount": 650000,
+            "currency": "VND"
+          },
+          "qty": 1,
+          "rating": 5
+        }
+      ],
+      "shop_log": [],
+      "photos": []
+    },
+    {
+      "id": "review:pepper-jeremy",
+      "place_id": "place:pepper-farm",
+      "user_id": "@jeremy",
+      "item_id": "item:d2-1515",
+      "rating": 3,
+      "notes": "免费参观，胡椒糖可以。",
+      "visited_at": "2027-01-11T15:20:00+07:00",
+      "shop_log": [
+        {
+          "name": "黑胡椒",
+          "price": {
+            "amount": 80000,
+            "currency": "VND"
+          },
+          "qty": 3
+        }
+      ]
+    }
+  ]
+}

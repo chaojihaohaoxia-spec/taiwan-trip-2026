@@ -1,0 +1,105 @@
+/* =====================================================================
+   shell/syncbar.css：同步状态条（SyncBar.jsx）。顶栏下方正中的一颗小胶囊，不是玻璃（同屏真玻璃要省着用）：
+   卡片材质（--material-card）+ 卡片的边 + 抬起的阴影；左边一个语气色的点（警示 / 危险 / 成功）或转圈，右边「重试」「放弃」。
+   ===================================================================== */
+
+.sync-bar {
+  position: fixed;
+  top: calc(var(--safe-top) + var(--topbar-h) + var(--space-2));
+  /* 居中：左右都定住 + 自动外边距 + 按内容宽（不用 left: 50% + translate，那样能用的宽度只有一半，字会被截掉） */
+  left: var(--gutter);
+  right: var(--gutter);
+  width: fit-content;
+  margin: 0 auto;
+  z-index: calc(var(--z-topbar) + 1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0 var(--space-1) 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--material-card);
+  box-shadow: var(--shadow-2), var(--material-card-edge);
+  color: var(--color-text);
+  font: var(--weight-semibold) var(--text-footnote) / 1.3 var(--font-label);
+  transition: top var(--dur-base) var(--ease-out);
+}
+
+/* 页面大标题有副标题、顶栏还没收起时：条放在副标题下面（不插在大标题和副标题中间，视觉评审 P2-2；FrameUI 传 data-below-sub） */
+.sync-bar[data-below-sub] {
+  top: calc(var(--safe-top) + var(--topbar-h) + var(--leading-subhead) + 2px + var(--space-2));
+}
+
+/* 页面正文已经整页显示出错（kit/ErrorState，自带「重试」）：条上不再放第二个「重试」（视觉评审 P2-3） */
+.shell:has(.shell-page .k-empty--error) .sync-bar__btn:not(.sync-bar__btn--quiet) {
+  display: none;
+}
+
+.sync-bar:not(:has(.sync-bar__btn)) {
+  padding-right: var(--space-4);
+}
+
+.sync-bar__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-round);
+  background: var(--color-text-3);
+}
+
+.sync-bar[data-tone="warning"] .sync-bar__dot {
+  background: var(--color-warning);
+}
+
+.sync-bar[data-tone="danger"] .sync-bar__dot {
+  background: var(--color-danger);
+}
+
+.sync-bar[data-tone="success"] .sync-bar__dot {
+  background: var(--color-success);
+}
+
+.sync-bar__spin {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+.sync-bar__text {
+  min-width: 0;
+  padding: var(--space-2) 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  animation: sync-bar-text var(--dur-base) var(--ease-out);
+}
+
+@keyframes sync-bar-text {
+  from {
+    opacity: 0;
+  }
+}
+
+.sync-bar__btn {
+  position: relative;
+  flex: none;
+  height: 28px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font: inherit;
+  cursor: pointer;
+  transition: var(--press-transition);
+}
+
+.sync-bar__btn--quiet {
+  background: var(--color-fill);
+  color: var(--color-text-2);
+}
+
+/* 触控区扩到 44px */
+.sync-bar__btn::after {
+  content: "";
+  position: absolute;
+  inset: -8px -2px;
+}

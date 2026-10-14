@@ -1,0 +1,35 @@
+// =====================================================================
+// dev/demos/InteractionsChecklist.jsx：用户点名的 10 个交互，以及建议的组件名和放置目录。
+// 哪个做好了，就在 dev/demos.js 登记它的演示，并把这里的状态改成“已完成”。
+// =====================================================================
+
+const ITEMS = [
+  { n: 1, title: '搜索按钮原位展开成搜索框', detail: '光标自动定位、不跳页；iOS 要在点击回调里同步 focus()', comp: 'ui/SearchExpand（演示 #/dev/primitives）', status: '已完成' },
+  { n: 2, title: '悬浮加号原位长成操作面板', detail: '加号转 ×，原路收回；面板进历史（?sheet=fab）', comp: 'overlay/AnchoredPanel（原语 motion/morph.js 的 morphFrom / morphTo；演示 #/dev/overlays）', status: '已完成' },
+  { n: 3, title: '提交按钮 文字 → 转圈 → 对勾', detail: '宽度不跳，期间禁止重复提交', comp: 'ui/SubmitButton（演示 #/dev/primitives）', status: '已完成' },
+  { n: 4, title: '图标平滑变形', detail: '三横线↔×、加号↔×、播放↔暂停、列表↔网格、箭头下↔上、圆圈↔对勾', comp: 'ui/MorphIcon（演示 #/dev/primitives）', status: '已完成' },
+  { n: 5, title: '标签指示条弹簧跟随（可拖动）', detail: '松手把手指速度接进弹簧（motion/springs.js 的 solveSpring 支持初速度）', comp: 'ui/SegmentedControl + ui/Tabs（演示 #/dev/primitives）', status: '已完成' },
+  { n: 6, title: '按钮变步进器', detail: '−/数字/+，归零还原成按钮（todos.qty）', comp: 'ui/Stepper（演示 #/dev/primitives）', status: '已完成' },
+  { n: 7, title: '列表项原地展开详情', detail: '下面的列表平滑下移（grid-template-rows 或 FLIP）', comp: 'ui/ExpandableCard（演示 #/dev/primitives）', status: '已完成' },
+  { n: 8, title: '列表 / 网格切换', detail: '元素 FLIP 移到新位置', comp: 'motion/flip + ui/ViewSwitch（演示 #/dev/primitives）', status: '已完成' },
+  { n: 9, title: '顶栏随滚动收成小胶囊', detail: '上滑恢复；读 window 滚动（页面滚动的是文档）', comp: 'ui/CollapsingHeader（演示 #/dev/primitives）', status: '已完成' },
+  { n: 10, title: '菜单从按钮位置圆形扩散铺满全屏', detail: 'clip-path: circle()，原路收回（?sheet=menu）', comp: 'overlay/FullscreenMenu（原语 motion/morph.js 的 revealCircle；演示 #/dev/overlays）', status: '已完成' },
+];
+
+export default function InteractionsChecklist() {
+  return (
+    <ol class="dev-checklist">
+      {ITEMS.map((it) => (
+        <li key={it.n} class="dev-checklist__item">
+          <span class="dev-checklist__n">{it.n}</span>
+          <div class="dev-checklist__text">
+            <b>{it.title}</b>
+            <span class="dev-muted">{it.detail}</span>
+            <code>{it.comp}</code>
+          </div>
+          <span class="dev-badge">{it.status}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}

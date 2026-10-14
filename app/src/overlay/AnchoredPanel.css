@@ -1,0 +1,75 @@
+/* =====================================================================
+   overlay/AnchoredPanel.css：从按钮长出来的面板。
+   .ov-panel 本身就是那块面板（底色、圆角在它身上）；位置由 AnchoredPanel.jsx 写，
+   长出来 / 收回去的形变（transform + clip-path）由 motion/morph.js 驱动。
+   阴影不在面板身上（clip-path 会把它裁掉）：在下面单独一层 .ov-panel-shadow，形变时形状和面板逐帧一致。
+   .ov-panel-tint：盖在面板上面、和按钮同色的色层（长出来 / 收回时的颜色过渡），平时透明；形状同样逐帧跟着面板。
+   两层的尺寸用 --ov-panel-w / --ov-panel-h（JS 量好写在它们身上），形变时 JS 逐帧覆盖。
+   A 皮肤（样稿的 ＋ 面板）：真玻璃（backdrop-filter）+ 高光细边，圆角 32px；标题是大字距的眉标（「快速添加」）。
+   面板自己是滚动容器，折射描边（::before）会跟着内容滚走，所以这里不加，只用 inset 阴影画边。
+   局部变量：--ov-panel-radius 面板圆角
+   ===================================================================== */
+
+.ov-layer--panel {
+  --ov-panel-radius: var(--radius-2xl);
+  /* 面板的尺寸（AnchoredPanel.jsx 量好写在阴影层、色层身上） */
+  --ov-panel-w: 0px;
+  --ov-panel-h: 0px;
+}
+
+.ov-panel-shadow,
+.ov-panel-tint {
+  position: absolute;
+  width: var(--ov-panel-w);
+  height: var(--ov-panel-h);
+  border-radius: var(--ov-panel-radius);
+  pointer-events: none;
+  transform-origin: 0 0;
+}
+
+.ov-panel-shadow {
+  box-shadow: var(--shadow-3);
+}
+
+.ov-panel-tint {
+  opacity: 0;
+}
+
+.ov-panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-4);
+  border-radius: var(--ov-panel-radius);
+  background: var(--material-glass-dense);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
+  color: var(--color-text);
+  pointer-events: auto;
+  outline: none;
+}
+
+.ov-panel[data-material="glass"] {
+  background: var(--material-glass-strong);
+}
+
+/* 标题：眉标（大字距的小字，样稿的「快速添加」） */
+.ov-panel__title {
+  margin: 0 var(--space-1) 10px;
+  color: var(--color-text-2);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+.ov-panel__title:focus-visible {
+  outline-offset: 0;
+}
+
+.ov-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

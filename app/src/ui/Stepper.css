@@ -1,0 +1,221 @@
+/* =====================================================================
+   ui/Stepper.css：按钮变步进器（.stepper）。
+   结构：底色层 .stepper__bg（clip-path 从“按钮那么大”伸展到整条）、「添加」按钮、− 数字 + 三格。
+   根元素宽度固定（展开后的宽度），收起时只有按钮那一段有底色、能点。
+   这里只写两种状态（data-state="closed" / "open"）的静止样式；两者之间的过程（裁切、底色、淡入淡出、位移）
+   由 Stepper.jsx 用弹簧驱动，所以这些属性不写过渡。data-phase="moving"：动画期间两边都看得见。
+   A 皮肤（样稿的打包步进器）：收起是强调色实心胶囊「＋ 加入」；展开是凸起的白胶囊（--color-raised + 高光细边），
+   ± 是强调色图标，数字是 Instrument Serif 大号数字，单位是小号次要字。
+   ===================================================================== */
+
+.stepper {
+  --stepper-h: var(--tap-min);
+  --stepper-w: 124px;
+  --stepper-add-w: 84px;
+  --stepper-bg-closed: var(--color-accent);
+  --stepper-bg-open: var(--color-raised);
+  --stepper-fg-closed: var(--color-on-accent);
+  --stepper-fg-open: var(--color-accent-text);
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: max(var(--stepper-w), var(--stepper-add-w));
+  height: var(--stepper-h);
+  vertical-align: middle;
+}
+
+.stepper--sm {
+  --stepper-h: 36px;
+  --stepper-w: 108px;
+}
+
+.stepper[aria-disabled="true"] {
+  opacity: 0.45;
+}
+
+/* ---------- 底色：从按钮伸展成整条 ---------- */
+.stepper__bg {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-pill);
+  background-color: var(--stepper-bg-open);
+  box-shadow: var(--shadow-raised);
+  clip-path: inset(0 round var(--radius-pill));
+  transform-origin: calc(100% - var(--stepper-add-w) / 2) 50%;
+  transition: var(--press-transition);
+  pointer-events: none;
+}
+
+.stepper[data-align="start"] .stepper__bg {
+  transform-origin: calc(var(--stepper-add-w) / 2) 50%;
+}
+
+.stepper[data-state="closed"] .stepper__bg {
+  background-color: var(--stepper-bg-closed);
+  box-shadow: var(--shadow-bevel);
+  clip-path: inset(0 0 0 calc(100% - var(--stepper-add-w)) round var(--radius-pill));
+}
+
+.stepper[data-state="closed"][data-align="start"] .stepper__bg {
+  clip-path: inset(0 calc(100% - var(--stepper-add-w)) 0 0 round var(--radius-pill));
+}
+
+/* 按下「添加」：底色和按钮一起缩 */
+.stepper[data-state="closed"]:has(.stepper__add[data-pressed]) .stepper__bg {
+  --press-transition: scale var(--press-duration) var(--ease-out);
+  scale: var(--press-scale);
+}
+
+/* ---------- 「添加」按钮 ---------- */
+.stepper__add {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--stepper-fg-closed);
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--press-transition);
+}
+
+.stepper[data-align="start"] .stepper__add {
+  right: auto;
+  left: 0;
+}
+
+.stepper[data-state="open"] .stepper__add {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 静止的展开状态：「添加」彻底隐藏（动画期间还要看得见它淡出） */
+.stepper[data-state="open"]:not([data-phase="moving"]) .stepper__add {
+  visibility: hidden;
+}
+
+/* 小号：视觉 36，可点区域扩到 44 */
+.stepper--sm .stepper__add::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+.stepper--sm .stepper__btn::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-round);
+}
+
+/* ---------- − 数字 + ---------- */
+.stepper__controls {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: var(--stepper-h) minmax(0, 1fr) var(--stepper-h);
+  align-items: center;
+  color: var(--stepper-fg-open);
+}
+
+.stepper__controls > * {
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.stepper[data-state="closed"] .stepper__controls {
+  pointer-events: none;
+}
+
+.stepper[data-state="closed"] .stepper__controls > * {
+  opacity: 0;
+}
+
+/* 静止的收起状态：三格彻底隐藏（动画期间还要看得见它们淡出） */
+.stepper[data-state="closed"]:not([data-phase="moving"]) .stepper__controls > * {
+  visibility: hidden;
+}
+
+/* 收起时往按钮那一侧收一点（只往里收，不伸出步进器的边界，免得撑出横向滚动） */
+.stepper[data-state="closed"][data-align="end"] .stepper__btn--minus,
+.stepper[data-state="closed"][data-align="end"] .stepper__value {
+  translate: 14px 0;
+}
+
+.stepper[data-state="closed"][data-align="start"] .stepper__btn--plus,
+.stepper[data-state="closed"][data-align="start"] .stepper__value {
+  translate: -14px 0;
+}
+
+.stepper__btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--stepper-h);
+  height: var(--stepper-h);
+  border-radius: var(--radius-round);
+  color: inherit;
+  cursor: pointer;
+}
+
+.stepper__btn[data-pressed] {
+  background-color: color-mix(in srgb, var(--color-accent) 16%, transparent);
+}
+
+.stepper__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .stepper__btn:not(:disabled):not([data-pressed]):hover {
+    background-color: color-mix(in srgb, var(--color-accent) 9%, transparent);
+  }
+}
+
+.stepper__value {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  color: var(--color-text);
+  font: var(--weight-regular) var(--text-figure-4) / 1 var(--font-figure);
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: var(--tracking-figure);
+  border-radius: var(--radius-xs);
+}
+
+.stepper--sm .stepper__value {
+  font-size: var(--text-figure-5);
+}
+
+.stepper__unit {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  letter-spacing: 0;
+}
+
+@media (hover: hover) {
+  .stepper[data-state="closed"]:has(.stepper__add:not(:disabled):hover) .stepper__bg {
+    background-color: var(--color-accent-hover);
+  }
+}
+
+/* 减弱动态效果：不伸展、不位移（JS 不播），状态直接切换；文字只淡入淡出 */
+@media (prefers-reduced-motion: reduce) {
+  .stepper__add,
+  .stepper__controls > * {
+    transition: var(--press-transition), opacity var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+  }
+
+  .stepper[data-state="closed"] .stepper__controls > * {
+    translate: none;
+  }
+}

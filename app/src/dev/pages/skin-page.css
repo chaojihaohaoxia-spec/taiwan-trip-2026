@@ -1,0 +1,453 @@
+/* =====================================================================
+   dev/pages/skin-page.css：皮肤一览（#/dev/skin）。只用 tokens.css 的变量；版式照样稿 P2-serif 的首屏。
+   ===================================================================== */
+
+/* ---------- 样张 ---------- */
+.skin-sample {
+  max-width: 430px;
+  margin-top: var(--space-3);
+}
+
+.skin-sample__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 60px;
+}
+
+.skin-sample__trip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  margin-left: -6px;
+  padding: 0 6px;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  transition: var(--press-transition);
+}
+
+.skin-sample__trip .t-display {
+  line-height: 1;
+}
+
+.skin-chev {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-top: 2px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+.skin-sample__sub {
+  margin-top: 2px;
+  color: var(--color-text-2);
+  font-size: var(--text-subhead);
+  letter-spacing: 0.01em;
+}
+
+/* 天数分段：玻璃胶囊，每段两行（小字日期 + 宋体 D1） */
+.skin-days {
+  margin: var(--space-4) 0 2px;
+  --seg-h: 58px;
+}
+
+.skin-days .seg__item {
+  flex-direction: column;
+  gap: 1px;
+}
+
+.skin-days .seg__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.skin-days i {
+  color: var(--color-text-2);
+  font: var(--weight-medium) var(--text-caption-2) / 1.2 var(--font-label);
+  font-style: normal;
+  letter-spacing: 0.02em;
+}
+
+.skin-days b {
+  font: var(--weight-serif) var(--text-title-4) / 1.1 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+}
+
+.skin-days .seg__item[aria-checked="true"] b {
+  color: var(--color-accent-text);
+}
+
+.skin-card {
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: var(--radius-xl);
+}
+
+.skin-card__h {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 28px;
+  margin-bottom: var(--space-3);
+}
+
+.skin-card__h .t-title {
+  flex: 1;
+  font-size: var(--text-title-3);
+}
+
+.skin-count {
+  color: var(--color-text-2);
+  font-size: var(--text-footnote);
+}
+
+/* 倒计时 + 航班 */
+.skin-hero {
+  padding: 16px 18px 18px;
+}
+
+.skin-hero__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 24px;
+}
+
+.skin-hero__main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: var(--space-2);
+}
+
+.skin-cd {
+  display: grid;
+  flex: none;
+  grid-template-columns: auto auto;
+  column-gap: 6px;
+}
+
+.skin-cd__num {
+  grid-row: 1 / 3;
+  padding: 0 0.1em 0 0.02em;
+  background: linear-gradient(165deg, var(--color-accent) 0%, var(--color-accent-text) 85%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: var(--text-figure-hero);
+  line-height: 0.78;
+}
+
+.skin-cd__unit {
+  align-self: end;
+  font: var(--weight-serif) var(--text-title-2) / 1.1 var(--font-serif);
+}
+
+.skin-cd__hm {
+  align-self: start;
+  margin-top: 3px;
+  color: var(--color-text-2);
+  font-size: var(--text-caption-1);
+  white-space: nowrap;
+}
+
+.skin-fl {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding-left: 14px;
+  border-left: 1px solid var(--color-separator);
+  color: var(--color-text-2);
+  font-size: var(--text-caption-1);
+}
+
+.skin-fl > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skin-fl__times {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--text-figure-3);
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.skin-fl__times svg {
+  color: var(--color-accent-text);
+  rotate: 45deg;
+}
+
+/* 待办 */
+.skin-todos li + li {
+  border-top: 1px solid var(--color-separator);
+}
+
+.skin-todos .check--row {
+  padding-inline: 0;
+}
+
+.skin-todos .check__desc span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.skin-warn {
+  color: var(--color-warning-text);
+}
+
+.skin-card .btn--block {
+  margin-top: var(--space-3);
+}
+
+/* 天气 */
+.skin-wx {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.skin-wx > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-2);
+  font-size: var(--text-caption-1);
+}
+
+.skin-wx svg {
+  margin-bottom: var(--space-1);
+  color: var(--color-accent-2);
+}
+
+.skin-wx b {
+  color: var(--color-text);
+  font-size: var(--text-figure-4);
+  line-height: 1.05;
+}
+
+/* 打包 */
+.skin-pack {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.skin-pack__ico {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-tile);
+  color: var(--color-accent-text);
+}
+
+.skin-pack__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--color-text-2);
+  font-size: var(--text-caption-1);
+}
+
+.skin-pack__text b {
+  color: var(--color-text);
+  font-size: var(--text-callout);
+  font-weight: var(--weight-semibold);
+}
+
+.skin-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+/* ---------- 字体 ---------- */
+.skin-fonts {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.skin-font code {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-mono);
+}
+
+.skin-font p {
+  margin-top: var(--space-1);
+}
+
+.skin-font__figure {
+  font-size: var(--text-figure-2);
+  line-height: 1.15;
+}
+
+.skin-font__italic {
+  color: var(--color-accent-text);
+}
+
+.skin-font__label {
+  font-size: var(--text-footnote);
+}
+
+.skin-font__note {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.skin-one {
+  display: flex;
+  gap: var(--space-6);
+  margin-top: var(--space-3);
+}
+
+.skin-one span {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.skin-one b {
+  font-size: var(--text-figure-1);
+  font-weight: var(--weight-regular);
+  line-height: 1;
+}
+
+.skin-one__raw {
+  font-family: var(--font-figure-italic);
+}
+
+.skin-one small {
+  max-width: 9em;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+}
+
+.skin-font__report p {
+  font: var(--type-footnote);
+}
+
+/* ---------- 材质 ---------- */
+.skin-materials {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.skin-materials > div,
+.skin-materials__inner > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: 104px;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  font: var(--type-caption-1);
+  color: var(--color-text-2);
+}
+
+.skin-materials b {
+  color: var(--color-text);
+  font: var(--type-footnote);
+  font-family: var(--font-mono);
+}
+
+.skin-materials__inner {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.skin-materials__inner > div {
+  min-height: 0;
+  border-radius: var(--radius-md);
+}
+
+/* ---------- 光场 ---------- */
+.skin-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.skin-field {
+  position: relative;
+  overflow: hidden;
+  height: 220px;
+  margin: 0;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2), var(--shadow-glass-edge);
+  isolation: isolate;
+}
+
+/* 预览里的光场关在格子里（正式页面的光场是 fixed 铺满视口） */
+.skin-field .light-field {
+  position: absolute;
+}
+
+.skin-field figcaption {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--material-glass-strong);
+  -webkit-backdrop-filter: var(--glass-filter-sm);
+  backdrop-filter: var(--glass-filter-sm);
+  box-shadow: var(--shadow-glass-edge);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+}
+
+.skin-field__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent);
+}
+
+.skin-switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.skin-field--wide {
+  flex: 1 1 260px;
+  height: 160px;
+}
+
+.skin-switch__name {
+  position: absolute;
+  left: var(--space-4);
+  top: var(--space-3);
+  font-size: var(--text-title-2);
+}

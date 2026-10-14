@@ -1,0 +1,69 @@
+/* =====================================================================
+   kit/SwipeRow.css：左滑操作（.k-swipe）。内容在上、操作托盘在下面右侧；托盘用 clip-path 只露出拉开的那一段
+   （内容是半透明材质也透不出下面的按钮）。按钮：危险红 / 成功绿 / 强调色实心 + 白字（on- 颜色）。
+   ===================================================================== */
+
+.k-swipe {
+  --k-swipe-w: 76px;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  /* 横着拖归我们，竖着滑还是滚页面 */
+  touch-action: pan-y;
+}
+
+.k-swipe__content {
+  position: relative;
+  z-index: var(--z-raised);
+  touch-action: pan-y;
+}
+
+.k-swipe[data-dragging] .k-swipe__content {
+  cursor: grabbing;
+}
+
+.k-swipe__tray {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-base);
+  display: flex;
+  width: var(--k-swipe-w);
+  clip-path: inset(0 0 0 100%);
+}
+
+.k-swipe__act {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--color-text-2);
+  color: var(--color-text-inverse);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+  transition: flex-grow var(--spring-snappy-duration) var(--spring-snappy), opacity var(--dur-fast) var(--ease-out);
+}
+
+.k-swipe__act--danger { background: var(--color-danger); color: var(--color-on-danger); }
+.k-swipe__act--success { background: var(--color-success); color: var(--color-on-success); }
+.k-swipe__act--accent { background: var(--color-accent); color: var(--color-on-accent); }
+
+.k-swipe__act:focus-visible {
+  outline-offset: -4px;
+}
+
+/* 一直往左拉到底：那个操作吃满整行，别的让开 */
+.k-swipe[data-armed] .k-swipe__act[data-full] {
+  flex-grow: 100;
+}
+
+.k-swipe[data-armed] .k-swipe__act:not([data-full]) {
+  opacity: 0;
+}

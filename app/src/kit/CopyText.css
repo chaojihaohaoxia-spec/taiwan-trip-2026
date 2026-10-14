@@ -1,0 +1,84 @@
+/* =====================================================================
+   kit/CopyText.css：点一下复制（.k-copy）。浅底胶囊 + 复制图标；视觉 32 高，可点区域扩到 44。
+   ===================================================================== */
+
+.k-copy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 5px 8px 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-medium);
+  text-align: left;
+  vertical-align: middle;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.k-copy::after {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
+}
+
+.k-copy--sm {
+  min-height: 28px;
+  padding: 3px 7px 3px 10px;
+  font-size: var(--text-footnote);
+}
+
+.k-copy--sm::after {
+  inset: -8px -2px;
+}
+
+.k-copy--block {
+  display: flex;
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+
+.k-copy--mono .k-copy__text {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.k-copy__text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.k-copy__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-round);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-accent-text);
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.k-copy--done .k-copy__icon {
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
+
+.k-copy[data-pressed] {
+  background-color: var(--color-fill-pressed);
+}
+
+@media (hover: hover) {
+  .k-copy:hover:not([data-pressed]) {
+    background-color: var(--color-fill-hover);
+  }
+}

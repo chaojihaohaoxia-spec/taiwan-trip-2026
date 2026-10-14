@@ -1,0 +1,61 @@
+/* =====================================================================
+   styles/type.css：字体角色工具类（P2「杂志宋体」的分工）。base 层，组件、页面可以覆盖。
+   组件里一般直接用变量（font: var(--type-title-2); letter-spacing: var(--tracking-display)），
+   页面里临时要某个角色时用这些类，省得每次写三行。
+
+   宋体（思源宋体 600）：大标题、卡片标题、行程名、菜单 / 面板标题、大按钮。只在 ≥15px 用；不开 palt。
+   大号数字（Instrument Serif 400）：倒计时（斜体）、航班时间、金额、天气、数量。它的「1」由 P2 Figure One 顶替。
+                                    D1–D4 这种字母 + 数字的徽章别用它（「D1」会读成「Dl」），用宋体自带的拉丁字母（.t-serif）。
+   标签（Geist + tabular-nums）：小号日期、计数、时间轴时间、标签里的拉丁字母和数字；中文仍是系统字体。
+   正文、说明、用户输入：系统字体（body 默认），不用加类。
+   ===================================================================== */
+
+/* 宋体标题：.t-display 40px（页面大标题）、.t-title 21px（区块 / 面板标题）。
+   只在空格、标点处折行（字距放开后，词中间折行很难看，例如「日落小 / 镇」） */
+.t-display,
+.t-title {
+  font: var(--type-large-title);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.t-title {
+  font: var(--type-title-2);
+}
+
+/* 只换成宋体（字号沿用上下文）：行程名、卡片里的名字、徽章里的 D1 */
+.t-serif {
+  font-family: var(--font-serif);
+  font-weight: var(--weight-serif);
+  letter-spacing: var(--tracking-title);
+}
+
+/* 大号数字；斜体（倒计时）用 Instrument Serif 自己的斜体「1」，不经过 P2 Figure One */
+.t-figure,
+.t-figure-italic {
+  font-family: var(--font-figure);
+  font-weight: var(--weight-regular);
+  font-style: normal;
+  letter-spacing: var(--tracking-figure);
+  font-variant-numeric: lining-nums;
+}
+
+.t-figure-italic {
+  font-family: var(--font-figure-italic);
+  font-style: italic;
+}
+
+/* 标签、小号数字 */
+.t-label {
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 眉标：卡片上方的小栏目名，大字距 */
+.t-eyebrow {
+  color: var(--color-text-2);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+}

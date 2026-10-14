@@ -1,0 +1,55 @@
+/* =====================================================================
+   pages/lists/action-chip.css：备注里认出来的「打电话 / WhatsApp / 写邮件 / 打开网页」小胶囊（ActionChip.jsx）。
+   和清单行里去预订、去那天的白胶囊（lists.css 的 .lchip）同样大小，但用强调色浅底：这是“马上做”的，那是“去看看”。
+   可点区域上下扩到 44 高（::after）。只用 tokens.css 的变量。
+   ===================================================================== */
+
+.lact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lact {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  min-height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-label);
+  text-decoration: none;
+  white-space: nowrap;
+  pointer-events: auto;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+  /* 长按电话号码照样出 iOS 的「拨打 / 发信息 / 拷贝」菜单（data-press 默认关掉了） */
+  -webkit-touch-callout: default;
+}
+
+.lact::after {
+  content: "";
+  position: absolute;
+  inset: -8px -3px;
+}
+
+.lact .glyph {
+  flex: none;
+}
+
+.lact__pre {
+  flex: none;
+  color: var(--color-text-2);
+}
+
+.lact__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,235 @@
+/* =====================================================================
+   styles/base.css：全局基础样式（重置 + 文档级默认值 + 少量通用工具类）
+
+   只放“所有页面都一样”的东西：盒模型、字体、底色、焦点环、安全区、选择色、
+   减弱动效、无障碍工具类。组件样式不放这里（放在各自目录，见 ui/README.md）。
+   取值一律来自 tokens.css。
+
+   同一层（base）里还有（在这里 @import，跟着 base.css 一起进首屏样式表）：
+     fonts.css      网页字体的 @font-face（scripts/fonts/build-fonts.py 生成）
+     materials.css  材质工具类：.material-card（卡片）、.material-glass（悬浮层真玻璃）、.material-raised、.material-inset
+     field.css      光场：.light-field（页面背景的主题色光斑 + 颗粒）
+     type.css       字体角色工具类：.t-serif、.t-figure、.t-label、.t-eyebrow……
+   ===================================================================== */
+
+@import "./fonts.css";
+@import "./materials.css";
+@import "./field.css";
+@import "./type.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* 跟随系统深浅色；用户强制时 data-theme 覆盖（表单控件、滚动条也跟着变） */
+  color-scheme: light dark;
+  /* 不让浏览器假粗、假斜：宋体只有 600，Instrument Serif 只有 400，缺的字重就用最接近的那个，不描粗 */
+  font-synthesis: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--color-canvas);
+  /* 页面滚动交给文档本身（不在内部容器里滚）：iOS 地址栏收起、点状态栏回顶部、
+     路由的滚动恢复都依赖这一点。弹层锁滚动时不能改变 window.scrollY。 */
+  scroll-padding-top: calc(var(--safe-top) + var(--topbar-h));
+  scroll-padding-bottom: calc(var(--safe-bottom) + var(--tabbar-h));
+  /* 关掉浏览器的滚动锚定：iOS Safari 本来就没有，桌面 Chrome 有的话行为就不一致——
+     弹层开关时上面的内容变高变矮，Chrome 会悄悄改 scrollY（锁滚动记下的位置就错了，关掉后整页跳一下）。
+     需要“内容变化时某个元素待在原地”的地方用 motion/anchor.js 的 holdPosition（逐帧、两边一致）。 */
+  overflow-anchor: none;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* 底色在 <html> 上（--color-canvas）；body 透明，光场（.light-field，z-index 在内容下面）才露得出来 */
+  background: transparent;
+  color: var(--color-text);
+  font: var(--type-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* 横屏时让开刘海；上下的安全区由顶栏、底栏各自处理 */
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+  /* 自己做按压反馈，去掉 iOS 默认的灰色点按高亮 */
+  -webkit-tap-highlight-color: transparent;
+  /* 兜底：任何东西都不能撑出横向滚动（clip 不会生成滚动容器，position: sticky 照常工作） */
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+button {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+a {
+  color: var(--color-accent-text);
+  text-decoration: none;
+}
+
+/* 能点的东西：去掉双击缩放的延迟 */
+a,
+button,
+input,
+select,
+textarea,
+label,
+summary,
+[role="button"],
+[role="tab"],
+[role="link"] {
+  touch-action: manipulation;
+}
+
+/* 输入框字号不能小于 16px，否则 iOS 聚焦时会放大页面 */
+input,
+select,
+textarea {
+  font-size: max(16px, 1em);
+}
+
+/* 焦点环：只在键盘操作时出现；输入框聚焦另有样式时由组件自己覆盖 */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+}
+
+/* 数字等宽：金额、时间、倒计时 */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 只给读屏软件看 */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* 主内容区：路由切换后焦点会落在这里（tabindex=-1），不显示焦点环 */
+#main:focus {
+  outline: none;
+}
+
+/* 启动画面：index.html 里的静态内容，首屏渲染完成后由 main.jsx 移除 */
+.boot {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--safe-top) var(--gutter) var(--safe-bottom);
+  background: var(--color-canvas);
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  text-align: center;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.boot[data-state="leaving"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 启动画面只出现一瞬间：用系统字体（不为它去下载宋体分片、也不会换字体闪一下） */
+.boot__name {
+  color: var(--color-text);
+  font: var(--weight-semibold) var(--text-title-3) / var(--leading-title-3) var(--font-sans);
+  letter-spacing: var(--tracking-label);
+}
+
+.boot__error {
+  margin-top: var(--space-2);
+  color: var(--color-danger-text);
+}
+
+/* 减弱动态效果：平滑滚动改成直接跳。
+   动画本身由各组件负责：弹簧变量在 tokens.css 里已经换成短缓出，
+   大位移、缩放、视差类动画请在组件里改成淡入淡出（读 motion/reduced-motion.js）。 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+}

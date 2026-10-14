@@ -1,0 +1,506 @@
+/* =====================================================================
+   dev/overlays.css：弹层展示页（dev/overlays.jsx）自用的样式（ovd- 前缀）。
+   这里的按钮、输入框只是演示道具，正式组件见 ui/。只用 tokens.css 的变量。
+   注意：触发按钮的 class（ovd-fab、ovd-trip-pill、ovd-icon-btn）也会被“替身按钮”用，
+   所以它们的样式不能依赖父元素、不能自己定位（定位交给外面包着的容器）。
+   ===================================================================== */
+
+.ovd-muted {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+/* ---------- 演示舞台：行程切换胶囊 + 右下角的悬浮加号 ---------- */
+.ovd-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: 220px;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+
+.ovd-stage__hint {
+  max-width: 60%;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.ovd-stage > .ovd-fab {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+}
+
+.ovd-fab {
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent);
+  box-shadow: var(--shadow-3);
+  color: var(--color-on-accent);
+}
+
+.ovd-fab[data-pressed] {
+  background: var(--color-accent-pressed);
+}
+
+.ovd-trip-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3) 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-2);
+  color: var(--color-text);
+  font: var(--type-headline);
+}
+
+.ovd-trip-pill__emoji {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  font-size: 16px;
+}
+
+.ovd-trip-pill__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ovd-trip-pill .morph-icon {
+  color: var(--color-accent-text);
+}
+
+.ovd-emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ---------- 顶栏样子的工具条 + 三横线按钮 ---------- */
+.ovd-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: 0 var(--space-2) 0 var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+
+.ovd-toolbar__title {
+  overflow: hidden;
+  font: var(--type-headline);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ovd-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border-radius: var(--radius-round);
+  background: var(--color-fill);
+  color: var(--color-accent-text);
+}
+
+.ovd-icon-btn[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+/* ---------- 加号面板里的方块 ---------- */
+.ovd-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.ovd-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-height: 112px;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  text-align: start;
+}
+
+.ovd-tile[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+.ovd-tile__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--space-1);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.ovd-tile__title {
+  font: var(--type-headline);
+}
+
+.ovd-tile__detail {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+@media (hover: hover) {
+  .ovd-tile:hover:not([data-pressed]) {
+    background: var(--color-fill-hover);
+  }
+}
+
+/* ---------- 表单（记一笔、写日记） ---------- */
+.ovd-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border: 0;
+}
+
+.ovd-field__label {
+  padding: 0;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+}
+
+.ovd-input {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  resize: vertical;
+}
+
+/* 聚焦：强调色边框 + 浅色光圈（已经很明显，不再叠全局的焦点环） */
+.ovd-input:focus,
+.ovd-input:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+  outline: none;
+}
+
+.ovd-input--amount {
+  font: var(--type-title-2);
+  font-family: var(--font-rounded);
+  font-variant-numeric: tabular-nums;
+}
+
+.ovd-segments {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+}
+
+.ovd-segment {
+  min-height: 40px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  text-align: center;
+  position: relative;
+}
+
+.ovd-segment::after {
+  content: "";
+  position: absolute;
+  inset: -2px 0;
+}
+
+.ovd-segment[aria-checked="true"] {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+  color: var(--color-accent-text);
+}
+
+.ovd-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ovd-chip {
+  position: relative;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.ovd-chip::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+.ovd-chip[aria-pressed="true"],
+.ovd-chip[aria-expanded="true"] {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.ovd-chip--danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
+}
+
+.ovd-primary {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font: var(--type-headline);
+  text-align: center;
+}
+
+.ovd-primary:disabled {
+  background: var(--color-fill);
+  color: var(--color-text-3);
+}
+
+.ovd-primary[data-pressed] {
+  scale: 0.98;
+  background: var(--color-accent-pressed);
+}
+
+/* ---------- 地点详情 ---------- */
+.ovd-place__hero {
+  display: grid;
+  place-items: center;
+  height: 120px;
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+.ovd-place__meta {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.ovd-place__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-5);
+}
+
+.ovd-pill {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-accent-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+}
+
+.ovd-pill[aria-pressed="true"] {
+  background: var(--color-accent-soft);
+}
+
+.ovd-pill--danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
+}
+
+.ovd-subtitle {
+  margin-bottom: var(--space-2);
+  font: var(--type-headline);
+}
+
+.ovd-list {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+
+.ovd-list__row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  font: var(--type-subhead);
+}
+
+.ovd-list__row span {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.ovd-list__row + .ovd-list__row {
+  border-top: 0.5px solid var(--color-separator);
+}
+
+/* ---------- 记账行（Toast、小菜单演示） ---------- */
+.ovd-rows {
+  overflow: hidden;
+  margin-top: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+
+.ovd-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+}
+
+.ovd-row + .ovd-row {
+  border-top: 0.5px solid var(--color-separator);
+}
+
+.ovd-row__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font: var(--type-callout);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ovd-row__amount {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  white-space: nowrap;
+}
+
+.ovd-row--empty {
+  justify-content: center;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+@media (max-width: 420px) {
+  .ovd-row {
+    flex-wrap: wrap;
+  }
+
+  .ovd-row__title {
+    flex-basis: 100%;
+  }
+
+  .ovd-row__amount {
+    flex: 1;
+  }
+}
+
+/* ---------- 全屏菜单底部的外观切换 ---------- */
+.ovd-theme {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.ovd-theme__label {
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+}
+
+.ovd-theme .ovd-segments {
+  flex: 1;
+  max-width: 360px;
+}
+
+/* ---------- 弹层栈调试 ---------- */
+.ovd-kv {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  font: var(--type-footnote);
+}
+
+.ovd-kv dt {
+  color: var(--color-text-2);
+}
+
+.ovd-kv dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.ovd-zlist {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-4);
+  font: var(--type-footnote);
+  counter-reset: z;
+}
+
+.ovd-zlist li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+}
+
+.ovd-zlist code {
+  color: var(--color-accent-text);
+  font-family: var(--font-mono);
+}
+
+/* ---------- 按需加载的面板 ---------- */
+.ovd-lazy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ovd-lazy code {
+  font-family: var(--font-mono);
+}
+
+.ovd-lazy__amount {
+  font: var(--type-title-1);
+  font-family: var(--font-rounded);
+}

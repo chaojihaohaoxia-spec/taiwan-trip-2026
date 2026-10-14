@@ -1,0 +1,857 @@
+/* =====================================================================
+   pages/ledger/ledger.css：账本页（.lg）。照样稿账本页（02-style.html「账本页」+ 06-render.js ledgerView）：
+   结算大字（Instrument Serif）、两格统计块、流水行（图标方块 40 + 标题 / 副标题 + 右边金额和折合港币）。
+   颜色、圆角、阴影、字体、间距只用 tokens.css 的变量。
+   ===================================================================== */
+
+.lg {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.lg__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.lg__skel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 18px;
+  border-radius: var(--radius-xl);
+}
+
+/* ---------- 总花费 ---------- */
+.lg-totals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lg-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.lg-total + .lg-total {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-separator);
+}
+
+.lg-total__count {
+  flex: none;
+  color: var(--color-text-2);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+}
+
+.lg-hkd {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-separator);
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-hkd b {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+/* 两人各付了多少：两格往下凹的块 */
+.lg-people {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.lg-person {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: var(--radius-md);
+}
+
+.lg-person__paid {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+}
+
+.lg-person__lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-fx {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-3);
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-fx[data-tone="warning"] {
+  color: var(--color-warning-text);
+}
+
+/* 分摊对不上的提醒（点了去看那一笔） */
+.lg-issue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--tap-min);
+  margin: var(--space-2) -8px 0;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
+  font: var(--type-footnote);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.lg-issue > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.lg-fx[data-tone="offline"] {
+  color: var(--color-info-text);
+}
+
+/* ---------- 结算 ---------- */
+.lg-settle__line + .lg-settle__line {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-separator);
+}
+
+.lg-settle__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+}
+
+.lg-settle__who b {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.lg-settle__amts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.lg-settle__amt {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.lg-settle__plus {
+  color: var(--color-text-2);
+  font-family: var(--font-figure);
+  font-size: var(--text-figure-4);
+  line-height: 1;
+}
+
+.lg-settle__even {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-success-text);
+  font: var(--type-callout);
+  font-weight: var(--weight-semibold);
+}
+
+.lg-settle__even-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-round);
+  background: var(--color-success-soft);
+}
+
+.lg-settle__last {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-separator);
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-settle__undo {
+  margin: -12px 0 -12px auto;
+  min-height: var(--tap-min);
+  padding: 0 8px;
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  transition: var(--press-transition);
+}
+
+.lg-settle__btn {
+  margin-top: var(--space-3);
+}
+
+.lg-settle__hint {
+  margin-top: var(--space-2);
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  text-align: center;
+}
+
+/* ---------- 视图切换 + 筛选 ---------- */
+.lg-view {
+  margin-top: var(--space-2);
+}
+
+.lg-filter {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0 calc(-1 * var(--gutter));
+  padding: var(--space-1) var(--gutter);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding: 0 var(--gutter);
+}
+
+.lg-filter::-webkit-scrollbar {
+  display: none;
+}
+
+.lg-filter .chip {
+  flex: none;
+}
+
+/* 分类 | 谁付 之间的一道线 */
+.lg-filter__sep {
+  flex: none;
+  align-self: center;
+  width: 1px;
+  height: 20px;
+  margin: 0 2px;
+  background: var(--color-border-strong);
+}
+
+/* 「Jeremy 付」芯片前面的成员色点（和 PersonChip 同一个颜色） */
+.lg-filter__dot {
+  --lg-dot: var(--color-accent);
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-round);
+  background: var(--lg-dot);
+  box-shadow: var(--shadow-highlight);
+}
+
+/* ---------- 日期头（吸顶） ---------- */
+.lg-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lg-date {
+  position: sticky;
+  top: calc(var(--safe-top) + var(--topbar-h) + var(--space-1));
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+
+/* 吸住时整条的玻璃底（材质是渐变，没法过渡颜色：放在伪元素上用透明度交叉淡化）。
+   看不见时不开背景模糊（透明度 0 的层照样每帧算模糊） */
+.lg-date::before {
+  content: "";
+  position: absolute;
+  inset: -3px -4px;
+  z-index: 0;
+  border-radius: var(--radius-pill);
+  background: var(--material-glass-strong);
+  box-shadow: var(--shadow-2), var(--shadow-glass-edge);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.lg-date__pill,
+.lg-date__sum {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  display: inline-flex;
+  /* 垂直居中（baseline 时右边「1 笔 · ≈ HK$…」贴在胶囊上沿，10-14 现场走查 P2-5） */
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+}
+
+/* 胶囊自己的卡片底色也放伪元素上，吸住时淡出 */
+.lg-date__pill::before,
+.lg-date__sum::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--material-card);
+  box-shadow: var(--material-card-edge);
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+/* 吸住了：内容从它下面滚过。整条变成一块真玻璃 + 投影（同一时间只有一两个日期头吸着，模糊开销很小），
+   两个胶囊自己的底色撤掉——不然流水的字会从两个胶囊之间露出来 */
+.lg-date[data-stuck]::before {
+  opacity: 1;
+  -webkit-backdrop-filter: var(--glass-filter-sm);
+  backdrop-filter: var(--glass-filter-sm);
+}
+
+.lg-date[data-stuck] .lg-date__pill::before,
+.lg-date[data-stuck] .lg-date__sum::before {
+  opacity: 0;
+}
+
+.lg-date__pill {
+  align-items: center;
+  padding-left: 10px;
+}
+
+/* 「D1」：第几天的颜色和概览、地图同一套（kit/day-tone.js，--lg-day 由 parts.jsx 写）；12px 的小字用标签字体（宋体只在 15px 以上用，视觉评审 P2-7） */
+.lg-date__d {
+  --lg-day: var(--color-accent);
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: var(--radius-xs);
+  background: var(--lg-day);
+  color: var(--color-on-tile);
+  font-family: var(--font-label);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-caption-1);
+  letter-spacing: 0.02em;
+}
+
+.lg-date__main {
+  font: var(--type-label);
+  font-size: var(--text-subhead);
+  letter-spacing: var(--tracking-label);
+}
+
+.lg-date__sub {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-date__sum {
+  flex: none;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------- 流水行 ---------- */
+.lg-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lg-item {
+  position: relative;
+  /* 长按删除：别弹出系统的文字选择 / 菜单 */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.lg-item + .lg-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 66px;
+  right: 14px;
+  z-index: var(--z-raised);
+  border-top: 1px solid var(--color-separator);
+  pointer-events: none;
+}
+
+/* 长按删除的渐进反馈（hooks.js 的 useLongPress：按住 150ms 起加 data-holding）：行微缩到 .98、
+   危险色浅底从左往右铺满（铺满的那一刻正好删除）；松手马上退回 */
+.lg-item {
+  --lg-hold-ms: 500ms;
+}
+
+.lg-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+
+.lg-item[data-holding]::after {
+  transform: scaleX(1);
+  opacity: 1;
+  transition: transform var(--lg-hold-ms) linear, opacity var(--dur-fast) var(--ease-out);
+}
+
+.lg-item[data-holding] > * {
+  scale: 0.98;
+  transition: scale var(--lg-hold-ms) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-item[data-holding]::after {
+    transform: scaleX(1);
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .lg-item[data-holding] > * {
+    scale: 1;
+  }
+}
+
+/* 刚保存的那一笔：短暂高亮（强调色浅底淡出） */
+.lg-item[data-fresh] > .k-swipe,
+.lg-item[data-fresh] > div {
+  animation: lg-fresh 2.6s var(--ease-out) both;
+}
+
+@keyframes lg-fresh {
+  0%,
+  35% {
+    background-color: var(--color-accent-soft);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* 从搜索 / 提示跳过来的那一笔（?expense=）：同样高亮一下 */
+.lg-item[data-focus] > .k-swipe,
+.lg-item[data-focus] > div {
+  animation: lg-fresh 2.6s var(--ease-out) both;
+}
+
+.lg-row__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lg-row__title {
+  font: var(--type-callout);
+  font-weight: var(--weight-semibold);
+  line-height: 1.35;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.lg-row__sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-row__sub .k-person {
+  font-size: var(--text-footnote);
+}
+
+.lg-row__value {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  max-width: 46%;
+}
+
+.lg-row__value .k-money__main {
+  font-weight: var(--weight-semibold);
+}
+
+/* 展开的详情 */
+.lg-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-1);
+}
+
+.lg-detail .k-info--pair {
+  min-height: 40px;
+}
+
+.lg-detail__shares {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.lg-detail__receipt {
+  display: block;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  transition: width var(--dur-base) var(--ease-out), height var(--dur-base) var(--ease-out);
+}
+
+.lg-detail__receipt[data-large] {
+  width: 100%;
+  height: auto;
+  min-height: 160px;
+}
+
+.lg-detail__receipt img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lg-detail__receipt[data-large] img {
+  height: auto;
+  object-fit: contain;
+}
+
+.lg-detail__meta {
+  color: var(--color-text-3);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-detail__acts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.lg-detail__ro {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.lg-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-accent-text);
+  font-weight: var(--weight-semibold);
+}
+
+/* ---------- 统计 ---------- */
+.lg-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lg-bar {
+  --lg-bar-c: var(--color-cat-1);
+  --lg-bar-w: 0%;
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: var(--space-3);
+  row-gap: 4px;
+  align-items: center;
+  width: calc(100% + 2 * var(--space-2));
+  margin: 0 calc(-1 * var(--space-2));
+  padding: 8px var(--space-2);
+  border-radius: var(--radius-md);
+  color: inherit;
+  text-align: left;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+button.lg-bar {
+  cursor: pointer;
+}
+
+button.lg-bar[data-pressed] {
+  background-color: var(--color-fill-pressed);
+}
+
+@media (hover: hover) {
+  button.lg-bar:hover:not([data-pressed]) {
+    background-color: var(--color-fill);
+  }
+}
+
+.lg-bar__icon {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+.lg-bar__head {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+  font: var(--type-callout);
+  font-weight: var(--weight-semibold);
+}
+
+.lg-bar__count {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-bar__value {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  text-align: right;
+}
+
+.lg-bar__share {
+  display: block;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-bar__track {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+}
+
+.lg-bar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--lg-bar-w);
+  min-width: 6px;
+  border-radius: inherit;
+  background: var(--lg-bar-c);
+  transform-origin: 0 50%;
+  animation: lg-grow var(--dur-slow) var(--ease-out) both;
+}
+
+@keyframes lg-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* 一分钱都没有：连最小的那一小截也不画 */
+.lg-bar__fill[data-zero] {
+  min-width: 0;
+  animation: none;
+}
+
+/* 按人：每个人一块，点了去看他付的流水（整块是按钮，右边小箭头） */
+.lg-who {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lg-who__row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: calc(100% + 2 * var(--space-2));
+  margin: 0 calc(-1 * var(--space-2));
+  padding: 8px var(--space-2);
+  border-radius: var(--radius-md);
+  color: inherit;
+  text-align: left;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+button.lg-who__row {
+  cursor: pointer;
+  padding-right: calc(var(--space-2) + 22px);
+}
+
+button.lg-who__row[data-pressed] {
+  background-color: var(--color-fill-pressed);
+}
+
+@media (hover: hover) {
+  button.lg-who__row:hover:not([data-pressed]) {
+    background-color: var(--color-fill);
+  }
+}
+
+.lg-who__go {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: -11px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+.lg-who__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.lg-who__net {
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  color: var(--color-text-2);
+}
+
+.lg-who__net[data-tone="positive"] {
+  color: var(--color-success-text);
+}
+
+.lg-who__net[data-tone="negative"] {
+  color: var(--color-danger-text);
+}
+
+.lg-who__bars {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  column-gap: var(--space-2);
+  row-gap: 4px;
+  align-items: center;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-who__bars .lg-bar__track {
+  grid-column: auto;
+  grid-row: auto;
+  height: 10px;
+}
+
+.lg-who__bars .lg-bar__fill[data-kind="share"] {
+  background: var(--color-text-3);
+}
+
+.lg-who__lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 底部的记一笔 ---------- */
+.lg-add {
+  margin-top: var(--space-2);
+}
+
+.lg-ro {
+  margin-top: var(--space-2);
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  text-align: center;
+}
+
+/* 减弱动态效果 */
+@media (prefers-reduced-motion: reduce) {
+  .lg-item[data-fresh] > .k-swipe,
+  .lg-item[data-fresh] > div,
+  .lg-item[data-focus] > .k-swipe,
+  .lg-item[data-focus] > div {
+    animation-duration: 0.9s;
+  }
+
+  .lg-bar__fill {
+    animation: none;
+  }
+}
+
+/* 宽屏：总花费和结算并排；筛选芯片不横向滚动（桌面没有手指滑、滚动条又藏着，放不下的会看不见），换行排 */
+@media (min-width: 768px) {
+  .lg__top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    align-items: start;
+  }
+
+  .lg-filter {
+    flex-wrap: wrap;
+    margin: 0;
+    padding: var(--space-1) 0;
+    overflow: visible;
+  }
+}

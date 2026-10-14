@@ -1,0 +1,130 @@
+/* =====================================================================
+   ui/SubmitButton.css：提交按钮（.submit-btn，叠在 .btn 上）。
+   四层内容（文字 / 「重试」/ 转圈 / 对勾）叠在同一个网格单元里，按 data-state 切换显隐：
+   退场用短淡出，进场用弹簧放大，宽度始终等于最宽的那一层。
+   A 皮肤：平时是强调色渐变（.btn 的 primary），成功变成绿色渐变（--material-success），失败是红色实心。
+   ===================================================================== */
+
+.submit-btn {
+  --submit-scale-out: 0.6;
+  /* 和 Button.css 里各尺寸的字距一致（文字层用它补左边距） */
+  --submit-tracking: var(--tracking-label);
+}
+
+.submit-btn.btn--lg {
+  --submit-tracking: var(--tracking-button-lg);
+}
+
+.submit-btn.btn--block:not(.btn--lg):not(.btn--sm) {
+  --submit-tracking: var(--tracking-button);
+}
+
+/* 忙的时候（转圈、对勾）看起来不是“禁用”，只是不响应 */
+.submit-btn[aria-disabled="true"] {
+  opacity: 1;
+  cursor: progress;
+}
+
+.submit-btn[data-state="success"] {
+  --btn-bg: var(--color-success);
+  --btn-fg: var(--color-on-success);
+  --btn-image: var(--material-success);
+  --btn-bg-hover: var(--color-success);
+  --btn-bg-pressed: var(--color-success);
+  --btn-tint-hover: transparent;
+  --btn-tint-pressed: transparent;
+  --btn-shadow: 0 10px 24px -10px color-mix(in srgb, var(--color-success) 50%, transparent);
+  --btn-ring: inset 0 1.5px 1px color-mix(in srgb, var(--color-glass-highlight) 45%, transparent);
+  cursor: default;
+}
+
+.submit-btn[data-state="error"] {
+  --btn-bg: var(--color-danger);
+  --btn-fg: var(--color-on-danger);
+  --btn-image: none;
+  --btn-bg-hover: color-mix(in srgb, var(--color-danger) 90%, var(--color-text));
+  --btn-bg-pressed: color-mix(in srgb, var(--color-danger) 82%, var(--color-text));
+  --btn-tint-hover: transparent;
+  --btn-tint-pressed: transparent;
+  --btn-shadow: 0 10px 22px -10px color-mix(in srgb, var(--color-danger) 45%, transparent);
+}
+
+.submit-btn {
+  transition:
+    var(--press-transition),
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.submit-btn__stack {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+
+.submit-btn__layer {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 0;
+  white-space: nowrap;
+  /* 退场：短淡出 + 缩小（不回弹） */
+  opacity: 0;
+  scale: var(--submit-scale-out);
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
+}
+
+/* 进场：弹簧放大 + 淡入 */
+.submit-btn[data-state="idle"] .submit-btn__label,
+.submit-btn[data-state="loading"] .submit-btn__spinner,
+.submit-btn[data-state="success"] .submit-btn__done,
+.submit-btn[data-state="error"] .submit-btn__error {
+  opacity: 1;
+  scale: 1;
+  transition:
+    opacity var(--dur-base) var(--ease-out) 60ms,
+    scale var(--spring-bouncy-duration) var(--spring-bouncy) 60ms;
+}
+
+/* 文字退场缩得少一点，看起来是“让位”而不是“消失”。
+   字距会在最后一个字后面也留一段空（宋体大按钮 .14em）：用文字层的内边距补到左边，文字才真正居中 */
+.submit-btn__label,
+.submit-btn__error {
+  --submit-scale-out: 0.88;
+  padding-inline-start: var(--submit-tracking);
+}
+
+.submit-btn__check {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+
+.submit-btn__check-path {
+  /* 间隔比路径长：偏移 1 时完全看不见（圆头不会在起点留一个点） */
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset var(--dur-fast) var(--ease-in);
+}
+
+/* 对勾一笔描出来（等转圈退场、对勾那一层放大开始后再描） */
+.submit-btn[data-state="success"] .submit-btn__check-path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--dur-slow) var(--ease-out) 120ms;
+}
+
+.btn--lg .submit-btn__check {
+  width: 26px;
+  height: 26px;
+}

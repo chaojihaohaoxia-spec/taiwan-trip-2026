@@ -1,0 +1,185 @@
+/* =====================================================================
+   dev/pages/kit-page.css：页面共用组件一览（#/dev/kit）的版式。只用 tokens.css 的变量。
+   ===================================================================== */
+
+.kit-page {
+  max-width: 960px;
+}
+
+.kit-section + .kit-section {
+  margin-top: var(--space-8);
+}
+
+.kit-section__body {
+  margin-top: var(--space-3);
+}
+
+.kit-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* 两个样本并排（宽屏两列，手机一列） */
+.kit-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .kit-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kit-span {
+    grid-column: 1 / -1;
+  }
+}
+
+.kit-figure {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--color-accent-text);
+  font-size: var(--text-figure-hero);
+  line-height: 0.9;
+}
+
+.kit-figure .t-serif {
+  color: var(--color-text);
+  font-size: var(--text-title-2);
+}
+
+/* 种类图标网格 */
+.kit-kinds__type {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-2);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+.kit-kinds__grid,
+.kit-glyphs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: var(--space-2);
+}
+
+.kit-kind,
+.kit-glyph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: var(--space-2) 2px;
+  border-radius: var(--radius-md);
+  background: var(--material-card);
+  box-shadow: var(--material-card-edge);
+  text-align: center;
+}
+
+.kit-kind figcaption,
+.kit-glyph figcaption {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--color-text-2);
+  font: var(--type-caption-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kit-glyph {
+  color: var(--color-accent-text);
+}
+
+/* 一排芯片 + 左边的说明 */
+.kit-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.kit-chips + .kit-chips {
+  margin-top: var(--space-2);
+}
+
+.kit-chips__label {
+  min-width: 64px;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+}
+
+/* 给司机看的入口 */
+.kit-driver {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-2);
+}
+
+.kit-driver__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font: var(--type-label);
+  text-align: left;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.kit-driver__btn .glyph {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+/* 空状态预设网格 */
+.kit-presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-2);
+}
+
+.kit-preset {
+  border-radius: var(--radius-xl);
+}
+
+.kit-add-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--space-3);
+}
+
+.kit-add-list li {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  font: var(--type-footnote);
+}
+
+.kit-log {
+  padding: var(--space-2) var(--space-1) 0;
+}
+
+.kit-search-input {
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: var(--space-3);
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  color: var(--color-text);
+  font: var(--type-body);
+}
+
+.kit-search-input:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--color-accent-text);
+}

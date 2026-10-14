@@ -1,0 +1,220 @@
+/* =====================================================================
+   ui/Button.css：文字按钮（.btn）。A 液态玻璃 + P2 杂志宋体：
+     primary   强调色渐变（左上亮、右下暗）+ 底下一圈同色柔光 + 顶部高光
+     secondary 凸起的白胶囊（--color-raised + 顶部高光、细边），文字墨色
+     tinted    强调色浅底 + 强调色字；outline 强调色细描边；text 只有强调色字
+     danger / danger-soft
+   字体：小号、中号用标签字体（拉丁走 Geist、中文走系统字体，字距 .03em）；
+        大号（lg）和整行按钮（block）是宋体大字（字距 .14em / .08em），像样稿的「记下这笔」「查看全部待办」。
+   每种样式用几个局部变量描述：
+     --btn-bg / --btn-fg          平时的底色、文字色
+     --btn-image                  底色上面的渐变（主按钮的强调色材质；没有就是 none）
+     --btn-bg-hover               悬停（只在能悬停的设备）
+     --btn-bg-pressed             按下（data-pressed，由 motion/press.js 加）
+     --btn-tint                   盖在渐变上的一层（悬停变亮、按下变深；渐变按钮换不了底色，靠它）
+     --btn-ring                   描边 / 高光（inset 阴影，不占尺寸）
+     --btn-shadow                 外阴影（主按钮的柔光）
+     --btn-tracking               字距（标签末尾的字距用负外边距抵掉，文字真正居中）
+   ===================================================================== */
+
+.btn {
+  --btn-h: var(--tap-min);
+  --btn-px: var(--space-5);
+  --btn-bg: var(--color-accent);
+  --btn-fg: var(--color-on-accent);
+  --btn-image: var(--material-accent);
+  --btn-bg-hover: var(--color-accent-hover);
+  --btn-bg-pressed: var(--color-accent-pressed);
+  --btn-tint: transparent;
+  --btn-tint-hover: color-mix(in srgb, var(--color-glass-highlight) 18%, transparent);
+  --btn-tint-pressed: var(--color-fill-pressed);
+  --btn-ring: 0 0 0 0 transparent;
+  --btn-shadow: var(--shadow-accent);
+  --btn-tracking: var(--tracking-label);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: var(--btn-h);
+  min-height: var(--btn-h);
+  padding: 0 var(--btn-px);
+  border-radius: var(--radius-pill);
+  background-color: var(--btn-bg);
+  background-image: linear-gradient(var(--btn-tint), var(--btn-tint)), var(--btn-image);
+  box-shadow: var(--btn-shadow), var(--btn-ring);
+  color: var(--btn-fg);
+  font: var(--type-label);
+  line-height: 1.2;
+  letter-spacing: var(--btn-tracking);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    var(--press-transition),
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.btn[data-pressed] {
+  --btn-tint: var(--btn-tint-pressed);
+  background-color: var(--btn-bg-pressed);
+}
+
+@media (hover: hover) {
+  .btn:hover:not(:disabled):not([aria-disabled="true"]):not([data-pressed]) {
+    --btn-tint: var(--btn-tint-hover);
+    background-color: var(--btn-bg-hover);
+  }
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.btn__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* 字距会在最后一个字后面也留一段空：抵掉，文字才真正居中 */
+  margin-inline-end: calc(var(--btn-tracking) * -1);
+}
+
+.btn__icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  margin-inline: calc(-1 * var(--space-1)) 0;
+}
+
+.btn__label + .btn__icon {
+  margin-inline: 0 calc(-1 * var(--space-1));
+}
+
+/* ---------- 尺寸 ---------- */
+.btn--sm {
+  --btn-h: 36px;
+  --btn-px: var(--space-4);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  line-height: 1.2;
+}
+
+/* 视觉 36px，可点区域扩到 44px */
+.btn--sm::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+/* 大号：宋体大字（样稿的提交按钮「记下这笔」） */
+.btn--lg {
+  --btn-h: 56px;
+  --btn-px: var(--space-7);
+  --btn-tracking: var(--tracking-button-lg);
+  font: var(--weight-serif) var(--text-title-4) / 1.2 var(--font-serif);
+}
+
+/* 整行按钮：宋体（样稿的「查看全部待办」「新建一趟旅行」） */
+.btn--block {
+  display: flex;
+  width: 100%;
+}
+
+.btn--block:not(.btn--lg):not(.btn--sm) {
+  --btn-h: 48px;
+  --btn-tracking: var(--tracking-button);
+  font: var(--weight-serif) var(--text-callout) / 1.2 var(--font-serif);
+}
+
+/* ---------- 样式 ---------- */
+.btn--secondary {
+  --btn-bg: var(--color-raised);
+  --btn-fg: var(--color-text);
+  --btn-image: none;
+  --btn-bg-hover: var(--color-raised-hover);
+  --btn-bg-pressed: var(--color-raised-pressed);
+  --btn-tint-hover: transparent;
+  --btn-tint-pressed: transparent;
+  --btn-ring: var(--shadow-raised);
+  --btn-shadow: 0 0 0 0 transparent;
+}
+
+/* 次要按钮里的图标用强调色（样稿的 .btn-pill） */
+.btn--secondary .btn__icon {
+  color: var(--color-accent-text);
+}
+
+/* 整行的次要按钮：字也是强调色（样稿的「查看全部待办 ›」） */
+.btn--secondary.btn--block {
+  --btn-fg: var(--color-accent-text);
+}
+
+.btn--tinted {
+  --btn-bg: var(--color-accent-soft);
+  --btn-fg: var(--color-accent-text);
+  --btn-image: none;
+  --btn-bg-hover: color-mix(in srgb, var(--color-accent-soft), var(--color-accent) 8%);
+  --btn-bg-pressed: color-mix(in srgb, var(--color-accent-soft), var(--color-accent) 16%);
+  --btn-tint-hover: transparent;
+  --btn-tint-pressed: transparent;
+  --btn-shadow: 0 0 0 0 transparent;
+}
+
+.btn--outline {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-accent-text);
+  --btn-image: none;
+  --btn-bg-hover: var(--color-accent-soft);
+  --btn-bg-pressed: var(--color-accent-soft);
+  --btn-tint-hover: transparent;
+  --btn-tint-pressed: transparent;
+  --btn-ring: inset 0 0 0 1.5px color-mix(in srgb, var(--color-accent) 50%, transparent);
+  --btn-shadow: 0 0 0 0 transparent;
+}
+
+.btn--text {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-accent-text);
+  --btn-image: none;
+  --btn-bg-hover: var(--color-fill);
+  --btn-bg-pressed: var(--color-fill-pressed);
+  --btn-tint-hover: transparent;
+  --btn-tint-pressed: transparent;
+  --btn-shadow: 0 0 0 0 transparent;
+  --btn-px: var(--space-3);
+}
+
+.btn--danger {
+  --btn-bg: var(--color-danger);
+  --btn-fg: var(--color-on-danger);
+  --btn-image: none;
+  --btn-bg-hover: color-mix(in srgb, var(--color-danger) 90%, var(--color-text));
+  --btn-bg-pressed: color-mix(in srgb, var(--color-danger) 82%, var(--color-text));
+  --btn-tint-hover: transparent;
+  --btn-tint-pressed: transparent;
+  --btn-shadow: 0 10px 22px -10px color-mix(in srgb, var(--color-danger) 45%, transparent);
+  --btn-ring: inset 0 1px 0 color-mix(in srgb, var(--color-glass-highlight) 40%, transparent);
+}
+
+.btn--danger-soft {
+  --btn-bg: var(--color-danger-soft);
+  --btn-fg: var(--color-danger-text);
+  --btn-image: none;
+  --btn-bg-hover: color-mix(in srgb, var(--color-danger-soft), var(--color-danger) 8%);
+  --btn-bg-pressed: color-mix(in srgb, var(--color-danger-soft), var(--color-danger) 16%);
+  --btn-tint-hover: transparent;
+  --btn-tint-pressed: transparent;
+  --btn-shadow: 0 0 0 0 transparent;
+}
+
+/* 禁用的主按钮：不要柔光（看起来像还能按） */
+.btn:disabled,
+.btn[aria-disabled="true"]:not(.submit-btn) {
+  --btn-shadow: 0 0 0 0 transparent;
+}

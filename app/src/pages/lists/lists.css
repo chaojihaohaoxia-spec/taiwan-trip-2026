@@ -1,0 +1,1103 @@
+/* =====================================================================
+   pages/lists/lists.css：清单页（.lists）。样稿 P2-serif 概览页的「出发前待办」（圆圈勾、标题 15px 半粗、
+   下面一小行带图标的截止时间）和「打包清单」（步进器「3 件」）；卡片、玻璃、字体、颜色、动效只用 tokens.css 的变量。
+
+   版面（手机 390）：
+     标签栏（ui/Tabs；往下滚贴在顶栏下面，换成玻璃胶囊）
+     只读说明（只读成员）
+     清单卡片：卡片头（「还有 6 件事要办」+ 进度圆环）/ 行 / 快速添加 / 「已完成 3」/ 勾完的
+     打包：顶部卡片（进度 + 谁的东西 + 隐藏已装好）、每个分类一张卡、最后快速添加
+   一行（.lrow）是三列网格：勾选框 44 | 标题 | 步进器；下面一行（备注、截止时间、负责人、小链接）横跨后两列。
+   整行铺一个透明按钮（.lrow__hit，点了编辑），其他东西浮在上面，只有勾选框、步进器、小链接接点击。
+   ===================================================================== */
+
+.lists {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-1) var(--gutter) var(--space-10);
+}
+
+.lists__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- 标签栏：贴顶时变成玻璃胶囊（同屏只多这一块真玻璃） ---------- */
+.lists__sentinel {
+  display: block;
+  height: 1px;
+  margin-bottom: -15px; /* 不占 gap：哨兵 1px + gap 14px */
+}
+
+.lists__bar {
+  /* 同步状态条让出的高度（JS 按外壳的 syncSpace 写） */
+  --lists-sync: 0px;
+  position: sticky;
+  top: calc(var(--safe-top) + var(--topbar-h) + var(--space-1) + var(--lists-sync));
+  z-index: var(--z-sticky);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-pill);
+  transition: background-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+
+.lists__bar[data-stuck] {
+  background: var(--material-glass-strong);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--shadow-3), var(--shadow-glass-edge);
+}
+
+.lists__bar[data-stuck] .tabs__list {
+  border-bottom-color: transparent;
+}
+
+/* 标签平分整行：四个清单在 375 宽也都看得见（「待确认 0/10」最宽），不用横滑；
+   放得下就不要两端的渐隐（Tabs 默认有，提示能横滑），很窄的屏放不下时照样能横滑 */
+.lists__tabs {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.lists__tabs .tabs__list {
+  justify-content: space-between;
+  gap: 0;
+  padding: 0;
+}
+
+.lists__tabs .tabs__tab {
+  flex: 1 0 auto;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 var(--space-1);
+}
+
+.lists__tabs .tabs__badge {
+  padding: 0 5px;
+  letter-spacing: 0;
+}
+
+.lists__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* ---------- 只读成员 ----------
+   步进器禁用时整个变淡到 0.45（ui/Stepper），数量就看不清了：只读成员也是来看“带几件”的，数字照常显示，± 仍然淡 */
+.lists__body[data-readonly] .lrow .stepper[aria-disabled="true"][data-state="open"] {
+  opacity: 1;
+}
+
+/* ---------- 只读说明 ---------- */
+.lro {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  background: var(--color-info-soft);
+  color: var(--color-info-text);
+  font: var(--type-footnote);
+  text-wrap: pretty;
+}
+
+.lro .glyph {
+  flex: none;
+  margin-top: 1px;
+}
+
+/* ---------- 清单卡片 ---------- */
+.lpanel__rows,
+.lgroup__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.lpanel__add {
+  padding: var(--space-2) 0 var(--space-1);
+}
+
+.lpanel > .k-empty + .lpanel__rows .lpanel__add,
+.lpanel > .k-empty + .lpanel__add {
+  padding-top: var(--space-3);
+}
+
+/* ---------- 卡片头：「还有 6 件事要办」+ 进度圆环 ---------- */
+.lhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: 2px 4px 10px;
+}
+
+.lhead__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lhead__count {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 6px;
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-serif);
+  font-size: var(--text-title-3);
+  font-weight: var(--weight-serif);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.15;
+}
+
+.lhead__n {
+  font-family: var(--font-figure);
+  font-size: var(--text-figure-2);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-figure);
+  font-variant-numeric: lining-nums;
+  line-height: 1;
+  color: var(--color-accent-text);
+}
+
+.lhead__pre,
+.lhead__unit {
+  white-space: nowrap;
+}
+
+.lhead__due {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 2px 0 0;
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  letter-spacing: var(--tracking-label);
+  text-wrap: pretty;
+}
+
+.lhead__part,
+.lrow__part {
+  white-space: nowrap;
+}
+
+/* 截止时间和行程时区不同（出发前人在香港）：钟点后面一个小标签「香港时间」（和时间轴的「香港」同一种样子） */
+.lrow__zone {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: var(--radius-xs);
+  background: var(--color-fill);
+  color: var(--color-text-2);
+  font: var(--type-caption-2);
+  font-weight: var(--weight-semibold);
+  line-height: 1.5;
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+
+.lhead__due .glyph,
+.lhead__zone .glyph {
+  flex: none;
+}
+
+/* 设备时区和行程时区不一样时（出发前人在香港）：卡片头说一次「截止时间按越南时间（比香港慢 1 小时）」，行里不重复 */
+.lhead__zone {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 2px 0 0;
+  color: var(--color-text-2);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  letter-spacing: var(--tracking-label);
+  text-wrap: pretty;
+}
+
+.lhead__due .glyph,
+.lhead__zone .glyph {
+  margin-top: 1px;
+}
+
+.lhead__due--warning {
+  color: var(--color-warning-text);
+}
+
+.lhead__due--danger {
+  color: var(--color-danger-text);
+}
+
+/* ---------- 进度圆环 ---------- */
+.lring {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+}
+
+.lring__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.lring__track,
+.lring__arc {
+  fill: none;
+  stroke-width: 4;
+}
+
+.lring__track {
+  stroke: var(--color-fill-pressed);
+}
+
+.lring__arc {
+  stroke: var(--color-accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--spring-smooth-duration) var(--spring-smooth), stroke var(--dur-base) var(--ease-out);
+}
+
+.lring[data-full] .lring__arc {
+  stroke: var(--color-success);
+}
+
+.lring__text {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.lring__text b {
+  font-size: var(--text-footnote);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+}
+
+.lring__text i {
+  font-size: var(--text-caption-2);
+  font-style: normal;
+  color: var(--color-text-2);
+}
+
+/* ---------- 一行 ---------- */
+.litem {
+  position: relative;
+  /* 自己一层：下面那块浮起来的底色（::before，z-index −1）一直垫在这一行后面、卡片前面 */
+  isolation: isolate;
+}
+
+/* 正在沉下去 / 浮上来的行：浮起来（和卡片同一种材质垫在不透明的底色上 + 阴影），压在别的行上面经过，
+   不会两行字叠在一起；落地后底色和阴影淡掉 */
+.litem::before {
+  content: "";
+  position: absolute;
+  inset: 0 -10px;
+  z-index: var(--z-below);
+  border-radius: var(--radius-md);
+  background: var(--material-card), var(--color-canvas);
+  box-shadow: var(--shadow-2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.litem[data-moving] {
+  z-index: var(--z-raised);
+}
+
+.litem[data-moving]::before {
+  opacity: 1;
+  transition-duration: var(--dur-instant);
+}
+
+/* 浮起来的行：上下的分隔线不画（它自己是一块） */
+.litem[data-moving] .lrow::before,
+.litem[data-moving] + .litem .lrow::before {
+  opacity: 0;
+}
+
+/* SwipeRow：左右各伸出 10px（按下的底色、滑开的按钮铺到卡片边上），和 kit 的 ListRow 一样 */
+.lswipe,
+.litem > div:not(.k-swipe) {
+  margin: 0 -10px;
+}
+
+.lrow {
+  --lrow-check: 44px;
+  --lrow-gap: 4px;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--lrow-check) minmax(0, 1fr) auto;
+  grid-template-areas:
+    "check title qty"
+    "check body  body";
+  column-gap: var(--lrow-gap);
+  align-items: start;
+  padding: 2px 10px 2px 4px;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+}
+
+/* 行与行之间的分隔线：从标题开始的位置画到右边 */
+.litem + .litem .lrow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(4px + var(--lrow-check) + var(--lrow-gap));
+  right: 10px;
+  border-top: 1px solid var(--color-separator);
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+/* 按下 / 滑开时分隔线让开，底色连成一块 */
+.litem:has(.lrow__hit[data-pressed]) .lrow::before,
+.litem:has(.lrow__hit[data-pressed]) + .litem .lrow::before,
+.litem:has(.k-swipe[data-open]) .lrow::before,
+.litem:has(.k-swipe[data-dragging]) .lrow::before {
+  opacity: 0;
+}
+
+/* 整行的透明按钮（点了编辑）：在最底下，按下换底色 */
+.lrow__hit {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  width: 100%;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .lrow__hit:hover:not([data-pressed]) {
+    background-color: var(--color-fill);
+  }
+}
+
+/* 其他东西浮在透明按钮上面，只有勾选框、步进器、小链接接点击 */
+.lrow > :not(.lrow__hit) {
+  position: relative;
+  z-index: var(--z-raised);
+  pointer-events: none;
+}
+
+.lrow > .lrow__check,
+.lrow > .lrow__qty,
+.lrow .lchip {
+  pointer-events: auto;
+}
+
+/* 勾选框：44×44 的热区，24px 的圈在正中（ui/Checkbox 的圆圈勾） */
+.lrow__check {
+  grid-area: check;
+  display: grid;
+  width: var(--lrow-check);
+  height: var(--lrow-check);
+  place-items: center;
+}
+
+.lrow__check .check {
+  justify-content: center;
+  width: var(--lrow-check);
+  height: var(--lrow-check);
+  gap: 0;
+}
+
+.lrow__check .check__text {
+  flex: 0 0 0;
+  width: 0;
+}
+
+/* 标题：第一行和圆圈对齐（44 高的格子里竖直居中一行字） */
+.lrow__title {
+  grid-area: title;
+  align-self: start;
+  min-width: 0;
+  padding: 11px 0 3px;
+  font: var(--type-callout);
+  font-weight: var(--weight-medium);
+  line-height: 1.4;
+  text-wrap: pretty;
+  word-break: normal;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+
+.lrow:not([data-body]) .lrow__title {
+  padding-bottom: 11px;
+}
+
+/* 划掉：每一行字下面各画一条线，从左往右画过去（多行标题每行都划，不是只在整块中间划一条） */
+.lrow__tt {
+  background: linear-gradient(var(--color-text-3), var(--color-text-3)) no-repeat 0 58% / 0% 1.5px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-size var(--dur-fast) var(--ease-in), color var(--dur-base) var(--ease-out);
+}
+
+.lrow[data-done] .lrow__tt {
+  color: var(--color-text-2);
+  background-size: 100% 1.5px;
+  transition: background-size var(--dur-slow) var(--ease-out) 120ms, color var(--dur-base) var(--ease-out);
+}
+
+.lrow__qty {
+  grid-area: qty;
+  align-self: start;
+  margin-left: var(--space-2);
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.lrow[data-done] .lrow__qty {
+  opacity: 0.6;
+}
+
+/* 下面一行：截止时间、负责人、备注、小链接、谁勾的 */
+.lrow__body {
+  grid-area: body;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 0 0 11px;
+}
+
+.lrow__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.lrow__due {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  color: var(--color-text-2);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+
+.lrow__due .glyph {
+  flex: none;
+  margin-top: 1px;
+}
+
+.lrow__due--warning {
+  color: var(--color-warning-text);
+}
+
+.lrow__due--danger {
+  color: var(--color-danger-text);
+}
+
+/* 备注：没勾的显示全文（备注里写的多是“找谁、说什么、几点前”，在街上要一眼看全，不用再点开）；勾完的只留一行。
+   备注里的电话、邮箱、网址不在文字里做下划线链接（行内链接的可点区域扩到 44 高会盖住上下几行字，点备注想编辑却打了电话），
+   而是在下面的小胶囊一排的最前面单独给一个（ActionChip.jsx 的 .lact） */
+.lrow__note {
+  display: block;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  line-height: 1.5;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.lrow[data-layout-done] .lrow__note {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.lrow__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+/* 小链接：凸起的白胶囊 + 强调色字（能点的东西一眼看得出能点），可点区域扩到 44 高 */
+.lchip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  min-height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  letter-spacing: var(--tracking-label);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.lchip::after {
+  content: "";
+  position: absolute;
+  inset: -8px -3px;
+}
+
+.lchip .glyph {
+  flex: none;
+}
+
+.lchip__day {
+  flex: none;
+  color: var(--color-text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.lchip__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (hover: hover) {
+  .lchip:hover:not([data-pressed]) {
+    background-color: var(--color-raised-hover);
+  }
+}
+
+.lrow__by {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-success-text);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+}
+
+/* 搜索跳过来：那一行闪两下强调色浅底 */
+.lrow[data-focus] .lrow__hit {
+  animation: lrow-flash var(--dur-slower) var(--ease-in-out) 3;
+}
+
+@keyframes lrow-flash {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+
+  45% {
+    background-color: var(--color-accent-soft);
+  }
+}
+
+/* ---------- 「已完成 3 · 收起」 ---------- */
+.lpanel__done {
+  margin: var(--space-1) -10px 0;
+}
+
+.ldone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 10px 0 14px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-2);
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.ldone::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 10px;
+  border-top: 1px solid var(--color-separator);
+}
+
+.ldone__label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+.ldone__n {
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.ldone__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  letter-spacing: var(--tracking-label);
+}
+
+@media (hover: hover) {
+  .ldone:hover:not([data-pressed]) {
+    background-color: var(--color-fill);
+  }
+}
+
+/* ---------- 全部完成：小小的庆祝 ---------- */
+.lcele {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.lcele__mark {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-round);
+  background: var(--color-success-soft);
+}
+
+.lcele__svg {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  fill: none;
+  stroke: var(--color-success);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lcele__ring {
+  stroke-width: 2.4;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 0;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.lcele__tick {
+  stroke-width: 3;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 0;
+}
+
+.lcele__spark {
+  /* 方向和先后由 parts.jsx 的内联样式给（这里是默认值） */
+  --lcele-a: 0deg;
+  --lcele-i: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lcele__spark:nth-child(even) {
+  background: var(--color-success);
+}
+
+.lcele__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lcele__title {
+  font: var(--type-title-3);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.lcele__desc {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+/* 刚勾完最后一项：底色弹一下、圆环画满、对勾描出来、六粒光点散开就消失 */
+.lcele[data-play] .lcele__mark {
+  animation: lcele-pop var(--spring-bouncy-duration) var(--spring-bouncy) both;
+}
+
+.lcele[data-play] .lcele__ring {
+  animation: lcele-draw var(--dur-slower) var(--ease-out) both;
+}
+
+.lcele[data-play] .lcele__tick {
+  animation: lcele-draw var(--dur-slow) var(--ease-out) var(--dur-slow) both;
+}
+
+.lcele[data-play] .lcele__spark {
+  animation: lcele-spark var(--dur-slower) var(--ease-out) calc(var(--dur-base) + var(--lcele-i) * 30ms) both;
+}
+
+.lcele[data-play] .lcele__text {
+  animation: lcele-text var(--dur-slow) var(--ease-out) var(--dur-fast) both;
+}
+
+@keyframes lcele-pop {
+  from {
+    scale: 0.6;
+    opacity: 0;
+  }
+
+  to {
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+@keyframes lcele-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes lcele-spark {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--lcele-a)) translateY(-18px) scale(0.4);
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(var(--lcele-a)) translateY(-36px) scale(1);
+  }
+}
+
+@keyframes lcele-text {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lcele[data-play] .lcele__mark,
+  .lcele[data-play] .lcele__ring,
+  .lcele[data-play] .lcele__tick,
+  .lcele[data-play] .lcele__spark {
+    animation: none;
+  }
+
+  .lcele[data-play] .lcele__text {
+    animation: lcele-fade var(--dur-fast) var(--ease-out) both;
+  }
+
+  .lrow[data-focus] .lrow__hit {
+    animation-iteration-count: 1;
+  }
+}
+
+@keyframes lcele-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- 打包 ---------- */
+.lpack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lpack__filter {
+  padding: 2px 0 0;
+}
+
+/* 卡片头左边文字下面的小控件（打包的「隐藏已装好」） */
+.lhead__extra {
+  display: flex;
+  margin-top: var(--space-2);
+}
+
+.lhead--done {
+  flex-direction: column;
+  align-items: flex-start;
+  padding-bottom: 12px;
+}
+
+.lhead--done .lhead__extra {
+  margin-top: var(--space-1);
+  padding-left: 66px;
+}
+
+/* 一个分类一张卡：图标方块 + 宋体分类名 + 「3/6」+ 细进度条 */
+.lgroup__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "tile title count"
+    "tile bar   bar";
+  align-items: center;
+  column-gap: var(--space-3);
+  row-gap: 6px;
+  padding: 2px 4px 10px;
+}
+
+.lgroup__tile {
+  grid-area: tile;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-tile);
+  background: var(--color-fill);
+  color: var(--color-accent-text);
+}
+
+.lgroup__title {
+  grid-area: title;
+  min-width: 0;
+  margin: 0;
+  font: var(--type-title-3);
+  letter-spacing: var(--tracking-display);
+  overflow-wrap: anywhere;
+}
+
+.lgroup__count {
+  grid-area: count;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--color-text-2);
+  font-family: var(--font-label);
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+}
+
+.lgroup__count b {
+  color: var(--color-text);
+  font-weight: var(--weight-bold);
+}
+
+.lgroup__head[data-full] .lgroup__count {
+  color: var(--color-success-text);
+  font-weight: var(--weight-semibold);
+}
+
+.lgroup__head[data-full] .lgroup__tile {
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
+}
+
+.lgroup__bar {
+  grid-area: bar;
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill-pressed);
+}
+
+.lgroup__bar i {
+  /* 进度 0–1 由 PackingPanel.jsx 的内联样式给 */
+  --lg-p: 0;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-accent);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--lg-p, 0));
+  transition: transform var(--spring-smooth-duration) var(--spring-smooth), background-color var(--dur-base) var(--ease-out);
+}
+
+.lgroup__head[data-full] .lgroup__bar i {
+  background: var(--color-success);
+}
+
+.lgroup__rows {
+  border-top: 1px solid var(--color-separator);
+}
+
+/* 打包的快速添加：上面一行「放进 [自动分类 ⌄]」 */
+.lpack__addhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 2px 2px var(--space-2);
+}
+
+.lpack__cat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.lpack__select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.lpack__select select {
+  min-height: var(--tap-min);
+  padding: 0 32px 0 14px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  font-size: var(--text-subhead);
+  letter-spacing: var(--tracking-label);
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.lpack__select .glyph {
+  position: absolute;
+  right: 12px;
+  color: var(--color-accent-text);
+  pointer-events: none;
+}
+
+.lpack__addwho {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.lpack__added {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: var(--space-2) 0 0;
+  padding: 0 4px;
+  color: var(--color-success-text);
+  font: var(--type-footnote);
+}
+
+.lpack__added .glyph {
+  flex: none;
+}
+
+.lpack__added span {
+  min-width: 0;
+}
+
+.lpack__added b {
+  margin: 0 2px;
+  font-weight: var(--weight-semibold);
+}
+
+.lpack__fix {
+  position: relative;
+  flex: none;
+  margin-left: auto;
+  min-height: 30px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+}
+
+.lpack__fix::after {
+  content: "";
+  position: absolute;
+  inset: -7px -4px;
+}
+
+/* ---------- 加载中 ---------- */
+.lists-skel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lists-skel__tabs {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+}
+
+.lists-skel__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 18px;
+  border-radius: var(--radius-xl);
+}
+
+.lists-skel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.lists-skel__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.lists-skel__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+

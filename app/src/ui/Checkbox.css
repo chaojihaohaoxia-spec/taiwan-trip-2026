@@ -1,0 +1,192 @@
+/* =====================================================================
+   ui/Checkbox.css：勾选框（.check）。A 皮肤（样稿的「出发前待办」）：圆圈勾。
+   框：1.8px 的墨色细圈（或圆角方）；勾上：强调色实心从中心弹出（--spring-bouncy），白色对勾一笔描出来
+   （stroke-dashoffset，稍晚一点开始）；取消：对勾先快速收回，底色缩掉。
+   划掉（strike）：一条线从左往右画过去，文字变成淡墨色。
+   原生 checkbox 盖在框上、完全透明：点击、键盘、读屏都是原生行为。
+   ===================================================================== */
+
+.check {
+  --check-size: 24px;
+  --check-radius: var(--radius-round);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  color: var(--color-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.check--row {
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.check--row[data-pressed] {
+  background-color: var(--color-fill-pressed);
+}
+
+@media (hover: hover) {
+  .check--row:not(.check--disabled):not([data-pressed]):hover {
+    background-color: var(--color-fill);
+  }
+}
+
+.check--inline {
+  display: inline-flex;
+}
+
+.check--square {
+  --check-radius: var(--radius-xs);
+}
+
+.check--disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* 原生 checkbox：透明地盖在整行上（点哪儿都行，焦点环画在框上） */
+.check__input {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+/* ---------- 框 ---------- */
+.check__box {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--check-size);
+  height: var(--check-size);
+  border-radius: var(--check-radius);
+  box-shadow: inset 0 0 0 1.8px var(--color-text-3);
+  color: var(--color-on-accent);
+  transition: box-shadow var(--dur-fast) var(--ease-out), scale var(--spring-bouncy-duration) var(--spring-bouncy);
+}
+
+/* 按住整行时，框也轻轻一缩 */
+.check[data-pressed] .check__box {
+  scale: 0.9;
+  transition: box-shadow var(--dur-fast) var(--ease-out), scale var(--press-duration) var(--ease-out);
+}
+
+.check__input:focus-visible + .check__box {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.check__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-accent);
+  box-shadow: var(--shadow-accent-sm), var(--shadow-highlight);
+  scale: 0.2;
+  opacity: 0;
+  transition:
+    scale var(--dur-fast) var(--ease-in) 60ms,
+    opacity var(--dur-fast) var(--ease-in) 60ms;
+}
+
+.check[data-state="on"] .check__fill,
+.check[data-state="mixed"] .check__fill {
+  scale: 1;
+  opacity: 1;
+  transition:
+    scale var(--spring-bouncy-duration) var(--spring-bouncy),
+    opacity var(--dur-instant) var(--ease-out);
+}
+
+.check[data-state="on"] .check__box,
+.check[data-state="mixed"] .check__box {
+  box-shadow: inset 0 0 0 1.8px transparent;
+}
+
+.check__mark {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.check__tick,
+.check__dash {
+  /* 间隔比路径长：偏移 1 时完全看不见（圆头不会留下小点） */
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset var(--dur-instant) var(--ease-in);
+}
+
+.check[data-state="on"] .check__tick,
+.check[data-state="mixed"] .check__dash {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--dur-base) var(--ease-out) 90ms;
+}
+
+/* ---------- 文字 ---------- */
+.check__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.check__label {
+  position: relative;
+  align-self: flex-start;
+  max-width: 100%;
+  font: var(--type-callout);
+  font-weight: var(--weight-medium);
+  line-height: 1.4;
+  text-wrap: pretty;
+  /* 句子式的长标题按正常中文规则断行（keep-all 只在标点、空格处折，「JW」会单独掉到下一行，长标题折得很碎，视觉评审 P2-1） */
+  word-break: normal;
+  line-break: strict;
+  overflow-wrap: anywhere;
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.check__desc {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+/* 划掉：一条线从左往右画过去，文字变次要色 */
+.check--strike .check__label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52%;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--color-text-2);
+  transform-origin: left center;
+  scale: 0 1;
+  transition: scale var(--dur-fast) var(--ease-in);
+}
+
+.check--strike[data-state="on"] .check__label {
+  color: var(--color-text-3);
+}
+
+.check--strike[data-state="on"] .check__label::after {
+  scale: 1 1;
+  transition: scale var(--dur-slow) var(--ease-out) 120ms;
+}

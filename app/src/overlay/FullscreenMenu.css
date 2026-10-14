@@ -1,0 +1,160 @@
+/* =====================================================================
+   overlay/FullscreenMenu.css：圆形扩散的全屏菜单。
+   .ov-fsmenu 整层铺满视口、负责 clip-path 圆形（FullscreenMenu.jsx 驱动）；
+   里面 .ov-fsmenu__scroll 自己滚动（内容多时），关闭按钮固定在右上角不跟着滚。
+   .ov-fsmenu-scrim：圆后面的遮罩，随圆一起变深（浅色模式下也看得出圆在扩散），圆铺满后被盖住。
+   A 皮肤（样稿的「更多」）：整屏真玻璃（模糊更重）+ 左上主题色、右下第二主题色两团柔光；
+   标题是 40px 宋体，副标题是带强调色圆点的眉标；菜单行是凸起的白色大圆角块，名字用宋体。
+   ===================================================================== */
+
+.ov-fsmenu {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 60% at 100% 100%, color-mix(in srgb, var(--color-accent-2) var(--field-menu-glow), transparent), transparent 70%),
+    radial-gradient(110% 55% at 0% 0%, color-mix(in srgb, var(--color-accent) var(--field-menu-glow), transparent), transparent 70%),
+    linear-gradient(155deg, var(--color-glass-strong), var(--color-glass-strong-2));
+  -webkit-backdrop-filter: var(--glass-filter-xl);
+  backdrop-filter: var(--glass-filter-xl);
+  color: var(--color-text);
+  pointer-events: auto;
+  outline: none;
+  will-change: clip-path;
+}
+
+.ov-layer--menu .ov-fsmenu-scrim {
+  pointer-events: none;
+}
+
+.ov-fsmenu__scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ov-fsmenu__inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding:
+    calc(var(--safe-top) + var(--space-9))
+    calc(var(--safe-right) + var(--gutter))
+    calc(var(--safe-bottom) + var(--space-9))
+    calc(var(--safe-left) + var(--gutter));
+}
+
+/* 标题在上、副标题（眉标）在标题上面一行：用 flex 倒过来，读屏顺序不变 */
+.ov-fsmenu__header {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
+  padding: 0 var(--space-1) var(--space-5);
+}
+
+/* 长标题（行程名）只在空格、标点处折行，不把「海岛」拆开；行数多时两行尽量一样长 */
+.ov-fsmenu__title {
+  font: var(--type-large-title);
+  line-height: 1.12;
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.ov-fsmenu__title:focus-visible {
+  outline-offset: 4px;
+}
+
+/* 眉标：前面一个强调色圆点（样稿「● 越南 · 富国岛 · 重阳」） */
+.ov-fsmenu__subtitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-2);
+  font: var(--type-eyebrow);
+  font-size: var(--text-footnote);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+}
+
+.ov-fsmenu__subtitle::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent);
+}
+
+/* 全屏菜单里的菜单行：凸起的白色大圆角块（样稿的菜单方块），名字用宋体 */
+.ov-fsmenu .ov-menu-list {
+  gap: 10px;
+}
+
+.ov-fsmenu .ov-menu-item {
+  min-height: 72px;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  font: var(--weight-serif) var(--text-title-4) / 1.35 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+}
+
+.ov-fsmenu .ov-menu-item[data-pressed] {
+  background: var(--color-raised-pressed);
+}
+
+@media (hover: hover) {
+  .ov-fsmenu .ov-menu-item:hover:not([data-pressed]) {
+    background: var(--color-raised-hover);
+  }
+}
+
+.ov-fsmenu .ov-menu-item[aria-current="page"] {
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised), inset 0 0 0 2px var(--color-accent);
+  color: var(--color-text);
+}
+
+.ov-fsmenu .ov-menu-item__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-tile);
+}
+
+.ov-fsmenu .ov-menu-item__detail {
+  margin-top: 2px;
+  font: var(--type-caption-1);
+  letter-spacing: 0;
+}
+
+.ov-fsmenu__footer {
+  margin-top: 18px;
+}
+
+/* 替身按钮在底栏区：内容底部留出位置，最后一项不被它盖住 */
+.ov-fsmenu[data-proxy-zone="bottom"] .ov-fsmenu__inner {
+  padding-bottom: calc(var(--safe-bottom) + var(--space-10) + var(--space-8));
+}
+
+/* 没有替身按钮时的关闭按钮：右上角、和大标题第一行对齐，不随内容滚动 */
+.ov-fsmenu__close {
+  position: absolute;
+  top: calc(var(--safe-top) + var(--space-9) + 6px);
+  right: calc(var(--safe-right) + var(--gutter) + var(--space-1));
+}
+
+.ov-fsmenu:not([data-proxy-zone]) .ov-fsmenu__header {
+  padding-right: var(--space-9);
+}
+
+@media (min-width: 1024px) {
+  .ov-fsmenu__inner {
+    padding-top: calc(var(--safe-top) + var(--space-10));
+  }
+
+  .ov-fsmenu__close {
+    top: calc(var(--safe-top) + var(--space-10) + 6px);
+  }
+}

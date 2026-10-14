@@ -1,0 +1,1422 @@
+/* =====================================================================
+   pages/day/day.css：每天页（.day）。大标题、分段条、顶栏、底栏由外壳画，这里从分段条下面开始。
+   照样稿 P2-serif 的 .day-head / .tl-*（04-body.html、02-style.html）：
+   左边 52px 一栏时间（Geist 等宽数字）、20px 一栏竖线和圆点、右边是可原地展开的卡片（ui/ExpandableCard）。
+   颜色、圆角、阴影、字体、间距只用 tokens.css 的变量。
+   ===================================================================== */
+
+.day {
+  position: relative;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-1) var(--gutter) calc(var(--safe-bottom) + var(--tabbar-h) + var(--space-6));
+  /* 横向手势（换天）自己接，竖向滚动交给浏览器 */
+  touch-action: pan-y;
+}
+
+.day > * + * {
+  margin-top: 14px;
+}
+
+.day[data-swiping] {
+  cursor: grabbing;
+}
+
+/* ---------- 页头 ---------- */
+.day-head {
+  padding: var(--space-2) var(--space-1) 0;
+}
+
+.day-head__eyebrow {
+  margin: 0;
+}
+
+.day-head__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 6px 0 0;
+  font: var(--type-title-1);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  /* 句子式的长标题按正常中文规则断行（keep-all 只在标点、空格处折，「JW」会单独掉到下一行，长标题折得很碎，视觉评审 P2-1） */
+  word-break: normal;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+
+.day-head__icon {
+  flex: none;
+  font-size: var(--text-title-2);
+  line-height: 1;
+}
+
+.day-head__title-text {
+  min-width: 0;
+}
+
+.day-head__summary {
+  margin: 8px 0 0;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.day-head__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+/* 小胶囊：凸起的白 + 强调色图标（样稿 .chip） */
+.day-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 10px 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+}
+
+.day-chip__icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  color: var(--color-accent-text);
+}
+
+.day-chip__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.day-chip--muted {
+  color: var(--color-text-2);
+}
+
+.day-chip--muted .day-chip__icon {
+  color: var(--color-text-2);
+}
+
+.day-chip--warning {
+  background: var(--color-warning-soft);
+  box-shadow: none;
+  color: var(--color-warning-text);
+}
+
+.day-chip--warning .day-chip__icon {
+  color: var(--color-warning-text);
+}
+
+/* 可点的（当晚住哪 → 预订详情）：带箭头，可点区域扩到 44 */
+.day-chip--link {
+  padding-right: 6px;
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.day-chip--link::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+
+.day-chip--link[data-pressed] {
+  background: var(--color-raised-pressed);
+}
+
+.day-chip__chev {
+  color: var(--color-accent-text);
+}
+
+.day-head__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 10px 0 0;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.day-head__note .glyph {
+  flex: none;
+  margin-top: 2px;
+  color: var(--color-accent-2);
+}
+
+.day-head__note b {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.day-head--skel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---------- 路线规划卡 ---------- */
+.day-route__sub {
+  margin: -4px 0 0;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  line-height: 1.5;
+}
+
+.day-route__metrics {
+  --day-cols: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--day-cols), minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 12px 0 0;
+}
+
+.day-route__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+}
+
+.day-route__metric dd {
+  margin: 0;
+  font-size: var(--text-figure-4);
+  line-height: 1.1;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.day-route__metric dt {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+}
+
+/* 值很长时（「约 2 小时 50 分」「12–20 万越南盾（约 HK$85–106）」）：一行一个，左标签右值 */
+.day-route__rows {
+  margin: 12px 0 0;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+}
+
+.day-route__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: 9px 0;
+  font: var(--type-subhead);
+  line-height: 1.4;
+}
+
+.day-route__row + .day-route__row {
+  border-top: 1px solid var(--color-separator);
+}
+
+.day-route__row dt {
+  flex: none;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  line-height: inherit;
+}
+
+.day-route__row dd {
+  min-width: 0;
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.day-route__stops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day-route__stop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 3px 10px 3px 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  font: var(--type-footnote);
+}
+
+.day-route__n {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font-size: var(--text-caption-1);
+  font-weight: var(--weight-semibold);
+}
+
+.day-route__stop-note {
+  color: var(--color-text-2);
+}
+
+.day-route__stop-note::before {
+  content: "·";
+  margin-right: 4px;
+}
+
+.day-route__links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: 14px;
+}
+
+/* ---------- 取舍说明 ---------- */
+.day-decisions__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day-decision + .day-decision {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-separator);
+}
+
+.day-decision__q {
+  margin: 0;
+  font: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+}
+
+.day-decision__a {
+  margin: 4px 0 0;
+  color: var(--color-text);
+  font: var(--type-subhead);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.day-decision__alts {
+  margin: 6px 0 0;
+  padding: 0 0 0 2px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  line-height: 1.5;
+  list-style: none;
+}
+
+.day-decision__alts::before {
+  content: "也考虑过：";
+  display: block;
+  margin-bottom: 2px;
+  font-weight: var(--weight-semibold);
+}
+
+.day-decision__alts li::before {
+  content: "–";
+  margin-right: 6px;
+}
+
+/* ---------- 当天提醒 ---------- */
+/* 当天提醒里待办的那行小字（截止 + 备注）：最多三行，全文在清单页 */
+.day-reminders__todos .check__desc,
+.tl-todos .check__desc {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.day-reminders__todos {
+  margin-top: 4px;
+}
+
+.day-reminders .k-row + .day-reminders__todos {
+  margin-top: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--color-separator);
+}
+
+/* ---------- 时间轴 ---------- */
+.tl {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tl__item,
+.tl__now {
+  --tl-time-w: 52px;
+  --tl-rail-w: 20px;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--tl-time-w) var(--tl-rail-w) minmax(0, 1fr);
+  padding-bottom: 10px;
+}
+
+/* 竖线：从圆点往下画到下一条 */
+.tl__item::before {
+  content: "";
+  position: absolute;
+  top: 26px;
+  bottom: -6px;
+  left: calc(var(--tl-time-w) + 9px);
+  width: 2px;
+  border-radius: 1px;
+  background: var(--color-rail);
+}
+
+.tl__item:last-child::before {
+  display: none;
+}
+
+.tl--general .tl__item::before {
+  opacity: 0.5;
+}
+
+.tl__time {
+  padding: 14px 6px 0 0;
+  text-align: right;
+  line-height: 1.15;
+}
+
+.tl__time-main {
+  display: block;
+  font-size: var(--text-callout);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.tl__time--label .tl__time-main {
+  font-family: var(--font-sans);
+  font-size: var(--text-caption-1);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.tl__time-end,
+.tl__time-sub {
+  display: block;
+  margin-top: 2px;
+  color: var(--color-text-2);
+  font-size: var(--text-caption-2);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.tl__time-sub {
+  font-family: var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+/* 条目在别的时区：小标签「香港」 */
+.tl__time-zone {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  background: var(--color-fill);
+  color: var(--color-text-2);
+  font: var(--type-caption-2);
+  font-weight: var(--weight-semibold);
+}
+
+.tl__time--dim {
+  color: var(--color-text-3);
+}
+
+.tl__time--dim .tl__time-end,
+.tl__time--dim .tl__time-sub {
+  color: var(--color-text-3);
+}
+
+.tl__rail {
+  position: relative;
+}
+
+.tl__dot {
+  position: absolute;
+  top: 19px;
+  left: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-accent-soft);
+}
+
+.tl__item--dim .tl__dot {
+  background: var(--color-text-3);
+  box-shadow: 0 0 0 4px var(--color-fill);
+}
+
+.tl--general .tl__dot {
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 2px var(--color-accent), 0 0 0 4px var(--color-accent-soft);
+}
+
+.tl__item--current .tl__dot {
+  box-shadow: 0 0 0 4px var(--color-accent-soft), 0 0 0 1px var(--color-accent);
+}
+
+.tl__item--current .tl__dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: var(--color-accent);
+  opacity: 0.35;
+  animation: tl-pulse 2.4s var(--ease-out) infinite;
+}
+
+@keyframes tl-pulse {
+  0% { transform: scale(0.6); opacity: 0.4; }
+  70% { transform: scale(1.8); opacity: 0; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.tl__dot--skel {
+  background: var(--color-skeleton);
+  box-shadow: none;
+}
+
+.tl__card {
+  min-width: 0;
+}
+
+/* 刚加的一条（面板收回以后放进时间轴）：淡入、轻轻落下，强调色细边亮一下再退掉（交互评审 P2-2，和账本新记的一笔一样） */
+@keyframes tl-fresh-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tl-fresh-glow {
+  0%,
+  40% {
+    box-shadow: var(--material-card-edge), 0 0 0 2px var(--color-accent), var(--shadow-accent-sm);
+  }
+
+  100% {
+    box-shadow: var(--material-card-edge);
+  }
+}
+
+.tl__item[data-fresh] > .tl__card {
+  animation: tl-fresh-in var(--dur-slow) var(--ease-out) var(--dur-fast) both, tl-fresh-glow 2.6s var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tl__item[data-fresh] > .tl__card {
+    animation: tl-fresh-glow 2.6s var(--ease-out) both;
+  }
+}
+
+/* 当前条目：强调色细边 */
+.tl__item--current > .tl__card.xcard--card {
+  box-shadow: var(--material-card-edge), 0 0 0 1.5px var(--color-accent), var(--shadow-accent-sm);
+}
+
+/* 完成 / 跳过：标题淡一点、划掉；右边的标签照旧看得清 */
+.tl__item--dim > .tl__card .xcard__title {
+  color: var(--color-text-2);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-text-3);
+}
+
+.tl__item--dim > .tl__card .xcard__leading {
+  opacity: 0.55;
+}
+
+/* 收起时的种类图标块小一号（40 → 32）：真实行程的标题很长，标题那一栏多让出一点宽度（视觉评审 P2-13） */
+.tl__card > .xcard__heading > .xcard__header {
+  gap: 10px;
+  padding-left: 12px;
+}
+
+.tl__card .xcard__leading {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+}
+
+/* 地址：点一下复制（整行就是复制按钮，越南语长地址照常折行） */
+.tl-address__copy {
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* 标题行可以折两行以上（超长标题）：样稿 .tl-title。真实行程的标题是中英混排的长句（「晚饭：Cơm Nhà（越南家常菜）」），
+   keep-all 会把一串中文当成一个词整段换行、末尾的「）」被甩到下一行，所以这里按正常的中文规则断行 */
+.tl__card .xcard__title {
+  font-weight: var(--weight-semibold);
+  word-break: normal;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+/* 副标题 + 标签同一行：放得下并排（标签靠右），放不下标签自己换到下一行 */
+.tl__sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-2);
+  row-gap: 4px;
+  min-width: 0;
+}
+
+/* flex-basis auto：副标题按自己的内容宽度决定能不能和标签挤在同一行——短的（「椰影湾酒店」）并排、标签靠右；
+   长的自己占一整行（两行省略），标签换到下一行 */
+.tl__sub .xcard__subtitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tl__card .xcard__subtitle {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* 只有模糊时间的时间栏（「取完行李后」）：两行时尽量匀 */
+.tl__time--label .tl__time-main {
+  text-wrap: balance;
+}
+
+/* 进行中的进度条（标题行底部） */
+.tl__progress {
+  --tl-progress: 0;
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+  left: 14px;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  overflow: hidden;
+}
+
+.tl__progress::after {
+  content: "";
+  display: block;
+  width: calc(var(--tl-progress) * 100%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+/* 有进行中的条目时：「现在」的钟点跟在这一栏的钟点下面（正常文档流，几行都不会压住），
+   圆点画在竖线上、小横线接到卡片边上（伪元素；横向位置按 --tl-time-w / --tl-rail-w 算，宽屏也对得上） */
+.tl__time {
+  position: relative;
+}
+
+.tl__nowmark {
+  position: relative;
+  display: block;
+  margin-top: 6px;
+  text-align: right;
+  pointer-events: none;
+}
+
+.tl__nowmark b {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  /* 实心强调色（浅底 + 强调色字压在光场上只有 3.9:1，视觉评审 P2-6） */
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--text-caption-1);
+  font-weight: var(--weight-bold);
+  line-height: 1.2;
+}
+
+/* 圆点：竖线正中（时间栏宽 + 竖线栏一半） */
+.tl__nowmark::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(var(--tl-time-w) + var(--tl-rail-w) / 2 - 7px);
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-surface), var(--shadow-accent-sm);
+  translate: 0 -50%;
+}
+
+/* 人不在行程时区（去程落地前 / 回程落地后）：钟点下面多一个「香港」小标签，圆点和横线对着钟点那一格（不是整块的正中） */
+.tl__nowmark[data-zone]::after,
+.tl__nowmark[data-zone]::before {
+  top: 10px;
+}
+
+.tl__nowmark .tl__time-zone {
+  display: table;
+  margin: 3px 0 0 auto;
+}
+
+/* 小横线：从竖线接到卡片边上 */
+.tl__nowmark::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(var(--tl-time-w) + var(--tl-rail-w) / 2);
+  width: calc(var(--tl-rail-w) / 2);
+  height: 2px;
+  background: var(--color-accent);
+  translate: 0 -50%;
+}
+
+/* 「现在」指示线 */
+.tl__now {
+  align-items: center;
+  min-height: 28px;
+  padding-bottom: 10px;
+}
+
+.tl__time--now {
+  padding-top: 0;
+  color: var(--color-accent-text);
+}
+
+.tl__time--now b {
+  font-size: var(--text-footnote);
+  font-weight: var(--weight-bold);
+}
+
+.tl__now-dot {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-surface), var(--shadow-accent-sm);
+  translate: 0 -50%;
+}
+
+.tl__now-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+}
+
+.tl__now-line span {
+  color: var(--color-accent-text);
+  font: var(--type-caption-2);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+}
+
+.tl__now-zone {
+  font-style: normal;
+}
+
+.tl__now-line::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--color-accent);
+}
+
+/* ---------- 展开后的内容 ---------- */
+.tl__card .xcard__content {
+  padding-top: 2px;
+}
+
+.tl-current {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+}
+
+.tl-desc {
+  margin: 0;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.tl-desc p {
+  margin: 0;
+}
+
+.tl-desc p + p,
+.tl-desc .md-list {
+  margin-top: 6px;
+}
+
+.tl-desc .md-list {
+  padding-left: 1.2em;
+}
+
+.tl-infos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.tl-infos:empty {
+  display: none;
+}
+
+.tl-infos .k-info + .k-info {
+  margin-top: 0;
+}
+
+.tl-cost__total,
+.tl-cost__note {
+  color: var(--color-text-2);
+}
+
+.tl-cost__total::before,
+.tl-cost__note::before {
+  content: " · ";
+}
+
+.tl-sec {
+  margin-top: 12px;
+}
+
+.tl-sec__h {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+}
+
+.tl-sec__h .glyph {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+.tl-sec__h em {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 怎么过去：每种走法一行 */
+.tl-opts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tl-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 0;
+}
+
+.tl-opt + .tl-opt {
+  border-top: 1px solid var(--color-separator);
+}
+
+.tl-opt__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.tl-opt__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+}
+
+.tl-opt__meta {
+  margin: 2px 0 0;
+  color: var(--color-text-2);
+  font-size: var(--text-caption-1);
+}
+
+.tl-opt__note {
+  margin: 2px 0 0;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  line-height: 1.45;
+}
+
+.tl-opt__link {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-round);
+  color: var(--color-accent-text);
+}
+
+.tl-opt__link::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+/* 步行路线 */
+.tl-stops {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tl-stop {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.tl-stop__n {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font-size: var(--text-caption-1);
+  font-weight: var(--weight-semibold);
+}
+
+.tl-stop__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  font: var(--type-subhead);
+  line-height: 1.4;
+}
+
+.tl-stop__text b {
+  font-weight: var(--weight-semibold);
+}
+
+.tl-stop__sub,
+.tl-stop__note {
+  color: var(--color-text-2);
+  font-size: var(--text-caption-1);
+}
+
+.tl-stop__note {
+  color: var(--color-warning-text);
+}
+
+.tl-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: 8px;
+}
+
+/* 链接 */
+.tl-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: 12px;
+}
+
+.tl-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  text-decoration: none;
+}
+
+.tl-link::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+.tl-link .glyph {
+  color: var(--color-accent-text);
+}
+
+/* 关联预订 */
+.tl-booking {
+  margin-top: 12px;
+}
+
+.tl-booking__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  text-align: left;
+}
+
+.tl-booking__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tl-booking__text b {
+  font: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.tl-booking__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.tl-booking__provider {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+}
+
+.tl-booking__chev {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+.tl-booking__deadline {
+  margin-top: 8px;
+}
+
+.tl-booking .k-info--pair {
+  min-height: 40px;
+  padding: 4px 0 0;
+}
+
+/* 相关贴士 */
+.tl-tips {
+  margin: 0 -10px;
+  padding: 0;
+  list-style: none;
+}
+
+.tl-tip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.tl-tip[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+.tl-tip__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  font: var(--type-subhead);
+  line-height: 1.35;
+}
+
+.tl-tip__text b {
+  font-weight: var(--weight-semibold);
+}
+
+.tl-tip[data-tone="danger"] .tl-tip__text b {
+  color: var(--color-danger-text);
+}
+
+.tl-tip__text span {
+  overflow: hidden;
+  color: var(--color-text-2);
+  font-size: var(--text-caption-1);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tl-tip__chev {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+.tl-todos {
+  margin: 0 -8px;
+}
+
+.tl-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 10px 0 0;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  line-height: 1.45;
+}
+
+.tl-note .glyph {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* 动作行（和 kit/PlaceActions 的 .k-act 同一种样子）：整合时挪到展开内容的最前面（标题下面一眼就是导航 / 叫 Grab），
+   下面的说明和详情和它隔开一段 */
+.tl__card .k-acts {
+  margin-top: 14px;
+}
+
+.tl__card .xcard__content > .k-acts:first-child,
+.tl__card .xcard__content > .tl-note:first-child,
+.tl__card .tl-current + .k-acts,
+.tl__card .tl-current + .tl-note {
+  margin-top: 4px;
+}
+
+.tl__card .k-acts + .tl-desc,
+.tl__card .tl-note + .tl-desc {
+  margin-top: 14px;
+}
+
+.tl-acts {
+  --tl-cols: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--tl-cols), minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.tl-act {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 58px;
+  padding: 6px 4px;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  box-shadow: inset 0 1px 0 var(--color-glass-highlight);
+  color: var(--color-text);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  letter-spacing: var(--tracking-label);
+  text-align: center;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.tl-act .glyph {
+  color: var(--color-accent-text);
+}
+
+.tl-act__label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tl-act[data-pressed] {
+  background-color: var(--color-fill-pressed);
+}
+
+.tl-act--primary {
+  background: var(--material-accent);
+  box-shadow: var(--shadow-accent-sm);
+  color: var(--color-on-accent);
+}
+
+.tl-act--primary .glyph {
+  color: var(--color-on-accent);
+}
+
+.tl-act--primary[data-pressed] {
+  background: var(--color-accent-pressed);
+}
+
+.tl-act:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+/* 完成 / 跳过 */
+.tl-statusrow {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.tl-status {
+  margin-top: var(--space-2);
+  padding: 12px;
+  border-radius: var(--radius-md);
+}
+
+.tl-status__h {
+  margin: 0;
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+}
+
+.tl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.tl-field__label {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-weight: var(--weight-semibold);
+}
+
+.tl-field__input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: var(--type-body);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.tl-field__input::placeholder {
+  color: var(--color-text-3);
+}
+
+.tl-field__input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.tl-field__input--time {
+  max-width: 160px;
+}
+
+.tl-status__btns {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: var(--space-2);
+  margin-top: 12px;
+}
+
+/* 备选切换 + 备选的内容 */
+.tl-alts {
+  margin-bottom: 10px;
+}
+
+.tl-alt__h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font: var(--type-callout);
+  font-weight: var(--weight-semibold);
+  line-height: 1.35;
+}
+
+.tl-alt__h .glyph {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+.tl-alt__meta {
+  margin: 4px 0 8px;
+  color: var(--color-text-2);
+  font-size: var(--text-caption-1);
+}
+
+/* ---------- 空、骨架、加条目 ---------- */
+.day-empty__card {
+  padding: 18px;
+  border-radius: var(--radius-xl);
+}
+
+.tl__skel {
+  padding: 12px 14px;
+  border-radius: var(--radius-lg);
+}
+
+.day-add {
+  margin-top: 6px;
+}
+
+/* ---------- 左右滑动的提示 ---------- */
+.day-swipe-hint {
+  --day-swipe: 0;
+  --day-gap: 0px;
+  /* 挂在 body 下（overlay 的 Portal），fixed 以视口为准；只放在页面让开的那条空隙里（--day-gap = 页面平移了多少） */
+  position: fixed;
+  top: 44vh;
+  z-index: var(--z-sticky);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: min(46vw, 200px);
+  padding: 10px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-3);
+  color: var(--color-text);
+  opacity: calc(0.4 + var(--day-swipe) * 0.6);
+  pointer-events: none;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+/* 空隙不够宽时提示还有一部分在屏幕外，空隙越拉越大就整个滑进来（右边缘最多到空隙的边上） */
+.day-swipe-hint--prev {
+  left: 8px;
+  translate: min(0px, calc(var(--day-gap) - 100% - 16px)) 0;
+}
+
+.day-swipe-hint--next {
+  right: 8px;
+  translate: max(0px, calc(100% + 16px - var(--day-gap))) 0;
+}
+
+.day-swipe-hint[data-armed] {
+  background: var(--color-accent);
+  box-shadow: var(--shadow-accent);
+  color: var(--color-on-accent);
+}
+
+.day-swipe-hint__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.day-swipe-hint__text b {
+  font-size: var(--text-headline);
+}
+
+.day-swipe-hint__text i {
+  overflow: hidden;
+  font: var(--type-caption-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.8;
+}
+
+/* ---------- 宽屏 ---------- */
+@media (min-width: 768px) {
+  .tl__item,
+  .tl__now {
+    --tl-time-w: 72px;
+    --tl-rail-w: 24px;
+  }
+
+  .tl__item::before {
+    left: calc(var(--tl-time-w) + 11px);
+  }
+
+  .tl__dot {
+    left: 7px;
+  }
+
+  .tl__now-dot {
+    left: 5px;
+  }
+
+  .tl__time-main {
+    font-size: var(--text-headline);
+  }
+
+  .day-swipe-hint {
+    display: none;
+  }
+}
+
+/* ---------- 减弱动态效果 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .tl__item--current .tl__dot::after {
+    animation: none;
+    opacity: 0;
+  }
+
+  .tl__progress::after {
+    transition: none;
+  }
+}

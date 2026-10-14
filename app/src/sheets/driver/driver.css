@@ -1,0 +1,241 @@
+/* =====================================================================
+   sheets/driver/driver.css：给司机看（.drv）。全屏、不透明：白底黑字，深色模式近黑底、近白字
+   （--color-text-inverse 底 + --color-text 字：浅色 #fff / #0a1c23、深色 #0a1c23 / #eef6f7，对比度 ≥17:1）。
+   不用玻璃、不用光场：户外强光下给别人看，越清楚越好。字号由 DriverSheet.jsx 算好写进 --drv-size。
+   ===================================================================== */
+
+.drv {
+  --drv-size: 48px;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding:
+    calc(var(--safe-top) + 10px)
+    calc(var(--safe-right) + 20px)
+    calc(var(--safe-bottom) + 14px)
+    calc(var(--safe-left) + 20px);
+  background: var(--color-text-inverse);
+  color: var(--color-text);
+  pointer-events: auto;
+  /* 整张卡接手往下拉的手势（中间那块能滚动时例外，见下面） */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: contain;
+}
+
+.drv:focus {
+  outline: none;
+}
+
+/* 打开时焦点落在大字标题上（读屏从这里读起）；它不是能点的东西，不画焦点环 */
+.drv__primary:focus,
+.drv__empty:focus {
+  outline: none;
+}
+
+/* ---------- 顶部：关闭 + 说明，都靠左（右上角留给系统 / 演示模式的角标，不会被挡住） ---------- */
+.drv__top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-3);
+  min-height: 44px;
+}
+
+.drv__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-2);
+  font: var(--type-eyebrow);
+  font-size: var(--text-footnote);
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+.drv__close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-round);
+  background: var(--color-fill);
+  color: var(--color-text);
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.drv__close[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+/* ---------- 中间：大字 ---------- */
+.drv__main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 放不下（到最小字号还放不下）：这块可以上下滚动 */
+.drv[data-scrollable] .drv__main {
+  overflow-y: auto;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  -webkit-mask-image: linear-gradient(transparent, var(--color-text) 16px, var(--color-text) calc(100% - 24px), transparent);
+  mask-image: linear-gradient(transparent, var(--color-text) 16px, var(--color-text) calc(100% - 24px), transparent);
+}
+
+/* 上下居中；内容比框高时 auto 外边距变成 0，从顶上开始排（滚得到第一行） */
+.drv__text {
+  margin-block: auto;
+  padding: var(--space-4) 0;
+}
+
+.drv__primary {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--drv-size);
+  font-weight: var(--weight-bold);
+  line-height: 1.16;
+  letter-spacing: 0;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.drv__address {
+  margin-top: 0.5em;
+  font-family: var(--font-sans);
+  font-size: max(28px, calc(var(--drv-size) * 0.62));
+  font-weight: var(--weight-medium);
+  line-height: 1.28;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.drv__primary + .drv__address {
+  margin-top: 0.42em;
+}
+
+.drv__secondary {
+  margin-top: var(--space-5);
+  color: var(--color-text-2);
+  font: var(--type-title-3);
+  letter-spacing: var(--tracking-title);
+  overflow-wrap: anywhere;
+}
+
+/* 下车提示（ride_note）：中文，给自己看的，次要色、正文字号 */
+.drv__note {
+  margin-top: var(--space-3);
+  color: var(--color-text-2);
+  font: var(--type-callout);
+  overflow-wrap: anywhere;
+}
+
+.drv__empty {
+  margin: 0;
+  font: var(--type-title-1);
+  letter-spacing: var(--tracking-display);
+}
+
+/* ---------- 底部：复制 / 打电话 + 提示 ---------- */
+.drv__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.drv__actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+
+.drv__actions--two {
+  grid-template-columns: 1fr 1fr;
+}
+
+.drv__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-text);
+  font: var(--type-label);
+  font-size: var(--text-callout);
+  letter-spacing: var(--tracking-label);
+  text-decoration: none;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.drv__btn .glyph {
+  color: var(--color-accent-text);
+}
+
+.drv__btn[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+.drv__hint {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  text-align: center;
+}
+
+@media (hover: hover) {
+  .drv__btn:hover:not([data-pressed]),
+  .drv__close:hover:not([data-pressed]) {
+    background: var(--color-fill-hover);
+  }
+}
+
+/* 平板、桌面：顶部、大字、按钮都在同一条居中的栏里（宽 --content-max），左边对齐——不是字铺满整个屏幕、按钮缩在中间 */
+@media (min-width: 768px) {
+  .drv__top,
+  .drv__main {
+    width: 100%;
+    max-width: var(--content-max);
+    margin-inline: auto;
+  }
+}
+
+/* 横屏（矮）：上下留白收紧，按钮矮一点，大字多一点地方 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .drv {
+    padding-top: calc(var(--safe-top) + 6px);
+    padding-bottom: calc(var(--safe-bottom) + 8px);
+  }
+
+  .drv__text {
+    padding: var(--space-2) 0;
+  }
+
+  .drv__secondary {
+    margin-top: var(--space-2);
+  }
+
+  .drv__bottom {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .drv__actions {
+    flex: 1;
+  }
+
+  .drv__btn {
+    min-height: 44px;
+  }
+
+  .drv__hint {
+    flex: none;
+  }
+}

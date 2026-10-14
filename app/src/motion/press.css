@@ -1,0 +1,45 @@
+/* =====================================================================
+   motion/press.css：按压反馈的样式（行为在 motion/press.js）。进 motion 层，组件可以覆盖。
+
+   - 缩放用独立的 `scale` 属性，不占 `transform`：组件自己的位移、FLIP、旋转都写在 transform 上，
+     两者互不覆盖（FLIP 正在播的卡片也能按）。
+   - 过渡写在 --press-transition 里（tokens.css 定义松手的弹簧回弹；按下时这里换成短缓出）。
+     组件自己还有别的过渡时这样写，别把它覆盖掉：
+       transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+   - --press-scale-auto 由 press.js 按元素大小算好写在元素上（大卡片缩得少）。
+   - data-press-float：浮在内容上、不需要从它开始滚动页面的按钮（悬浮加号、顶栏按钮、替身按钮）。
+     触屏上手指一动浏览器就开始滚动并发 pointercancel（按压取消、不算点击），所以普通按钮“滑出再滑回”只对鼠标有效；
+     加了这个属性（touch-action: none）后手指可以滑出取消、再滑回重新按下、在里面松手照样触发（press.js 补发 click），
+     和 iOS 原生按钮一样。
+     列表里的行、卡片不要加：从它们开始的滑动要能滚动页面。
+   ===================================================================== */
+
+[data-press] {
+  --press-scale-auto: var(--press-scale);
+  --press-highlight: var(--color-fill-pressed);
+  transition: var(--press-transition);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 按下：短缓出（松手时去掉这一条，回到 tokens.css 里的弹簧回弹） */
+[data-press][data-pressed] {
+  --press-transition: scale var(--press-duration) var(--ease-out);
+}
+
+[data-press="scale"][data-pressed],
+[data-press="both"][data-pressed] {
+  scale: var(--press-scale-auto);
+}
+
+/* 高亮式（列表行）：不缩放，换底色 */
+[data-press="highlight"][data-pressed],
+[data-press="both"][data-pressed] {
+  background-color: var(--press-highlight);
+}
+
+/* 浮层按钮：从它开始的滑动不滚动页面，手指滑出、滑回都由 press.js 跟踪 */
+[data-press-float] {
+  touch-action: none;
+}

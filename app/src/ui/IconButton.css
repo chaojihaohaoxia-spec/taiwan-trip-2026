@@ -1,0 +1,125 @@
+/* =====================================================================
+   ui/IconButton.css：圆形图标按钮（.icon-btn）。A 液态玻璃：
+     fill（默认） 凸起的白圆（--color-raised + 顶部高光、细边），图标墨色
+     tinted       强调色浅底 + 强调色图标
+     filled       强调色渐变 + 柔光（像悬浮加号）
+     glass        真玻璃小圆（浮在光场上的顶栏搜索按钮）：backdrop-filter + 投影 + 高光
+     plain        透明，强调色图标
+   ===================================================================== */
+
+.icon-btn {
+  --icon-btn-size: var(--tap-min);
+  --icon-btn-bg: var(--color-raised);
+  --icon-btn-fg: var(--color-text);
+  --icon-btn-bg-hover: var(--color-raised-hover);
+  --icon-btn-bg-pressed: var(--color-raised-pressed);
+  --icon-btn-image: none;
+  --icon-btn-shadow: var(--shadow-raised);
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--icon-btn-size);
+  height: var(--icon-btn-size);
+  padding: 0;
+  border-radius: var(--radius-round);
+  background-color: var(--icon-btn-bg);
+  background-image: var(--icon-btn-image);
+  box-shadow: var(--icon-btn-shadow);
+  color: var(--icon-btn-fg);
+  cursor: pointer;
+  transition:
+    var(--press-transition),
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.icon-btn > svg {
+  pointer-events: none;
+}
+
+.icon-btn[data-pressed] {
+  background-color: var(--icon-btn-bg-pressed);
+}
+
+@media (hover: hover) {
+  .icon-btn:hover:not(:disabled):not([aria-disabled="true"]):not([data-pressed]) {
+    background-color: var(--icon-btn-bg-hover);
+  }
+}
+
+.icon-btn:disabled,
+.icon-btn[aria-disabled="true"] {
+  opacity: 0.42;
+  cursor: default;
+}
+
+/* 开关型：按下去的状态用强调色浅底 */
+.icon-btn[aria-pressed="true"] {
+  --icon-btn-bg: var(--color-accent-soft);
+  --icon-btn-fg: var(--color-accent-text);
+  --icon-btn-bg-hover: color-mix(in srgb, var(--color-accent-soft), var(--color-accent) 8%);
+  --icon-btn-bg-pressed: color-mix(in srgb, var(--color-accent-soft), var(--color-accent) 16%);
+  --icon-btn-shadow: 0 0 0 0 transparent;
+}
+
+/* ---------- 尺寸 ---------- */
+.icon-btn--sm {
+  --icon-btn-size: 36px;
+}
+
+.icon-btn--sm::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-round);
+}
+
+.icon-btn--lg {
+  --icon-btn-size: 56px;
+}
+
+/* ---------- 样式 ---------- */
+.icon-btn--tinted {
+  --icon-btn-bg: var(--color-accent-soft);
+  --icon-btn-fg: var(--color-accent-text);
+  --icon-btn-bg-hover: color-mix(in srgb, var(--color-accent-soft), var(--color-accent) 8%);
+  --icon-btn-bg-pressed: color-mix(in srgb, var(--color-accent-soft), var(--color-accent) 16%);
+  --icon-btn-shadow: 0 0 0 0 transparent;
+}
+
+/* 实心：强调色渐变 + 同色柔光（样稿的悬浮加号）。底色仍写实心的强调色：
+   从它长出来的面板（overlay/AnchoredPanel）读这个底色做色层 */
+.icon-btn--filled {
+  --icon-btn-bg: var(--color-accent);
+  --icon-btn-fg: var(--color-on-accent);
+  --icon-btn-bg-hover: var(--color-accent-hover);
+  --icon-btn-bg-pressed: var(--color-accent-pressed);
+  --icon-btn-image: var(--material-accent);
+  --icon-btn-shadow: var(--shadow-accent);
+}
+
+.icon-btn--filled[data-pressed] {
+  --icon-btn-image: linear-gradient(var(--color-fill-pressed), var(--color-fill-pressed)), var(--material-accent);
+}
+
+/* 真玻璃小圆：浮在光场 / 页面上（顶栏的搜索）。真的 backdrop-filter，同屏别放太多 */
+.icon-btn--glass {
+  --icon-btn-bg: transparent;
+  --icon-btn-image: var(--material-glass-strong);
+  --icon-btn-bg-hover: color-mix(in srgb, var(--color-glass-highlight) 24%, transparent);
+  --icon-btn-bg-pressed: var(--color-fill);
+  --icon-btn-shadow: var(--shadow-btn), var(--shadow-glass-edge);
+  -webkit-backdrop-filter: var(--glass-filter-sm);
+  backdrop-filter: var(--glass-filter-sm);
+}
+
+.icon-btn--plain {
+  --icon-btn-bg: transparent;
+  --icon-btn-fg: var(--color-accent-text);
+  --icon-btn-bg-hover: var(--color-fill);
+  --icon-btn-bg-pressed: var(--color-fill-pressed);
+  --icon-btn-shadow: 0 0 0 0 transparent;
+}

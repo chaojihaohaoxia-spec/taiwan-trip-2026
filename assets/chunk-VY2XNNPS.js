@@ -1,0 +1,1 @@
+import{a as t}from"./chunk-7VH3CII5.js";function u(){return!1}var e=null;function c(){return e||(e=t(()=>import("./chunk-UDNM4EJN.js"),"demo/index.js").then(r=>r.createDemoDb()).catch(r=>{throw e=null,r})),e}export{u as a,c as b};

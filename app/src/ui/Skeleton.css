@@ -1,0 +1,97 @@
+/* =====================================================================
+   ui/Skeleton.css：骨架屏（.skel）。微光是一条斜向的亮带从左扫到右（背景位置动画），
+   1.4 秒一次；同一时刻开始的骨架扫光同步。减弱动态效果时不扫。
+   ===================================================================== */
+
+.skel {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-xs);
+  background-color: var(--color-skeleton);
+  background-image: linear-gradient(100deg, transparent 20%, var(--color-skeleton-shine) 50%, transparent 80%);
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  background-position: 160% 0;
+  animation: skel-shine 1.4s var(--ease-in-out) infinite;
+}
+
+.skel--text {
+  height: 0.8em;
+  margin: 0.3em 0;
+  border-radius: var(--radius-pill);
+}
+
+.skel--circle {
+  flex: none;
+  border-radius: var(--radius-round);
+}
+
+.skel--rect {
+  flex: none;
+  border-radius: var(--radius-md);
+}
+
+.skel-lines {
+  display: block;
+  width: 100%;
+}
+
+@keyframes skel-shine {
+  from {
+    background-position: 160% 0;
+  }
+  to {
+    background-position: -60% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
+    background-image: none;
+  }
+}
+
+/* ---------- 常用组合 ---------- */
+.skel-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+}
+
+.skel-card__text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- 加载完交叉淡入 ---------- */
+.reveal {
+  display: grid;
+}
+
+.reveal__skeleton,
+.reveal__content {
+  grid-area: 1 / 1;
+  min-width: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.reveal__skeleton {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reveal[data-loading] .reveal__skeleton {
+  opacity: 1;
+}
+
+.reveal[data-loading] .reveal__content {
+  opacity: 0;
+}
+
+/* 加载完以后骨架不再扫光（不留看不见的无限动画） */
+.reveal:not([data-loading]) .reveal__skeleton .skel {
+  animation: none;
+}

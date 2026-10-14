@@ -1,0 +1,236 @@
+/* =====================================================================
+   pages/skeleton.css：骨架占位页、开发页用的简单版式（sk- 前缀，正式页面不要用）。
+   只用 tokens.css 的变量。
+   ===================================================================== */
+
+.sk-page {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: calc(var(--safe-top) + var(--space-6)) var(--gutter) calc(var(--safe-bottom) + var(--space-10));
+}
+
+.sk-page--wide {
+  max-width: var(--content-max-wide);
+}
+
+/* ---------- 页头 ---------- */
+.sk-header {
+  padding: var(--space-4) var(--space-1) var(--space-5);
+}
+
+.sk-header__eyebrow {
+  color: var(--color-accent-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+}
+
+.sk-header__title {
+  margin-top: var(--space-1);
+  font: var(--type-large-title);
+  letter-spacing: var(--tracking-tight);
+  overflow-wrap: anywhere;
+}
+
+.sk-header__subtitle {
+  margin-top: var(--space-2);
+  color: var(--color-text-2);
+  font: var(--type-callout);
+}
+
+.sk-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min);
+  margin: 0 0 var(--space-3) calc(-1 * var(--space-1));
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-accent-text);
+  font: var(--type-headline);
+  /* 按压：data-press（motion/press.js 的全局委托） */
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.sk-back[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+/* ---------- 卡片 ---------- */
+.sk-card {
+  margin-top: var(--space-5);
+}
+
+.sk-card__title {
+  padding: 0 var(--space-4) var(--space-2);
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+}
+
+.sk-card__body {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.sk-card__footer {
+  padding: var(--space-2) var(--space-4) 0;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+/* ---------- 链接行 ---------- */
+.sk-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  color: var(--color-text);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.sk-row + .sk-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--space-4);
+  right: 0;
+  border-top: 0.5px solid var(--color-separator);
+}
+
+.sk-row[data-pressed] {
+  background: var(--color-fill-pressed);
+  transition-duration: var(--press-duration);
+}
+
+@media (hover: hover) {
+  .sk-row:hover:not([data-pressed]) {
+    background: var(--color-fill);
+  }
+}
+
+.sk-row__leading {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font-size: var(--text-title-3);
+}
+
+.sk-row__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-row__title {
+  color: var(--color-accent-text);
+  font: var(--type-headline);
+  overflow-wrap: anywhere;
+}
+
+.sk-row__detail {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  overflow-wrap: anywhere;
+}
+
+.sk-row__chevron {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+/* ---------- 信息行 ---------- */
+.sk-info {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 48px;
+  padding: var(--space-3) var(--space-4);
+  font: var(--type-subhead);
+}
+
+.sk-info + .sk-info {
+  border-top: 0.5px solid var(--color-separator);
+}
+
+.sk-info__label {
+  flex: none;
+  color: var(--color-text-2);
+}
+
+.sk-info__value {
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 提示条 ---------- */
+.sk-notice {
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-info-soft);
+  color: var(--color-text);
+  font: var(--type-subhead);
+}
+
+.sk-mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+/* ---------- 卡片里的操作按钮（退出登录等） ---------- */
+.sk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+}
+
+.sk-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-accent-text);
+  font: var(--type-headline);
+  /* 按压：data-press（motion/press.js 的全局委托） */
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.sk-button[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+.sk-button:disabled {
+  color: var(--color-text-3);
+  cursor: progress;
+}
+
+@media (hover: hover) {
+  .sk-button:hover:not(:disabled) {
+    background: var(--color-fill-hover);
+  }
+}

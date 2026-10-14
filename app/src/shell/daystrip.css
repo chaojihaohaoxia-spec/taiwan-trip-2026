@@ -1,0 +1,153 @@
+/* =====================================================================
+   shell/daystrip.css：天数分段条（DayStrip.jsx，样稿 .seg.days-seg）。
+   真玻璃胶囊（和 ui/SegmentedControl 的 .seg--glass 同一种材质）+ 白色滑块（--color-thumb + --shadow-thumb）。
+   每格两行：上面小字（Geist 11px，阶段 / 日期 + 周几；今天那格写「今天」并用强调色），下面大字（宋体 17px：概览 / D1…）。
+   格子平分整条；放不下（每格不到 64px）时轨道撑宽到 格数 × 64px、整条横向滑动（滚动条藏起来，两头有渐隐提示还有内容）。
+   滑块的静止位置：translateX(--ds-index × 100%)（块宽 = 一格的宽），首帧不需要 JS。
+   ===================================================================== */
+
+.ds {
+  position: relative;
+  height: 58px;
+  border-radius: var(--radius-pill);
+  background: var(--material-glass);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
+}
+
+.ds::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--material-rim);
+  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
+  -webkit-mask-composite: xor;
+  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
+  pointer-events: none;
+}
+
+.ds__scroll {
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  border-radius: inherit;
+  scrollbar-width: none;
+}
+
+/* 能横向滑的时候（DayStrip.jsx 量出来写 data-scrolls）还有内容的那一头渐隐；滑到头的那一头不渐隐
+   （data-at-start / data-at-end，滚动时更新），选中的第一格 / 最后一格滑块不会被淡掉一边 */
+.ds[data-scrolls] .ds__scroll {
+  --ds-fade-l: 14px;
+  --ds-fade-r: 14px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, var(--color-text) var(--ds-fade-l), var(--color-text) calc(100% - var(--ds-fade-r)), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, var(--color-text) var(--ds-fade-l), var(--color-text) calc(100% - var(--ds-fade-r)), transparent 100%);
+}
+
+.ds[data-at-start] .ds__scroll {
+  --ds-fade-l: 0px;
+}
+
+.ds[data-at-end] .ds__scroll {
+  --ds-fade-r: 0px;
+}
+
+.ds__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.ds__track {
+  --ds-pad: 4px;
+  /* 每格最窄多宽：放不下时整条横向滑 */
+  --ds-cell-min: 64px;
+  /* 一共几格、选中第几格（DayStrip.jsx 写在 style 上） */
+  --ds-n: 1;
+  --ds-index: 0;
+  position: relative;
+  display: grid;
+  /* 轨道宽 = max(整条, 每格 64px × 格数 + 两头内边距)：格子和滑块（宽 = (轨道 − 内边距) / 格数）按同一个宽度算，
+     天多横向滑时滑块仍然正好盖住一格（只写 min-width 的话轨道宽一直等于滚动框，格子溢出在外面，滑块按窄的那个宽度算）*/
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  width: max(100%, calc(var(--ds-n) * var(--ds-cell-min) + 2 * var(--ds-pad)));
+  height: 100%;
+  padding: var(--ds-pad);
+}
+
+.ds__thumb {
+  position: absolute;
+  top: var(--ds-pad);
+  bottom: var(--ds-pad);
+  left: var(--ds-pad);
+  width: calc((100% - 2 * var(--ds-pad)) / var(--ds-n));
+  transform: translateX(calc(var(--ds-index) * 100%));
+  pointer-events: none;
+}
+
+.ds__thumb > span {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-thumb);
+  box-shadow: var(--shadow-thumb);
+}
+
+.ds__cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: var(--press-transition);
+}
+
+.ds__top {
+  color: var(--color-text-2);
+  font: var(--weight-medium) var(--text-caption-2) / 1.25 var(--font-label);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.ds__big {
+  font: var(--weight-serif) var(--text-title-4) / 1.1 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+  white-space: nowrap;
+}
+
+.ds__cell[aria-current="page"] .ds__big {
+  color: var(--color-accent-text);
+}
+
+/* 今天那一格：上面写「今天」，强调色 */
+.ds__cell[data-today] .ds__top {
+  color: var(--color-accent-text);
+  font-weight: var(--weight-semibold);
+}
+
+/* 按下没选中的格：变淡（iOS 分段控件的写法） */
+.ds__cell[data-pressed]:not([aria-current="page"]) {
+  opacity: 0.6;
+}
+
+@media (hover: hover) {
+  .ds__cell:hover:not([aria-current="page"]) .ds__big {
+    color: var(--color-accent-text);
+  }
+}
+
+.ds__cell:focus-visible {
+  outline-offset: -3px;
+}

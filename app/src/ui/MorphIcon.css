@@ -1,0 +1,28 @@
+/* =====================================================================
+   ui/MorphIcon.css：可变形图标。颜色跟随文字（currentColor），线宽 2、圆头圆角，和 lucide 一致。
+   ===================================================================== */
+
+.morph-icon {
+  display: block;
+  flex: none;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.morph-icon__shape {
+  fill: currentColor;
+}
+
+.morph-icon__ring {
+  fill: none;
+}
+
+.morph-icon__check {
+  fill: none;
+  /* 间隔比路径长，偏移 1 时整条都落在间隔里（圆头不会在端点留下小圆点） */
+  stroke-dasharray: 1 2;
+}

@@ -1,0 +1,43 @@
+/* =====================================================================
+   pages/launch/launch.css：启动页的品牌画面。和 index.html 的启动画面（styles/base.css 的 .boot）同一个位置、
+   同样的字（系统字体：启动这一瞬间不为它去下载宋体），启动画面淡出时看不出接缝；底下是外壳的默认光场。
+   多等一会儿出现转圈和「正在读取行程…」。
+   ===================================================================== */
+
+.launch {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--safe-top) var(--gutter) var(--safe-bottom);
+  text-align: center;
+}
+
+.launch__brand {
+  display: grid;
+  justify-items: center;
+}
+
+.launch__name {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--weight-semibold) var(--text-title-3) / var(--leading-title-3) var(--font-sans);
+  letter-spacing: var(--tracking-label);
+}
+
+.launch__text {
+  margin: 0;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+}
+
+.launch__spin {
+  margin-top: var(--space-4);
+  color: var(--color-accent-text);
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+
+.launch__spin[data-shown] {
+  opacity: 1;
+}

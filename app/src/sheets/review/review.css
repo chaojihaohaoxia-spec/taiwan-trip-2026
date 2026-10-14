@@ -1,0 +1,579 @@
+/* =====================================================================
+   sheets/review/review.css：写评级（.rv）。面板本身由 overlay/Sheet 画，这里只排表单。
+   五档评级是大色块按钮（--color-rating-1…5，选中实心白字）；输入框是往下凹的浅底（--color-fill，16px 字：iOS 聚焦不放大）。
+   颜色、圆角、阴影、字体、动效只用设计变量。
+   ===================================================================== */
+
+.rv {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-bottom: var(--space-2);
+}
+
+.rv-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+/* ---------- 段 ---------- */
+.rv-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.rv-sec__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--color-text);
+  font: var(--weight-serif) var(--text-title-4) / 1.3 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+}
+
+.rv-sec__title .glyph {
+  color: var(--color-accent-text);
+}
+
+.rv-sec__count,
+.rv-sec__hint {
+  color: var(--color-text-2);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  letter-spacing: var(--tracking-label);
+}
+
+/* ---------- 五档评级 ---------- */
+.rv-tiers {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.rv-tier {
+  --rv-c: var(--color-rating-3);
+  position: relative;
+  height: 68px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  cursor: pointer;
+  transition: var(--press-transition);
+}
+
+.rv-tier--r5 { --rv-c: var(--color-rating-5); }
+.rv-tier--r4 { --rv-c: var(--color-rating-4); }
+.rv-tier--r3 { --rv-c: var(--color-rating-3); }
+.rv-tier--r2 { --rv-c: var(--color-rating-2); }
+.rv-tier--r1 { --rv-c: var(--color-rating-1); }
+
+.rv-tier__face {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised), var(--shadow-1);
+  color: var(--color-text);
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+
+.rv-tier__label {
+  padding: 0 2px var(--space-2);
+  font: var(--weight-serif) var(--text-title-4) / 1 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+  white-space: nowrap;
+}
+
+/* 底下一道档位色：没选的时候也看得出五档的颜色 */
+.rv-tier__bar {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  left: 12px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--rv-c);
+  transition: background-color var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+
+.rv-tier[data-selected] .rv-tier__face {
+  background: var(--rv-c);
+  box-shadow: var(--shadow-highlight), var(--shadow-2);
+  color: var(--color-on-rating);
+}
+
+.rv-tier[data-selected] .rv-tier__bar {
+  background: var(--color-on-rating);
+  opacity: 0.55;
+}
+
+.rv-tier[data-dim] .rv-tier__face {
+  opacity: 0.72;
+}
+
+.rv-tier:focus-visible {
+  outline-offset: 2px;
+}
+
+/* 375 及更窄：五个格子各不到 60px，「人上人」「拉完了」三个字收一点字号和字距，左右留得出空 */
+@media (max-width: 380px) {
+  .rv-tiers {
+    gap: var(--space-1);
+  }
+
+  .rv-tier__label {
+    font-size: var(--text-callout);
+    letter-spacing: 0;
+  }
+}
+
+.rv-tiers__hint {
+  min-height: 19px;
+  margin: 0 2px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.rv-tiers__hint b {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.rv-tiers__again {
+  color: var(--color-text-2);
+}
+
+/* ---------- 输入框（往下凹的浅底） ---------- */
+.rv-input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--color-fill);
+  color: var(--color-text);
+  font: var(--type-body);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: box-shadow var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+
+.rv-input::placeholder {
+  color: var(--color-text-3);
+}
+
+.rv-input:focus {
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.rv-textarea {
+  display: block;
+  min-height: 92px;
+  padding: var(--space-3) 14px;
+  line-height: var(--leading-body);
+  resize: none;
+}
+
+/* ---------- 吃了什么 / 买了什么 ---------- */
+.rv-logs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rv-logs:empty {
+  display: none;
+}
+
+.rv-log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 10px;
+  border-radius: var(--radius-lg);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+}
+
+.rv-log__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rv-log__name {
+  flex: 1 1 0;
+  height: 44px;
+  padding: 0 var(--space-3);
+  font-weight: var(--weight-semibold);
+}
+
+.rv-log__remove {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-round);
+  background: var(--color-fill);
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.rv-log__remove::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+.rv-log__remove[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+/* 价格输入框占满一行（「千」和币种都在里面），折合港币的预览另起一行放在下面：
+   和预览挤在同一行时，1,200,000 这种越南盾价格会被截掉 */
+.rv-price {
+  display: flex;
+  flex: 1 1 100%;
+  align-items: center;
+  min-width: 0;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.rv-price:focus-within {
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.rv-price[data-error] {
+  box-shadow: inset 0 0 0 1.5px var(--color-danger);
+}
+
+.rv-price__input {
+  flex: 1;
+  height: 100%;
+  padding: 0 var(--space-1) 0 var(--space-3);
+  background: transparent;
+  font-variant-numeric: tabular-nums;
+}
+
+.rv-price__input:focus {
+  box-shadow: none;
+}
+
+.rv-price__k {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 32px;
+  margin-right: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised), var(--shadow-1);
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+/* 视觉 34×32，可点区域 44×44（上下延到输入框的高度，左右各多 5） */
+.rv-price__k::after {
+  content: "";
+  position: absolute;
+  inset: -6px -5px;
+}
+
+.rv-price__k[data-pressed] {
+  background: var(--color-raised-pressed);
+}
+
+.rv-price__k:disabled {
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-text-3);
+  cursor: default;
+}
+
+.rv-price__cur {
+  flex: none;
+  height: 44px;
+  min-width: 56px;
+  padding: 0 10px;
+  border: 0;
+  border-left: 1px solid var(--color-separator);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  outline: none;
+  background: transparent;
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  cursor: pointer;
+}
+
+.rv-price__cur:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-focus-ring);
+}
+
+.rv-price__preview {
+  flex: 1 1 100%;
+  min-width: 0;
+  margin-top: -2px;
+  padding-left: var(--space-3);
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.rv-log__forgot {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  align-self: flex-start;
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
+  font: var(--type-caption-1);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--press-transition);
+}
+
+.rv-log__forgot::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+
+.rv-log__forgot .glyph {
+  flex: none;
+  margin-top: 1px;
+}
+
+.rv-log__error {
+  color: var(--color-danger-text);
+  font: var(--type-caption-1);
+}
+
+/* 好不好吃：同样五档的小胶囊 */
+.rv-mini {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.rv-mini__tier {
+  --rv-c: var(--color-rating-3);
+  position: relative;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  height: 30px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-text-2);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+/* 视觉 30 高，可点区域 44 */
+.rv-mini__tier::after {
+  content: "";
+  position: absolute;
+  inset: -7px 0;
+}
+
+.rv-mini__tier > span {
+  display: inline-block;
+}
+
+.rv-mini__tier--r5 { --rv-c: var(--color-rating-5); }
+.rv-mini__tier--r4 { --rv-c: var(--color-rating-4); }
+.rv-mini__tier--r3 { --rv-c: var(--color-rating-3); }
+.rv-mini__tier--r2 { --rv-c: var(--color-rating-2); }
+.rv-mini__tier--r1 { --rv-c: var(--color-rating-1); }
+
+.rv-mini__tier[data-selected] {
+  background: var(--rv-c);
+  box-shadow: var(--shadow-highlight);
+  color: var(--color-on-rating);
+}
+
+/* ---------- 照片 ---------- */
+.rv-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 76px);
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rv-photo {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-3);
+  box-shadow: var(--shadow-1);
+}
+
+.rv-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rv-photo__ph {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--color-text-3);
+}
+
+.rv-photo__new {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font: var(--weight-bold) var(--text-caption-2) / 1.4 var(--font-sans);
+}
+
+.rv-photo__remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-round);
+  background: var(--color-scrim);
+  color: var(--color-on-rating);
+  cursor: pointer;
+  transition: var(--press-transition);
+}
+
+/* 视觉 24，可点区域 44（往照片里面扩，不出照片的边） */
+.rv-photo__remove::after {
+  content: "";
+  position: absolute;
+  inset: -4px -4px -16px -16px;
+}
+
+.rv-photo--add {
+  background: transparent;
+  box-shadow: none;
+}
+
+.rv-photo__add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1.5px var(--color-border-strong);
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.rv-photo__add[data-pressed] {
+  background: var(--color-accent-soft);
+}
+
+.rv-photo__add:focus-within {
+  box-shadow: inset 0 0 0 2px var(--color-focus-ring);
+}
+
+.rv-photo__add[data-disabled] {
+  color: var(--color-text-3);
+  cursor: not-allowed;
+}
+
+/* ---------- 删除、离线说明 ---------- */
+.rv-delete {
+  display: flex;
+}
+
+.rv-offline {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 10px var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-info-soft);
+  color: var(--color-info-text);
+  font: var(--type-footnote);
+}
+
+.rv-offline .glyph {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* ---------- 底部 ---------- */
+.rv-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rv-foot__error {
+  color: var(--color-danger-text);
+  font: var(--type-footnote);
+  text-align: center;
+}
+
+.rv-foot__hint {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  text-align: center;
+}

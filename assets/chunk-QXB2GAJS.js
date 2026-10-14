@@ -1,0 +1,1 @@
+var t="https://vzybjxghnoyubzdhvmsl.supabase.co",e="sb_publishable_dfEGPYFxKz9FQS_sNYgXPA_7ncxovbK",o="rs7885:auth";var _="trip-files";var p=Object.freeze(["image/jpeg","image/png","image/webp","image/gif","image/heic","image/heif","application/pdf"]),E=2e4,s=9e4;export{t as a,e as b,o as c,_ as d,p as e,E as f,s as g};

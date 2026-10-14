@@ -1,0 +1,250 @@
+/* =====================================================================
+   pages/login/login.css：登录页（login- 前缀）。只用 tokens.css 的变量；换皮时跟着变。
+   A 液态玻璃 · 海岛光 + P2 杂志宋体：光场上一列——圆形海岛小标（主题色渐变 + 太阳 + 海面）→ 品牌眉标 → 宋体大标题 →
+   一张磨砂白卡片（登录方式分段控件、输入框是往下凹的浅灰块、宋体大按钮）→ 演示说明 → 版本页脚。
+   手机：左右留白 --gutter，卡片铺满；平板 / 桌面：整列居中，最宽 420。
+   ===================================================================== */
+
+.login {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: calc(var(--safe-top) + var(--space-9)) calc(var(--safe-right) + var(--gutter)) calc(var(--safe-bottom) + var(--space-8))
+    calc(var(--safe-left) + var(--gutter));
+  place-items: start center;
+}
+
+.login__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 420px;
+}
+
+@media (min-width: 768px) {
+  .login {
+    place-items: center;
+  }
+}
+
+/* ---------- 头 ---------- */
+.login__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: 0 4px;
+}
+
+/* 小标：主题色渐变圆 + 太阳 + 海面（和行程封面同一种渐变） */
+.login__mark {
+  position: relative;
+  display: block;
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--space-3);
+  overflow: hidden;
+  border-radius: var(--radius-round);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-accent-2) 70%, var(--color-on-tile)) 0%, var(--color-accent-2) 58%);
+  box-shadow: 0 0 0 2px var(--color-glass-highlight), var(--shadow-2);
+}
+
+.login__mark-sun {
+  position: absolute;
+  bottom: 40%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-round);
+  background: var(--color-on-tile);
+  opacity: 0.94;
+  transform: translate(-50%, 35%);
+}
+
+.login__mark-sea {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 40%;
+  background: linear-gradient(180deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 70%, var(--color-text)));
+}
+
+.login__brand {
+  margin: 0;
+  color: var(--color-accent-text);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+.login__title {
+  margin: 0;
+  font: var(--type-large-title);
+  letter-spacing: var(--tracking-display);
+}
+
+.login__subtitle {
+  margin: 0;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.login__notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-info-soft);
+  color: var(--color-info-text);
+  font: var(--type-subhead);
+}
+
+.login__notice--join {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font-weight: var(--weight-medium);
+}
+
+/* ---------- 卡片 ---------- */
+.login__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-2xl);
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.login__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.login__switch {
+  position: relative;
+  align-self: center;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.login__switch::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+
+.login__fine {
+  margin: 0;
+  padding: 0 4px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  text-align: center;
+}
+
+/* ---------- 输入框 ---------- */
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.login-field__label {
+  padding: 0 4px;
+  color: var(--color-text-2);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  letter-spacing: var(--tracking-label);
+}
+
+.login-field__input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-fill);
+  color: var(--color-text);
+  /* ≥16px：iOS 聚焦时不放大页面 */
+  font: var(--type-body);
+  outline: none;
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.login-field__input::placeholder {
+  color: var(--color-text-3);
+}
+
+.login-field__input:focus {
+  box-shadow: inset 0 0 0 1.5px var(--color-accent-text);
+}
+
+.login-field__input:read-only {
+  color: var(--color-text-2);
+}
+
+/* 验证码：一行大号数字，等宽、大字距 */
+.login-field__input--code {
+  min-height: 60px;
+  font: var(--weight-semibold) var(--text-title-1) / 1 var(--font-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.32em;
+  text-align: center;
+}
+
+.login-field__input--code::placeholder {
+  color: var(--color-text-3);
+  letter-spacing: 0.32em;
+}
+
+.login-field__hint {
+  padding: 0 4px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+/* ---------- 出错、演示提示、页脚 ---------- */
+.login__error {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-medium);
+}
+
+.login__demo {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+  font: var(--type-footnote);
+}
+
+.login__foot {
+  margin: 0;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  text-align: center;
+}
+
+.login__mono {
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}

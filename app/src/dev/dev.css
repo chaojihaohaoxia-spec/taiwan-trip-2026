@@ -1,0 +1,508 @@
+/* =====================================================================
+   dev/dev.css：开发页样式（dev- 前缀）。只用 tokens.css 的变量。
+   ===================================================================== */
+
+.dev-muted {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.dev-pass {
+  color: var(--color-success-text);
+  font: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+}
+
+.dev-fail {
+  color: var(--color-danger-text);
+  font: var(--type-footnote);
+  font-weight: var(--weight-semibold);
+}
+
+/* ---------- 顶部导航（横向可滚动的胶囊） ---------- */
+.dev-nav,
+.dev-toolbar {
+  position: relative;
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--gutter)) var(--space-2);
+  padding: var(--space-1) var(--gutter) var(--space-2);
+  scrollbar-width: none;
+}
+
+.dev-nav::-webkit-scrollbar,
+.dev-toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+.dev-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text);
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+  position: relative;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+/* 胶囊 36px 高，可点区域扩到 44px */
+.dev-chip::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+.dev-chip.is-active {
+  background: var(--color-accent);
+  box-shadow: var(--shadow-accent-sm);
+  color: var(--color-on-accent);
+}
+
+/* ---------- 区块 ---------- */
+.dev-section {
+  margin-top: var(--space-6);
+}
+
+.dev-section__title {
+  font: var(--type-title-2);
+  letter-spacing: var(--tracking-display);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.dev-section__note {
+  margin-top: var(--space-1);
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+/* 演示区的卡片：和正式页面一样的磨砂白卡片材质（styles/materials.css 的 .material-card 那一套） */
+.dev-section__body {
+  position: relative;
+  margin-top: var(--space-3);
+  padding: 18px;
+  border-radius: var(--radius-xl);
+  background: var(--material-card);
+  box-shadow: var(--material-card-edge);
+}
+
+.dev-section__body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--material-rim);
+  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
+  -webkit-mask-composite: xor;
+  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
+  pointer-events: none;
+}
+
+.dev-pre {
+  margin-top: var(--space-3);
+  overflow-x: auto;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font: var(--type-caption-1);
+  font-family: var(--font-mono);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ---------- 按钮（开发页自用；正式按钮见 ui/） ---------- */
+.dev-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.dev-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text);
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+
+.dev-btn:disabled {
+  opacity: 0.45;
+}
+
+.dev-btn--primary {
+  background: var(--color-accent);
+  background-image: var(--material-accent);
+  box-shadow: var(--shadow-accent);
+  color: var(--color-on-accent);
+}
+
+.dev-btn--outline {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+.dev-btn--danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
+}
+
+/* ---------- 设计变量页 ---------- */
+.dev-probe {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.dev-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.dev-swatch {
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.dev-swatch__chip {
+  display: grid;
+  place-items: center;
+  height: 64px;
+  border-bottom: 0.5px solid var(--color-separator);
+  font: var(--type-headline);
+}
+
+.dev-swatch figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  font: var(--type-caption-1);
+  overflow-wrap: anywhere;
+}
+
+.dev-row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.dev-radius,
+.dev-shadow {
+  display: flex;
+  align-items: flex-end;
+  width: 150px;
+  height: 96px;
+  margin: 0;
+  padding: var(--space-2);
+  background: var(--color-surface);
+  font: var(--type-caption-1);
+}
+
+.dev-radius {
+  border: 1.5px solid var(--color-accent);
+}
+
+/* --radius-tile 是百分比，只用在正方形上 */
+.dev-radius--square {
+  width: 96px;
+}
+
+.dev-shadow {
+  border-radius: var(--radius-lg);
+}
+
+.dev-glass {
+  background: var(--material-glass-strong);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--shadow-3), var(--shadow-glass-edge);
+}
+
+.dev-types {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.dev-type code {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-mono);
+}
+
+.dev-type p {
+  overflow-wrap: anywhere;
+}
+
+.dev-spaces {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.dev-space {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  font: var(--type-caption-1);
+}
+
+.dev-space__bar {
+  display: block;
+  height: 12px;
+  border-radius: var(--radius-xs);
+  background: var(--color-accent);
+}
+
+.dev-z {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+  font: var(--type-footnote);
+}
+
+.dev-z li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+/* ---------- 弹簧演示 ---------- */
+.dev-spring {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  grid-template-areas:
+    "meta curve"
+    "track track";
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  margin-top: var(--space-4);
+}
+
+.dev-spring__meta {
+  grid-area: meta;
+  display: flex;
+  flex-direction: column;
+  font: var(--type-subhead);
+}
+
+.dev-spring__meta code {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-mono);
+}
+
+.dev-curve {
+  grid-area: curve;
+  width: 120px;
+  height: 64px;
+}
+
+.dev-curve__guide {
+  stroke: var(--color-separator);
+  stroke-dasharray: 3 3;
+}
+
+.dev-curve__line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dev-spring__track {
+  grid-area: track;
+  position: relative;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+}
+
+.dev-spring__dot {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent);
+  box-shadow: var(--shadow-2);
+  transform: translateX(0);
+}
+
+.dev-spring__dot--snappy {
+  transition: transform var(--spring-snappy-duration) var(--spring-snappy);
+}
+
+.dev-spring__dot--bouncy {
+  transition: transform var(--spring-bouncy-duration) var(--spring-bouncy);
+}
+
+.dev-spring__dot--smooth {
+  transition: transform var(--spring-smooth-duration) var(--spring-smooth);
+}
+
+/* 轨道是尺寸容器：圆点走的距离 = 轨道宽 − 圆点 − 两边留白（100cqw − 32px − 12px） */
+.dev-spring__track {
+  container-type: inline-size;
+}
+
+.dev-springs[data-on="true"] .dev-spring__dot {
+  transform: translateX(calc(100cqw - 44px));
+}
+
+/* ---------- 10 个交互清单 ---------- */
+.dev-checklist {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.dev-checklist__item {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-3) 0;
+  border-bottom: 0.5px solid var(--color-separator);
+}
+
+.dev-checklist__item:last-child {
+  border-bottom: 0;
+}
+
+.dev-checklist__n {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font: var(--type-footnote);
+  font-weight: var(--weight-bold);
+}
+
+.dev-checklist__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font: var(--type-subhead);
+}
+
+.dev-checklist__text code {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-family: var(--font-mono);
+}
+
+.dev-badge {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
+  font: var(--type-caption-2);
+  white-space: nowrap;
+}
+
+/* ---------- 弹层栈调试 ---------- */
+.dev-sheet-stack {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.dev-sheet-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-2);
+  font: var(--type-subhead);
+}
+
+/* ---------- 长列表 ---------- */
+.dev-long {
+  margin-top: var(--space-3);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.dev-long li + li {
+  border-top: 0.5px solid var(--color-separator);
+}
+
+.dev-long__link {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  color: var(--color-accent-text);
+  font: var(--type-callout);
+}
+
+/* ---------- 第三方库 ---------- */
+.dev-map {
+  height: 300px;
+  margin-top: var(--space-3);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  box-shadow: var(--shadow-1);
+  /* Leaflet 自己的层级很高（400–1000），关进一个独立的层叠上下文，免得盖住顶栏和弹层 */
+  isolation: isolate;
+  z-index: var(--z-base);
+  position: relative;
+}
+
+.dev-icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.dev-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-3) var(--space-1);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: var(--type-caption-2);
+}

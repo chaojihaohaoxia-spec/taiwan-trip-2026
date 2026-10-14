@@ -1,0 +1,195 @@
+/* =====================================================================
+   shell/tabbar.css：底栏（TabBar.jsx，样稿 .tabbar）。
+   悬浮玻璃胶囊：离屏幕两边 --tabbar-x（手机 16px，宽屏最宽 440px、居中）、离底 --tabbar-inset + 安全区、高 --tabbar-bar-h；
+   五格平分，中间是 56px 的实心主题色 ＋（ui/IconButton filled lg）；选中格下面是白色胶囊指示块（--color-thumb）。
+   不在行程里（行程列表、设置……）时沉到屏幕下面藏起来（data-shown 去掉），进出行程时弹簧滑上 / 滑下。
+   ＋ 面板、更多菜单开着时 data-lifted：抬到弹层上面（不被遮罩盖住，和样稿一样一直清楚可点）。
+   ===================================================================== */
+
+.tabbar {
+  /* 手机离屏幕边 --gutter；宽屏居中、最宽 440px */
+  --tabbar-x: max(max(var(--gutter), calc((100% - var(--content-max)) / 2 + var(--gutter))), calc((100% - 440px) / 2));
+  /* 指示块在第几格（TabBar.jsx 写在指示块上） */
+  --tab-index: 0;
+  position: fixed;
+  left: var(--tabbar-x);
+  right: var(--tabbar-x);
+  bottom: calc(var(--safe-bottom) + var(--tabbar-inset));
+  z-index: var(--z-tabbar);
+  height: var(--tabbar-bar-h);
+  translate: 0 calc(100% + var(--safe-bottom) + var(--tabbar-inset) + var(--space-4));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tabbar[data-ready] {
+  transition:
+    translate var(--spring-smooth-duration) var(--spring-smooth),
+    opacity var(--dur-fast) var(--ease-out),
+    visibility 0s linear var(--spring-smooth-duration);
+}
+
+.tabbar[data-shown] {
+  translate: 0 0;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.tabbar[data-shown][data-ready] {
+  transition:
+    translate var(--spring-smooth-duration) var(--spring-smooth),
+    opacity var(--dur-fast) var(--ease-out),
+    visibility 0s;
+}
+
+.tabbar[data-lifted] {
+  z-index: calc(var(--z-menu) + 9);
+}
+
+/* 从 ＋ 面板 / 更多菜单上面沉到别的弹层下面之前：先在上层淡出（TabBar.jsx 的 sinking），沉下去以后在遮罩下面淡回来 */
+.tabbar[data-shown][data-sinking] {
+  opacity: 0;
+}
+
+.tabbar__shadow,
+.tabbar__glass {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+}
+
+.tabbar__shadow {
+  box-shadow: var(--shadow-3);
+}
+
+.tabbar__glass {
+  background: var(--material-glass-strong);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
+}
+
+.tabbar__glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--material-rim);
+  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
+  -webkit-mask-composite: xor;
+  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
+}
+
+.tabbar__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  height: 100%;
+  padding: 0 6px;
+}
+
+/* 指示块：一格宽，静止位置由 --tab-index 决定（JS 动画结束后回到这里） */
+.tabbar__ind {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: 6px;
+  width: calc((100% - 12px) / 5);
+  transform: translateX(calc(var(--tab-index) * 100%));
+  transition: opacity var(--dur-fast) var(--ease-out);
+  pointer-events: none;
+}
+
+.tabbar__ind > span {
+  position: absolute;
+  inset: 0 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-thumb);
+  box-shadow: var(--shadow-thumb);
+}
+
+.tabbar__ind[data-hidden] {
+  opacity: 0;
+}
+
+.tabbar__tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 56px;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-2);
+  font: var(--weight-semibold) var(--text-caption-2) / 1.2 var(--font-label);
+  letter-spacing: var(--tracking-tab);
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: none;
+  transition: var(--press-transition), color var(--dur-fast) var(--ease-out);
+}
+
+.tabbar__tab[aria-current="page"] {
+  color: var(--color-accent-text);
+}
+
+/* 标签末尾的字距抵掉，字真正居中 */
+.tabbar__label {
+  margin-right: calc(-1 * var(--tracking-tab));
+}
+
+/* 「更多」↔「关闭」：两个字叠在同一格里交叉淡化。走的那个马上淡出，来的那个晚一点（--dur-instant，约等于图标变形到一半）再淡入 */
+.tabbar__swap {
+  display: grid;
+  justify-items: center;
+}
+
+.tabbar__swap > i {
+  grid-area: 1 / 1;
+  font-style: normal;
+  opacity: 0;
+  transition: opacity var(--dur-instant) var(--ease-out);
+}
+
+.tabbar__swap > i[data-on] {
+  opacity: 1;
+  transition-delay: var(--dur-instant);
+}
+
+@media (hover: hover) {
+  .tabbar__tab:hover:not([data-pressed]):not([aria-current="page"]) {
+    color: var(--color-text);
+  }
+}
+
+.tabbar__fab-slot {
+  display: grid;
+  place-items: center;
+}
+
+.tabbar__fab {
+  touch-action: none;
+}
+
+/* ＋ 开着时：按钮略暗一点，表示“这里收回” */
+.tabbar__fab[aria-expanded="true"] {
+  --icon-btn-shadow: var(--shadow-accent-sm);
+}
+
+/* 减弱动态效果：进出行程只淡入淡出 */
+@media (prefers-reduced-motion: reduce) {
+  .tabbar {
+    translate: 0 0;
+  }
+
+  .tabbar[data-ready],
+  .tabbar[data-shown][data-ready] {
+    transition: opacity var(--dur-fast) var(--ease-out), visibility 0s linear var(--dur-fast);
+  }
+}

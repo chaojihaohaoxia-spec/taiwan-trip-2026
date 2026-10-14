@@ -1,0 +1,255 @@
+/* =====================================================================
+   sheets/invite/invite.css：邀请成员弹层（.ivf）。
+   顶上「邀请对方加入 + 行程名」→ 三个分段控件 → 生成按钮；生成以后换成大号邀请码卡片 + 分享 / 复制 → 已发出的邀请列表。
+   邀请码用 Geist 等宽数字、大字距（照着念给对方也不会看错：码里没有 I O 0 1）。
+   ===================================================================== */
+
+.ivf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-bottom: var(--space-4);
+}
+
+.ivf-trip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 14px 10px 10px;
+  border-radius: var(--radius-lg);
+  background: var(--color-fill);
+}
+
+.ivf-trip .cover-dot {
+  width: 40px;
+  height: 40px;
+}
+
+.ivf-trip__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.ivf-trip__eyebrow {
+  color: var(--color-text-2);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+.ivf-trip__text b {
+  overflow: hidden;
+  font: var(--weight-serif) var(--text-title-4) / 1.3 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ivf-form,
+.ivf-made {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ivf-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ivf-label {
+  padding: 0 4px;
+  color: var(--color-text-2);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  letter-spacing: var(--tracking-label);
+}
+
+.ivf-hint {
+  margin: 0;
+  padding: 0 4px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  text-wrap: pretty;
+}
+
+.ivf-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  background: var(--color-info-soft);
+  color: var(--color-info-text);
+  font: var(--type-footnote);
+}
+
+.ivf-note > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.ivf-note--warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
+}
+
+.ivf-note__btn {
+  position: relative;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: inherit;
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  cursor: pointer;
+}
+
+.ivf-note__btn::after {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
+}
+
+.ivf-error {
+  margin: 0;
+  padding: 0 4px;
+  color: var(--color-danger-text);
+  font: var(--type-footnote);
+  font-weight: var(--weight-medium);
+}
+
+/* ---------- 邀请码卡片 ---------- */
+.ivf-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius-xl);
+  text-align: center;
+}
+
+.ivf-code__eyebrow {
+  color: var(--color-accent-text);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+.ivf-code__value {
+  font: var(--weight-semibold) var(--text-title-1) / 1.2 var(--font-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+.ivf-code__link {
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-fill);
+  color: var(--color-text-2);
+  font: var(--text-caption-1) / 1.4 var(--font-label);
+  overflow-wrap: anywhere;
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+.ivf-code__meta {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
+  text-wrap: balance;
+}
+
+.ivf-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ---------- 已发出的邀请 ---------- */
+.ivf-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-separator);
+}
+
+.ivf-list__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 4px;
+  font: var(--type-title-3);
+  letter-spacing: var(--tracking-title);
+}
+
+.ivf-list__count {
+  color: var(--color-text-2);
+  font: var(--weight-medium) var(--text-callout) / 1 var(--font-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.ivf-rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ivf-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: 6px 4px;
+}
+
+.ivf-row + .ivf-row {
+  border-top: 1px solid var(--color-separator);
+}
+
+.ivf-row .badge {
+  flex: none;
+}
+
+.ivf-row__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ivf-row__text b {
+  font: var(--weight-semibold) var(--text-subhead) / 1.3 var(--font-sans);
+}
+
+.ivf-row__text span {
+  color: var(--color-text-2);
+  font: var(--text-caption-1) / 1.3 var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.ivf-row:not([data-state="active"]) .ivf-row__text b {
+  color: var(--color-text-2);
+}
+
+.ivf-nowrap {
+  white-space: nowrap;
+}

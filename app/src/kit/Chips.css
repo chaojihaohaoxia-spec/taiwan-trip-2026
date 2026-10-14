@@ -1,0 +1,71 @@
+/* =====================================================================
+   kit/Chips.css：阶段芯片（.k-phase）、成员芯片（.k-person）、倒计时（.k-count）、日期（.k-date）。
+   状态芯片本身是 ui/Badge（.badge），这里不重复写。
+   ===================================================================== */
+
+.k-phase {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.k-phase__detail {
+  color: var(--color-text-2);
+  font: var(--weight-medium) var(--text-footnote) / 1.3 var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 成员：色点 + 名字（样稿记一笔的「谁付」） */
+.k-person {
+  --k-person: var(--color-cat-1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  color: var(--color-text);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+}
+
+.k-person--sm {
+  gap: 5px;
+  font-size: var(--text-caption-1);
+}
+
+.k-person__dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-round);
+  background: var(--k-person);
+  box-shadow: 0 0 0 2px var(--color-glass-highlight), var(--shadow-highlight);
+}
+
+.k-person--sm .k-person__dot {
+  width: 8px;
+  height: 8px;
+}
+
+.k-person__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.k-person__you {
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-text-2);
+  font-size: var(--text-caption-2);
+  line-height: 18px;
+}
+
+.k-count,
+.k-date {
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

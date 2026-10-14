@@ -1,0 +1,123 @@
+/* =====================================================================
+   kit/PlaceActions.css：动作行（.k-acts）。
+   完整版照样稿 .tl-actions / .act：等宽几列、58 高、圆角 16、往下凹的浅底 + 强调色图标 + 12px 标签；
+   主要动作是强调色渐变实心。紧凑版：一排 44px 的凸起白圆。
+   ===================================================================== */
+
+.k-acts {
+  --k-acts-cols: 4;
+}
+
+.k-acts__row {
+  display: grid;
+  grid-template-columns: repeat(var(--k-acts-cols), minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.k-act {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 58px;
+  padding: 6px 4px;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  box-shadow: inset 0 1px 0 var(--color-glass-highlight);
+  color: var(--color-text);
+  font: var(--type-label);
+  font-size: var(--text-caption-1);
+  letter-spacing: var(--tracking-label);
+  text-align: center;
+  text-decoration: none;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.k-act .glyph {
+  color: var(--color-accent-text);
+}
+
+.k-act__label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.k-act[data-pressed] {
+  background-color: var(--color-fill-pressed);
+}
+
+@media (hover: hover) {
+  .k-act:hover:not([data-pressed]):not(:disabled) {
+    background-color: var(--color-fill-hover);
+  }
+}
+
+.k-act--primary {
+  background: var(--material-accent);
+  box-shadow: var(--shadow-accent-sm);
+  color: var(--color-on-accent);
+}
+
+.k-act--primary .glyph {
+  color: var(--color-on-accent);
+}
+
+.k-act--primary[data-pressed] {
+  background: var(--color-accent-pressed);
+}
+
+.k-act:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+/* 紧凑：一排凸起的白圆 */
+.k-acts--compact .k-acts__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.k-acts--compact .k-act {
+  width: 44px;
+  min-height: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius-round);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+}
+
+.k-acts--compact .k-act--primary {
+  background: var(--material-accent);
+  box-shadow: var(--shadow-accent-sm);
+}
+
+.k-acts--compact .k-act[data-pressed] {
+  background: var(--color-raised-pressed);
+}
+
+.k-acts--compact .k-act--primary[data-pressed] {
+  background: var(--color-accent-pressed);
+}
+
+/* 说明（为什么某个按钮用不了 / 没坐标按名字找） */
+.k-acts__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: var(--space-2);
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  line-height: 1.45;
+}
+
+.k-acts__note .glyph {
+  flex: none;
+  margin-top: 1px;
+}

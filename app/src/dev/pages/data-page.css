@@ -1,0 +1,516 @@
+/* =====================================================================
+   dev/pages/data-page.css：数据层展示页（#/dev/data，dd- 前缀）。只用 tokens.css 的变量。
+   ===================================================================== */
+
+.dd {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.dd-body {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* 卡片里已经有 gap，按钮行不再额外加上边距 */
+.dd-body > .dev-buttons,
+.dd-status > .dev-buttons,
+.dd-confirm .dev-buttons {
+  margin-top: 0;
+}
+
+.dd-confirm {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.dd-muted {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.dd-note {
+  color: var(--color-success-text);
+  font: var(--type-footnote);
+  font-weight: var(--weight-medium);
+}
+
+.dd-error {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
+  font: var(--type-footnote);
+}
+
+.dd-warn {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+}
+
+/* ---------- 顶部状态卡：会话、同步、演示网络 ---------- */
+.dd-status {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.dd-status__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.dd-status__row--wrap {
+  flex-wrap: wrap;
+}
+
+.dd-status__who {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.dd-status__who strong {
+  font: var(--type-headline);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dd-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font: var(--type-headline);
+}
+
+.dd-confirm {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
+  font: var(--type-subhead);
+}
+
+/* 分段按钮（演示网络） */
+.dd-seg {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+}
+
+.dd-seg__btn {
+  min-height: var(--tap-min);
+  min-width: 56px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-medium);
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.dd-seg__btn.is-active {
+  background: var(--color-surface-raised);
+  color: var(--color-accent-text);
+  box-shadow: var(--shadow-1);
+}
+
+/* ---------- 标签 ---------- */
+.dd-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-weight: var(--weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.dd-pill--success {
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
+}
+
+.dd-pill--info {
+  background: var(--color-info-soft);
+  color: var(--color-info-text);
+}
+
+.dd-pill--warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
+}
+
+.dd-pill--danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
+}
+
+/* ---------- 可横滑的选择胶囊（行程、日期） ---------- */
+.dd-chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--space-4));
+  padding: var(--space-1) var(--space-4) var(--space-2);
+  scrollbar-width: none;
+}
+
+.dd-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.dd-chip {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-text);
+  font: var(--type-subhead);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.dd-chip.is-active {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.dd-chip.is-active .dd-pill {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* ---------- 键值行 ---------- */
+.dd-row {
+  display: grid;
+  grid-template-columns: minmax(84px, 30%) 1fr;
+  gap: var(--space-3);
+  align-items: baseline;
+  min-width: 0;
+  font: var(--type-subhead);
+}
+
+.dd-row__label {
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.dd-row__value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  align-items: baseline;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 各表行数 ---------- */
+.dd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: var(--space-2);
+}
+
+.dd-stat {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+.dd-stat__n {
+  font: var(--type-title-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.dd-stat__label {
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+}
+
+/* ---------- 列表（条目、写队列、搜索结果） ---------- */
+.dd-list {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.dd-item {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-separator);
+}
+
+.dd-item:last-child {
+  border-bottom: 0;
+}
+
+.dd-item__time {
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  font-variant-numeric: tabular-nums;
+}
+
+.dd-item__main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dd-item__title {
+  font: var(--type-subhead);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.dd-item--done .dd-item__title,
+.dd-item--skipped .dd-item__title {
+  color: var(--color-text-2);
+}
+
+.dd-alts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.dd-op {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-separator);
+  font: var(--type-subhead);
+}
+
+.dd-op:last-child {
+  border-bottom: 0;
+}
+
+.dd-op__label {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dd-op .dev-buttons {
+  margin-top: 0;
+}
+
+/* ---------- 卡片（每个币种） ---------- */
+.dd-card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+.dd-card__head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font: var(--type-subhead);
+}
+
+/* ---------- 进度条 ---------- */
+.dd-progress {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.dd-progress__row {
+  display: grid;
+  grid-template-columns: 56px 1fr 48px;
+  gap: var(--space-3);
+  align-items: center;
+  font: var(--type-subhead);
+}
+
+.dd-progress__bar {
+  position: relative;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+}
+
+.dd-progress__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-accent);
+  transform-origin: left center;
+  transition: transform var(--spring-smooth-duration) var(--spring-smooth);
+}
+
+.dd-progress__n {
+  color: var(--color-text-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* ---------- 表单 ---------- */
+.dd-login {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dd-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.dd-field {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.dd-field--grow {
+  flex: 1 1 160px;
+}
+
+.dd-field--inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.dd-field--inline select {
+  width: auto;
+}
+
+.dd-field input,
+.dd-field select {
+  min-height: var(--tap-min);
+  width: 100%;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font: var(--type-body);
+}
+
+.dd-field input:focus-visible,
+.dd-field select:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+/* 文件选择：真正的 input 盖在按钮上（透明），整块可点 */
+.dd-file {
+  position: relative;
+  display: inline-flex;
+  width: fit-content;
+}
+
+.dd-file input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dd-upload {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.dd-upload__img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: var(--color-skeleton);
+}
+
+.dd-code {
+  font: var(--type-caption-1);
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.dd-code--big {
+  font: var(--type-headline);
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* ---------- 撤销条 ---------- */
+.dd-undo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  font: var(--type-subhead);
+}
+
+.dd-undo .dev-btn--outline {
+  box-shadow: none;
+  background: var(--color-surface);
+  color: var(--color-accent-text);
+}
+
+@media (min-width: 768px) {
+  .dd-row {
+    grid-template-columns: 160px 1fr;
+  }
+}
+
+@media (hover: hover) {
+  .dd-chip:hover:not(.is-active),
+  .dd-seg__btn:hover:not(.is-active) {
+    background: var(--color-fill-hover);
+  }
+}

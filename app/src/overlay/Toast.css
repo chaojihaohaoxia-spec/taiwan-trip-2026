@@ -1,0 +1,178 @@
+/* =====================================================================
+   overlay/Toast.css：Toast 显示区。
+   每条提示两层：
+     .ov-toast        堆叠位置（translateY + scale，CSS 过渡 --spring-snappy，随时可打断）
+     .ov-toast__card  出场 / 离场 / 甩掉的动画（Toast.jsx 用 Web Animations 驱动）
+   收起时后面的卡片用 clip-path 只露出和最前那张一样高的底部（露边整齐），展开时 clip-path 过渡回完整。
+   A 皮肤（样稿的提示条）：真玻璃胶囊（圆角 22px）+ 高光细边；左边是语气色实心小圆 + 反白图标；
+   按钮（「撤销」）是强调色浅底的胶囊。放在底栏上方（--tabbar-h 已经包括底栏离屏幕底的距离）。
+   局部变量：
+     --ov-toast-max-w    最大宽度
+     --ov-toast-front-h  最前那张的高度（JS 写入）
+     --ov-toast-kb       软键盘挡住的高度（JS 写入，键盘弹起时才有）
+     --ov-toast-lift     外壳常驻的底部提示（「有新版本」）占的高度：外壳写在 <html> 的 style 上，
+                         Toast 整体往上让出这段，两者不重叠（默认 0）
+     --ov-toast-sheet    开着的底部面板 footer（保存 / 删除按钮）顶边离屏幕底多高：overlay/Sheet.jsx 写在 <html> 上，
+                         Toast 至少停在它上面，不盖住面板底部的按钮；没有面板时不存在
+   ===================================================================== */
+
+:root {
+  --ov-toast-lift: 0px;
+  --ov-toast-sheet: 0px;
+}
+
+.ov-toasts {
+  --ov-toast-max-w: 420px;
+  --ov-toast-front-h: 0px;
+  --ov-toast-kb: 0px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  /* 放在底栏上方（没有底栏的页面也一样，位置固定好找）；外壳的「有新版本」在时再往上让一让 */
+  bottom: max(
+    calc(var(--safe-bottom) + var(--tabbar-h) + var(--space-3) + var(--ov-toast-lift)),
+    calc(var(--ov-toast-sheet) + var(--space-3))
+  );
+  z-index: var(--z-toast);
+  width: min(var(--ov-toast-max-w), calc(100% - 2 * var(--gutter)));
+  margin: 0 auto;
+  pointer-events: none;
+}
+
+/* 软键盘弹起：贴着键盘上沿（键盘挡住的部分 + 一点间距），不被键盘盖住 */
+.ov-toasts[data-keyboard] {
+  bottom: calc(var(--ov-toast-kb) + var(--space-3));
+}
+
+/* 展开时整块区域都接收指针：鼠标在两条提示之间的空隙里移动不会让它收起 */
+.ov-toasts[data-expanded] {
+  pointer-events: auto;
+}
+
+.ov-toasts__list {
+  position: relative;
+  height: 100%;
+}
+
+.ov-toast {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* 缩放原点在“露出来的那条边”上：后面的卡片缩小时露出的高度正好是位移量 */
+  transform-origin: 50% calc(100% - var(--ov-toast-front-h));
+  transition:
+    transform var(--spring-snappy-duration) var(--spring-snappy),
+    opacity var(--dur-base) var(--ease-out);
+  pointer-events: auto;
+}
+
+.ov-toast[data-state="closing"] {
+  pointer-events: none;
+}
+
+.ov-toast__card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--material-glass-strong);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--shadow-3), var(--shadow-glass-edge);
+  color: var(--color-text);
+  /* 负的内缩 = 往外扩：完整显示时阴影不被裁掉 */
+  clip-path: inset(-48px -48px -48px -48px round var(--radius-lg));
+  transition: clip-path var(--spring-snappy-duration) var(--spring-snappy);
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+.ov-toast[data-behind] .ov-toast__card {
+  clip-path: inset(calc(100% - var(--ov-toast-front-h)) 0 0 0 round var(--radius-lg));
+}
+
+.ov-toast__card > * {
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.ov-toast[data-behind] .ov-toast__card > * {
+  opacity: 0;
+}
+
+/* 语气图标：实心小圆 + 反白图标（样稿的提示条） */
+.ov-toast__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-round);
+  background: var(--color-fill-pressed);
+  color: var(--color-text);
+}
+
+.ov-toast[data-tone="success"] .ov-toast__icon {
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
+
+.ov-toast[data-tone="danger"] .ov-toast__icon {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+
+.ov-toast[data-tone="warning"] .ov-toast__icon {
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+}
+
+.ov-toast[data-tone="info"] .ov-toast__icon {
+  background: var(--color-info);
+  color: var(--color-on-info);
+}
+
+.ov-toast__message {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-2) 0;
+  font: var(--type-label);
+  line-height: 1.45;
+  letter-spacing: var(--tracking-label);
+  overflow-wrap: anywhere;
+}
+
+/* “撤销”等按钮：强调色浅底 + 强调色字，一眼看得出能点 */
+.ov-toast__action {
+  position: relative;
+  flex: none;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+}
+
+.ov-toast__action::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+/* 悬停 / 按下：在强调色浅底上再叠一层中性填充，颜色变深一点 */
+.ov-toast__action[data-pressed] {
+  background-image: linear-gradient(var(--color-fill-pressed), var(--color-fill-pressed));
+}
+
+@media (hover: hover) {
+  .ov-toast__action:hover:not([data-pressed]) {
+    background-image: linear-gradient(var(--color-fill), var(--color-fill));
+  }
+}

@@ -1,0 +1,69 @@
+/* =====================================================================
+   kit/SectionHeader.css：段标题（.k-sec）。样稿 .sec-h：上 26、左右 4；标题宋体 21px。
+   ===================================================================== */
+
+.k-sec {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  margin: 26px 4px var(--space-2);
+}
+
+.k-sec:first-child {
+  margin-top: 0;
+}
+
+.k-sec__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.k-sec__title {
+  margin: 0;
+  font: var(--type-title-2);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.k-sec__count {
+  margin-left: var(--space-2);
+  color: var(--color-text-2);
+  font: var(--weight-medium) var(--text-callout) / 1 var(--font-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  vertical-align: 0.08em;
+}
+
+.k-sec__meta {
+  margin-top: 2px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+/* 文字动作：强调色字 + 小箭头；视觉 32 高，可点区域用 ::after 扩到 44 */
+.k-sec__action {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  min-height: 32px;
+  padding: 0 6px 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  letter-spacing: var(--tracking-label);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.k-sec__action::after {
+  content: "";
+  position: absolute;
+  inset: -6px -4px;
+}

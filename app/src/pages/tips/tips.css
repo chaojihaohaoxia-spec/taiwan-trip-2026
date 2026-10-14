@@ -1,0 +1,857 @@
+/* =====================================================================
+   pages/tips/tips.css：贴士与常用语（.tp）。大标题、顶栏、底栏由外壳画，这里只排内容。
+   搜索框、筛选芯片、「相关」小胶囊、小标、闪一下在 common.css（和联系人页共用）。
+   颜色、圆角、阴影、字体、动效只用 tokens.css 的变量。
+   ===================================================================== */
+
+.tp {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-2) var(--gutter) var(--space-6);
+}
+
+.tp__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- 加载中 ---------- */
+.tp-skel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tp-skel__chips {
+  display: flex;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.tp-skel__card {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+}
+
+.tp-skel__lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+/* ---------- 搜索 + 芯片 ---------- */
+.tp-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tp-none {
+  margin-top: var(--space-2);
+}
+
+/* ---------- 分组 ---------- */
+.tp-group > .k-sec {
+  margin-top: var(--space-3);
+}
+
+.tp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* =====================================================================
+   贴士卡：短的（.tp-static，整段直接显示）和长的（.tp-xtip，ui/ExpandableCard 原地展开）同一个版式
+   ===================================================================== */
+
+.tp-static {
+  position: relative;
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: 12px 14px 14px;
+  color: var(--color-text);
+}
+
+.tp-static--card {
+  border-radius: var(--radius-lg);
+  background: var(--material-card);
+  box-shadow: var(--material-card-edge);
+}
+
+/* 折射高光描边（和 ExpandableCard 卡片一样） */
+.tp-static--card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--material-rim);
+  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
+  -webkit-mask-composite: xor;
+  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
+  pointer-events: none;
+}
+
+.tp-static__lead,
+.tp-xtip > .xcard__heading .xcard__leading,
+.tp-tpl .tp-static__lead {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-tile);
+  background: var(--color-fill);
+  color: var(--color-accent-text);
+}
+
+/* 种类的颜色：防坑 = 警示色（暖，不是红）；实用信息 = 信息蓝；其余强调色 */
+.tp-tip[data-kind="warning"] .tp-static__lead,
+.tp-xtip[data-kind="warning"] > .xcard__heading .xcard__leading {
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
+}
+
+.tp-tip[data-kind="info"] .tp-static__lead,
+.tp-xtip[data-kind="info"] > .xcard__heading .xcard__leading {
+  background: var(--color-info-soft);
+  color: var(--color-info-text);
+}
+
+.tp-static__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  /* 和左边 40px 的图标块第一行居中对齐 */
+  padding-top: 9px;
+}
+
+.tp-static__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--space-2);
+  align-items: center;
+}
+
+.tp-static__title {
+  min-width: 0;
+  margin: 0;
+  font: var(--type-callout);
+  font-weight: var(--weight-semibold);
+  line-height: 1.35;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.tp-tags {
+  display: inline-flex;
+  flex: none;
+  gap: 4px;
+}
+
+/* 正文 Markdown：段落、列表、加粗、链接 */
+.tp-md {
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  line-height: 1.6;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.tp-md p {
+  margin: 0;
+}
+
+.tp-md p + p,
+.tp-md p + .md-list,
+.tp-md .md-list + p,
+.tp-md .md-list + .md-list {
+  margin-top: 6px;
+}
+
+.tp-md .md-list {
+  margin: 0;
+  padding-left: 1.25em;
+  list-style: disc outside;
+}
+
+.tp-md ol.md-list {
+  list-style-type: decimal;
+}
+
+.tp-md li + li {
+  margin-top: 3px;
+}
+
+.tp-md li::marker {
+  color: var(--color-text-3);
+}
+
+.tp-md strong {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.tp-md .md-heading {
+  color: var(--color-text);
+}
+
+/* 行内链接：强调色 + 下划线；可点区域上下扩到 44px（不改变排版） */
+.tp-md .md-link {
+  position: relative;
+  color: var(--color-accent-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.tp-md .md-link::after {
+  content: "";
+  position: absolute;
+  inset: -14px -6px;
+}
+
+/* 搜到正文里的字：命中的那一小段 */
+.tp-snippet {
+  margin: 0;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.tp-related {
+  margin-top: 4px;
+}
+
+/* ---------- 长的：原地展开 ---------- */
+.tp-xtip > .xcard__heading > .xcard__header {
+  align-items: flex-start;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.tp-xtip > .xcard__heading > .xcard__header > .xcard__text {
+  padding-top: 9px;
+}
+
+.tp-xtip > .xcard__heading > .xcard__header > .xcard__chevron {
+  margin-top: 3px;
+}
+
+.tp-xtip > .xcard__heading > .xcard__header > .xcard__meta {
+  align-self: flex-start;
+  margin-top: 9px;
+}
+
+/* 收起时两行预览；展开时预览收起来（全文在下面），和详情区同一条弹簧 */
+.tp-preview {
+  display: grid;
+  grid-template-rows: 1fr;
+  margin-top: 2px;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  line-height: 1.5;
+  transition: grid-template-rows var(--spring-smooth-duration) var(--spring-smooth), opacity var(--dur-fast) var(--ease-out);
+}
+
+.tp-preview__in {
+  display: -webkit-box;
+  min-height: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.xcard[data-open] .tp-preview {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+/* 展开的正文和标题文字对齐（左边让出图标块） */
+.tp-tip__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 52px;
+}
+
+.tp-tip__body > .tp-md {
+  color: var(--color-text);
+  font-size: var(--text-callout);
+}
+
+/* =====================================================================
+   置顶提醒：最上面一张暖色的卡（醒目但不吓人：浅暖色底 + 暖色图标，不用红）
+   ===================================================================== */
+
+.tp-pinned {
+  position: relative;
+  padding: 12px 0 4px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(var(--color-warning-soft), var(--color-warning-soft)), var(--material-card);
+  box-shadow: var(--material-card-edge), inset 0 0 0 1px var(--color-warning-soft);
+}
+
+.tp-pinned__head {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: 0 18px 4px 14px;
+}
+
+.tp-pinned__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-round);
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+}
+
+.tp-pinned__title {
+  flex: 1;
+  margin: 0;
+  font: var(--type-title-3);
+  letter-spacing: var(--tracking-title);
+}
+
+.tp-pinned__count {
+  color: var(--color-warning-text);
+  font: var(--weight-semibold) var(--text-footnote) / 1 var(--font-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-label);
+}
+
+.tp-pinned__list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 置顶卡里的每一行：透明底、行间细线、图标块是凸起的白 */
+.tp-pinned .tp-static--row,
+.tp-pinned .xcard--row {
+  background: transparent;
+}
+
+.tp-pinned .tp-static--row + .tp-static--row::after,
+.tp-pinned .tp-static--row + .xcard--row::after,
+.tp-pinned .xcard--row + .tp-static--row::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 66px;
+  right: 0;
+  border-top: 1px solid var(--color-separator);
+}
+
+.tp-pinned .xcard--row + .xcard--row::before {
+  left: 66px;
+}
+
+.tp-pinned .tp-static__lead,
+.tp-pinned .xcard__leading {
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+}
+
+.tp-pinned .xcard--row > .xcard__heading > .xcard__header {
+  border-radius: 0;
+}
+
+.tp-pinned .xcard--row:last-child > .xcard__heading > .xcard__header {
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.tp-pinned .xcard--row[data-open]:last-child > .xcard__heading > .xcard__header {
+  border-radius: 0;
+}
+
+.tp-pinned .xcard--row .xcard__content {
+  padding-right: 14px;
+}
+
+/* =====================================================================
+   原文块（消息模板、带原文的贴士）+ 复制 / 给对方看 + 直接发
+   ===================================================================== */
+
+.tp-local {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+}
+
+.tp-local__lang {
+  color: var(--color-text-2);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-label);
+}
+
+.tp-local__text {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--weight-medium) var(--text-title-4) / 1.5 var(--font-sans);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  -webkit-user-select: text;
+  user-select: text;
+  hyphens: auto;
+}
+
+/* 太长先收起：最多六行，最后一行渐隐 */
+.tp-local[data-clamped] .tp-local__text {
+  max-height: calc(1.5em * 6);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, var(--color-text) calc(100% - 1.6em), transparent);
+  mask-image: linear-gradient(to bottom, var(--color-text) calc(100% - 1.6em), transparent);
+}
+
+.tp-local__more {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 2px;
+  min-height: 32px;
+  margin: -2px 0 -6px -8px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-accent-text);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.tp-local__more::after {
+  content: "";
+  position: absolute;
+  inset: -6px -4px;
+}
+
+.tp-local__more[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+/* 复制 / 给对方看：两个一样宽的大按钮 */
+.tp-acts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.tp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: var(--tap-min);
+  min-height: 48px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text);
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.tp-btn > .glyph {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+.tp-btn[data-pressed] {
+  background: var(--color-raised-pressed);
+}
+
+@media (hover: hover) {
+  .tp-btn:not([data-pressed]):hover {
+    background: var(--color-raised-hover);
+  }
+}
+
+/* 复制过了：绿色对勾 1.6 秒 */
+.tp-btn[data-done] {
+  color: var(--color-success-text);
+}
+
+.tp-btn[data-done] > .glyph {
+  color: var(--color-success-text);
+}
+
+/* 给对方看：强调色实心（全屏大字卡从它长出来） */
+.tp-btn--show {
+  background: var(--material-accent);
+  box-shadow: var(--shadow-accent-sm);
+  color: var(--color-on-accent);
+}
+
+.tp-btn--show > .glyph {
+  color: var(--color-on-accent);
+}
+
+.tp-btn--show[data-pressed] {
+  background: var(--color-accent-pressed);
+}
+
+@media (hover: hover) {
+  .tp-btn--show:not([data-pressed]):hover {
+    background: var(--color-accent-hover);
+  }
+}
+
+.tp-btn--icon {
+  width: 48px;
+  padding: 0;
+}
+
+/* 直接发给关联的联系人（WhatsApp 预填原文 / Zalo 先复制 / 邮件） */
+.tp-send {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tp-send__btn {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: 52px;
+  padding: 6px 14px 6px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.tp-send__btn[data-pressed] {
+  background: var(--color-raised-pressed);
+}
+
+@media (hover: hover) {
+  .tp-send__btn:not([data-pressed]):hover {
+    background: var(--color-raised-hover);
+  }
+}
+
+.tp-send__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-round);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+.tp-send__icon--whatsapp {
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
+}
+
+.tp-send__icon--zalo {
+  background: var(--color-info-soft);
+  color: var(--color-info-text);
+}
+
+.tp-send__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.tp-send__label {
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+}
+
+.tp-send__to {
+  overflow: hidden;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tp-send__ext {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+/* ---------- 消息模板卡 ---------- */
+.tp-tpl {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px 14px;
+  border-radius: var(--radius-lg);
+  background: var(--material-card);
+  box-shadow: var(--material-card-edge);
+  color: var(--color-text);
+}
+
+.tp-tpl::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--material-rim);
+  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
+  -webkit-mask-composite: xor;
+  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
+  pointer-events: none;
+}
+
+.tp-tpl__head {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.tp-tpl__titles {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding-top: 9px;
+}
+
+.tp-tpl__note {
+  font-size: var(--text-footnote);
+}
+
+.tp-tpl__empty {
+  margin: 0;
+  color: var(--color-text-3);
+  font: var(--type-footnote);
+}
+
+/* =====================================================================
+   常用语：卡片网格（手机两列，长句占满一行；宽屏三列）
+   ===================================================================== */
+
+.tp-scenes {
+  margin-bottom: 4px;
+}
+
+.tp-phrases {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 600px) {
+  .tp-phrases {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.tp-phrase {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 12px 10px;
+  border-radius: var(--radius-lg);
+  background: var(--material-card);
+  box-shadow: var(--material-card-edge);
+  color: var(--color-text);
+}
+
+.tp-phrase::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--material-rim);
+  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
+  -webkit-mask-composite: xor;
+  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
+  pointer-events: none;
+}
+
+.tp-phrase[data-wide] {
+  grid-column: 1 / -1;
+}
+
+.tp-phrase__top {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 22px;
+}
+
+.tp-phrase__scene {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-2);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-label);
+  white-space: nowrap;
+}
+
+.tp-phrase__scene > .glyph {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+.tp-phrase__zh {
+  margin: 2px 0 0;
+  color: var(--color-text-2);
+  font: var(--weight-semibold) var(--text-subhead) / 1.35 var(--font-sans);
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+/* 当地语原文：最大的字（越南语声调用系统字体最清楚） */
+.tp-phrase__local {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--weight-bold) var(--text-figure-4) / 1.3 var(--font-sans);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* 能读出来：整块是按钮（右下角一个小喇叭），读的时候喇叭变强调色实心、轻轻跳 */
+.tp-phrase__local--speak {
+  position: relative;
+  display: block;
+  width: calc(100% + 12px);
+  min-height: var(--tap-min);
+  margin: 0 -6px;
+  padding: 4px 30px 4px 6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.tp-phrase__local--speak[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+@media (hover: hover) {
+  .tp-phrase__local--speak:not([data-pressed]):hover {
+    background: var(--color-fill);
+  }
+}
+
+.tp-phrase__speaker {
+  position: absolute;
+  right: 4px;
+  bottom: 8px;
+  padding: 2px;
+  border-radius: var(--radius-round);
+  color: var(--color-accent-text);
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.tp-phrase__local--speak[data-speaking] .tp-phrase__speaker {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  animation: tp-speak var(--dur-slower) var(--ease-in-out) infinite alternate;
+}
+
+@keyframes tp-speak {
+  to {
+    scale: 1.15;
+  }
+}
+
+.tp-phrase__note {
+  margin: 0;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.tp-phrase__acts {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.tp-phrase__acts .tp-btn {
+  min-height: 44px;
+}
+
+.tp-phrase__acts .tp-btn--icon {
+  width: 44px;
+}
+
+.tp-btn--grow {
+  flex: 1;
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.tp-btn--grow > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-phrase__local--speak[data-speaking] .tp-phrase__speaker {
+    animation: none;
+  }
+}
+
+/* 窄的常用语卡（手机两列）：「给对方看」按钮放不下图标就只留字 */
+.tp-phrase {
+  container-type: inline-size;
+}
+
+@container (max-width: 200px) {
+  .tp-phrase__acts .tp-btn--show > .glyph {
+    display: none;
+  }
+}

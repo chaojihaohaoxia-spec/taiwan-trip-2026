@@ -1,0 +1,246 @@
+/* =====================================================================
+   overlay/Sheet.css：底部面板。
+   位移（出场、拖动、档位）由 Sheet.jsx 用 transform 驱动；这里只管静止时的版式。
+   A 皮肤（样稿「记一笔」）：手机上是离屏幕两边、底边各 8px 的浮动玻璃卡片（圆角 38px，和屏幕圆角同心），
+   真玻璃（backdrop-filter）+ 高光细边 + 折射描边；标题左对齐、宋体；右上角凸起的白圆 ×。
+   material="solid"（默认）是更厚、更不透明的玻璃（表单、长内容好读）；material="glass" 是样稿那种更通透的玻璃。
+   局部变量：
+     --ov-kb         被键盘挡住的高度（JS 写入，没有键盘时为 0）
+     --ov-vvh        可见区域高度（JS 写入，没有键盘时为 100dvh）
+     --ov-sheet-gap  大档时面板顶部离安全区的距离
+     --ov-sheet-max-w 宽屏时卡片的最大宽度
+     --ov-sheet-float 手机上面板离屏幕左右、底边的距离（底边另加安全区）
+   ===================================================================== */
+
+.ov-layer--sheet {
+  --ov-kb: 0px;
+  --ov-vvh: 100dvh;
+  --ov-sheet-gap: var(--space-3);
+  --ov-sheet-max-w: 640px;
+  --ov-sheet-float: 8px;
+  --ov-sheet-bottom: calc(var(--ov-sheet-float) + var(--safe-bottom));
+}
+
+/* 键盘弹起时整个面板上移（visualViewport 推算的高度），过渡跟上系统键盘；
+   面板底边离屏幕底 8px + 安全区（JS 量这里的 bottom 算“完全移出屏幕”的位移） */
+.ov-sheet-frame {
+  position: absolute;
+  left: var(--ov-sheet-float);
+  right: var(--ov-sheet-float);
+  bottom: var(--ov-sheet-bottom);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  transform: translateY(calc(var(--ov-kb) * -1));
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+/* 键盘挡住了 Home 指示条那一截：只留 8px */
+.ov-layer--sheet[data-keyboard="open"] {
+  --ov-sheet-bottom: var(--ov-sheet-float);
+}
+
+.ov-sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(var(--ov-vvh) - var(--safe-top) - var(--ov-sheet-gap) - var(--ov-sheet-bottom));
+  border-radius: var(--radius-sheet);
+  background: var(--material-glass-dense);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--shadow-4), var(--shadow-glass-edge), var(--shadow-glass-glow);
+  color: var(--color-text);
+  pointer-events: auto;
+  will-change: transform;
+  outline: none;
+}
+
+/* 有半屏 / 大档：面板固定为大档的高度，用位移露出不同的高度 */
+.ov-sheet[data-sized="full"] {
+  height: calc(var(--ov-vvh) - var(--safe-top) - var(--ov-sheet-gap) - var(--ov-sheet-bottom));
+}
+
+/* 折射高光描边（左上亮、右下次亮的 1px 渐变边） */
+.ov-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--material-rim);
+  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
+  -webkit-mask-composite: xor;
+  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
+  pointer-events: none;
+}
+
+.ov-sheet[data-material="glass"] {
+  background: var(--material-glass-strong);
+}
+
+.ov-sheet:focus-visible {
+  outline: none;
+}
+
+/* ---------- 顶部：把手 + 标题栏（整块都能拖） ---------- */
+.ov-sheet__top {
+  flex: none;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ov-sheet__top:not([data-draggable]) {
+  padding-top: var(--space-4);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ov-sheet__top[data-draggable] {
+    cursor: grab;
+  }
+
+  .ov-sheet__top[data-draggable]:active {
+    cursor: grabbing;
+  }
+}
+
+.ov-sheet__grabber {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 22px;
+  margin: 0 auto;
+  border-radius: var(--radius-pill);
+}
+
+/* 把手视觉只有 22px 高，触控区扩到 44px */
+button.ov-sheet__grabber::after {
+  content: "";
+  position: absolute;
+  inset: -11px -8px;
+}
+
+.ov-sheet__grabber-bar {
+  display: block;
+  width: 40px;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--color-text-3);
+  opacity: 0.6;
+  transition: opacity var(--dur-fast) var(--ease-out), width var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  button.ov-sheet__grabber:hover .ov-sheet__grabber-bar {
+    opacity: 0.9;
+  }
+}
+
+/* 标题栏：标题左对齐（宋体）+ 右边的关闭按钮；左边有按钮（例如「取消」）时标题居中（iOS 导航栏的写法） */
+.ov-sheet__header {
+  display: grid;
+  grid-template-columns: minmax(var(--tap-min), 1fr) minmax(0, auto) minmax(var(--tap-min), 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: 0 var(--space-4) var(--space-2) 18px;
+}
+
+.ov-sheet__header:has(> .ov-sheet__side--leading:empty) {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.ov-sheet__header > .ov-sheet__side--leading:empty {
+  display: none;
+}
+
+.ov-sheet__side {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.ov-sheet__side--trailing {
+  justify-content: flex-end;
+}
+
+.ov-sheet__titles {
+  min-width: 0;
+  text-align: center;
+}
+
+.ov-sheet__header:has(> .ov-sheet__side--leading:empty) .ov-sheet__titles {
+  text-align: start;
+}
+
+/* 打开时焦点落在标题上（读屏先读标题）：标题不是可操作的东西，不画焦点框（从网址直接打开时浏览器会当成键盘焦点） */
+.ov-sheet__title:focus,
+.ov-sheet__title:focus-visible {
+  outline: none;
+}
+
+.ov-sheet__title {
+  font: var(--type-title-2);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.ov-sheet__description {
+  margin-top: 2px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+/* ---------- 内容 / 底部操作区 ---------- */
+.ov-sheet__body {
+  /* 定位元素：Sheet.jsx 量“内容实际多高”时，子元素的 offsetTop 相对它算 */
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-1) 18px var(--space-5);
+}
+
+/* 有底部操作区：内容往下滚到它上面时渐隐（不画分隔线，样稿的吸底提交区就是这样） */
+.ov-sheet__body[data-has-footer] {
+  padding-bottom: var(--space-4);
+  -webkit-mask-image: linear-gradient(to bottom, var(--color-text) calc(100% - var(--space-4)), transparent);
+  mask-image: linear-gradient(to bottom, var(--color-text) calc(100% - var(--space-4)), transparent);
+}
+
+.ov-sheet__footer {
+  /* 在面板露出来那一截的底边（Sheet.jsx 反向位移）；盖在内容区上面 */
+  position: relative;
+  z-index: 1;
+  flex: none;
+  padding: var(--space-2) 18px var(--space-4);
+}
+
+/* ---------- 宽屏（平板、桌面）：底部居中的浮动卡片 ---------- */
+@media (min-width: 768px) {
+  .ov-layer--sheet {
+    --ov-sheet-gap: var(--space-9);
+    --ov-sheet-float: var(--space-6);
+  }
+
+  .ov-sheet-frame {
+    left: 0;
+    right: 0;
+  }
+
+  .ov-sheet {
+    width: min(var(--ov-sheet-max-w), calc(100% - 2 * var(--gutter)));
+  }
+
+  .ov-sheet__body {
+    padding-bottom: var(--space-6);
+  }
+}
