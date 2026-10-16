@@ -192,9 +192,10 @@ test('贴士页（行程中 390）：置顶提醒在最上面，其余按 防坑
     assert.deepEqual(chips[0], ['all', String(island('tips').length)]);
     assert.ok(chips.some(([v, n]) => v === 'phrase' && n === '9'), JSON.stringify(chips));
     assert.match(await page.$eval(T('tips-summary'), (el) => el.textContent), /29 条 · 置顶 2 条/);
-    // 置顶卡是暖色（警示色浅底），不是红
+    // 置顶是普通的一组（纸本：没有暖色底、没有图钉圆）
     const bg = await page.$eval(T('tips-pinned'), (el) => getComputedStyle(el).backgroundImage);
-    assert.match(bg, /gradient/);
+    assert.equal(bg, 'none');
+    assert.equal(await page.$(`${T('tips-pinned')} .tp-pinned__icon`), null);
     // 「今天」：D2 的贴士带小标
     assert.ok(await page.$(`${T(`tip-${TIP('浮潜前一晚别喝太多').id}`)} ${T('tip-today')}`), '今天（D2）的贴士带「今天」');
     await assertNoHorizontalOverflow(page);
@@ -451,15 +452,15 @@ test('联系人页（行程中 390）：紧急在最上面；收起时名字、�
     assert.equal(desk.name, DESK.name);
     assert.match(desk.sub, /前台 · /);
     assert.equal(desk.num, DESK.phone);
-    // 号码用 Geist 等宽数字（tabular-nums），不再用系统等宽粗体（视觉评审 P2-18）
-    assert.match(desk.font, /Geist/, '号码用 Geist');
+    // 号码用系统字体的等宽数字（tabular-nums），不用系统等宽粗体（视觉评审 P2-18）；Geist 已经去掉
+    assert.doesNotMatch(desk.font, /Geist|monospace/, '号码用系统字体，不用 Geist、不用等宽字体');
     assert.match(desk.nums, /tabular-nums/, '号码等宽数字');
     assert.deepEqual(desk.quick.map((q) => q[0]), ['call', 'whatsapp']);
     assert.equal(desk.quick[0][1], `tel:${DESK.phone.startsWith('+') ? '+' : ''}${DESK.phone.replace(/\D/g, '')}`);
     assert.equal(desk.quick[1][1], `https://wa.me/${DESK.whatsapp.replace(/\D/g, '')}`);
     assert.equal(desk.quick[0][2], `打电话给${DESK.name}`);
     assert.ok(desk.today, '今天住的酒店：带「今天」');
-    // 紧急的打电话是危险色实心
+    // 紧急的打电话有自己的类（纸本：外观和别的组一样是细线框，只有组标题是砖红）
     const police = await page.$eval(`${T(`contact-quick-${POLICE.id}`)} a`, (el) => ({ cls: el.className, bg: getComputedStyle(el).backgroundColor }));
     assert.match(police.cls, /ct-qbtn--danger/);
     // 名字没有被快捷圆钮压住

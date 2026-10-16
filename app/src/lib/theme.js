@@ -11,7 +11,7 @@
 //   地图底图、图表这类要用 JS 换颜色 / 换图的地方读它（纯 CSS 的地方直接用 tokens 就行）。
 //
 // 行程主题色：setTripAccent('#0EA5A4', '#F2A65A') 写到 <html> 的 --trip-accent / --trip-accent-2，
-//   --color-accent、光场整页跟着变；离开行程时 setTripAccent(null, null) 恢复默认。
+//   --color-accent 整页跟着变；离开行程时 setTripAccent(null, null) 恢复默认。
 //   外壳（shell/trip-state.js）按当前行程统一设置（切换行程时在两个颜色之间平滑过渡），页面不用自己调。
 // =====================================================================
 
@@ -102,7 +102,7 @@ function writeAccent(root, name, hex) {
 /**
  * 整页换行程主题色；传 null 恢复默认。
  *   setTripAccent('#0E8A8A')             只换第一主题色（第二主题色不动）
- *   setTripAccent('#0E8A8A', '#F2A65A')  两个一起换（trips.cover.accent / accent_2；光场下半部分的暖色跟着变）
+ *   setTripAccent('#0E8A8A', '#F2A65A')  两个一起换（trips.cover.accent / accent_2）
  *   setTripAccent(null, null)            两个都恢复默认（离开行程）
  * 外壳（shell/trip-state.js）按当前行程统一调用，页面不用自己调。
  * @param {string|null} hex

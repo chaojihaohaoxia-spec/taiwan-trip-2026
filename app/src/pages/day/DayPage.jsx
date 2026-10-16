@@ -2,7 +2,7 @@
 // pages/day/DayPage.jsx：每天（路由 day，#/t/:tripId/day/:date，SPEC §5.3）。
 //
 // 大标题、天数分段条、顶栏、底栏由外壳画（shell/Frame.jsx）；这里从分段条下面开始：
-//   页头（parts.jsx DayHead）  眉标 D2 · 日期 · 今天 / 当天标题（宋体）/ 概要 / 节奏、天气、日落、当晚住哪、规划状态
+//   页头（parts.jsx DayHead）  眉标 D2 · 日期 · 今天 / 当天标题（宋体）/ 概要 / 一行事实（天气 · 日落 · 规划状态）/ 当晚住哪
 //   路线规划卡（RoutePlanCard）、取舍说明（DecisionsCard，收着）、当天提醒（RemindersCard：这一天的贴士和待办）
 //   时间轴（timeline.jsx Timeline）  一次只开一张（useAccordion）；行程中的那一天：当前条目高亮、「现在」指示线每分钟走、
 //                                 进来自动滚到当前条目附近（用户先动过就不抢；同一条历史记录只滚一次）
@@ -231,7 +231,7 @@ export default function DayPage({ route }) {
 
   return (
     <div class="day" data-testid="page-day" data-phase={phase} data-today={now.info.visible ? '' : undefined} ref={rootRef}>
-      <DayHead day={day} trip={trip} dayNumber={dayNumber} timeZone={timeZone} at={now.at} weather={weather} stay={stay} count={plan.primary.length} />
+      <DayHead day={day} trip={trip} dayNumber={dayNumber} timeZone={timeZone} at={now.at} weather={weather} stay={stay} />
       <RoutePlanCard plan={day.route_plan} getPlace={getPlace} />
       <DecisionsCard decisions={day.decisions} />
       <RemindersCard tips={dayTips} todos={dayTodos} tripId={tripId} store={store} canEdit={canEdit} timeZone={timeZone} />

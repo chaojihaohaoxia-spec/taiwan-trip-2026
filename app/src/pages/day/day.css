@@ -1,7 +1,7 @@
 /* =====================================================================
    pages/day/day.css：每天页（.day）。大标题、分段条、顶栏、底栏由外壳画，这里从分段条下面开始。
-   照样稿 P2-serif 的 .day-head / .tl-*（04-body.html、02-style.html）：
-   左边 52px 一栏时间（Geist 等宽数字）、20px 一栏竖线和圆点、右边是可原地展开的卡片（ui/ExpandableCard）。
+   「杂志纸本」：页头是一行事实；时间轴像印出来的行程单——左边 52px 一栏时间（系统字体等宽数字）、20px 一栏细竖线和小圆点、
+   右边是直接排在纸上、上面一根细线的条目（ui/ExpandableCard），当前条目左边一道 2px 海色线。
    颜色、圆角、阴影、字体、间距只用 tokens.css 的变量。
    ===================================================================== */
 
@@ -24,7 +24,7 @@
 
 /* ---------- 页头 ---------- */
 .day-head {
-  padding: var(--space-2) var(--space-1) 0;
+  padding: var(--space-2) 0 0;
 }
 
 .day-head__eyebrow {
@@ -32,27 +32,20 @@
 }
 
 .day-head__title {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
   margin: 6px 0 0;
   font: var(--type-title-1);
   letter-spacing: var(--tracking-display);
-  text-wrap: balance;
+  text-wrap: pretty;
   /* 句子式的长标题按正常中文规则断行（keep-all 只在标点、空格处折，「JW」会单独掉到下一行，长标题折得很碎，视觉评审 P2-1） */
   word-break: normal;
   line-break: strict;
   overflow-wrap: anywhere;
 }
 
-.day-head__icon {
-  flex: none;
-  font-size: var(--text-title-2);
-  line-height: 1;
-}
-
-.day-head__title-text {
-  min-width: 0;
+/* 标题按标点切成的段（parts.jsx 的 titleSegments）：段和段之间才折行，一段比一行还长时段内照常折 */
+.day-head__seg {
+  display: inline-block;
+  max-width: 100%;
 }
 
 .day-head__summary {
@@ -63,81 +56,46 @@
   text-wrap: pretty;
 }
 
-.day-head__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 12px;
+/* 一行事实：天气 · 日落 · 规划状态（用 · 隔开，不是胶囊） */
+.day-head__facts {
+  margin: 12px 0 0;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
 }
 
-/* 小胶囊：凸起的白 + 强调色图标（样稿 .chip） */
-.day-chip {
+.day-fact + .day-fact::before {
+  content: "·";
+  margin: 0 8px;
+  color: var(--color-text-3);
+}
+
+.day-fact--muted {
+  color: var(--color-text-3);
+}
+
+.day-fact--warning {
+  color: var(--color-warning-text);
+}
+
+/* 当晚住哪：一行海色链接（点了开预订详情），可点区域扩到 44 */
+.day-head__stay {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  min-height: 32px;
-  padding: 0 10px 0 8px;
-  border-radius: var(--radius-pill);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-text);
-  font: var(--type-label);
-  font-size: var(--text-footnote);
-  letter-spacing: var(--tracking-label);
-  white-space: nowrap;
-}
-
-.day-chip__icon {
-  display: inline-grid;
-  flex: none;
-  place-items: center;
+  gap: 2px;
+  min-height: 24px;
+  margin-top: 2px;
   color: var(--color-accent-text);
-}
-
-.day-chip__text {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.day-chip--muted {
-  color: var(--color-text-2);
-}
-
-.day-chip--muted .day-chip__icon {
-  color: var(--color-text-2);
-}
-
-.day-chip--warning {
-  background: var(--color-warning-soft);
-  box-shadow: none;
-  color: var(--color-warning-text);
-}
-
-.day-chip--warning .day-chip__icon {
-  color: var(--color-warning-text);
-}
-
-/* 可点的（当晚住哪 → 预订详情）：带箭头，可点区域扩到 44 */
-.day-chip--link {
-  padding-right: 6px;
+  font: var(--type-subhead);
+  text-align: left;
   cursor: pointer;
-  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+  transition: var(--press-transition);
 }
 
-.day-chip--link::after {
+.day-head__stay::after {
   content: "";
   position: absolute;
-  inset: -6px 0;
-}
-
-.day-chip--link[data-pressed] {
-  background: var(--color-raised-pressed);
-}
-
-.day-chip__chev {
-  color: var(--color-accent-text);
+  inset: -10px 0;
 }
 
 .day-head__note {
@@ -189,8 +147,6 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
 }
 
 .day-route__metric dd {
@@ -206,12 +162,9 @@
   font: var(--type-caption-1);
 }
 
-/* 值很长时（「约 2 小时 50 分」「12–20 万越南盾（约 HK$85–106）」）：一行一个，左标签右值 */
+/* 值很长时（「约 2 小时 50 分」「12–20 万越南盾（约 HK$85–106）」）：一行一个，左标签右值，细线分隔（不凹进去） */
 .day-route__rows {
   margin: 12px 0 0;
-  padding: 0 12px;
-  border-radius: var(--radius-md);
-  background: var(--color-fill);
 }
 
 .day-route__row {
@@ -219,8 +172,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: 44px;
-  padding: 9px 0;
+  padding: 7px 0;
   font: var(--type-subhead);
   line-height: 1.4;
 }
@@ -239,53 +191,11 @@
 .day-route__row dd {
   min-width: 0;
   margin: 0;
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   font-variant-numeric: tabular-nums;
   text-align: right;
   text-wrap: pretty;
   overflow-wrap: anywhere;
-}
-
-.day-route__stops {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.day-route__stop {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 28px;
-  padding: 3px 10px 3px 3px;
-  border-radius: var(--radius-pill);
-  background: var(--color-fill);
-  font: var(--type-footnote);
-}
-
-.day-route__n {
-  display: inline-grid;
-  flex: none;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-round);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
-  font-size: var(--text-caption-1);
-  font-weight: var(--weight-semibold);
-}
-
-.day-route__stop-note {
-  color: var(--color-text-2);
-}
-
-.day-route__stop-note::before {
-  content: "·";
-  margin-right: 4px;
 }
 
 .day-route__links {
@@ -380,16 +290,15 @@
   padding-bottom: 10px;
 }
 
-/* 竖线：从圆点往下画到下一条 */
+/* 细竖线：从圆点往下画到下一条 */
 .tl__item::before {
   content: "";
   position: absolute;
   top: 26px;
   bottom: -6px;
-  left: calc(var(--tl-time-w) + 9px);
-  width: 2px;
-  border-radius: 1px;
-  background: var(--color-rail);
+  left: calc(var(--tl-time-w) + 9.5px);
+  width: 1px;
+  background: var(--color-separator);
 }
 
 .tl__item:last-child::before {
@@ -409,7 +318,7 @@
 .tl__time-main {
   display: block;
   font-size: var(--text-callout);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   font-variant-numeric: tabular-nums;
 }
 
@@ -435,16 +344,12 @@
   overflow-wrap: anywhere;
 }
 
-/* 条目在别的时区：小标签「香港」 */
+/* 条目在别的时区：灰色小字「香港」 */
 .tl__time-zone {
   display: inline-block;
   margin-top: 4px;
-  padding: 1px 5px;
-  border-radius: var(--radius-xs);
-  background: var(--color-fill);
-  color: var(--color-text-2);
-  font: var(--type-caption-2);
-  font-weight: var(--weight-semibold);
+  color: var(--color-text-3);
+  font: var(--weight-regular) var(--text-caption-2) / 1.3 var(--font-sans);
 }
 
 .tl__time--dim {
@@ -460,45 +365,24 @@
   position: relative;
 }
 
+/* 8px 小圆点（没有光环）：平时灰，当前条目海色；当天通用备选是空心的 */
 .tl__dot {
   position: absolute;
-  top: 19px;
-  left: 5px;
-  width: 10px;
-  height: 10px;
+  top: 21px;
+  left: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: var(--radius-round);
-  background: var(--color-accent);
-  box-shadow: 0 0 0 4px var(--color-accent-soft);
-}
-
-.tl__item--dim .tl__dot {
   background: var(--color-text-3);
-  box-shadow: 0 0 0 4px var(--color-fill);
 }
 
 .tl--general .tl__dot {
-  background: var(--color-surface);
-  box-shadow: inset 0 0 0 2px var(--color-accent), 0 0 0 4px var(--color-accent-soft);
+  background: var(--color-canvas);
+  box-shadow: inset 0 0 0 1.5px var(--color-text-3);
 }
 
 .tl__item--current .tl__dot {
-  box-shadow: 0 0 0 4px var(--color-accent-soft), 0 0 0 1px var(--color-accent);
-}
-
-.tl__item--current .tl__dot::after {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: inherit;
   background: var(--color-accent);
-  opacity: 0.35;
-  animation: tl-pulse 2.4s var(--ease-out) infinite;
-}
-
-@keyframes tl-pulse {
-  0% { transform: scale(0.6); opacity: 0.4; }
-  70% { transform: scale(1.8); opacity: 0; }
-  100% { transform: scale(1.8); opacity: 0; }
 }
 
 .tl__dot--skel {
@@ -510,7 +394,7 @@
   min-width: 0;
 }
 
-/* 刚加的一条（面板收回以后放进时间轴）：淡入、轻轻落下，强调色细边亮一下再退掉（交互评审 P2-2，和账本新记的一笔一样） */
+/* 刚加的一条（面板收回以后放进时间轴）：淡入、轻轻落下，左边的海色线亮一下再退掉（交互评审 P2-2，和账本新记的一笔一样） */
 @keyframes tl-fresh-in {
   from {
     opacity: 0;
@@ -526,11 +410,11 @@
 @keyframes tl-fresh-glow {
   0%,
   40% {
-    box-shadow: var(--material-card-edge), 0 0 0 2px var(--color-accent), var(--shadow-accent-sm);
+    box-shadow: inset 0 1px 0 var(--color-separator), inset 2px 0 0 var(--color-accent);
   }
 
   100% {
-    box-shadow: var(--material-card-edge);
+    box-shadow: inset 0 1px 0 var(--color-separator);
   }
 }
 
@@ -544,9 +428,14 @@
   }
 }
 
-/* 当前条目：强调色细边 */
+/* 当前条目：左边一道 2px 海色线，标题和钟点是海色 */
 .tl__item--current > .tl__card.xcard--card {
-  box-shadow: var(--material-card-edge), 0 0 0 1.5px var(--color-accent), var(--shadow-accent-sm);
+  box-shadow: inset 0 1px 0 var(--color-separator), inset 2px 0 0 var(--color-accent);
+}
+
+.tl__item--current .xcard__title,
+.tl__item--current .tl__time-main {
+  color: var(--color-accent-text);
 }
 
 /* 完成 / 跳过：标题淡一点、划掉；右边的标签照旧看得清 */
@@ -556,20 +445,14 @@
   text-decoration-color: var(--color-text-3);
 }
 
-.tl__item--dim > .tl__card .xcard__leading {
-  opacity: 0.55;
-}
-
-/* 收起时的种类图标块小一号（40 → 32）：真实行程的标题很长，标题那一栏多让出一点宽度（视觉评审 P2-13） */
+/* 标题行离竖线一点距离（当前条目左边那道海色线和字之间） */
 .tl__card > .xcard__heading > .xcard__header {
   gap: 10px;
   padding-left: 12px;
 }
 
-.tl__card .xcard__leading {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
+.tl__card > .xcard__body > .xcard__clip > .xcard__content {
+  padding-left: 12px;
 }
 
 /* 地址：点一下复制（整行就是复制按钮，越南语长地址照常折行） */
@@ -584,7 +467,7 @@
 /* 标题行可以折两行以上（超长标题）：样稿 .tl-title。真实行程的标题是中英混排的长句（「晚饭：Cơm Nhà（越南家常菜）」），
    keep-all 会把一串中文当成一个词整段换行、末尾的「）」被甩到下一行，所以这里按正常的中文规则断行 */
 .tl__card .xcard__title {
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   word-break: normal;
   overflow-wrap: anywhere;
   text-wrap: pretty;
@@ -620,29 +503,6 @@
   text-wrap: balance;
 }
 
-/* 进行中的进度条（标题行底部） */
-.tl__progress {
-  --tl-progress: 0;
-  position: absolute;
-  right: 12px;
-  bottom: 0;
-  left: 14px;
-  height: 3px;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent-soft);
-  overflow: hidden;
-}
-
-.tl__progress::after {
-  content: "";
-  display: block;
-  width: calc(var(--tl-progress) * 100%);
-  height: 100%;
-  border-radius: inherit;
-  background: var(--color-accent);
-  transition: width var(--dur-slow) var(--ease-out);
-}
-
 /* 有进行中的条目时：「现在」的钟点跟在这一栏的钟点下面（正常文档流，几行都不会压住），
    圆点画在竖线上、小横线接到卡片边上（伪元素；横向位置按 --tl-time-w / --tl-rail-w 算，宽屏也对得上） */
 .tl__time {
@@ -657,29 +517,24 @@
   pointer-events: none;
 }
 
+/* 「现在」的钟点：海色小字（不是实心胶囊） */
 .tl__nowmark b {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: var(--radius-xs);
-  /* 实心强调色（浅底 + 强调色字压在光场上只有 3.9:1，视觉评审 P2-6） */
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  font-size: var(--text-caption-1);
-  font-weight: var(--weight-bold);
-  line-height: 1.2;
+  color: var(--color-accent-text);
+  font: var(--weight-semibold) var(--text-caption-1) / 1.2 var(--font-sans);
+  font-variant-numeric: tabular-nums;
 }
 
-/* 圆点：竖线正中（时间栏宽 + 竖线栏一半） */
+/* 小圆点：竖线正中（时间栏宽 + 竖线栏一半），外面一圈纸色把竖线断开 */
 .tl__nowmark::after {
   content: "";
   position: absolute;
   top: 50%;
-  left: calc(var(--tl-time-w) + var(--tl-rail-w) / 2 - 7px);
-  width: 14px;
-  height: 14px;
+  left: calc(var(--tl-time-w) + var(--tl-rail-w) / 2 - 4.5px);
+  width: 9px;
+  height: 9px;
   border-radius: var(--radius-round);
   background: var(--color-accent);
-  box-shadow: 0 0 0 3px var(--color-surface), var(--shadow-accent-sm);
+  box-shadow: 0 0 0 3px var(--color-canvas);
   translate: 0 -50%;
 }
 
@@ -701,7 +556,7 @@
   top: 50%;
   left: calc(var(--tl-time-w) + var(--tl-rail-w) / 2);
   width: calc(var(--tl-rail-w) / 2);
-  height: 2px;
+  height: 1px;
   background: var(--color-accent);
   translate: 0 -50%;
 }
@@ -720,18 +575,18 @@
 
 .tl__time--now b {
   font-size: var(--text-footnote);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-semibold);
 }
 
 .tl__now-dot {
   position: absolute;
   top: 50%;
-  left: 3px;
-  width: 14px;
-  height: 14px;
+  left: 5.5px;
+  width: 9px;
+  height: 9px;
   border-radius: var(--radius-round);
   background: var(--color-accent);
-  box-shadow: 0 0 0 3px var(--color-surface), var(--shadow-accent-sm);
+  box-shadow: 0 0 0 3px var(--color-canvas);
   translate: 0 -50%;
 }
 
@@ -745,8 +600,7 @@
 .tl__now-line span {
   color: var(--color-accent-text);
   font: var(--type-caption-2);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-wide);
+  font-weight: var(--weight-semibold);
 }
 
 .tl__now-zone {
@@ -756,8 +610,7 @@
 .tl__now-line::after {
   content: "";
   flex: 1;
-  height: 2px;
-  border-radius: 1px;
+  height: 1px;
   background: var(--color-accent);
 }
 

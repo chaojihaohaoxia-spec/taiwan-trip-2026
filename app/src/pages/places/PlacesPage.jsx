@@ -34,7 +34,6 @@ import { KindIcon } from '../../kit/KindIcon.jsx';
 import { Glyph } from '../../kit/Glyph.jsx';
 import { PageEmptyState, ErrorState } from '../../kit/States.jsx';
 import { Highlight } from '../../kit/search/SearchResults.jsx';
-import { kindGlyph } from '../../kit/kinds.js';
 import { openPlaceSheet, openReviewSheet, openItemSheet } from '../../sheets/index.js';
 import { haptic } from '../../lib/native.js';
 import { prefersReducedMotion } from '../../lib/media.js';
@@ -407,7 +406,6 @@ function Toolbar({ query, onQuery, mode, onMode, view, onView, kind, onKind, cou
               selected={kind === c.kind}
               onToggle={(on) => onKind(on ? c.kind : 'all')}
               count={c.count}
-              icon={(p) => <Glyph name={kindGlyph('place', c.kind)} size={p.size} />}
               data-kind={c.kind}
             >
               {c.label}
@@ -577,7 +575,7 @@ function PlaceCard({ row, view, flipKey, mode, members }) {
       <span class="plc__bg" data-flip-key={`${flipKey}:bg`} data-flip="box" aria-hidden="true" />
       <span class="plc__media" data-flip-key={`${flipKey}:media`} data-flip="crop">
         <PlaceThumb place={p} photo={entry.photo} glyphSize={grid ? 34 : 24} kindBadge />
-        {p.wishlist && (
+        {p.wishlist && grid && (
           <span class="plc__wish" title="想去">
             <HeartGlyph filled size={grid ? 16 : 13} />
             <span class="visually-hidden">想去</span>
@@ -585,7 +583,15 @@ function PlaceCard({ row, view, flipKey, mode, members }) {
         )}
       </span>
       <span class="plc__text" data-flip-key={`${flipKey}:text`} data-flip="text">
-        <span class="plc__title"><Highlight text={p.name} ranges={hit.name} /></span>
+        <span class="plc__title">
+          <Highlight text={p.name} ranges={hit.name} />
+          {p.wishlist && !grid && (
+            <span class="plc__wish-inline" title="想去">
+              <HeartGlyph filled size={12} />
+              <span class="visually-hidden">想去</span>
+            </span>
+          )}
+        </span>
         {local && <span class="plc__local"><Highlight text={local} ranges={hit.local} /></span>}
         {visitLine && <span class="plc__visit">{visitLine}</span>}
         <span class="plc__chips">

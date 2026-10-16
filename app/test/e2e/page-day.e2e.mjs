@@ -178,7 +178,7 @@ for (const [label, o] of [['手机浅色', {}], ['手机深色', { colorScheme: 
   });
 }
 
-test('出发前的 D1：页头有节奏 / 日落 / 当晚住哪、天气提示；路线卡「打开路线」是数据里的链接；已完成 / 已跳过淡化并带标签；没有「现在」；取舍说明收着、点了展开', async () => {
+test('出发前的 D1：页头一行事实（天气 · 日落）+ 一行「住 …」链接（「杂志纸本」：没有节奏 / 条数胶囊、不放 emoji、预报模型那段不上屏）；路线卡「打开路线」是数据里的链接；已完成 / 已跳过淡化并带标签；没有「现在」；取舍说明收着、点了展开', async () => {
   const app = await openApp({ browser, server, hash: '#/t/demo-island/day/2027-01-10', now: UPCOMING });
   const { page } = app;
   try {
@@ -187,15 +187,19 @@ test('出发前的 D1：页头有节奏 / 日落 / 当晚住哪、天气提示�
     const head = await page.$eval(T('day-head'), (el) => ({
       eyebrow: el.querySelector('.day-head__eyebrow').textContent,
       title: el.querySelector('.day-head__title').textContent,
-      chips: [...el.querySelectorAll('.day-chip')].map((c) => c.textContent.trim()),
-      note: el.querySelector('[data-testid="day-weather-note"]')?.textContent,
+      facts: [...el.querySelectorAll('.day-head__facts .day-fact')].map((c) => c.textContent.trim()),
+      stay: el.querySelector('[data-testid="day-chip-stay"]')?.textContent.trim(),
+      chips: el.querySelectorAll('.day-chip, [data-testid="day-chip-pace"], [data-testid="day-chip-count"]').length,
+      note: el.querySelector('[data-testid="day-weather-note"]')?.textContent ?? null,
+      emoji: /\p{Extended_Pictographic}/u.test(el.querySelector('.day-head__title').textContent),
     }));
     assert.match(head.eyebrow, /^D1 · 1月10日 周日$/);
     assert.ok(head.title.includes('落地'), head.title);
-    assert.ok(head.chips.some((c) => c.startsWith('节奏')), JSON.stringify(head.chips));
-    assert.ok(head.chips.some((c) => c.startsWith('日落')), JSON.stringify(head.chips));
-    assert.ok(head.chips.some((c) => c.startsWith('住 ')), JSON.stringify(head.chips));
-    assert.ok(head.note, '天气提示');
+    assert.ok(head.facts.some((c) => c.startsWith('日落')), JSON.stringify(head.facts));
+    assert.ok(head.stay?.startsWith('住 '), `当晚住哪是一行链接：${head.stay}`);
+    assert.equal(head.chips, 0, '没有胶囊（节奏、条数不上屏）');
+    assert.equal(head.note, null, '数据里的预报模型那段不上屏');
+    assert.equal(head.emoji, false, '标题不放 emoji');
     const day1 = DAYS.find((d) => d.date === '2027-01-10');
     const link = await page.$eval(T('day-route-link-0'), (el) => el.getAttribute('href'));
     assert.equal(link, day1.route_plan.maps_url);
@@ -220,7 +224,7 @@ test('出发前的 D1：页头有节奏 / 日落 / 当晚住哪、天气提示�
   }
 });
 
-test('行程中的今天 10:00：「半日浮潜」是当前条目（高亮、进行中标签、进度条），「现在」标在它旁边写 10:00；进来自动滚到它附近', async () => {
+test('行程中的今天 10:00：「半日浮潜」是当前条目（左边一道海色线、进行中标签；「杂志纸本」不画进度条），「现在」标在它旁边写 10:00（海色小字 + 小点）；进来自动滚到它附近', async () => {
   const app = await openDay(D2);
   const { page } = app;
   try {
@@ -232,7 +236,7 @@ test('行程中的今天 10:00：「半日浮潜」是当前条目（高亮、�
     }));
     assert.equal(cur.current, true);
     assert.equal(cur.meta, '进行中');
-    assert.ok(Number(cur.progress) > 0.4 && Number(cur.progress) < 0.5, `08:15–12:00 在 10:00 走了 ${cur.progress}`);
+    assert.equal(cur.progress, undefined, '不画进度条');
     assert.equal(cur.now, '10:00');
     assert.equal(await page.$$eval(T('tl-now'), (els) => els.length), 1, '只有一个「现在」');
     // 「现在」的钟点在开始 / 结束钟点下面，不压住它们（收起的卡片很矮时也一样）
@@ -243,7 +247,7 @@ test('行程中的今天 10:00：「半日浮潜」是当前条目（高亮、�
       return { endBottom: end.bottom, nowTop: now.top, dotW: dot.width };
     });
     assert.ok(stack.nowTop >= stack.endBottom - 1, `「现在」在结束钟点下面：${stack.endBottom} → ${stack.nowTop}`);
-    assert.equal(stack.dotW, '14px', '竖线上有圆点');
+    assert.equal(stack.dotW, '9px', '竖线上有一个小圆点');
     const y = await page.evaluate(() => window.scrollY);
     assert.ok(y > 200, `自动滚到了当前条目附近：scrollY = ${y}`);
     const r = await rect(page, T(`item-${DIVE.id}`));

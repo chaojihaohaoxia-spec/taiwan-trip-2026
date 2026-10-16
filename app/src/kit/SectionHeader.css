@@ -1,5 +1,6 @@
 /* =====================================================================
-   kit/SectionHeader.css：段标题（.k-sec）。样稿 .sec-h：上 26、左右 4；标题宋体 21px。
+   kit/SectionHeader.css：段标题（.k-sec）。「杂志纸本」：上 26；标题宋体 21px，和页面左边对齐；计数是灰字；
+   右边的动作（「加条目」）是一个海色文字链接，不是浅绿胶囊。
    ===================================================================== */
 
 .k-sec {
@@ -7,7 +8,7 @@
   align-items: center;
   gap: var(--space-3);
   min-height: 44px;
-  margin: 26px 4px var(--space-2);
+  margin: 26px 0 var(--space-2);
 }
 
 .k-sec:first-child {
@@ -30,8 +31,8 @@
 
 .k-sec__count {
   margin-left: var(--space-2);
-  color: var(--color-text-2);
-  font: var(--weight-medium) var(--text-callout) / 1 var(--font-label);
+  color: var(--color-text-3);
+  font: var(--weight-regular) var(--text-callout) / 1 var(--font-label);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
   vertical-align: 0.08em;
@@ -43,7 +44,7 @@
   font: var(--type-footnote);
 }
 
-/* 文字动作：强调色字 + 小箭头；视觉 32 高，可点区域用 ::after 扩到 44 */
+/* 文字动作：海色字 + 小箭头（没有底）；视觉 32 高，可点区域用 ::after 扩到 44 */
 .k-sec__action {
   position: relative;
   display: inline-flex;
@@ -51,9 +52,8 @@
   align-items: center;
   gap: 2px;
   min-height: 32px;
-  padding: 0 6px 0 12px;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent-soft);
+  padding: 0 2px 0 8px;
+  border-radius: var(--radius-sm);
   color: var(--color-accent-text);
   font: var(--type-label);
   font-size: var(--text-footnote);
@@ -66,4 +66,13 @@
   content: "";
   position: absolute;
   inset: -6px -4px;
+}
+
+/* 标题旁的小按钮（列表 / 网格切换）：就是一个灰色图标，不是白圆 */
+.k-sec .icon-btn--fill {
+  --icon-btn-bg: transparent;
+  --icon-btn-bg-hover: var(--color-fill);
+  --icon-btn-bg-pressed: var(--color-fill-pressed);
+  --icon-btn-shadow: 0 0 0 0 transparent;
+  --icon-btn-fg: var(--color-text-2);
 }

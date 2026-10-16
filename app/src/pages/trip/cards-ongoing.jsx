@@ -4,23 +4,20 @@
 //   NowCard       「现在 / 接下来」大卡：正在进行的条目（或下一项）、地点、一句说明、怎么过去；
 //                 kit 的 PlaceActions 完整尺寸（导航 / 叫 Grab / 给司机看 / 记一笔）+「完成」（SubmitButton 转圈打勾）+「跳过」；
 //                 下面一行「接下来 …」。标题点进那一天并展开那一条（?item=）。
-//   TimelineCard  今天的时间轴缩略：围着“现在”的几条，点了到那天并展开；前后还有几条折叠成一行
-//   SpendCard     今天花了多少：按币种分别合计 + 折合港币（RollingNumber），点进账本；没记账时直接「记一笔」
 //   TomorrowCard  明天一张小卡：标题、路线一句话、住哪
 // =====================================================================
 
 import { useState, useRef, useLayoutEffect } from 'preact/hooks';
-import { Card, KindIcon, Glyph, MoneyText, PlaceActions, kindLabel, rideHintFor, itemClock } from '../../kit/index.js';
-import { Button, SubmitButton, RollingNumber, Badge } from '../../ui/index.js';
+import { Card, Glyph, PlaceActions, kindLabel, rideHintFor, itemClock } from '../../kit/index.js';
+import { Button, SubmitButton, Badge } from '../../ui/index.js';
 import { toast } from '../../overlay/index.js';
 import { captureHeight, playHeight } from '../../motion/index.js';
 import { href } from '../../router/index.js';
 import { formatDuration } from '../../lib/datetime.js';
-import { formatAmount, currencyName } from '../../lib/money.js';
 import { markdownToText } from '../../lib/markdown.js';
 import { haptic } from '../../lib/native.js';
 import { openExpenseSheet, openItemSheet } from '../../sheets/index.js';
-import { nowModel, timelineWindow, spendSummary, itemTimeText, expenseCategoryOf, dayRouteLine, stayShortName } from './model.js';
+import { nowModel, itemTimeText, expenseCategoryOf, dayRouteLine, stayShortName } from './model.js';
 
 const dayHref = (tripId, date, item) => href({ name: 'day', params: { tripId, date }, query: item ? { item } : undefined });
 
@@ -150,14 +147,13 @@ export function NowCard({ store, tripId, trip, today, primary, canEdit }) {
     <Card tone="accent" eyebrow={eyebrow} testId="ov-now" data-mode={m.mode} data-item-id={focus.id} data-finishing={held ? '' : undefined} class="ov-now">
       <div class="ov-now__swap" key={focus.id} data-swap={swapping ? '' : undefined}>
         <a class="ov-now__head" href={dayHref(tripId, day.date, focus.id)} data-press="highlight" data-testid="ov-now-title" aria-label={`${focus.title}，查看今天并展开这一条`}>
-          <KindIcon type="item" kind={focus.kind} tile="lg" tone="solid" />
           <span class="ov-now__titles">
             <span class="ov-now__title t-serif">{focus.title}</span>
             <span class="ov-now__sub t-label" data-testid="ov-now-time">
               {[time, place?.name].filter(Boolean).join(' · ') || kindLabel('item', focus.kind)}
             </span>
           </span>
-          <span class="ov-now__chev" aria-hidden="true"><Glyph name="chev-r" size={18} stroke={2.2} /></span>
+          <span class="ov-now__chev" aria-hidden="true"><Glyph name="chev-r" size={15} stroke={2.2} /></span>
         </a>
         {desc && <p class="ov-now__desc">{desc}</p>}
         {transport && (
@@ -217,136 +213,9 @@ export function NowCard({ store, tripId, trip, today, primary, canEdit }) {
             <span class="ov-now__next-time t-label">{startText(m.next, clockOpts(m.next))}</span>
             <span class="ov-now__next-title">{m.next.title}</span>
             {leftText(m.minutesUntilNext) && <span class="ov-now__next-left t-label">{leftText(m.minutesUntilNext)}</span>}
-            <Glyph name="chev-r" size={16} stroke={2.2} />
+            <Glyph name="chev-r" size={15} stroke={2.2} />
           </a>
         )}
-      </div>
-    </Card>
-  );
-}
-
-// ---------------------------------------------------------------------
-// 今天的时间轴缩略
-// ---------------------------------------------------------------------
-
-/**
- * 时间轴缩略的钟点：开始 / –结束 两行（和每天页的时间栏一样），窄的时间栏里不会压到竖线；
- * 在香港发生的条目第三行一个「香港」小标签，航班是「16:45 香港 / →18:35」（kit/item-clock.js）。
- */
-function TimeText({ clock }) {
-  if (!clock?.main && !clock?.fuzzy) return <span class="ov-tl__time t-label">—</span>;
-  // 超过 4 个字的模糊时间（「取完行李后」）窄栏里会被拆开：栏里空着（竖线上的圆点在），写在标题前面
-  if (clock.label && !clock.main) return <span class="ov-tl__time t-label" aria-hidden="true" />;
-  if (clock.label) return <span class="ov-tl__time ov-tl__time--label t-label">{clock.main}</span>;
-  if (clock.arrow) {
-    return (
-      <span class="ov-tl__time t-label">
-        <span>{clock.main}</span>
-        {clock.zone && <span class="ov-tl__zone">{clock.zone}</span>}
-        <span class="ov-tl__end">→{clock.end}</span>
-        {clock.endZone && <span class="ov-tl__zone">{clock.endZone}</span>}
-      </span>
-    );
-  }
-  return (
-    <span class="ov-tl__time t-label">
-      <span>{clock.main}</span>
-      {clock.end && <span class="ov-tl__end">–{clock.end}</span>}
-      {clock.zone && <span class="ov-tl__zone">{clock.zone}</span>}
-    </span>
-  );
-}
-
-/**
- * @param {{ tripId: string, day: object, primary: object[], currentId: string|null, places: Map, bookings?: Map, timeZone?: string }} props
- */
-export function TimelineCard({ tripId, day, primary, currentId, places, bookings = new Map(), timeZone }) {
-  if (!primary.length) return null;
-  const win = timelineWindow(primary, { anchorId: currentId, size: 5 });
-  const done = primary.filter((i) => i.status === 'done').length;
-  const rows = win.items.map((it) => {
-    const place = it.place_id ? places.get(it.place_id) : null;
-    const dim = it.status === 'done' || it.status === 'skipped';
-    const state = it.id === currentId ? 'current' : it.status;
-    const clock = itemClock(it, { timeZone, booking: it.booking_id ? bookings.get(it.booking_id) || null : null });
-    return (
-      <a
-        key={it.id}
-        class="ov-tl__row"
-        href={dayHref(tripId, day.date, it.id)}
-        data-press="highlight"
-        data-state={state}
-        data-testid="ov-tl-row"
-        aria-current={state === 'current' ? 'step' : undefined}
-        aria-label={`${clock.aria}，${it.title}`}
-      >
-        <TimeText clock={clock} />
-        <span class="ov-tl__rail" aria-hidden="true"><i /></span>
-        <KindIcon type="item" kind={it.kind} tile="xs" tone={state === 'current' ? 'solid' : dim ? 'neutral' : 'accent'} />
-        <span class={`ov-tl__title${dim ? ' ov-tl__title--dim' : ''}`}>{clock.fuzzy && <span class="ov-tl__place">{clock.fuzzy} · </span>}{it.title}{place?.name && place.name !== it.title ? <span class="ov-tl__place"> · {place.name}</span> : null}</span>
-        {it.status === 'done' && <Glyph name="check" size={16} stroke={2.2} class="ov-tl__mark" />}
-        {it.status === 'skipped' && <Glyph name="x" size={16} stroke={2.2} class="ov-tl__mark" />}
-      </a>
-    );
-  });
-  return (
-    <Card
-      title={`今天 · ${day.title || '安排'}`}
-      meta={`${done} / ${primary.length} 已完成`}
-      padding="sm"
-      testId="ov-timeline"
-      footer={<Button variant="secondary" block href={dayHref(tripId, day.date)} data-testid="ov-timeline-all">查看全天</Button>}
-    >
-      <div class="ov-tl">
-        {win.hiddenBefore > 0 && <a class="ov-tl__more t-label" href={dayHref(tripId, day.date, primary[0].id)} data-press="highlight">前面还有 {win.hiddenBefore} 条</a>}
-        {rows}
-        {win.hiddenAfter > 0 && <a class="ov-tl__more t-label" href={dayHref(tripId, day.date, primary[primary.length - 1].id)} data-press="highlight">后面还有 {win.hiddenAfter} 条</a>}
-      </div>
-    </Card>
-  );
-}
-
-// ---------------------------------------------------------------------
-// 今天花了多少
-// ---------------------------------------------------------------------
-
-/**
- * @param {{ tripId: string, date: string, expenses: object[], homeOf: (e: object) => number|null, home?: string, fx: object|null, canEdit: boolean }} props
- *   home：行程的本币（trips.home_currency，两趟都是港币）；homeOf 算出来的就是这个币种的金额
- */
-export function SpendCard({ tripId, date, expenses, homeOf, home = 'HKD', fx, canEdit }) {
-  const s = spendSummary(expenses, { date, homeOf });
-  const ledger = { name: 'ledger', params: { tripId } };
-  const homeLabel = `折合${home === 'HKD' ? '港币' : currencyName(home)}`;
-  if (!s.count) {
-    return (
-      <Card title="今天花了" glyph="wallet" testId="ov-spend" data-count="0">
-        <div class="ov-inline-empty">
-          <span>今天还没记账</span>
-          {canEdit && (
-            <Button variant="tinted" size="sm" onClick={(e) => openExpenseSheet({ date }, { keyboard: true, trigger: e.currentTarget })} data-testid="ov-spend-add">记一笔</Button>
-          )}
-        </div>
-        <a class="ov-textlink" href={href(ledger)} data-press="highlight"><span>去账本</span><Glyph name="chev-r" size={16} stroke={2.2} /></a>
-      </Card>
-    );
-  }
-  return (
-    <Card title="今天花了" glyph="wallet" meta={`${s.count} 笔`} to={ledger} label={`今天花了约 ${formatAmount(s.hkd, home)}，${s.count} 笔，查看账本`} testId="ov-spend" data-count={s.count}>
-      <div class="ov-spend">
-        <div class="ov-spend__total">
-          <RollingNumber class="ov-spend__hkd t-figure" value={s.hkd} format={(v) => formatAmount(v, home)} data-testid="ov-spend-hkd" />
-          <span class="ov-spend__label t-label">{s.complete ? homeLabel : `${homeLabel}（部分币种没有汇率）`}</span>
-        </div>
-        <ul class="ov-spend__list">
-          {s.byCurrency.map((c) => (
-            <li key={c.currency} class="ov-spend__item">
-              <MoneyText amount={c.total} currency={c.currency} size="md" fx={fx} hkdValue={home === 'HKD' ? c.home : null} />
-              <span class="ov-spend__count t-label">{c.count} 笔</span>
-            </li>
-          ))}
-        </ul>
-        {s.latest?.description && <p class="ov-spend__latest t-label">最近一笔：{s.latest.description}</p>}
       </div>
     </Card>
   );
@@ -367,7 +236,7 @@ export function TomorrowCard({ tripId, day, plan, stay, places, index }) {
   return (
     <Card eyebrow={`明天 · D${index + 1}`} title={day.title || '明天'} to={{ name: 'day', params: { tripId, date: day.date } }} testId="ov-tomorrow">
       <p class="ov-tomorrow__line">{primary.length ? `${primary.length} 条安排${route ? ` · ${route}` : ''}` : '还没安排'}</p>
-      {stayName && <Badge tone="neutral" size="sm" icon={<Glyph name="bed" size={12} stroke={2.1} />}>{stayName}</Badge>}
+      {stayName && <Badge tone="neutral" size="sm">住 {stayName}</Badge>}
     </Card>
   );
 }

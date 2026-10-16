@@ -1,32 +1,15 @@
 /* =====================================================================
-   shell/daystrip.css：天数分段条（DayStrip.jsx，样稿 .seg.days-seg）。
-   真玻璃胶囊（和 ui/SegmentedControl 的 .seg--glass 同一种材质）+ 白色滑块（--color-thumb + --shadow-thumb）。
-   每格两行：上面小字（Geist 11px，阶段 / 日期 + 周几；今天那格写「今天」并用强调色），下面大字（宋体 17px：概览 / D1…）。
+   shell/daystrip.css：天数分段条（DayStrip.jsx）。「杂志纸本」：像书的目录——没有轨道、没有胶囊，下面一根细线；
+   选中的那天下面一道 2px 海色短线（.ds__thumb，弹簧跟过去），大字变成墨色。
+   每格两行：上面小字（系统字体 11px，阶段 / 日期 + 周几；今天那格写「今天」并用海色），下面大字（宋体 18px：概览 / D1…，没选中是次要灰）。
    格子平分整条；放不下（每格不到 64px）时轨道撑宽到 格数 × 64px、整条横向滑动（滚动条藏起来，两头有渐隐提示还有内容）。
    滑块的静止位置：translateX(--ds-index × 100%)（块宽 = 一格的宽），首帧不需要 JS。
    ===================================================================== */
 
 .ds {
   position: relative;
-  height: 58px;
-  border-radius: var(--radius-pill);
-  background: var(--material-glass);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
-  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
-}
-
-.ds::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
+  height: 54px;
+  box-shadow: inset 0 -1px 0 var(--color-separator);
 }
 
 .ds__scroll {
@@ -34,7 +17,6 @@
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
-  border-radius: inherit;
   scrollbar-width: none;
 }
 
@@ -60,7 +42,7 @@
 }
 
 .ds__track {
-  --ds-pad: 4px;
+  --ds-pad: 0px;
   /* 每格最窄多宽：放不下时整条横向滑 */
   --ds-cell-min: 64px;
   /* 一共几格、选中第几格（DayStrip.jsx 写在 style 上） */
@@ -87,12 +69,12 @@
   pointer-events: none;
 }
 
+/* 选中那天下面的海色短线 */
 .ds__thumb > span {
   position: absolute;
-  inset: 0;
-  border-radius: var(--radius-pill);
-  background: var(--color-thumb);
-  box-shadow: var(--shadow-thumb);
+  inset: auto 18px 0;
+  height: 2px;
+  background: var(--color-accent);
 }
 
 .ds__cell {
@@ -103,7 +85,6 @@
   justify-content: center;
   gap: 1px;
   min-width: 0;
-  border-radius: var(--radius-pill);
   color: var(--color-text);
   text-decoration: none;
   cursor: pointer;
@@ -113,8 +94,8 @@
 }
 
 .ds__top {
-  color: var(--color-text-2);
-  font: var(--weight-medium) var(--text-caption-2) / 1.25 var(--font-label);
+  color: var(--color-text-3);
+  font: var(--weight-regular) var(--text-caption-2) / 1.25 var(--font-label);
   font-style: normal;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
@@ -122,19 +103,20 @@
 }
 
 .ds__big {
-  font: var(--weight-serif) var(--text-title-4) / 1.1 var(--font-serif);
+  color: var(--color-text-2);
+  font: var(--weight-serif) var(--text-title-3) / 1.15 var(--font-serif);
   letter-spacing: var(--tracking-title);
   white-space: nowrap;
 }
 
 .ds__cell[aria-current="page"] .ds__big {
-  color: var(--color-accent-text);
+  color: var(--color-text);
 }
 
-/* 今天那一格：上面写「今天」，强调色 */
+/* 今天那一格：上面写「今天」，海色 */
 .ds__cell[data-today] .ds__top {
   color: var(--color-accent-text);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
 }
 
 /* 按下没选中的格：变淡（iOS 分段控件的写法） */
@@ -144,7 +126,7 @@
 
 @media (hover: hover) {
   .ds__cell:hover:not([aria-current="page"]) .ds__big {
-    color: var(--color-accent-text);
+    color: var(--color-text);
   }
 }
 

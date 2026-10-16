@@ -291,33 +291,30 @@ export function upcomingOrder({ daysUntil, urgentDeadline = false, packingLeft =
   order.push('days');
   if (!weatherSoon) order.push('weather');
   if (!packingSoon) order.push('packing');
-  order.push('pool');
   return order;
 }
 
 /**
- * 进行中的卡片顺序。
- *   - 最上面永远是「现在 / 接下来」；出发当天（去程还没落地）紧跟去程航班；最后一天紧跟回程航班；
- *   - 傍晚以后（18:00）或今天的安排都做完了：今晚住哪提到第二（回酒店是最常用的打车场景）；
- *   - 3 小时内到期的待办提前；
- *   - 离日落不到 2.5 小时：天气和日落提前（要赶日落）；
- * @param {{ minutes: number, hasUpcoming: boolean, isLastDay?: boolean, todoSoon?: boolean, sunsetSoon?: boolean, outbound?: boolean }} s
- * @returns {string[]} 'now' | 'outflight' | 'flight' | 'stay' | 'todos' | 'weather' | 'timeline' | 'spend' | 'deadlines' | 'tomorrow' | 'pool'
+ * 进行中的卡片顺序（「杂志纸本」：一屏一个主角，整页约 2.4 屏）：
+ *   现在 / 接下来 →（出发当天去程还没落地：去程航班）→（最后一天：回程航班）→ 今晚住哪 → 天气一行 → 今天的待办 → 免费取消截止 → 明天。
+ *   - 3 小时内到期的待办提前到「现在」后面；离日落不到 2.5 小时，天气提前（要赶日落）；
+ *   - 傍晚以后（18:00）或今天的安排都做完了（evening）：今晚住哪一定紧跟「现在」（回酒店是最常用的打车场景），排在急的待办、日落前面；
+ *   - 今天的时间轴缩略（和那一天的页面重复）、今天花了多少、每天安排（天数条已经有了）、备选池（在地点页）不在概览上。
+ * @param {{ isLastDay?: boolean, todoSoon?: boolean, sunsetSoon?: boolean, outbound?: boolean, evening?: boolean }} s
+ * @returns {string[]} 'now' | 'outflight' | 'flight' | 'stay' | 'todos' | 'weather' | 'deadlines' | 'tomorrow'
  */
-export function ongoingOrder({ minutes, hasUpcoming, isLastDay = false, todoSoon = false, sunsetSoon = false, outbound = false }) {
+export function ongoingOrder({ isLastDay = false, todoSoon = false, sunsetSoon = false, outbound = false, evening = false } = {}) {
   const order = ['now'];
   if (outbound) order.push('outflight');
   if (isLastDay) order.push('flight');
-  const evening = minutes >= 18 * 60 || !hasUpcoming;
   const stayFirst = evening && !isLastDay;
   if (stayFirst) order.push('stay');
   if (todoSoon) order.push('todos');
   if (sunsetSoon) order.push('weather');
-  order.push('timeline', 'spend');
-  if (!sunsetSoon) order.push('weather');
   if (!stayFirst) order.push('stay');
+  if (!sunsetSoon) order.push('weather');
   if (!todoSoon) order.push('todos');
-  order.push('deadlines', 'tomorrow', 'pool');
+  order.push('deadlines', 'tomorrow');
   return order;
 }
 
@@ -490,7 +487,7 @@ export function paceLabel(pace) {
 }
 
 /**
- * 一天的路线一句话（样稿「9G501 → Phở Hòa → Anh Anh Spa」）：主方案里的地点名（没有地点用条目标题），
+ * 一天的路线一句话（样稿「航班 → 河粉店 → 按摩店」）：主方案里的地点名（没有地点用条目标题），
  * 跳过纯交通和入住退房，相邻重复的合并，最多 max 个。
  * @param {object[]} primary
  * @param {(id: string) => object|null} getPlace

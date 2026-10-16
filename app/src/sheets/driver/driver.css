@@ -1,7 +1,8 @@
 /* =====================================================================
-   sheets/driver/driver.css：给司机看（.drv）。全屏、不透明：白底黑字，深色模式近黑底、近白字
-   （--color-text-inverse 底 + --color-text 字：浅色 #fff / #0a1c23、深色 #0a1c23 / #eef6f7，对比度 ≥17:1）。
-   不用玻璃、不用光场：户外强光下给别人看，越清楚越好。字号由 DriverSheet.jsx 算好写进 --drv-size。
+   sheets/driver/driver.css：给司机看（.drv）。全屏、不透明：白底墨字，深色模式深墨底、近白字
+   （--color-driver-bg 底 + --color-text 字：浅色纯白 / 墨、深色深墨 / 米白，对比度 ≥16:1）。
+   这一屏是全站的“样板”，换成纸本以后也不改：其他页面都是纸色，只有它保持纯白。
+   不用玻璃：户外强光下给别人看，越清楚越好。字号由 DriverSheet.jsx 算好写进 --drv-size。
    ===================================================================== */
 
 .drv {
@@ -15,7 +16,7 @@
     calc(var(--safe-right) + 20px)
     calc(var(--safe-bottom) + 14px)
     calc(var(--safe-left) + 20px);
-  background: var(--color-text-inverse);
+  background: var(--color-driver-bg);
   color: var(--color-text);
   pointer-events: auto;
   /* 整张卡接手往下拉的手势（中间那块能滚动时例外，见下面） */

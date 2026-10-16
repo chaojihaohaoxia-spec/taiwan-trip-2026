@@ -1,27 +1,26 @@
 /* =====================================================================
-   ui/Chip.css：小胶囊（.chip）。A 液态玻璃（样稿「记一笔」里的分类胶囊）：
-   平时是凸起的白胶囊（--color-raised + 顶部高光、细边），图标强调色；
-   选中变成强调色实心 + 同色柔光，文字和图标反白。字体是标签字体（拉丁走 Geist），字距 .03em。
-   选中时左侧对勾的宽度用 grid-template-columns 0fr → 1fr 展开（文字被平滑推开，不跳），对勾本身弹簧放大。
+   ui/Chip.css：筛选 / 选择用的小块（.chip）。「杂志纸本」：方一点的纸片（圆角 --radius-sm），透明底 + 一根细线，系统字体 400；
+   选中是墨色字 + 墨色细线框（不是实心色块、没有对勾）；计数是跟在字后面的灰字（不是小泡）。
    ===================================================================== */
 
 .chip {
   --chip-h: var(--tap-min);
-  --chip-bg: var(--color-raised);
+  --chip-bg: transparent;
   --chip-fg: var(--color-text);
-  --chip-icon: var(--color-accent-text);
-  --chip-shadow: var(--shadow-raised);
+  --chip-icon: var(--color-text-2);
+  --chip-shadow: inset 0 0 0 1px var(--color-border);
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   min-height: var(--chip-h);
   padding: 0 15px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background-color: var(--chip-bg);
   box-shadow: var(--chip-shadow);
   color: var(--chip-fg);
   font: var(--type-label);
+  font-weight: var(--weight-regular);
   letter-spacing: var(--tracking-label);
   white-space: nowrap;
   vertical-align: middle;
@@ -56,65 +55,26 @@ button.chip.chip--sm::after,
 }
 
 button.chip[data-pressed] {
-  --chip-bg: var(--color-raised-pressed);
+  --chip-bg: var(--color-fill-pressed);
 }
 
 @media (hover: hover) {
   button.chip:not(:disabled):not([data-pressed]):hover {
-    --chip-bg: var(--color-raised-hover);
-  }
-
-  button.chip.chip--selected:not(:disabled):not([data-pressed]):hover {
-    --chip-bg: var(--color-accent-hover);
+    --chip-bg: var(--color-fill);
   }
 }
 
 .chip--selected {
-  --chip-bg: var(--color-accent);
-  --chip-fg: var(--color-on-accent);
-  --chip-icon: var(--color-on-accent);
-  --chip-shadow: 0 6px 14px -8px var(--color-accent-glow), inset 0 1px 0 color-mix(in srgb, var(--color-glass-highlight) 35%, transparent);
-}
-
-button.chip--selected[data-pressed] {
-  --chip-bg: var(--color-accent-pressed);
+  --chip-fg: var(--color-text);
+  --chip-icon: var(--color-text);
+  --chip-shadow: inset 0 0 0 1px var(--color-text);
+  font-weight: var(--weight-medium);
 }
 
 .chip:disabled,
 .chip[aria-disabled="true"] {
   opacity: 0.42;
   cursor: default;
-}
-
-/* ---------- 对勾（只有可切换的胶囊有） ---------- */
-.chip__check {
-  display: inline-grid;
-  grid-template-columns: 0fr;
-  margin-right: -5px;
-  transition:
-    grid-template-columns var(--spring-snappy-duration) var(--spring-snappy),
-    margin var(--spring-snappy-duration) var(--spring-snappy);
-}
-
-.chip--selected .chip__check {
-  grid-template-columns: 1fr;
-  margin-right: 0;
-}
-
-.chip__check-inner {
-  display: inline-grid;
-  place-items: center;
-  min-width: 0;
-  overflow: hidden;
-  scale: 0.4;
-  opacity: 0;
-  transition: scale var(--dur-fast) var(--ease-out), opacity var(--dur-instant) var(--ease-out);
-}
-
-.chip--selected .chip__check-inner {
-  scale: 1;
-  opacity: 1;
-  transition: scale var(--spring-bouncy-duration) var(--spring-bouncy) 40ms, opacity var(--dur-fast) var(--ease-out) 40ms;
 }
 
 .chip__icon {
@@ -126,24 +86,14 @@ button.chip--selected[data-pressed] {
 }
 
 .chip__count {
-  min-width: 18px;
-  padding: 0 5px;
-  border-radius: var(--radius-pill);
-  background: var(--color-fill-pressed);
-  color: var(--color-text-2);
-  font: var(--type-caption-1);
-  font-family: var(--font-label);
-  font-weight: var(--weight-semibold);
+  color: var(--color-text-3);
+  font: var(--weight-regular) var(--text-footnote) / 1 var(--font-label);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
-  line-height: 18px;
-  text-align: center;
 }
 
-/* 选中的芯片里：计数做成反色小胶囊（底 = 芯片上的字色、字 = 芯片底色；以前是半透明白底白字，只有 3.2:1，视觉评审 P2-6） */
 .chip--selected .chip__count {
-  background: var(--color-on-accent);
-  color: var(--color-accent);
+  color: var(--color-text-2);
 }
 
 /* ---------- 可删除 ---------- */
@@ -159,7 +109,7 @@ button.chip--selected[data-pressed] {
   gap: 5px;
   min-height: var(--chip-h);
   padding: 0 var(--space-1) 0 15px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   color: inherit;
   font: inherit;
   letter-spacing: inherit;
@@ -187,11 +137,6 @@ button.chip--selected[data-pressed] {
   position: absolute;
   inset: -9px;
   border-radius: var(--radius-round);
-}
-
-.chip--selected .chip__remove {
-  background: color-mix(in srgb, var(--color-on-accent) 20%, transparent);
-  color: var(--color-on-accent);
 }
 
 .chip__remove[data-pressed] {

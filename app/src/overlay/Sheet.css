@@ -1,9 +1,8 @@
 /* =====================================================================
    overlay/Sheet.css：底部面板。
    位移（出场、拖动、档位）由 Sheet.jsx 用 transform 驱动；这里只管静止时的版式。
-   A 皮肤（样稿「记一笔」）：手机上是离屏幕两边、底边各 8px 的浮动玻璃卡片（圆角 38px，和屏幕圆角同心），
-   真玻璃（backdrop-filter）+ 高光细边 + 折射描边；标题左对齐、宋体；右上角凸起的白圆 ×。
-   material="solid"（默认）是更厚、更不透明的玻璃（表单、长内容好读）；material="glass" 是样稿那种更通透的玻璃。
+   「杂志纸本」：手机上是离屏幕两边、底边各 8px 的浮动纸片（圆角 --radius-sheet），不透明的纸 + 细线框 + 很浅的柔影；
+   标题左对齐、宋体；右上角细线框的纸片圆 ×。material="solid"（默认）/ "glass" 在纸上一样。
    局部变量：
      --ov-kb         被键盘挡住的高度（JS 写入，没有键盘时为 0）
      --ov-vvh        可见区域高度（JS 写入，没有键盘时为 100dvh）
@@ -48,9 +47,7 @@
   max-height: calc(var(--ov-vvh) - var(--safe-top) - var(--ov-sheet-gap) - var(--ov-sheet-bottom));
   border-radius: var(--radius-sheet);
   background: var(--material-glass-dense);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
-  box-shadow: var(--shadow-4), var(--shadow-glass-edge), var(--shadow-glass-glow);
+  box-shadow: var(--shadow-4), var(--shadow-glass-edge);
   color: var(--color-text);
   pointer-events: auto;
   will-change: transform;
@@ -60,21 +57,6 @@
 /* 有半屏 / 大档：面板固定为大档的高度，用位移露出不同的高度 */
 .ov-sheet[data-sized="full"] {
   height: calc(var(--ov-vvh) - var(--safe-top) - var(--ov-sheet-gap) - var(--ov-sheet-bottom));
-}
-
-/* 折射高光描边（左上亮、右下次亮的 1px 渐变边） */
-.ov-sheet::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-raised);
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
 }
 
 .ov-sheet[data-material="glass"] {

@@ -1,6 +1,6 @@
 /* =====================================================================
    pages/join/join.css：加入行程（join- 前缀）。外壳不画顶栏，这一页自己留出安全区。
-   一列居中：品牌眉标 → 插图 → 宋体大标题 → 一句说明 → 一张磨砂白卡片（邀请码、登录 / 确认加入、失败原因、加入成功）。
+   一列：品牌眉标 → 宋体大标题 → 一句说明（左对齐，和登录页一致）→ 一张纸片（邀请码、登录 / 确认加入、失败原因、加入成功）。
    ===================================================================== */
 
 .join {
@@ -24,14 +24,13 @@
   left: calc(var(--safe-left) + var(--gutter));
 }
 
+/* 纸本：和登录页一样左对齐，不放插图（SPEC §11：不要 ✦ 这类装饰） */
 .join__hero {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  --k-ill-line: var(--color-text-2);
-  --k-ill-acc: var(--color-accent-text);
-  --k-ill-soft: var(--color-accent-soft);
+  align-items: flex-start;
+  align-self: stretch;
+  padding: 0 4px;
 }
 
 .join__brand {
@@ -39,11 +38,6 @@
   color: var(--color-accent-text);
   font: var(--type-eyebrow);
   letter-spacing: var(--tracking-eyebrow);
-}
-
-.join__ill.k-ill {
-  width: 132px;
-  height: auto;
 }
 
 .join__title {
@@ -140,7 +134,7 @@
   inset: -8px -4px;
 }
 
-/* 邀请码：Geist 大字、等宽数字 */
+/* 邀请码：大字、等宽数字（系统字体） */
 .join-code {
   display: flex;
   flex-direction: column;
@@ -253,7 +247,7 @@
   box-shadow: var(--shadow-2);
 }
 
-.join-done__cover .cover-dot__emoji {
+.join-done__cover .cover-dot__char {
   font-size: 40px;
 }
 

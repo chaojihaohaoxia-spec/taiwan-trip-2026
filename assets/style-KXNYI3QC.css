@@ -1,0 +1,1 @@
+@layer reset,tokens,base,vendor,motion,ui,overlay,shell,kit,pages,dev;@layer kit{.k-tile{--k-tile: 24px;display:inline-grid;flex:none;place-items:center;width:var(--k-tile);height:var(--k-tile);color:var(--color-text-2)}.k-tile .glyph{width:18px;height:18px}.k-tile--solid{color:var(--color-accent-text)}}

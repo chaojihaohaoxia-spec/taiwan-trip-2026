@@ -43,9 +43,7 @@
 
 .lists__bar[data-stuck] {
   background: var(--material-glass-strong);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
-  box-shadow: var(--shadow-3), var(--shadow-glass-edge);
+  box-shadow: 0 1px 0 var(--color-separator);
 }
 
 .lists__bar[data-stuck] .tabs__list {
@@ -70,11 +68,6 @@
   justify-content: center;
   gap: 3px;
   padding: 0 var(--space-1);
-}
-
-.lists__tabs .tabs__badge {
-  padding: 0 5px;
-  letter-spacing: 0;
 }
 
 .lists__panel {
@@ -108,7 +101,11 @@
   margin-top: 1px;
 }
 
-/* ---------- 清单卡片 ---------- */
+/* ---------- 清单：标签页下面直接排在纸上（不再画第二根线） ---------- */
+.lpanel.k-card {
+  border-top: 0;
+}
+
 .lpanel__rows,
 .lgroup__rows {
   display: flex;
@@ -124,7 +121,7 @@
   padding-top: var(--space-3);
 }
 
-/* ---------- 卡片头：「还有 6 件事要办」+ 进度圆环 ---------- */
+/* ---------- 卡片头：「还有 6 件事要办」（宋体一行，数字不放大）+ 截止提醒一行 ---------- */
 .lhead {
   display: flex;
   align-items: center;
@@ -148,21 +145,13 @@
   gap: 0 6px;
   margin: 0;
   color: var(--color-text);
-  font-family: var(--font-serif);
-  font-size: var(--text-title-3);
-  font-weight: var(--weight-serif);
+  font: var(--weight-serif) var(--text-title-2) / 1.3 var(--font-serif);
   letter-spacing: var(--tracking-display);
-  line-height: 1.15;
 }
 
 .lhead__n {
-  font-family: var(--font-figure);
-  font-size: var(--text-figure-2);
-  font-weight: var(--weight-regular);
-  letter-spacing: var(--tracking-figure);
-  font-variant-numeric: lining-nums;
-  line-height: 1;
-  color: var(--color-accent-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
 }
 
 .lhead__pre,
@@ -186,22 +175,14 @@
   white-space: nowrap;
 }
 
-/* 截止时间和行程时区不同（出发前人在香港）：钟点后面一个小标签「香港时间」（和时间轴的「香港」同一种样子） */
+/* 截止时间和行程时区不同（出发前人在香港）：钟点后面灰色小字「香港时间」（和时间轴的「香港」同一种样子） */
 .lrow__zone {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 0 5px;
-  border-radius: var(--radius-xs);
-  background: var(--color-fill);
-  color: var(--color-text-2);
-  font: var(--type-caption-2);
-  font-weight: var(--weight-semibold);
-  line-height: 1.5;
+  margin-left: 4px;
+  color: var(--color-text-3);
+  font: var(--weight-regular) var(--text-caption-1) / inherit var(--font-sans);
   white-space: nowrap;
-  vertical-align: 1px;
 }
 
-.lhead__due .glyph,
 .lhead__zone .glyph {
   flex: none;
 }
@@ -219,7 +200,6 @@
   text-wrap: pretty;
 }
 
-.lhead__due .glyph,
 .lhead__zone .glyph {
   margin-top: 1px;
 }
@@ -230,64 +210,6 @@
 
 .lhead__due--danger {
   color: var(--color-danger-text);
-}
-
-/* ---------- 进度圆环 ---------- */
-.lring {
-  position: relative;
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-}
-
-.lring__svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.lring__track,
-.lring__arc {
-  fill: none;
-  stroke-width: 4;
-}
-
-.lring__track {
-  stroke: var(--color-fill-pressed);
-}
-
-.lring__arc {
-  stroke: var(--color-accent);
-  stroke-linecap: round;
-  transition: stroke-dashoffset var(--spring-smooth-duration) var(--spring-smooth), stroke var(--dur-base) var(--ease-out);
-}
-
-.lring[data-full] .lring__arc {
-  stroke: var(--color-success);
-}
-
-.lring__text {
-  display: inline-flex;
-  align-items: baseline;
-  font-family: var(--font-label);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
-}
-
-.lring__text b {
-  font-size: var(--text-footnote);
-  font-weight: var(--weight-bold);
-  color: var(--color-text);
-}
-
-.lring__text i {
-  font-size: var(--text-caption-2);
-  font-style: normal;
-  color: var(--color-text-2);
 }
 
 /* ---------- 一行 ---------- */
@@ -496,14 +418,7 @@
   text-wrap: pretty;
 }
 
-.lrow__due .glyph {
-  flex: none;
-  margin-top: 1px;
-}
-
-.lrow__due--warning {
-  color: var(--color-warning-text);
-}
+/* 只标异常：没过期的截止是灰字，过期才是砖红 */
 
 .lrow__due--danger {
   color: var(--color-danger-text);
@@ -531,11 +446,11 @@
 .lrow__links {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 6px 16px;
   padding-top: 2px;
 }
 
-/* 小链接：凸起的白胶囊 + 强调色字（能点的东西一眼看得出能点），可点区域扩到 44 高 */
+/* 小链接（航班、网址、第几天）：一行海色小字（灰色小图标），可点区域扩到 44 高 */
 .lchip {
   position: relative;
   display: inline-flex;
@@ -543,14 +458,8 @@
   gap: 5px;
   max-width: 100%;
   min-height: 28px;
-  padding: 0 10px 0 8px;
-  border-radius: var(--radius-pill);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
   color: var(--color-accent-text);
-  font: var(--type-label);
-  font-size: var(--text-caption-1);
-  letter-spacing: var(--tracking-label);
+  font: var(--weight-medium) var(--text-footnote) / 1.3 var(--font-sans);
   text-decoration: none;
   white-space: nowrap;
   transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
@@ -564,6 +473,7 @@
 
 .lchip .glyph {
   flex: none;
+  color: var(--color-text-3);
 }
 
 .lchip__day {
@@ -576,12 +486,6 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-@media (hover: hover) {
-  .lchip:hover:not([data-pressed]) {
-    background-color: var(--color-raised-hover);
-  }
 }
 
 .lrow__by {
@@ -875,27 +779,19 @@
 }
 
 /* 一个分类一张卡：图标方块 + 宋体分类名 + 「3/6」+ 细进度条 */
+/* 纸本：分类标题一行（宋体名字 + 右边灰字「0/6」），不放图标方块、不画进度条 */
 .lgroup__head {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    "tile title count"
-    "tile bar   bar";
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "title count";
   align-items: center;
   column-gap: var(--space-3);
-  row-gap: 6px;
-  padding: 2px 4px 10px;
+  padding: 2px 0 10px;
 }
 
-.lgroup__tile {
-  grid-area: tile;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-tile);
-  background: var(--color-fill);
-  color: var(--color-accent-text);
+.lgroup__tile,
+.lgroup__bar {
+  display: none;
 }
 
 .lgroup__title {
@@ -928,11 +824,6 @@
 .lgroup__head[data-full] .lgroup__count {
   color: var(--color-success-text);
   font-weight: var(--weight-semibold);
-}
-
-.lgroup__head[data-full] .lgroup__tile {
-  background: var(--color-success-soft);
-  color: var(--color-success-text);
 }
 
 .lgroup__bar {
@@ -1101,3 +992,14 @@
   gap: 6px;
 }
 
+
+/* ---------- 打包清单里的步进器（「杂志纸本」：一页二十几个，不能每行一个框）----------
+   静止的展开状态不画细线框，± 用次要灰，数量照常是墨色；按下 ± 照常有一块浅底（ui/Stepper.css）。
+   收起和展开之间的动画（data-phase="moving"）不动，交互 6 原样 */
+.lrow .stepper {
+  --stepper-fg-open: var(--color-text-2);
+}
+
+.lrow .stepper[data-state="open"]:not([data-phase="moving"]) .stepper__bg {
+  box-shadow: none;
+}

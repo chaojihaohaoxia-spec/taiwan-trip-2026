@@ -262,7 +262,7 @@ function Contacts({ store, route }) {
             id={`ct-h-${g.cat}`}
             title={g.label}
             count={g.rows.length}
-            meta={g.cat === 'emergency' ? '报警、急救、医院、领事：点右边的圆钮直接拨号' : null}
+            meta={g.cat === 'emergency' ? '报警、急救、医院、领事' : null}
           />
           <div class="ct-list">
             {g.rows.map((row) => <ContactCard key={row.contact.id} row={row} ctx={ctx} acc={acc} />)}

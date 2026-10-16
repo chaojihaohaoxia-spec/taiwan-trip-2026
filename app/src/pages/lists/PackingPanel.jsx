@@ -200,7 +200,7 @@ function StarterButton({ onStarter }) {
     <Button
       variant="primary"
       size="md"
-      leading={<Glyph name="sparkle" size={18} />}
+      leading={<Glyph name="plus" size={18} stroke={2.2} />}
       disabled={busy}
       onClick={async () => {
         setBusy(true);

@@ -14,27 +14,16 @@ const ICONS = {
 };
 
 /**
- * 光场背景（styles/field.css 的 .light-field）：开发页上的组件铺在和正式页面一样的光场上看。
- * 外壳以后有了全站的光场，这里就不再画（页面上已经有一个不是开发页画的 .light-field 时跳过）。
+ * 纸（styles/field.css 的 .paper）：开发页上的组件铺在和正式页面一样的纸上看。
+ * 外壳已经画了一张纸（.shell-field）时跳过。
  */
 function DevField() {
   const ref = useRef(null);
   useLayoutEffect(() => {
-    const others = [...document.querySelectorAll('.light-field')].filter((el) => el !== ref.current);
+    const others = [...document.querySelectorAll('.paper')].filter((el) => el !== ref.current);
     if (others.length && ref.current) ref.current.hidden = true;
   }, []);
-  return (
-    <div ref={ref} class="light-field light-field--drift" data-dev-field="" aria-hidden="true">
-      <div class="light-field__layer">
-        <i class="light-field__blob" />
-        <i class="light-field__blob" />
-        <i class="light-field__blob" />
-        <i class="light-field__blob" />
-        <i class="light-field__blob" />
-      </div>
-      <div class="light-field__grain" />
-    </div>
-  );
+  return <div ref={ref} class="paper" data-dev-field="" aria-hidden="true" />;
 }
 
 function DevNav({ current }) {

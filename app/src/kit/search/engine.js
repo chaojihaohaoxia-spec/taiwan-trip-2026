@@ -187,7 +187,7 @@ function chooseSubtitle(defaultSubtitle, defaultKey, hits) {
 /**
  * 每一类结果点了去哪（直接交给 router 的 navigate；sheets 是要一起打开的弹层）：
  *   items     → 那一天：{ name: 'day', params: { tripId, date }, query: { item: id } }（每天页据此展开并滚到这一条；
- *               备选 / 雨天方案也是它自己的 id，每天页负责切到对应方案）；备选池里的（没排进哪天）→ 行程概览 ?item=id
+ *               备选 / 雨天方案也是它自己的 id，每天页负责切到对应方案）；备选池里的（没排进哪天）→ 地点页按天看（备选池在那里，默认展开）
  *   places    → 地点页 + 地点详情弹层：{ name: 'places', params, query: {}, sheets: [{ id: 'place', arg: id }] }
  *   bookings  → 预订页 + 预订详情弹层：{ name: 'bookings', …, sheets: [{ id: 'booking', arg: id }] }
  *   contacts  → 联系人页 ?contact=id（页面滚到并高亮这一个）
@@ -202,7 +202,7 @@ export function targetFor(group, row, bundle) {
     case 'items': {
       const day = row.day_id ? bundle.days?.get(row.day_id) : null;
       if (day?.date) return { name: 'day', params: { tripId, date: day.date }, query: { item: row.id } };
-      return { name: 'trip', params, query: { item: row.id } };
+      return { name: 'places', params, query: { by: 'day' } };
     }
     case 'places':
       return { name: 'places', params, query: {}, sheets: [{ id: 'place', arg: row.id }] };

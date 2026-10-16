@@ -5,7 +5,7 @@
 //                  快捷圆钮是卡片标题行的“兄弟”（不能把链接放进标题行那个按钮里），绝对定位盖在标题行右上角；
 //                  标题文字最前面放一块同样大的浮动空位（.ct-float，float: right）：名字、身份那两行绕开圆钮，
 //                  下面的号码、备注又能用满整行（手机上两个圆钮 + 箭头占掉 150px，不绕开的话号码要折成两行）。
-//   QuickActions   快捷圆钮：打电话（实心强调色；紧急类是危险色）+ WhatsApp / Zalo（凸起的白）；只有邮箱的给「邮件」
+//   QuickActions   快捷圆钮（细线框圆）：打电话（海色图标）+ WhatsApp / Zalo（灰色图标）；只有邮箱的给「邮件」
 //   ContactDetails 展开后：号码（点了复制，等宽）、带字的大按钮（打电话 / WhatsApp / Zalo / 邮件）、邮箱 / 微信 / LINE、备注、关联
 //   NoteText       备注全文；里面写的别的号码（「总机 +84 …」）做成能点的 tel: 链接
 // 外链（tel: / wa.me / zalo.me / mailto:）都是真的 <a href>（长按能看到、e2e 能读），点击走 lib/native.js 的 openExternal（同一个窗口：

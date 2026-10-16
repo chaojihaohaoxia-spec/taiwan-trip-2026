@@ -1,54 +1,29 @@
 /* =====================================================================
-   styles/materials.css：材质工具类（A 液态玻璃 · 海岛光）。base 层，组件层（ui / overlay / pages）可以覆盖。
+   styles/materials.css：材质工具类（「杂志纸本」）。base 层，组件层（ui / overlay / pages）可以覆盖。
+   不用玻璃、不要光斑和折射描边：内容直接排在纸上，浮层是不透明的纸。
 
-   两种玻璃，性能差别很大，按用途选：
-   .material-card          内容卡片：半透明白（深色是半透明深灰）的渐变 + 左上角光斑 + 顶部高光、底部暗边、细描边、内发光
-                           + 1px 折射高光描边。**不开 backdrop-filter**——卡片下面就是平滑的光场，模糊了也看不出差别，
-                           iPhone 上几十张卡片都开 backdrop-filter 会掉帧。列表、时间轴、概览卡片一律用它。
-   .material-glass         悬浮层的真玻璃（backdrop-filter: blur + saturate）：顶栏、底栏、悬浮按钮、弹层、菜单。
-   .material-glass-strong  更厚一点的真玻璃（顶栏、底栏胶囊、弹层），同样的边和高光。
-                           同一屏的真玻璃控制在 8 个以内（SPEC §2）。
-   .material-raised        卡片 / 面板里凸起的白块：次要按钮、小方块（--color-raised + --shadow-raised）
-   .material-inset         卡片里往下凹的浅灰块：数字格、输入框底、统计块（--color-fill）
-
-   折射高光描边用 ::before（mask 挖空中间，只留 1px 的边）。元素自己要用 ::before 时，别加这些类，
-   直接写 background: var(--material-card); box-shadow: var(--material-card-edge);（没有那圈描边，其他都一样）。
-   圆角由使用者给（border-radius），描边自动跟着（border-radius: inherit）。
+   .material-card          内容块：直接排在纸上（没有底、没有边；分组靠组件自己的 1px 细线）。
+                           要一张“纸片”（细线框、比纸亮一点：「现在」、预订卡）时，组件写
+                           background: var(--material-card); box-shadow: var(--material-card-edge);
+   .material-glass         浮层的纸（不透明）+ 细线框：顶栏收起后、弹层、菜单
+   .material-glass-strong  同上（以前是更厚的玻璃；纸上两者一样）
+   .material-raised        纸片：次要按钮、小块（--color-raised + 一根细线）
+   .material-inset         纸上往下凹一点的浅墨：表单里的选择框、小输入块（--color-fill）。数字、统计不用它（靠排版和细线）
    ===================================================================== */
 
 .material-card {
   position: relative;
-  background: var(--material-card);
-  box-shadow: var(--material-card-edge);
 }
 
 .material-glass,
 .material-glass-strong {
   position: relative;
   background: var(--material-glass);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
-  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
+  box-shadow: var(--shadow-glass-edge);
 }
 
 .material-glass-strong {
   background: var(--material-glass-strong);
-}
-
-/* 折射高光：左上最亮、右下次亮的 1px 渐变描边 */
-.material-card::before,
-.material-glass::before,
-.material-glass-strong::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
 }
 
 .material-raised {

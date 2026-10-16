@@ -1,9 +1,10 @@
 // =====================================================================
 // pages/day/parts.jsx：每天页时间轴以外的几块（样式在 day.css）。
 //
-//   <DayHead …/>          页头：眉标（D2 · 1月11日 周一 · 今天）、当天标题（宋体）、一句概要、
-//                         一排小胶囊（节奏 / 天气 / 日落 / 当晚住哪（点了开预订详情）/ 规划状态）、天气提示
-//   <RoutePlanCard …/>    路线规划卡（days.route_plan，docs B5.3）：标题、副标题、几个指标、经过的点、「打开路线」
+//   <DayHead …/>          页头（「杂志纸本」）：眉标（D2 · 1月11日 周一 · 今天）、当天标题（宋体，不放 emoji）、一句概要、
+//                         一行事实（天气 · 日落 · 规划状态，用 · 隔开，不是胶囊）、当晚住哪（一行海色链接，点了开预订详情）、
+//                         节日 / 备注。节奏、条数不上屏；数据里的天气提示（预报模型那段）不上屏
+//   <RoutePlanCard …/>    路线规划卡（days.route_plan，docs B5.3）：标题、副标题、几个指标、「打开路线」（经过的点和时间轴重复，不列）
 //   <DecisionsCard …/>    取舍说明（days.decisions，B5.4）：原地展开的卡片，收着的时候只有一行
 //   <RemindersCard …/>    当天的提醒：这一天自己的贴士（没被哪一条认领的）+ 这一天的待办（可以直接勾）
 //   <DaySkeleton />       加载中的骨架
@@ -19,29 +20,9 @@ import { href } from '../../router/index.js';
 import { openBookingSheet } from '../../sheets/index.js';
 
 import { useNow } from '../../kit/useNow.js';
-import { PACE_LABELS, PLANNING_LABELS, WEATHER_GLYPHS, dayEyebrow, routePlanView, sunTimes, dayNotes, firstLine, todoHint } from './model.js';
+import { PLANNING_LABELS, WEATHER_GLYPHS, dayEyebrow, routePlanView, sunTimes, dayNotes, firstLine, todoHint } from './model.js';
 
-/** 页头上的小胶囊：图标 + 文字；可点的（onClick）一眼看得出能点（凸起 + 箭头） */
-function HeadChip({ glyph, children, onClick, tone, label, testId }) {
-  const inner = (
-    <>
-      <span class="day-chip__icon" aria-hidden="true">{typeof glyph === 'string' ? <Glyph name={glyph} size={15} stroke={2} /> : glyph}</span>
-      <span class="day-chip__text">{children}</span>
-      {onClick && <Glyph name="chev-r" size={13} stroke={2.3} class="day-chip__chev" />}
-    </>
-  );
-  const cls = ['day-chip', tone && `day-chip--${tone}`, onClick && 'day-chip--link'].filter(Boolean).join(' ');
-  if (onClick) {
-    return (
-      <button type="button" class={cls} onClick={onClick} data-press="scale" aria-label={label} data-testid={testId}>
-        {inner}
-      </button>
-    );
-  }
-  return <span class={cls} data-testid={testId}>{inner}</span>;
-}
-
-/** 天气胶囊的文字：「晴 31° / 25°」「多云 · 降雨 60%」；超出预报范围「出发前一周可看」 */
+/** 页头那一行事实里的天气：「晴 31° / 25°」「多云 · 降雨 60%」；超出预报范围「出发前一周可看」 */
 export function weatherChipText(entry) {
   if (!entry) return null;
   if (entry.status === 'ok' && entry.weather) {
@@ -55,10 +36,19 @@ export function weatherChipText(entry) {
 }
 
 /**
- * @param {{ day: object, trip: object, dayNumber: number|null, timeZone: string, at: Date, weather: object|null,
- *           stay: { booking: object, place: object|null } | null, count: number }} props
+ * 大标题按「，、；」切成几段（每段自己是一块，只在段和段之间折行）：「…晚上吃河 / 粉」这种把词拆开的折法不会出现；
+ * 一段比一行还长时段内照常折。
+ * @param {string} title
  */
-export function DayHead({ day, trip, dayNumber, timeZone, at, weather, stay, count }) {
+export function titleSegments(title) {
+  return String(title).match(/[^，、；,;]+[，、；,;]?\s*|[，、；,;]\s*/g) || [String(title)];
+}
+
+/**
+ * @param {{ day: object, trip: object, dayNumber: number|null, timeZone: string, at: Date, weather: object|null,
+ *           stay: { booking: object, place: object|null } | null }} props
+ */
+export function DayHead({ day, trip, dayNumber, timeZone, at, weather, stay }) {
   const eyebrow = dayEyebrow({ dayNumber, date: day.date, timeZone, at });
   const title = (day.title || '').trim() || (dayNumber ? `第 ${dayNumber} 天` : day.date);
   const sun = sunTimes(day, weather?.weather);
@@ -67,28 +57,33 @@ export function DayHead({ day, trip, dayNumber, timeZone, at, weather, stay, cou
   const wx = weatherChipText(weather);
   const planning = PLANNING_LABELS[day.planning_status];
   const stayName = stay?.place?.name || stay?.booking?.title || null;
-  const icon = typeof day.icon === 'string' && day.icon.trim() ? day.icon.trim() : null;
+  const hasFacts = Boolean(wx || sunset || planning);
   return (
     <header class="day-head" data-testid="day-head">
       <p class="day-head__eyebrow t-eyebrow">{eyebrow}</p>
       <h2 class="day-head__title">
-        {icon && <span class="day-head__icon" aria-hidden="true">{icon}</span>}
-        <span class="day-head__title-text">{title}</span>
+        {titleSegments(title).map((seg, i) => <span key={i} class="day-head__seg">{seg}</span>)}
       </h2>
       {day.summary && <p class="day-head__summary">{day.summary}</p>}
-      <div class="day-head__chips">
-        {day.pace && <HeadChip glyph="sparkle" testId="day-chip-pace">节奏{PACE_LABELS[day.pace] || '未定'}</HeadChip>}
-        {count > 0 && <HeadChip glyph="list" testId="day-chip-count">{count} 条安排</HeadChip>}
-        {wx && <HeadChip glyph={wx.glyph} tone={wx.muted ? 'muted' : undefined} testId="day-chip-weather"><span title={wx.title}>{wx.text}</span></HeadChip>}
-        {sunset && <HeadChip glyph="sunset" testId="day-chip-sunset">日落 <span class="t-label">{sunset.time}</span></HeadChip>}
-        {stayName && (
-          <HeadChip glyph="bed" label={`当晚住：${stayName}，查看预订`} onClick={(e) => { haptic('light'); openBookingSheet(stay.booking.id, { trigger: e.currentTarget }); }} testId="day-chip-stay">
-            住 {stayName}
-          </HeadChip>
-        )}
-        {planning && <HeadChip glyph="alert" tone="warning" testId="day-chip-planning">{planning}</HeadChip>}
-      </div>
-      {notes.weather && <p class="day-head__note" data-testid="day-weather-note"><Glyph name="cloud-sun" size={15} /><span>{notes.weather}</span></p>}
+      {hasFacts && (
+        <p class="day-head__facts">
+          {wx && <span class={`day-fact${wx.muted ? ' day-fact--muted' : ''}`} title={wx.title} data-testid="day-chip-weather">{wx.text}</span>}
+          {sunset && <span class="day-fact" data-testid="day-chip-sunset">日落 {sunset.time}</span>}
+          {planning && <span class="day-fact day-fact--warning" data-testid="day-chip-planning">{planning}</span>}
+        </p>
+      )}
+      {stayName && (
+        <button
+          type="button"
+          class="day-head__stay"
+          onClick={(e) => { haptic('light'); openBookingSheet(stay.booking.id, { trigger: e.currentTarget }); }}
+          data-press="scale"
+          aria-label={`当晚住：${stayName}，查看预订`}
+          data-testid="day-chip-stay"
+        >
+          住 {stayName}<Glyph name="chev-r" size={14} stroke={2.2} />
+        </button>
+      )}
       {notes.notes.map((n) => (
         <p key={n.key} class="day-head__note"><Glyph name={n.key === 'holiday' ? 'gift' : 'info'} size={15} /><span><b>{n.label}：</b>{n.text}</span></p>
       ))}
@@ -111,7 +106,7 @@ export function RoutePlanCard({ plan, getPlace }) {
       {v.metrics.length > 0 && v.metricsLayout === 'tiles' && (
         <dl class="day-route__metrics" style={{ '--day-cols': v.metrics.length === 4 ? 2 : Math.min(v.metrics.length, 3) }} data-testid="day-route-metrics" data-layout="tiles">
           {v.metrics.map((m) => (
-            <div key={m.label} class="day-route__metric material-inset">
+            <div key={m.label} class="day-route__metric">
               <dd class="t-figure">{m.value}</dd>
               <dt>{m.label}</dt>
             </div>
@@ -128,21 +123,10 @@ export function RoutePlanCard({ plan, getPlace }) {
           ))}
         </dl>
       )}
-      {v.stops.length > 0 && (
-        <ol class="day-route__stops" aria-label="经过的点">
-          {v.stops.map((s, i) => (
-            <li key={s.key} class="day-route__stop">
-              <span class="day-route__n t-label" aria-hidden="true">{i + 1}</span>
-              <span class="day-route__stop-name">{s.name}</span>
-              {s.note && <span class="day-route__stop-note">{s.note}</span>}
-            </li>
-          ))}
-        </ol>
-      )}
       {v.links.length > 0 && (
         <div class="day-route__links">
           {v.links.map((l, i) => (
-            <Button key={l.url} variant={i === 0 ? 'primary' : 'secondary'} size="md" block href={l.url} onClick={open(l.url)} leading={() => <Glyph name="map" size={20} />} data-testid={`day-route-link-${i}`}>
+            <Button key={l.url} variant={i === 0 ? 'outline' : 'secondary'} size="md" block href={l.url} onClick={open(l.url)} leading={() => <Glyph name="map" size={20} />} data-testid={`day-route-link-${i}`}>
               {l.label}
             </Button>
           ))}

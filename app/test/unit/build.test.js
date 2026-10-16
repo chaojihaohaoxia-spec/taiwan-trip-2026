@@ -103,8 +103,8 @@ test('index.html：viewport-fit=cover、深浅两条 theme-color、相对路径�
   assert.ok(csp.includes(scriptHash(NOMODULE_SCRIPT)));
   assert.ok(html.includes(`<script>${THEME_BOOT_SCRIPT}</script>`));
   assert.match(csp, /object-src 'none'/);
-  assert.equal(colors.light, '#dff1ed', 'A 皮肤：光场最上面的薄荷色');
-  assert.equal(colors.dark, '#04161c');
+  assert.equal(colors.light, '#f4f1ea', '「杂志纸本」：米白的纸');
+  assert.equal(colors.dark, '#141413', '深色：深墨色的纸');
 });
 
 test('manifest：相对 start_url / scope、不写 id、简体中文、图标齐全', () => {

@@ -2,7 +2,7 @@
    styles/fonts.css：网页字体的 @font-face（scripts/fonts/build-fonts.py 生成，别手改）
    字体文件在 app/static/fonts/，构建时 esbuild 按这里的 url() 把它们带进 assets/（文件名加内容哈希）。
    全部 SIL OFL 1.1，授权原文在 app/static/fonts/licenses/，来源和版本见 app/static/fonts/README.md。
-   用法见 styles/README.md「字体」：标题 var(--font-serif) / 大号数字 var(--font-figure) / 小号数字和标签 var(--font-label)。
+   用法见 styles/README.md「字体」：标题 var(--font-serif) / 主数字 var(--font-figure)；其余（正文、标签、小号数字）用系统字体，不下载。
 
    思源宋体 Noto Serif SC 600 一共 4043 个码位，切成 54 片（合计 881 KB）：
    浏览器按 unicode-range 只下载页面上真的用到的那几片。@font-face 后声明的先匹配：
@@ -457,14 +457,6 @@
   font-style: italic;
   font-display: swap;
 }  /* 15.9 KB */
-
-/* ---------- Geist 1.800 · 可变字重 100–900（小号数字、标签；预加载，不写 unicode-range） ---------- */
-@font-face {
-  font-family: "Geist";
-  src: url("../../static/fonts/geist.woff2");
-  font-weight: 100 900;
-  font-display: swap;
-}  /* 38.0 KB */
 
 /* ---------- P2 Figure One：思源宋体 Regular 的「1」和「₫」 ----------
    Instrument Serif 的 1 像小写 l（"05-11" 读成 "05-ll"），而且没有 ₫（越南盾符号回退到思源宋体 600，在细数字旁边特别黑）：

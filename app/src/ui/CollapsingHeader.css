@@ -1,12 +1,12 @@
 /* =====================================================================
-   ui/CollapsingHeader.css：随滚动收成胶囊的顶栏（.ch）。A 液态玻璃（样稿的顶栏）：
+   ui/CollapsingHeader.css：随滚动收成胶囊的顶栏（.ch）。「杂志纸本」：收起后是一张不透明的纸片（细线框），不用玻璃：
    - 整条（bar）：离屏幕两边 16px、离顶 10px（+ 安全区）的悬浮玻璃条，圆角 = 半高（60px 高 → 30px）；
      在页面最顶上时玻璃透明（只剩两侧按钮，和页面大标题融为一体），一滚动就淡出玻璃、投影和高光；
    - 胶囊（pill）：玻璃条正中 44px 高的小胶囊，宽度按短标题量（JS 写 --ch-pill-w）。
    只有一层玻璃 .ch__glass：两种状态的静止样式写在这里；状态之间的过程由 CollapsingHeader.jsx 用弹簧逐帧改它的
    实际形状（top / left / right / bottom / 圆角），所以这些属性在这里**不写过渡**（会和 JS 打架）。
    整条状态的几何由下面的 --ch-bar-* 决定，JS 量 .ch__probe（同样的定位、圆角，看不见）拿到像素值。
-   .ch__shadow 是玻璃下面的阴影层（透明底，只露出外阴影），形状和玻璃同步；.ch__edge 是高光细边 + 折射描边。
+   .ch__shadow 是玻璃下面的阴影层（透明底，只露出外阴影），形状和玻璃同步；.ch__edge 是细线框。
    局部变量（JS 量好写在根元素上）：--ch-pill-w 胶囊宽、--ch-pill-top / --ch-pill-bottom 胶囊上下边距。
    ===================================================================== */
 
@@ -81,8 +81,6 @@
   overflow: hidden;
   background-color: var(--ch-bar-bg);
   background-image: var(--material-glass-lift);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
   /* 在页面最顶上：透明，和页面大标题融在一起（只动透明度；opacity 写在玻璃自己身上，不影响磨砂） */
   transition: var(--press-transition), opacity var(--dur-base) var(--ease-out);
 }
@@ -97,25 +95,13 @@
   transition: var(--press-transition), opacity var(--dur-base) var(--ease-out);
 }
 
-/* 高光细边 + 折射描边 */
+/* 细线框 */
 .ch__edge {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
+  box-shadow: var(--shadow-glass-edge);
   transition: opacity var(--dur-base) var(--ease-out);
-}
-
-.ch__edge::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
 }
 
 /* 在页面最顶上的整条：没有投影、没有高光（玻璃本身也透明） */
@@ -124,7 +110,7 @@
   opacity: 0;
 }
 
-/* A 皮肤的顶栏是悬浮的玻璃条，不要整条状态的底边分隔线 */
+/* 顶栏是悬浮的纸条，不要整条状态的底边分隔线 */
 .ch__hairline {
   display: none;
 }

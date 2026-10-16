@@ -1,9 +1,9 @@
 /* =====================================================================
-   shell/topbar.css：常驻顶栏（TopBar.jsx，样稿 .topbar）。
-   - 整条（bar）：离屏幕两边 --tb-x、离顶 --topbar-inset（+ 安全区）、高 --topbar-bar-h 的玻璃条，圆角 = 半高；
-   - 胶囊（pill）：玻璃条正中 44px 高（--tb-pill-h）的小胶囊，宽度按内容量（JS 写 --tb-pill-w）；
-   - 页面最上面（top）：玻璃、阴影透明，只剩两边的圆按钮。
-   只有一层玻璃 .tb__glass：几种状态的静止样式写在这里；状态之间的过程由 TopBar.jsx 用弹簧逐帧改它的
+   shell/topbar.css：常驻顶栏（TopBar.jsx）。「杂志纸本」：顶栏收起后是一张不透明的纸片（细线框 + 下面一根细线），不用玻璃。
+   - 整条（bar）：离屏幕两边 --tb-x、离顶 --topbar-inset（+ 安全区）、高 --topbar-bar-h 的纸条，圆角 = 半高；
+   - 胶囊（pill）：纸条正中 44px 高（--tb-pill-h）的小胶囊，宽度按内容量（JS 写 --tb-pill-w）；
+   - 页面最上面（top）：纸片透明，只剩两边的按钮（搜索、返回只是一个图标，没有圆底）。
+   只有一层 .tb__glass（名字沿用）：几种状态的静止样式写在这里；状态之间的过程由 TopBar.jsx 用弹簧逐帧改它的
    实际形状（top / left / right / bottom / 圆角），所以这些属性不写过渡（会和 JS 打架）。
    .tb__probe 和整条状态的玻璃同一组定位（看不见），JS 量它拿到像素值。
    整条顶栏不吃点击（pointer-events: none），只有看得见的按钮吃。
@@ -35,7 +35,7 @@
   z-index: calc(var(--z-scrim) + 2);
 }
 
-/* ---------- 玻璃、阴影、探针 ---------- */
+/* ---------- 纸片、下面的细线、探针 ---------- */
 .tb__glass,
 .tb__shadow,
 .tb__probe {
@@ -55,49 +55,27 @@
 .tb__glass {
   overflow: hidden;
   background: var(--material-glass-strong);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
   transform-origin: 50% 50%;
 }
 
 .tb__shadow {
-  box-shadow: var(--shadow-3);
+  box-shadow: 0 1px 0 var(--color-separator);
   transform-origin: 50% 50%;
 }
 
-/* 高光细边 + 内侧柔光 + 折射描边 */
+/* 纸片的细线框 */
 .tb__edge {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
+  box-shadow: var(--shadow-glass-edge);
 }
 
-.tb__edge::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-}
-
-/* 页面最上面：没有玻璃（大标题就是标题） */
+/* 页面最上面：没有纸片（大标题就是标题） */
 .tb[data-state="top"] .tb__glass,
 .tb[data-state="top"] .tb__shadow {
   opacity: 0;
   visibility: hidden;
-}
-
-/* 看不见的玻璃不做背景模糊（iPhone 上每一层 backdrop-filter 都要算）：淡出动画（--dur-base）播完再关掉，
-   淡出途中还是磨砂的；从 top 出来时没有延迟，第一帧就是磨砂 */
-.tb[data-state="top"] .tb__glass {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  transition: -webkit-backdrop-filter 0s linear var(--dur-base), backdrop-filter 0s linear var(--dur-base);
 }
 
 /* 胶囊的静止样式（和动画终点一模一样） */
@@ -110,7 +88,7 @@
   border-radius: var(--radius-pill);
 }
 
-/* 按胶囊：玻璃、阴影和字一起轻轻一缩 */
+/* 按胶囊：纸片、细线和字一起轻轻一缩 */
 .tb[data-state="pill"]:has(.tb__pill[data-pressed]) .tb__glass,
 .tb[data-state="pill"]:has(.tb__pill[data-pressed]) .tb__shadow {
   scale: var(--press-scale);
@@ -160,8 +138,8 @@
   height: var(--tap-min);
   padding: 0 9px 0 6px;
   border-radius: var(--radius-pill);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
+  /* 纸本：纸条里不再套一个凸起的按钮框（两层边框），只在按下时一层浅灰 */
+  background: transparent;
   color: var(--color-text);
   text-align: left;
   cursor: pointer;
@@ -173,7 +151,7 @@
 }
 
 .tb__switch[data-pressed] {
-  background: var(--color-raised-pressed);
+  background: var(--color-fill-pressed);
 }
 
 .tb__text {
@@ -254,7 +232,7 @@
   color: var(--color-text-2);
 }
 
-/* ---------- 两边的圆按钮：返回（左）、页面按钮和搜索（右） ---------- */
+/* ---------- 两边的按钮：返回（左）、页面按钮和搜索（右） ---------- */
 .tb__lead {
   position: absolute;
   top: var(--tb-btn-y);
@@ -302,7 +280,7 @@
   touch-action: none;
 }
 
-/* ---------- 搜索（ui/SearchExpand 的玻璃版，整条横带宽；收起时只有右边的放大镜） ---------- */
+/* ---------- 搜索（ui/SearchExpand，整条横带宽；收起时只有右边的放大镜，没有圆底） ---------- */
 .tb__search.search-x {
   position: absolute;
   top: var(--tb-btn-y);
@@ -318,10 +296,11 @@
 }
 
 .tb__search .search-x__trigger {
-  box-shadow: var(--shadow-btn), var(--shadow-glass-edge);
+  background: none;
+  box-shadow: none;
 }
 
-/* 减弱动态效果：不变形，玻璃和字只淡入淡出 */
+/* 减弱动态效果：不变形，纸片和字只淡入淡出 */
 @media (prefers-reduced-motion: reduce) {
   .tb__glass,
   .tb__shadow,

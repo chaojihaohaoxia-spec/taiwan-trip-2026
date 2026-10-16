@@ -6,12 +6,12 @@
 //   <Card to={{ name: 'ledger', params: { tripId } }} title="今天花了" glyph="wallet">…</Card>   整张可点（链接）
 //   <Card onClick={open} title="…">…</Card>                                                 整张可点（按钮）
 //
-// 外观：卡片材质（--material-card，不开 backdrop-filter）+ 折射描边、圆角 26、内边距 18（样稿 .card）。
-// 标题区：眉标（小字大字距）/ 宋体标题（title-3，18px）、右边计数（标签字体）或一个动作；可点的卡片右上角有
-//         凸起的白圆箭头（一眼看得出能点），整张卡按下轻轻一缩（data-press）。
+// 外观（「杂志纸本」）：直接排在纸上的一段，上面一根 1px 细线，左右和页面对齐（Card.css）。
+// 标题区：眉标（装饰灰小字）/ 宋体标题（21px）、右边计数（灰字）或一个动作；可点的块右上角有一个灰色小箭头，
+//         整块按下轻轻一缩（data-press）。glyph（标题前的小图标）纸本不显示：图标只在比字更快认出时用。
 // 可点的卡片里不要再放按钮、链接（整张卡已经是一个链接 / 按钮，里面再嵌就是嵌套的可点元素）；要放动作用不可点的卡片 + action / footer。
 // onClick 的卡片：外层还是 <section>（标题语义不丢），上面铺一个透明按钮接点击（读屏读 label，没给就读标题）。
-// tone：'neutral'（默认；旧写法 'default'）| 'accent'（强调色浅底，给“现在 / 接下来”这类要突出的卡）| 'warning'（警示色描边，给快到期的提醒）。
+// tone：'neutral'（默认；旧写法 'default'）| 'accent'（要突出的块，纸本里和 neutral 一样）| 'warning'（上面那根线是赭石色，快到期的提醒）。
 // =====================================================================
 
 import './Card.css';
@@ -25,7 +25,7 @@ import { Glyph } from './Glyph.jsx';
  * @param {any} [props.eyebrow]        标题上方的眉标（或没有标题时单独用）
  * @param {any} [props.meta]           标题区右边的说明（计数、日期）
  * @param {any} [props.action]         标题区右边的一个动作（不可点的卡片才用）
- * @param {string} [props.glyph]       标题前的小图标（kit/glyphs.js 的名字）
+ * @param {string} [props.glyph]       标题前的小图标（kit/glyphs.js 的名字；纸本不显示）
  * @param {any} [props.footer]         卡片底部（整行按钮等）
  * @param {object|string} [props.to]   整张卡是站内链接（路由目标）
  * @param {string} [props.href]        整张卡是链接（已经拼好的 #/…）
@@ -46,7 +46,7 @@ export function Card({
   const link = to ? hrefOf(to) : href;
   const clickable = Boolean(link || onClick);
   const Heading = `h${level}`;
-  const hasHead = title || eyebrow || meta || action || glyph || clickable;
+  const hasHead = title || eyebrow || meta || action || clickable;
   const cls = [
     'k-card',
     'material-card',
@@ -58,14 +58,13 @@ export function Card({
 
   const head = hasHead && (
     <div class="k-card__head">
-      {glyph && <span class="k-card__glyph"><Glyph name={glyph} size={18} /></span>}
       <div class="k-card__titles">
         {eyebrow && <p class="k-card__eyebrow">{eyebrow}</p>}
         {title && <Heading class="k-card__title">{title}</Heading>}
       </div>
       {meta !== undefined && meta !== null && meta !== false && <span class="k-card__meta">{meta}</span>}
       {!clickable && action}
-      {clickable && <span class="k-card__chev" aria-hidden="true"><Glyph name="chev-r" size={18} stroke={2.2} /></span>}
+      {clickable && <span class="k-card__chev" aria-hidden="true"><Glyph name="chev-r" size={15} stroke={2.2} /></span>}
     </div>
   );
 

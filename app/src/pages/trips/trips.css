@@ -1,6 +1,6 @@
 /* =====================================================================
    pages/trips/trips.css：行程列表（trips-、tcard 前缀）。只用 tokens.css 的变量。
-   卡片照样稿的「行程切换面板」：主题色渐变封面 + 宋体行程名 + Geist 日期 + 阶段芯片；卡片是磨砂白材质（不开 backdrop-filter）。
+   卡片照样稿的「行程切换面板」：主题色渐变封面 + 宋体行程名 + 日期（系统字体） + 阶段芯片；卡片是磨砂白材质（不开 backdrop-filter）。
    列表：封面在左（72px），文字在中间，右边强调色小圆箭头；网格：封面在上（4:3），文字在下。
    圆角同心：卡片 26（--radius-xl）− 内边距 10 / 12 ≈ 封面 16（--radius-md）。
    ===================================================================== */
@@ -106,21 +106,19 @@
   transition: var(--press-transition);
 }
 
+/* 纸本：「今天」是一张细线框的纸片（和概览的「现在」同一种），不铺海色浅底、图标不放实心方块 */
 .trips-today {
-  background: var(--color-accent-soft);
-  box-shadow: inset 0 0 0 1px var(--color-glass-border);
+  background: var(--color-card);
+  box-shadow: inset 0 0 0 1px var(--color-border);
 }
 
 .trips-today__icon {
   display: grid;
   flex: none;
   place-items: center;
-  width: 44px;
+  width: 28px;
   height: 44px;
-  border-radius: var(--radius-tile);
-  background: var(--material-accent);
-  box-shadow: var(--shadow-accent-sm);
-  color: var(--color-on-accent);
+  color: var(--color-accent-text);
 }
 
 .trips-today__text {
@@ -140,9 +138,8 @@
 }
 
 .trips-today__text span {
-  /* 强调色浅底上的强调色小字只有 3.4:1（视觉评审 P2-6）：用次要正文色 */
   color: var(--color-text-2);
-  font: var(--weight-semibold) var(--text-footnote) / 1.3 var(--font-label);
+  font: var(--weight-medium) var(--text-footnote) / 1.3 var(--font-label);
   font-variant-numeric: tabular-nums;
 }
 
@@ -150,12 +147,9 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
 }
 
 .trips-grid.vs--list {
@@ -173,14 +167,14 @@
   grid-template-areas:
     "cover text chev"
     "cover meta chev";
-  grid-template-columns: 72px minmax(0, 1fr) 28px;
+  grid-template-columns: 52px minmax(0, 1fr) 20px;
   grid-template-rows: auto auto;
   align-content: center;
   column-gap: 14px;
-  row-gap: 7px;
+  row-gap: 5px;
   width: 100%;
   min-width: 0;
-  min-height: 96px;
+  min-height: 84px;
   padding: 12px 14px 12px 12px;
   border-radius: var(--radius-xl);
   color: var(--color-text);
@@ -216,19 +210,6 @@
   transition: box-shadow var(--dur-fast) var(--ease-out);
 }
 
-.tcard__bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
-}
-
 .tcard[data-pressed] .tcard__bg {
   box-shadow: var(--material-card-edge), var(--shadow-pressed);
 }
@@ -248,17 +229,17 @@
   box-shadow: var(--material-card-edge), inset 0 0 0 2px var(--color-accent);
 }
 
-/* 封面：主题色渐变 + emoji（或照片） */
+/* 封面：照片；没有照片是一张纸片 + 海色宋体首字（纸本：不做实心色块，深色模式下也不会是一大块浅青） */
 .tcard__cover {
   position: relative;
   display: block;
   grid-area: cover;
-  width: 72px;
-  height: 72px;
+  width: 52px;
+  height: 52px;
   overflow: hidden;
   border-radius: var(--radius-md);
-  background: var(--color-surface-3);
-  box-shadow: var(--shadow-2);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
 }
 
 .vs--grid .tcard__cover {
@@ -271,13 +252,15 @@
   position: absolute;
   inset: 0;
   border-radius: 0;
+  background: transparent;
+  color: var(--color-accent-text);
 }
 
-.tcard .cover-dot__emoji {
-  font-size: 32px;
+.tcard .cover-dot__char {
+  font-size: 24px;
 }
 
-.vs--grid .tcard .cover-dot__emoji {
+.vs--grid .tcard .cover-dot__char {
   font-size: 46px;
 }
 
@@ -359,22 +342,14 @@
   white-space: nowrap;
 }
 
-.tcard__role {
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--color-fill);
-}
-
 .tcard__chev {
   display: grid;
   grid-area: chev;
   place-items: center;
   align-self: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-round);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
 }
 
 .vs--grid .tcard__chev {
@@ -391,10 +366,8 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 40px;
+  width: 28px;
   height: 40px;
-  border-radius: var(--radius-tile);
-  background: var(--color-accent-soft);
   color: var(--color-accent-text);
 }
 

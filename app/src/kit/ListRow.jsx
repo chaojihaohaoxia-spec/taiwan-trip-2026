@@ -4,13 +4,13 @@
 //   ListRow（可点或只看的一行；样稿账本流水、地点列表）：
 //     <ListRow leading={<KindIcon type="expense" kind="餐饮" tile />} title="夜市烤海鲜" subtitle="1月10日 · Jeremy 付"
 //              value={<MoneyText amount={520000} currency="VND" align="end" />} to={{ name: 'ledger', params }} />
-//     <ListRow title="联系人" subtitle="17 位" glyph="user" onClick={…} />        glyph：左边自动放一个图标方块
+//     <ListRow title="联系人" subtitle="17 位" glyph="user" onClick={…} />        glyph：左边自动放一个图标（「杂志纸本」不显示前导图标，见 ListRow.css）
 //     <ListRow title="已跳过的条目" dim />                                           完成 / 跳过的淡化
 //   有 to / href / onClick 时整行可点：右边带箭头（chevron={false} 可去掉）、按下换底色；没有就是只看的一行。
-//   行与行之间有 1px 分隔线（从文字开始的位置画起）；最少 44 高，有副标题 56 高。
+//   行与行之间有 1px 分隔线；最少 44 高，有副标题 56 高；行尾的箭头是灰色小箭头。
 //
 //   InfoRow（只看的信息；样稿时间轴展开后的「Google 5.0」「约 45 万越南盾/人」「开到 23:00」「地址」）：
-//     <InfoRow glyph="clock">开到 23:00</InfoRow>                    图标 + 一段字（强调色小图标，13px 字）
+//     <InfoRow glyph="clock">开到 23:00</InfoRow>                    图标 + 一段字（灰色小图标，13px 字）
 //     <InfoRow label="订单号" pair><CopyText text="DEMO-FL01" mono /></InfoRow>   左标签、右值（设置页、预订详情）
 //
 //   Divider：<Divider />、<Divider inset />（从文字处开始）、<Divider label="备选方案" />（中间带字）
@@ -67,7 +67,7 @@ export function ListRow({
         {children}
       </span>
       {value !== undefined && value !== null && value !== false && <span class="k-row__value">{value}</span>}
-      {showChevron && <span class="k-row__chev" aria-hidden="true"><Glyph name="chev-r" size={16} stroke={2.2} /></span>}
+      {showChevron && <span class="k-row__chev" aria-hidden="true"><Glyph name="chev-r" size={15} stroke={2.2} /></span>}
     </>
   );
   if (link && !disabled) {

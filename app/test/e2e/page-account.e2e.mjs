@@ -367,11 +367,13 @@ test('设置（390）：账号、成员和邀请（当前行程默认展开，�
     assert.equal(await page.$eval(T('settings-sync'), (el) => el.textContent.trim()), '已同步');
     assert.match(await page.$eval(T('settings-version'), (el) => el.textContent), /^2\.0\.0/);
     assert.equal(await page.$eval(T('settings-sign'), (el) => el.textContent), '热爱生活7885 · Jeremy & Cathy');
-    // 字体授权文件随站部署：三个链接都能打开
-    for (const f of ['Noto-Serif-SC-OFL.txt', 'Instrument-Serif-OFL.txt', 'Geist-OFL.txt']) {
+    // 字体授权文件随站部署：两个链接都能打开（Geist 已经去掉，不再随站）
+    for (const f of ['Noto-Serif-SC-OFL.txt', 'Instrument-Serif-OFL.txt']) {
       const status = await page.evaluate(async (name) => (await fetch(new URL(`fonts/licenses/${name}`, document.baseURI))).status, f);
       assert.equal(status, 200, f);
     }
+    const licenses = await page.$$eval('[data-testid^="settings-font-"]', (els) => els.map((el) => el.dataset.testid));
+    assert.deepEqual(licenses, ['settings-font-noto', 'settings-font-instrument'], '关于里只列两套字体（没有 Geist）');
     // 检查更新：没有 SW（e2e 不注册）→ 说明刷新就是最新版
     await page.click(T('settings-check-update'));
     await page.waitForFunction(() => /刷新就是最新版/.test(document.body.textContent), { timeout: 4000 });

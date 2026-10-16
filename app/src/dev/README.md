@@ -16,10 +16,10 @@
 | `#/dev/lib` | `pages/LibPage.jsx`（各段在 `pages/lib/`） | 工具与外部服务：汇率卡、天气卡（拨时间看各种情况）、地图组件（实例常驻、列表联动）、日期 / 金额格式样例、数字滚动（`ui/RollingNumber`）、复制（提示显示成外壳的 Toast）、Google 地图链接、Markdown、图片压缩和拍摄时间 |
 | `#/dev/data` | `pages/DataPage.jsx`、`pages/data-page.css` | 数据层（演示模式）：登录 / 退出前确认、同步状态、演示网络开关、行程数据包、时间拨动、某一天（主方案 / 备选 / 路线点）、预算、记账结算、清单进度、写操作试验台、写队列、照片上传、邀请、搜索、维护 |
 
-## 光场背景
+## 纸（页面背景）
 
-开发页（`DevPage.jsx` 的 `DevField`）在页面最底下铺一层和正式页面一样的光场（`styles/field.css` 的 `.light-field`，带 `data-dev-field`），
-组件是放在光场上看的（玻璃、卡片的效果离开光场看不出来）。外壳以后有了全站的光场，页面上已经有一个不是开发页画的 `.light-field` 时，这里就不再画。
+开发页（`DevPage.jsx` 的 `DevField`）在页面最底下铺一层和正式页面一样的纸（`styles/field.css` 的 `.paper`，带 `data-dev-field`）；
+页面上已经有外壳画的那一张时，这里就不再画。
 
 ## 加演示
 

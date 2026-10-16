@@ -5,12 +5,12 @@
 //   dayLabel('2026-10-16')                       → { md: '10-16', day: '16', weekday: '周五' }
 //   dateRangeLabel('2026-10-16', '2026-10-19', { thisYear: 2026 }) → '10-16 周五 – 10-19 周一'
 //   tripSubtitle(trip, { thisYear })             → '重阳 3 晚 · 10-16 周五 – 10-19 周一'
-//   switcherDates(trip)                          → '2026-10-16 – 10-19 · 3 晚'
+//   switcherDates(trip, { thisYear })            → '10-16 周五 – 10-19 周一 · 3 晚'
 //   phaseChip(phase)                             → { tone: 'accent', text: '5 天后出发' }
 //   overviewLabel('upcoming')                    → '出发前'
 //
 // 大标题只用行程名的第一段（「富国岛 · 重阳 3 晚」的「富国岛」），后面那段放到副标题最前面——
-// 样稿的「富国岛」+「重阳三晚 · 10-16 周五 – 10-19 周一」。日期用数字（Geist 等宽数字），和样稿一致。
+// 样稿的「富国岛」+「重阳三晚 · 10-16 周五 – 10-19 周一」。日期用数字（系统字体等宽数字）。
 // =====================================================================
 
 export const WEEKDAYS = Object.freeze(['周日', '周一', '周二', '周三', '周四', '周五', '周六']);
@@ -87,16 +87,17 @@ export function nightsOf(trip) {
   return n === null ? null : Math.max(0, n);
 }
 
-/** 行程切换面板里的日期行：'2026-10-16 – 10-19 · 3 晚'（区间和全站一样用「–」；跨年写全；一天的不写晚数；没日期「日期未定」） */
-export function switcherDates(trip) {
-  const a = parseYmd(trip?.start_date);
-  if (!a) return '日期未定';
-  const b = parseYmd(trip.end_date) || a;
-  const head = `${a.y}-${pad(a.m)}-${pad(a.d)}`;
+/**
+ * 行程切换面板里的日期行：'10-16 周五 – 10-19 周一 · 3 晚'（和顶栏副标题、全部行程同一种写法：
+ * 不是今年的写上年份，跨年两头都写；一天的不写晚数；没日期「日期未定」）
+ * @param {object} trip
+ * @param {{ thisYear?: number|null }} [o]
+ */
+export function switcherDates(trip, { thisYear = null } = {}) {
+  if (!parseYmd(trip?.start_date)) return '日期未定';
+  const range = dateRangeLabel(trip.start_date, trip.end_date || trip.start_date, { thisYear });
   const n = nightsOf(trip);
-  if (!n) return head;
-  const tail = b.y !== a.y ? `${b.y}-${pad(b.m)}-${pad(b.d)}` : `${pad(b.m)}-${pad(b.d)}`;
-  return `${head} – ${tail} · ${n} 晚`;
+  return n ? `${range} · ${n} 晚` : range;
 }
 
 /**

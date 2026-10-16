@@ -4,8 +4,8 @@
    根元素宽度固定（展开后的宽度），收起时只有按钮那一段有底色、能点。
    这里只写两种状态（data-state="closed" / "open"）的静止样式；两者之间的过程（裁切、底色、淡入淡出、位移）
    由 Stepper.jsx 用弹簧驱动，所以这些属性不写过渡。data-phase="moving"：动画期间两边都看得见。
-   A 皮肤（样稿的打包步进器）：收起是强调色实心胶囊「＋ 加入」；展开是凸起的白胶囊（--color-raised + 高光细边），
-   ± 是强调色图标，数字是 Instrument Serif 大号数字，单位是小号次要字。
+   纸本：收起是强调色实心胶囊「＋ 加入」；展开是纸上的细线框胶囊（没有底色），
+   ± 是强调色图标，数字是系统字体 500（等宽数字），单位是小号次要字。
    ===================================================================== */
 
 .stepper {
@@ -13,7 +13,7 @@
   --stepper-w: 124px;
   --stepper-add-w: 84px;
   --stepper-bg-closed: var(--color-accent);
-  --stepper-bg-open: var(--color-raised);
+  --stepper-bg-open: transparent;
   --stepper-fg-closed: var(--color-on-accent);
   --stepper-fg-open: var(--color-accent-text);
   position: relative;
@@ -186,14 +186,14 @@
   gap: 2px;
   min-width: 0;
   color: var(--color-text);
-  font: var(--weight-regular) var(--text-figure-4) / 1 var(--font-figure);
+  font: var(--weight-medium) var(--text-callout) / 1 var(--font-sans);
   font-variant-numeric: tabular-nums lining-nums;
-  letter-spacing: var(--tracking-figure);
+  letter-spacing: 0;
   border-radius: var(--radius-xs);
 }
 
 .stepper--sm .stepper__value {
-  font-size: var(--text-figure-5);
+  font-size: var(--text-subhead);
 }
 
 .stepper__unit {

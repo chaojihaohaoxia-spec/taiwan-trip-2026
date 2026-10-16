@@ -15,7 +15,6 @@ import { Chip } from '../../ui/Chip.jsx';
 import { SegmentedControl } from '../../ui/SegmentedControl.jsx';
 import { Glyph } from '../../kit/Glyph.jsx';
 import { PersonChip } from '../../kit/Chips.jsx';
-import { kindGlyph } from '../../kit/kinds.js';
 import { useSignedUrl } from '../../data/index.js';
 import { animateSpring } from '../../motion/animate.js';
 import { num } from '../../motion/physics.js';
@@ -51,7 +50,6 @@ export function CategoryChips({ value, onChange, disabled = false }) {
           key={c}
           selected={value === c}
           disabled={disabled}
-          icon={<Glyph name={kindGlyph('expense', c)} size={16} />}
           data-testid={`xf-cat-${c}`}
           onToggle={() => {
             haptic('selection');

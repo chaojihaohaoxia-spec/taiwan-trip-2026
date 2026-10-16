@@ -107,13 +107,15 @@ test('减弱动态效果：弹簧换成短缓出（--dur-fast = 160ms），不�
   }
 });
 
-test('按压反馈（只写 data-press 的按钮，全局委托）：按下缩到 0.96，松手弹回 1', async () => {
+test('按压反馈（只写 data-press 的按钮，全局委托）：按下缩到 --press-scale（「杂志纸本」0.98），松手弹回 1', async () => {
   const app = await openApp({ browser, server, hash: '#/dev/primitives', device: 'desktop' });
   try {
     const { page } = app;
     const btn = await page.waitForSelector('#demo-press .dev-btn--primary');
     await btn.evaluate((el) => el.scrollIntoView({ block: 'center' }));
     const box = await btn.boundingBox();
+    const target = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--press-scale')));
+    assert.ok(target > 0.9 && target < 1, `--press-scale ${target}`);
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
     // 缩放用独立的 scale 属性（motion/press.css），不占 transform
@@ -121,13 +123,13 @@ test('按压反馈（只写 data-press 的按钮，全局委托）：按下缩�
       const v = getComputedStyle(el).scale;
       return v === 'none' ? 1 : Number(v.split(' ')[0]);
     };
-    await page.waitForFunction((el) => {
+    await page.waitForFunction((el, t) => {
       const v = getComputedStyle(el).scale;
-      return v !== 'none' && Number(v.split(' ')[0]) < 0.961;
-    }, { timeout: 2000 }, btn);
+      return v !== 'none' && Number(v.split(' ')[0]) < t + 0.001;
+    }, { timeout: 2000 }, btn, target);
     await waitForAnimationsDone(page);
     const pressed = await btn.evaluate(scaleOf);
-    assert.ok(Math.abs(pressed - 0.96) < 0.002, `按下缩放 ${pressed}`);
+    assert.ok(Math.abs(pressed - target) < 0.002, `按下缩放 ${pressed}（--press-scale ${target}）`);
     await withPlaybackRate(page, 1, async () => {
       await page.mouse.up();
     });

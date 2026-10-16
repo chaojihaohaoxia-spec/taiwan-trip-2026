@@ -94,7 +94,7 @@ const more = useOverlayTrigger('row-more', { arg: item.id, haspopup: 'menu' });
 | 组件 | 主要参数 |
 |---|---|
 | `Sheet` | `title`、`description`、`footer`（固定在底部，不随内容滚动；有更高的档时一直停在面板露出来那一截的底边——`['content','large']` 打开时按钮就在内容下面、看得见点得到）、`detents`（`['content']` 默认 / `['medium','large']` / `['content','large']`；`'content'` 档 = 标题区 + 内容实际的高度 + footer，内容很短时面板只升起一截；**内容高度变了（骨架换成表单、多了一行提示、照片多了一排）面板自己用 ResizeObserver 跟着长高 / 变矮**，弹层不用再发 resize 事件）、`initialDetent`、`dismissible`（false = 不能拖走、点遮罩不关）、`closeOnScrim`、`closeOnEsc`、`confirmClose`（`true` / 文案对象 / `(reason) => boolean \| Promise`）、`hideClose`、`leading` / `trailing`（标题栏左右）、`material`（`'solid'` / `'glass'`）、`label`（无标题时）、`onDetentChange` |
-| `AnchoredPanel` | `placement`（`'auto'` / `'above'` / `'below'`）、`align`（`'start'` / `'center'` / `'end'`）、`width`（默认 360）、`gap`、`title` / `label`、`anchorRef`（不给就找 `data-overlay-trigger`）、`anchorProxy`（`{ class, render({ open }), label }`）、`closeOnScrim`、`closeOnEsc`、`material`、`tintOnExit`（默认 true；false = 收回时不染回按钮色、最后一段淡掉——按钮在更高的层上、收回的形状会从它后面露出来时用，例如外壳的 ＋ 面板） |
+| `AnchoredPanel` | `placement`（`'auto'` / `'above'` / `'below'`）、`align`（`'start'` / `'center'` / `'end'`）、`width`（默认 360）、`gap`、`title` / `label`、`anchorRef`（不给就找 `data-overlay-trigger`）、`anchorProxy`（`{ class, render({ open }), label }`）、`closeOnScrim`、`closeOnEsc`、`material`、`tintOnExit`（默认 true；false = 收回时不染回按钮色、最后一段淡掉——按钮在更高的层上、收回的形状会从它后面露出来时用，例如外壳的 ＋ 面板）、`tintOnEnter`（默认 true；false = 长出来时不先盖按钮色，面板本身从按钮的形状长出来） |
 | `FullscreenMenu` | `title`、`subtitle`、`footer`、`anchorRef`、`anchorProxy`（按钮在顶栏 / 底栏区时显示，在页面中间时改用右上角关闭按钮、真按钮一直看得见）、`closeOnEsc` |
 | `Dialog` | `title`、`message`、`actions: [{ label, role: 'cancel' \| 'destructive' \| 'default', onSelect, preferred, testId }]`、`closeOnScrim`（默认 false）、`closeOnEsc`、`onAction`、`onDismiss` |
 | `Popover` | `placement`（默认 `'below'`）、`align`（默认 `'end'`）、`width`（默认 240）、`role`（`'menu'` 默认 / `'dialog'`）、`label`、`title`、`anchorRef` |
@@ -197,19 +197,19 @@ n = 在弹层栈里第几层；基准取这一层及下面各层里最高的那�
 
 ## 样式
 
-只用 tokens.css 的变量（颜色、圆角、阴影、字体、模糊、弹簧和时长），换皮改 tokens 即可。现在是 A 皮肤「液态玻璃 · 海岛光」：
-弹层都是**真玻璃**（`backdrop-filter`，见 `styles/README.md`「两种玻璃」）——页面上的卡片不开模糊，只有浮在上面的这些开。
+只用 tokens.css 的变量（颜色、圆角、阴影、字体、弹簧和时长），换皮改 tokens 即可。现在是「杂志纸本」（SPEC §11）：
+弹层都是**不透明的纸** + 1px 细线框（`--shadow-glass-edge`）+ 一层很浅的柔影，不用玻璃（`--glass-filter: none`）、没有折射描边和内发光。
 
 | 弹层 | 外观 |
 |---|---|
-| 遮罩 | `--color-scrim` + `--scrim-filter`（背后的页面轻轻虚化，像隔了一层磨砂）；小菜单用透明遮罩（`.ov-scrim--clear`：看不见、不模糊，点它关闭） |
-| `Sheet` | 手机上是**浮动卡片**：离屏幕左右、底边各 8px（底边另加安全区，`--ov-sheet-float` / `--ov-sheet-bottom`），圆角 `--radius-sheet` 38（和 iPhone 屏幕圆角同心）；面 `--material-glass-dense` + `--glass-filter`（`material="glass"` 换成更通透的 `--material-glass-strong`）+ `--shadow-4` + 玻璃边 + 内侧柔光 + 折射描边（`::before` 的 `--material-rim`）；没有左侧按钮时标题左对齐、宋体 `title-2`；内容滚到底部有渐隐；宽屏（≥768）居中浮动、离底 24px |
-| `AnchoredPanel` | 圆角 `--radius-2xl`；`--material-glass-dense` + 模糊；标题是眉标（`--type-eyebrow`，大字距）；下面单独一层 `--shadow-3` 的阴影跟着形状走 |
-| `FullscreenMenu` | 强调色 / 第二主题色两团柔光 + `--material-glass-strong` + `--glass-filter-xl`；标题宋体 40（`keep-all` 只在标点处折行），上面一行眉标带强调色圆点；菜单项是凸起的白块（`--color-raised`，高 72，圆角 `--radius-lg`，名字宋体 `--text-title-4`） |
-| `Dialog` | 圆角 `--radius-2xl` 的玻璃卡片 + 折射描边；标题宋体 `title-3`；按钮是胶囊：取消 = 凸起的白、确认 = 强调色渐变（`--material-accent`）、危险 = 红色浅底红字 |
-| `Popover` | `--material-glass-dense` + 模糊 + `--shadow-3`，圆角 `--radius-lg`；标题是眉标；图标方块 `--radius-tile` |
-| `Toast` | `--material-glass-strong` + 模糊 + `--shadow-3`；语气图标是实心圆（成功 / 警告 / 出错 / 提示各用状态色，提示是 `--color-info` 蓝，不跟主题色）；文字 `--type-label` |
-| 关闭按钮 `.ov-close`、菜单行 | × 是 44px 凸起的白圆（`--color-raised` + `--shadow-raised`）；菜单行的图标方块 34px（`--color-accent-soft`，圆角 `--radius-tile`），行尾箭头是 30px 凸起的白圆，分隔线 1px `--color-separator` |
+| 遮罩 | `--color-scrim`：只把页面压暗一点，不虚化；小菜单用透明遮罩（`.ov-scrim--clear`：看不见，点它关闭） |
+| `Sheet` | 手机上是**浮动纸片**：离屏幕左右、底边各 8px（底边另加安全区，`--ov-sheet-float` / `--ov-sheet-bottom`），圆角 `--radius-sheet` 22；面 `--material-glass-dense`（不透明的纸，`material="glass"` 一样）+ `--shadow-4` + 细线框；没有左侧按钮时标题左对齐、宋体 `title-2`；内容滚到底部有渐隐；宽屏（≥768）居中浮动、离底 24px |
+| `AnchoredPanel` | 圆角 `--radius-2xl` 18；不透明的纸 + 细线框；标题是眉标（`--type-eyebrow`）；下面单独一层 `--shadow-3` 的阴影跟着形状走 |
+| `FullscreenMenu` | 整屏一张不透明的纸（`--color-canvas`，没有柔光）；标题宋体大标题（`keep-all` 只在标点处折行），上面一行灰色眉标；菜单项像书的目录（宋体名字、细线分隔，没有方块和图标）；仍是从按钮圆形扩散（交互 9） |
+| `Dialog` | 圆角 `--radius-2xl` 的纸片 + 细线框；标题宋体 `title-3`；取消 = 纸片、确认 = 实色海色、危险 = 砖红 |
+| `Popover` | 不透明的纸 + 细线框 + `--shadow-3`，圆角 `--radius-lg`；标题是眉标 |
+| `Toast` | 不透明的纸片胶囊 + 细线框 + `--shadow-3`；语气图标是实心圆（状态色）；文字 `--type-label` |
+| 关闭按钮 `.ov-close`、菜单行 | × 是 44px 纸片圆（`--color-raised` + 一根细线）；菜单行的图标是次要灰的线条小图标（没有底块），行尾一个灰色小箭头；分隔线 1px `--color-separator` |
 
 组件局部变量（都在对应 CSS 文件开头声明）：`--ov-sheet-gap`、`--ov-sheet-max-w`、`--ov-sheet-float`、`--ov-sheet-bottom`、`--ov-kb`、`--ov-vvh`、`--ov-panel-radius`、`--ov-panel-w` / `-h`、`--ov-toast-max-w`、`--ov-toast-front-h`、`--ov-toast-kb`；确认框按钮的 `--dlg-bg` / `--dlg-fg`。
 
@@ -222,7 +222,7 @@ n = 在弹层栈里第几层；基准取这一层及下面各层里最高的那�
 
 - **`Sheet` 入场保护**：入场开始后 `SCRIM_GUARD_MS`（450ms）之内、还没完全升起时，点遮罩不关——误双击（或第一次打开要下载分包、以为没点上又点一下）的第二下落在遮罩上，不会把刚升起的面板关掉。
 - **`setPageCovered(on)`**（`dom.js`，从 `index.js` 导出）：不透明的全屏层（大图浏览、给司机看）入场播完调 `true`、开始退场 / 卸载时调 `false`（成对、计数），
-  写 `<html data-covered>`，外壳据此关掉底下看不见的毛玻璃（`shell/shell.css`）。
+  写 `<html data-covered>`，外壳据此关掉底下看不见的东西（`shell/shell.css`；纸本没有玻璃，这条规则只是兜底）。
 
 ## 测试
 

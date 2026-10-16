@@ -1,6 +1,6 @@
 /* =====================================================================
    shell/frame.css：常驻框架（Frame.jsx）的版面：主内容区、页面大标题、天数分段条的位置、滚动边缘、换页幽灵、
-   封面小圆点、标题旁的圆形箭头。顶栏见 topbar.css，底栏 tabbar.css，分段条 daystrip.css，同步条 syncbar.css。
+   封面小圆点、标题旁的箭头。顶栏见 topbar.css，底栏 tabbar.css，分段条 daystrip.css，同步条 syncbar.css。
    只用 tokens.css 的变量。几何（离边、离顶、高度）全部来自 --gutter、--topbar-*、--tabbar-*、--safe-*：
    大标题和顶栏是同一条横带（离顶 --topbar-inset、高 --topbar-bar-h），顶栏里的圆按钮和大标题左右对齐。
    ===================================================================== */
@@ -170,14 +170,13 @@ button.shell-head__title {
   position: relative;
 }
 
-/* ---------- 滚动边缘：内容滑进顶栏、底栏下面时渐隐 + 轻模糊（样稿 .edge） ---------- */
+/* ---------- 滚动边缘：内容滑进顶栏、底栏下面时盖一层纸色（不虚化）。
+   顶上到顶栏底边为止是实心纸色（像印刷页眉：返回键、放大镜后面不透出内容），只在最下面 22px 淡出 ---------- */
 .shell-edge {
   position: fixed;
   left: 0;
   right: 0;
   pointer-events: none;
-  -webkit-backdrop-filter: blur(var(--blur-sm));
-  backdrop-filter: blur(var(--blur-sm));
 }
 
 .shell-edge--top {
@@ -185,22 +184,14 @@ button.shell-head__title {
   z-index: calc(var(--z-topbar) - 1);
   height: calc(var(--safe-top) + var(--topbar-h) + 22px);
   opacity: 0;
-  background: linear-gradient(var(--color-edge-tint), transparent);
-  -webkit-mask-image: linear-gradient(var(--color-text) 50%, transparent);
-  mask-image: linear-gradient(var(--color-text) 50%, transparent);
-}
-
-/* 页面在最上面（顶部边缘完全透明）：不做背景模糊 */
-.shell-edge[data-off] {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  background: linear-gradient(var(--color-edge-tint) calc(100% - 22px), transparent);
 }
 
 .shell-edge--bottom {
   bottom: 0;
   z-index: calc(var(--z-tabbar) - 1);
   height: calc(var(--safe-bottom) + var(--tabbar-h) + 32px);
-  /* 底栏的玻璃要看得见后面的内容：这里只淡淡一层（--color-edge-tint-bottom），不先把内容洗白 */
+  /* 底栏下面只淡淡一层纸色（--color-edge-tint-bottom） */
   background: linear-gradient(transparent, var(--color-edge-tint-bottom));
   -webkit-mask-image: linear-gradient(transparent, var(--color-text) 62%);
   mask-image: linear-gradient(transparent, var(--color-text) 62%);
@@ -214,7 +205,7 @@ button.shell-head__title {
   pointer-events: none;
 }
 
-/* ---------- 封面小圆点 / 方块（行程主题色的渐变 + emoji） ---------- */
+/* ---------- 行程小封面（主题色纯色 + 宋体首字，CoverDot.jsx） ---------- */
 .cover-dot {
   position: relative;
   display: inline-grid;
@@ -224,8 +215,8 @@ button.shell-head__title {
   height: 32px;
   overflow: hidden;
   border-radius: var(--radius-round);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--color-accent) 70%, var(--color-thumb)), var(--color-accent) 58%, var(--color-accent-2));
-  box-shadow: 0 0 0 1.5px var(--color-glass-highlight), var(--shadow-highlight);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .cover-dot--sm {
@@ -237,49 +228,38 @@ button.shell-head__title {
   width: 100%;
   height: 100%;
   border-radius: inherit;
-  box-shadow: var(--shadow-highlight);
 }
 
-.cover-dot__emoji {
-  font-size: 15px;
-  line-height: 1;
+.cover-dot__char {
+  font: var(--weight-serif) 15px / 1 var(--font-serif);
 }
 
-.cover-dot--sm .cover-dot__emoji {
+.cover-dot--sm .cover-dot__char {
   font-size: 13px;
 }
 
-.cover-dot--tile .cover-dot__emoji {
+.cover-dot--tile .cover-dot__char {
   font-size: 30px;
 }
 
-/* ---------- 标题旁的圆形箭头（样稿 .chev-chip） ---------- */
+/* ---------- 标题旁的箭头：一个灰色小箭头，没有底（类名沿用以前的 .chev-chip） ---------- */
 .chev-chip {
   display: inline-grid;
   flex: none;
   place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-round);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
-}
-
-.chev-chip--sm {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
 }
 
 .chev-chip--lg {
-  width: 32px;
-  height: 32px;
   margin-top: 2px;
   margin-left: -0.04em;
 }
 
 @media (hover: hover) {
   button.shell-head__title:hover:not([data-pressed]) .chev-chip {
-    background: color-mix(in srgb, var(--color-accent-soft), var(--color-accent) 10%);
+    color: var(--color-text-2);
   }
 }
 

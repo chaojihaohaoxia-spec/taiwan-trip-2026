@@ -1,103 +1,30 @@
 /* =====================================================================
-   styles/field.css：光场（页面背景）。A「海岛光」：每趟行程一套主题色光斑 + 细颗粒，深色模式有对应的深色光场。
-   颜色全部来自 tokens.css 的 --field-*（由 --trip-accent / --trip-accent-2 派生，富国岛青绿 → 珊瑚、台湾暖金 → 橙红）。
+   styles/field.css：纸（页面背景）。「杂志纸本」：米白的纸（深色是深墨色的纸），纯色，只留一点点纸纹。
+   以前这里是“光场”（每趟行程一套主题色光斑、缓慢漂移）——那是“AI 落地页”感的第一来源，已经拿掉。
 
-   结构（外壳的光场组件照这个写；开发页 dev/DevPage.jsx 里有一份现成的）：
+     <div class="paper" aria-hidden="true"></div>     （外壳的 shell/Field.jsx，整页只放一个）
 
-     <div class="light-field light-field--drift" aria-hidden="true">
-       <div class="light-field__layer accent-scope" style="--trip-accent:#0E8A8A; --trip-accent-2:#F2A65A">
-         <i class="light-field__blob"></i> × 5
-       </div>
-       <div class="light-field__grain"></div>
-     </div>
-
-   - .light-field：fixed 铺满视口，在内容下面（z-index: var(--z-below)），不接收点击。
-     页面滚动时光场不动（内容在它上面滑过）。body 是透明的（base.css），所以看得见它。
-   - .light-field__layer：一层 = 一趟行程的配色（底色渐变 + 5 个光斑）。加 accent-scope 并写 --trip-accent / --trip-accent-2，
-     这一层就按这两个色重新派生；不写就跟随 <html> 上 setTripAccent() 设的色（没设就是默认的海岛青绿）。
-     **切换行程**：放两层，新的一层叠在上面、从 opacity 0 淡到 1（--dur-field 1.1 秒，--ease-field，样稿同款），
-     旧的那层保持不透明垫在下面、暂停漂移（data-paused），新层盖满后删掉。不要让两层同时淡（旧的淡出、新的淡入）：
-     中途两层都半透明，会透出 <html> 的底色，整片发灰发白。新层挂上时先加 data-hidden、下一帧去掉（CSS 过渡才有起点）。
-   - .light-field--drift：光斑缓慢漂移（transform 动画，合成线程跑；23–34 秒一个来回）。减弱动态效果时不动。
-   - 光斑的位置、大小按视口宽度算（width 是视口宽的 110–150%），桌面上一样铺满。
+   - .paper：fixed 铺满视口，在内容下面（z-index: var(--z-below)），不接收点击，contain: strict（滚动时不重绘）。
+     底色就是 --color-canvas（和 <html> 的底色一样，iOS 回弹时露出来的也是纸）；
+   - ::after 是纸纹：灰度噪点（--paper-grain），正片叠底、很淡（--paper-grain-opacity，浅色 3.5%、深色 3%）。
+   - 行程主题色不再铺在背景上，只用在强调色（--color-accent）上。
    ===================================================================== */
 
-.light-field {
+.paper {
   position: fixed;
   inset: 0;
   z-index: var(--z-below);
   overflow: hidden;
   pointer-events: none;
   contain: strict;
+  background: var(--color-canvas);
 }
 
-.light-field__layer {
+.paper::after {
+  content: "";
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  background: var(--field-base);
-  transition: opacity var(--dur-field) var(--ease-field);
-}
-
-.light-field__layer[data-hidden] {
-  opacity: 0;
-}
-
-.light-field__blob {
-  --lf-blob: var(--field-1);
-  position: absolute;
-  aspect-ratio: 1;
-  border-radius: var(--radius-round);
-  background: radial-gradient(closest-side, var(--lf-blob), transparent);
-  opacity: var(--field-blob-opacity);
-  will-change: transform;
-}
-
-.light-field__blob:nth-child(1) { --lf-blob: var(--field-1); width: 150%; left: -55%; top: -22%; }
-.light-field__blob:nth-child(2) { --lf-blob: var(--field-2); width: 120%; left: 30%; top: -18%; }
-.light-field__blob:nth-child(3) { --lf-blob: var(--field-3); width: 110%; left: -30%; top: 32%; }
-.light-field__blob:nth-child(4) { --lf-blob: var(--field-4); width: 130%; left: 35%; top: 40%; }
-.light-field__blob:nth-child(5) { --lf-blob: var(--field-5); width: 120%; left: -10%; top: 70%; }
-
-/* 细颗粒：灰度噪点，叠加模式（让大片渐变不出现色带，也更像纸） */
-.light-field__grain {
-  position: absolute;
-  inset: 0;
-  background-image: var(--field-grain);
-  opacity: var(--field-grain-opacity);
-  mix-blend-mode: overlay;
-}
-
-/* ---------- 漂移（样稿同款：每个光斑来回漂、时长各不相同，看起来不机械；两条路径轮流用，第二条反着走）
-   时长是 --dur-drift（28 秒）乘各自的倍数（样稿的 26 / 31 / 23 / 34 / 28 秒），负的延迟让它们一开始就错开 ---------- */
-.light-field--drift .light-field__blob { animation: lf-drift calc(var(--dur-drift) * 0.93) var(--ease-in-out) calc(var(--dur-drift) * -0.34) infinite alternate; }
-.light-field--drift .light-field__blob:nth-child(2) { animation: lf-drift-b calc(var(--dur-drift) * 1.1) var(--ease-in-out) calc(var(--dur-drift) * -0.41) infinite alternate; }
-.light-field--drift .light-field__blob:nth-child(3) { animation-duration: calc(var(--dur-drift) * 0.82); animation-delay: calc(var(--dur-drift) * -0.6); animation-direction: alternate-reverse; }
-.light-field--drift .light-field__blob:nth-child(4) { animation: lf-drift-b calc(var(--dur-drift) * 1.2) var(--ease-in-out) calc(var(--dur-drift) * -1.35) infinite alternate-reverse; }
-.light-field--drift .light-field__blob:nth-child(5) { animation-duration: var(--dur-drift); animation-delay: calc(var(--dur-drift) * -1.48); }
-
-.light-field__layer[data-paused] .light-field__blob {
-  animation-play-state: paused;
-}
-
-@keyframes lf-drift {
-  50% { transform: translate(10%, 7%) scale(1.12); }
-  100% { transform: translate(-5%, 12%) scale(0.95); }
-}
-
-@keyframes lf-drift-b {
-  50% { transform: translate(-12%, 6%) scale(0.92); }
-  100% { transform: translate(-4%, -9%) scale(1.08); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* 第 2、4 个光斑的漂移规则带 :nth-child，优先级更高：这里要写到同样的优先级才盖得住（外壳评审） */
-  .light-field--drift .light-field__blob,
-  .light-field--drift .light-field__blob:nth-child(n) {
-    animation: none;
-  }
-
-  .light-field__layer {
-    transition-duration: var(--dur-base);
-  }
+  background-image: var(--paper-grain);
+  opacity: var(--paper-grain-opacity);
+  mix-blend-mode: multiply;
 }

@@ -1,6 +1,6 @@
 /* =====================================================================
    overlay/Popover.css：小菜单 / 气泡。位置和缩放原点由 Popover.jsx 写入。
-   A 皮肤：真玻璃（backdrop-filter）+ 高光细边 + 悬浮阴影，圆角 22px；标题是眉标。
+   「杂志纸本」：不透明的纸 + 细线框 + 很浅的柔影；标题是眉标。
    ===================================================================== */
 
 .ov-popover {
@@ -12,8 +12,6 @@
   padding: var(--space-2);
   border-radius: var(--radius-lg);
   background: var(--material-glass-dense);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
   /* 悬浮阴影 + 高光细边（深色模式下和背后的面分得清） */
   box-shadow: var(--shadow-3), var(--shadow-glass-edge);
   color: var(--color-text);

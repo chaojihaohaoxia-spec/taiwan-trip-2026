@@ -107,17 +107,19 @@ async function assertTapTargetsIn(page, root, min = 44) {
 // 出发前：汇总、卡片、筛选、分组方式
 // ---------------------------------------------------------------------
 
-test('出发前：汇总四格的数字和数据对得上；卡片按类型分组、组内按时间；登机牌、入住退房、订单号、价格都在；不横向滚动、可点的 ≥44px', async () => {
+test('出发前：汇总一行字的数字和数据对得上（是 0 的那类不写）；卡片按类型分组、组内按时间；登机牌、入住退房、订单号、价格都在；不横向滚动、可点的 ≥44px', async () => {
   const app = await openBookings();
   const { page } = app;
   try {
     const live = B.filter((b) => b.status !== 'cancelled');
-    const num = async (key) => Number(await page.$eval(`${T(`tile-${key}`)} .bkp-tile__num b`, (el) => el.textContent));
+    // 「杂志纸本」：汇总是一行字「2 还没订 · 2 待确认 · 1 到店付」，是 0 的那类不写
+    const num = async (key) => Number(await page.$eval(T(`tile-${key}`), (el) => el.querySelector('.bkp-sum__n').textContent).catch(() => 0));
     assert.equal(await num('idea'), live.filter((b) => b.status === 'idea').length);
     assert.equal(await num('pending'), live.filter((b) => b.status === 'pending').length);
     assert.equal(await num('property'), live.filter((b) => b.status !== 'idea' && b.payment_status === 'pay_at_property').length);
-    // 到店付金额带折合港币
-    assert.match(await text(page, T('tile-property-sum')), /₫.*约 HK\$/);
+    // 到店付：一行里只写折合港币（原币金额在卡片和详情里）
+    assert.match(await text(page, T('tile-property-sum')), /约 HK\$/);
+    assert.equal(await page.$$eval('[data-testid="bookings-summary"] .bkp-tile, [data-testid="bookings-summary"] .bkp-sum__grid', (els) => els.length), 0, '不再是格子');
     // 最近的免费取消：南岬海景屋（还剩不到一天：红色）
     assert.equal(await page.$eval(T('tile-deadline'), (el) => el.dataset.deadline), 'urgent');
     assert.match(await text(page, T('tile-deadline')), new RegExp(HOTEL_B.title.split(' · ')[0]));
@@ -350,11 +352,12 @@ test('一键改状态：待确认的酒店点「商家确认了」→ 芯片变�
   const { page } = app;
   try {
     await waitSheet(page, HOTEL_B.id);
-    const before = Number(await page.$eval(`${T('tile-pending')} .bkp-tile__num b`, (el) => el.textContent));
+    const pendingN = () => page.$eval(T('tile-pending'), (el) => Number(el.querySelector('.bkp-sum__n').textContent)).catch(() => 0);
+    const before = await pendingN();
     await page.click(T('quick-confirm'));
     await page.waitForFunction(() => document.querySelector('[data-testid="booking-detail"] [data-status]')?.dataset.status === 'booked', { timeout: 6000 });
     await page.waitForFunction(() => [...document.querySelectorAll('.ov-toast__message')].some((el) => el.textContent.includes('已改成「已订」')), { timeout: 4000 });
-    assert.equal(Number(await page.$eval(`${T('tile-pending')} .bkp-tile__num b`, (el) => el.textContent)), before - 1);
+    assert.equal(await pendingN(), before - 1);
     await page.screenshot({ path: path.join(SHOTS, 'quick-confirm.png'), captureBeyondViewport: false });
     await page.click('.ov-toast__action');
     await page.waitForFunction(() => document.querySelector('[data-testid="booking-detail"] [data-status]')?.dataset.status === 'pending', { timeout: 6000 });
@@ -642,7 +645,7 @@ test('375 小屏、桌面 1280、深色：没有报错、不横向滚动、内�
       if (o.device === 'desktop') {
         const box = await page.$eval(T('page-bookings'), (el) => el.getBoundingClientRect().toJSON());
         assert.ok(box.width <= 720 + 1, `最大宽度：${box.width}`);
-        assert.equal(await page.$$eval('.bkp-sum__grid > *', (els) => new Set(els.map((el) => Math.round(el.getBoundingClientRect().top))).size), 1, '桌面四格一行');
+        assert.equal(await page.$$eval('.bkp-sum__line > *', (els) => new Set(els.map((el) => Math.round(el.getBoundingClientRect().top))).size), 1, '桌面上汇总是一行字');
       }
       await page.screenshot({ path: path.join(SHOTS, `page-${name}.png`), captureBeyondViewport: false });
       await page.click(T(`booking-open-${HOTEL_B.id}`));
@@ -773,8 +776,7 @@ test('行程里：今天的「还没订」放进「今天」并标出来；时�
   const day4 = await openBookings({ now: '2027-01-13T10:00:00+07:00', query: '?by=kind' });
   const { page } = day4;
   try {
-    assert.equal(await page.$eval(`${T('tile-idea')} .bkp-tile__num b`, (el) => el.textContent), '0');
-    assert.equal(await page.$eval(T('tile-idea'), (el) => el.disabled), true, '0 个的格子不能点');
+    assert.equal(await page.$(T('tile-idea')), null, '0 个「还没订」：汇总里不写这一类');
     assert.ok(await page.$(`${T(`chips-${DINNER.id}`)} [data-stale]`), '时间已过');
     assert.equal(await page.$(T(`acts-${DINNER.id}`)), null, '过去了不放动作行');
     assert.equal(await page.$(T(`contact-${DINNER.id}`)), null, '过去了不放一键联系');

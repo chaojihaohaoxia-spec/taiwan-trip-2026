@@ -1,9 +1,8 @@
 // =====================================================================
 // pages/lists/parts.jsx：清单页的几个小部件。
 //
-//   <ProgressRing done total />     进度圆环（「3/9」，完成的那一段弹簧补上去）
-//   <PanelHead … />                 一张清单卡片的头：「还有 6 件事要办」（大号数字）+ 快到期提醒 + 进度圆环；
-//                                   全部勾完时换成 <Celebrate>
+//   <PanelHead … />                 一张清单卡片的头（「杂志纸本」）：「还有 6 件事要办」（宋体一行）+ 快到期提醒（一行字）；
+//                                   进度写在标签页上（「待办 0/11」），不再画进度圆环；全部勾完时换成 <Celebrate>
 //   <Celebrate play … />            全部完成：圆环画满、对勾描出来、几粒小光点轻轻散开（克制，不放彩带）；
 //                                   只在“刚刚勾完最后一项”时播，平时打开就是静止的样子
 //   <DoneDivider … />               「已完成 3 · 收起 / 展开」分隔行
@@ -14,43 +13,6 @@ import { Fragment } from 'preact';
 import { Glyph } from '../../kit/Glyph.jsx';
 import { MorphIcon } from '../../ui/index.js';
 import { LISTS, joinWords } from './model.js';
-
-const RING_R = 17;
-const RING_C = 2 * Math.PI * RING_R;
-
-/**
- * 进度圆环（44×44）：底圈 + 完成的弧（stroke-dashoffset 过渡），中间「3/9」。
- * @param {{ done: number, total: number, label?: string }} props
- */
-export function ProgressRing({ done, total, label }) {
-  const ratio = total ? Math.min(1, done / total) : 0;
-  return (
-    <span
-      class="lring"
-      role="progressbar"
-      aria-valuemin="0"
-      aria-valuemax={total}
-      aria-valuenow={done}
-      aria-label={label || `已完成 ${done} 项，共 ${total} 项`}
-      data-full={total && done >= total ? '' : undefined}
-    >
-      <svg class="lring__svg" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-        <circle class="lring__track" cx="22" cy="22" r={RING_R} />
-        <circle
-          class="lring__arc"
-          cx="22"
-          cy="22"
-          r={RING_R}
-          style={{ strokeDasharray: `${RING_C.toFixed(2)}`, strokeDashoffset: `${(RING_C * (1 - ratio)).toFixed(2)}` }}
-        />
-      </svg>
-      <span class="lring__text" aria-hidden="true">
-        <b>{done}</b>
-        <i>/{total}</i>
-      </span>
-    </span>
-  );
-}
 
 /**
  * 卡片头。
@@ -80,7 +42,6 @@ export function PanelHead({ list, open, progress, due, zone = null, who = null, 
         </p>
         {due && (
           <p class={`lhead__due lhead__due--${due.tone}`} data-testid="lists-due-summary">
-            <Glyph name={due.tone === 'danger' ? 'alert' : 'clock'} size={14} stroke={2} />
             <span>
               {/* 每段自己不折行；「 · 」放在段外面（那里的空格才是折行的地方） */}
               {due.parts.map((t, i) => (
@@ -100,11 +61,12 @@ export function PanelHead({ list, open, progress, due, zone = null, who = null, 
         )}
         {extra && <div class="lhead__extra">{extra}</div>}
       </div>
-      <ProgressRing done={progress.done} total={progress.total} label={`${meta.label}：已完成 ${progress.done} ${meta.unit}，共 ${progress.total} ${meta.unit}`} />
     </div>
   );
 }
 
+/** 庆祝的圆环半径（44×44 的画布） */
+const RING_R = 17;
 /** 小光点的方向（度）：六个，不均匀一点更自然 */
 const SPARKS = [-78, -22, 28, 86, 148, 212];
 

@@ -42,7 +42,7 @@ export function RecapHero({ tripId, trip, countdown, segments, stats }) {
     { key: 'photos', value: stats.photos, label: '张照片', to: { name: 'journal', params: { tripId }, query: { tab: 'photos' } } },
   ];
   return (
-    <Card class="ov-hero ov-hero--recap" eyebrow="这趟旅行" action={<Badge tone="neutral" icon={<Glyph name="clock" size={13} stroke={2.1} />}>{chip}</Badge>} testId="ov-recap" data-phase="ended">
+    <Card class="ov-hero ov-hero--recap" eyebrow="这趟旅行" action={<Badge tone="neutral">{chip}</Badge>} testId="ov-recap" data-phase="ended">
       <div class="ov-hero__main">
         <div class="ov-cd" role="img" aria-label={`${days} 天 ${nights} 晚`}>
           <span class="ov-cd__num t-figure-italic" data-testid="ov-recap-days">{days}</span>
@@ -50,7 +50,7 @@ export function RecapHero({ tripId, trip, countdown, segments, stats }) {
           <span class="ov-cd__hm t-label">{nights ? `${nights} 晚` : '当天往返'}</span>
         </div>
         <div class="ov-fl ov-fl--none">
-          <span class="ov-fl__times t-figure">{formatDateRange(start, end, { timeZone: trip.timezone, year: 'never' })}</span>
+          <span class="ov-fl__times t-figure-serif">{formatDateRange(start, end, { timeZone: trip.timezone, year: 'never' })}</span>
           <span class="ov-fl__line t-label">{start && end && start !== end ? `${weekdayName(start)}出发，${weekdayName(end)}回` : formatTripLength(start, end)}</span>
           <span class="ov-fl__line">回顾模式 · {tripTitleRest(trip.title) || formatDate(end, { timeZone: trip.timezone, year: 'never' })}</span>
         </div>

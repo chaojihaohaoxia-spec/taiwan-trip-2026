@@ -23,7 +23,7 @@ import { Button } from '../../ui/Button.jsx';
 import { IconButton } from '../../ui/IconButton.jsx';
 import { SubmitButton } from '../../ui/SubmitButton.jsx';
 import { Spinner } from '../../ui/Spinner.jsx';
-import { Illustration, Glyph } from '../../kit/index.js';
+import { Glyph } from '../../kit/index.js';
 import { CoverDot } from '../../shell/CoverDot.jsx';
 import { BackGlyph } from '../../shell/glyphs.jsx';
 import { switcherDates } from '../../shell/format.js';
@@ -50,9 +50,8 @@ export default function JoinPage({ route }) {
       )}
       <header class="join__hero">
         <p class="join__brand">热爱生活7885</p>
-        <Illustration name="invited" class="join__ill" />
         <h1 class="join__title">加入行程</h1>
-        <p class="join__lede">对方邀请你一起用这趟行程：两个人看到的是同一份行程、清单和账本，改了马上同步。</p>
+        <p class="join__lede">两个人看同一份行程、清单和账本，改了马上同步。</p>
       </header>
       <div class="join__card material-card">
         {!code ? (

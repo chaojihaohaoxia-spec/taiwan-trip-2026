@@ -403,8 +403,8 @@
   isolation: isolate;
 }
 
-/* 预览里的光场关在格子里（正式页面的光场是 fixed 铺满视口） */
-.skin-field .light-field {
+/* 预览里的纸关在格子里（正式页面的纸是 fixed 铺满视口） */
+.skin-field .paper {
   position: absolute;
 }
 
@@ -418,8 +418,6 @@
   padding: 4px 10px;
   border-radius: var(--radius-pill);
   background: var(--material-glass-strong);
-  -webkit-backdrop-filter: var(--glass-filter-sm);
-  backdrop-filter: var(--glass-filter-sm);
   box-shadow: var(--shadow-glass-edge);
   font: var(--type-label);
   font-size: var(--text-caption-1);
@@ -430,24 +428,4 @@
   height: 8px;
   border-radius: var(--radius-round);
   background: var(--color-accent);
-}
-
-.skin-switch {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-}
-
-.skin-field--wide {
-  flex: 1 1 260px;
-  height: 160px;
-}
-
-.skin-switch__name {
-  position: absolute;
-  left: var(--space-4);
-  top: var(--space-3);
-  font-size: var(--text-title-2);
 }

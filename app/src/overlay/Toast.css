@@ -4,7 +4,7 @@
      .ov-toast        堆叠位置（translateY + scale，CSS 过渡 --spring-snappy，随时可打断）
      .ov-toast__card  出场 / 离场 / 甩掉的动画（Toast.jsx 用 Web Animations 驱动）
    收起时后面的卡片用 clip-path 只露出和最前那张一样高的底部（露边整齐），展开时 clip-path 过渡回完整。
-   A 皮肤（样稿的提示条）：真玻璃胶囊（圆角 22px）+ 高光细边；左边是语气色实心小圆 + 反白图标；
+   「杂志纸本」：不透明的纸片胶囊 + 细线框；左边是语气色实心小圆 + 反白图标；
    按钮（「撤销」）是强调色浅底的胶囊。放在底栏上方（--tabbar-h 已经包括底栏离屏幕底的距离）。
    局部变量：
      --ov-toast-max-w    最大宽度
@@ -79,8 +79,6 @@
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
   border-radius: var(--radius-lg);
   background: var(--material-glass-strong);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
   box-shadow: var(--shadow-3), var(--shadow-glass-edge);
   color: var(--color-text);
   /* 负的内缩 = 往外扩：完整显示时阴影不被裁掉 */

@@ -1,5 +1,5 @@
 /* =====================================================================
-   kit/search/SearchResults.css：搜索结果（.k-sres）。分组标题是眉标（小字大字距），每行 = 种类图标方块 + 标题 / 副标题 + 箭头；
+   kit/search/SearchResults.css：搜索结果（.k-sres）。分组标题是眉标（小字大字距），每行 = 种类图标 + 标题 / 副标题 + 灰色小箭头；
    关键字高亮是强调色浅底 + 强调色字（.k-hl）。键盘选中的行（data-active）和按下一样有底色。
    ===================================================================== */
 
@@ -65,15 +65,14 @@
   white-space: nowrap;
 }
 
+/* 灰色小箭头（纸本：没有圆底） */
 .k-sres__go {
   display: grid;
   flex: none;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-round);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
 }
 
 /* 关键字高亮 */

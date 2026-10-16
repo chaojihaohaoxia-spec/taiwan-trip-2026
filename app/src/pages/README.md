@@ -40,7 +40,7 @@
    （恢复会话期间、没登录的人打开深层链接——以前页面要自己手写这道门，现在 `useTrip` 自己管），页面拿到 `null` 就显示加载中；演示模式（`?demo=1`）下数据来自虚构的三趟行程（未开始的海岛、已结束的三城、几乎空的山雾镇），开发和 e2e 都用它；`?now=2027-01-11T10:00:00+07:00` 把海岛行程拨到进行中。
    路由表 `meta.auth: true` 的页面由数据层的守卫保护：没登录会被带去登录页，页面里不用自己判断。
 5. 标题：路由表的 `meta.title` 会自动写进 `document.title`；需要动态标题（行程名）就在页面的 effect 里自己设。
-6. 行程主题色（光场、强调色）由外壳按当前行程统一设置（`lib/theme.js` 的 `setTripAccent`，外壳的 `shell/trip-state.js` 调），页面不用自己调；
+6. 行程主题色（强调色）由外壳按当前行程统一设置（`lib/theme.js` 的 `setTripAccent`，外壳的 `shell/trip-state.js` 调），页面不用自己调；
    **不要逐帧往 `<html>` 写 CSS 变量**（整页每一帧重算样式，掉帧）。大标题、返回、右上按钮用 `shell/chrome.js` 的 `usePageChrome()` 声明（见 shell/README.md）。
 7. 滚动的是文档；不要做“整页内部滚动容器”。长列表恢复位置由路由负责。
 8. 行程列表页（`trips`）负责处理 `?go=today|ledger`（旧版快捷方式）：跳到当前行程的今天 / 账本。
@@ -52,4 +52,4 @@
 - 手机 390 宽、桌面 1280 宽都要好用：内容最大宽度 `--content-max`，左右留白 `--gutter`，不能横向滚动（e2e 的 `assertNoHorizontalOverflow`）。
 - 空状态 / 出错用 `kit/` 的页面级预设（`PageEmptyState preset=…`、`ErrorState error onRetry`，带线条插图；小地方也可以用 `ui/EmptyState`）、加载中（`ui/Skeleton` / `SkeletonCard`，加载完用 `Reveal` 交叉淡入；按钮里转圈用 `ui/Spinner`）、出错、离线都要有样子；页面出错会被外壳的错误边界接住，只影响这一页。
 - 文字简体中文；金额一律 `lib/money.js` 的 `formatMoney(amount, currency)`——外币自动在全角括号里标折合港币（如 `400,000₫（约 HK$121）`），不要自己拼；时间按行程时区（`trips.timezone`）显示（`lib/datetime.js`）。
-- 能点的东西一眼看得出能点（按钮有底色或描边、链接行有箭头；能点的 `ListRow` 别写 `chevron={false}`；往下凹的 `.material-inset` 是“不能点的格子”，能点的格子用凸起的 `.material-raised` + 小箭头，也别把 `.material-inset` 直接放在光场上），触控区 ≥44px（`--tap-min`；e2e 的 `assertTapTargets` 会查）；颜色、圆角、阴影、间距只用 tokens.css 的变量。
+- 能点的东西一眼看得出能点（按钮有底色或描边、链接行有箭头；能点的 `ListRow` 别写 `chevron={false}`；往下凹的 `.material-inset` 是“不能点的格子”，能点的格子用凸起的 `.material-raised` + 小箭头，），触控区 ≥44px（`--tap-min`；e2e 的 `assertTapTargets` 会查）；颜色、圆角、阴影、间距只用 tokens.css 的变量。

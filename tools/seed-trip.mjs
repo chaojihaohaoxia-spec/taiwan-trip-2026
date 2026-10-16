@@ -10,6 +10,7 @@
 //   --ids               和 --dry-run 一起用：再打印每个 key 对应的 uuid
 //   --print-sql         打印将要执行的 SQL（含行程内容，注意别贴到公开的地方），不连网
 //   --only-new          只新增，不更新已存在的行（保护在 App 里改过的内容）
+//   --only-keys <k,k>   只写入这几个 key 的行（整份文件照常校验，行程本身和成员不写）
 //   --yes               不再询问确认，直接写入
 //   --project-ref <ref> 目标项目，默认 vzybjxghnoyubzdhvmsl
 //
@@ -559,15 +560,17 @@ function buildSql(plan, { onlyNew }) {
     return name;
   };
 
-  // trips
-  const tripRow = { ...plan.tripRow };
-  const tripCols = Object.keys(tripRow);
-  report.push({ table: 'trips', rows: 1, ctes: [groupCte('trips', tripCols, [tripRow])] });
-
-  // trip_members
-  const memName = `w${n++}`;
   const tripLit = q(plan.tripId);
-  ctes.push(`${memName} AS (
+  // --only-keys：行程本身和成员都不写
+  if (!plan.onlyKeys) {
+    // trips
+    const tripRow = { ...plan.tripRow };
+    const tripCols = Object.keys(tripRow);
+    report.push({ table: 'trips', rows: 1, ctes: [groupCte('trips', tripCols, [tripRow])] });
+
+    // trip_members
+    const memName = `w${n++}`;
+    ctes.push(`${memName} AS (
   INSERT INTO public.trip_members AS t (trip_id, user_id, email, role, display_name, color)
   SELECT ${tripLit}, user_id, email, role, display_name, color FROM mem WHERE user_id IS NOT NULL
   ${onlyNew ? 'ON CONFLICT (trip_id, user_id) DO NOTHING' : `ON CONFLICT (trip_id, user_id) DO UPDATE
@@ -580,7 +583,8 @@ function buildSql(plan, { onlyNew }) {
                              coalesce(EXCLUDED.color, t.color), coalesce(t.email, EXCLUDED.email))`}
   RETURNING (xmax = 0) AS inserted
 )`);
-  report.push({ table: 'trip_members', rows: plan.memberRows.length, ctes: [memName], members: true });
+    report.push({ table: 'trip_members', rows: plan.memberRows.length, ctes: [memName], members: true });
+  }
 
   // 内容表：按外键顺序；同一张表按“写了哪些字段”分组
   for (const table of Object.keys(TABLES)) {
@@ -683,6 +687,7 @@ function parseArgs(argv) {
     else if (a === '--ids') opts.ids = true;
     else if (a === '--print-sql') opts.printSql = true;
     else if (a === '--only-new') opts.onlyNew = true;
+    else if (a === '--only-keys') opts.onlyKeys = String(argv[++i] ?? '').split(',').map(s => s.trim()).filter(Boolean);
     else if (a === '--yes' || a === '-y') opts.yes = true;
     else if (a === '--project-ref') opts.projectRef = argv[++i];
     else if (a === '--help' || a === '-h') opts.help = true;
@@ -698,12 +703,22 @@ function isInside(child, parent) {
   return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
 }
 
+// --only-keys：整份文件校验完以后，只留下这几个 key 的行
+function restrictPlan(plan, keys) {
+  const bad = keys.filter(k => !plan.definedKeys.has(k));
+  if (bad.length) throw new Error(`--only-keys 里这些 key 在文件里不存在：${bad.join(' ')}`);
+  const ids = new Set(keys.map(k => toUuid(plan.tripId, k)));
+  for (const t of Object.keys(plan.tables)) plan.tables[t] = plan.tables[t].filter(r => ids.has(r.id));
+  plan.onlyKeys = keys;
+}
+
 function printSummary(plan, opts) {
-  const rows = [['trips', 1], ['trip_members', plan.memberRows.length]];
+  const rows = plan.onlyKeys ? [] : [['trips', 1], ['trip_members', plan.memberRows.length]];
   for (const t of Object.keys(TABLES)) if (plan.tables[t]?.length) rows.push([t, plan.tables[t].length]);
   console.log(`行程 ${plan.tripId}（${plan.tripRow.title ?? ''}）将写入：`);
   for (const [t, c] of rows) console.log(`  ${t.padEnd(16)} ${String(c).padStart(4)} 行`);
-  if (plan.memberRows.length) console.log(`  成员按邮箱匹配已注册用户：${plan.memberRows.map(m => '@' + m.ref).join(' ')}（没注册的会跳过，"@ref" 写成 null）`);
+  if (plan.onlyKeys) console.log(`  只写这些 key：${plan.onlyKeys.join(' ')}（行程本身和成员不动）`);
+  else if (plan.memberRows.length) console.log(`  成员按邮箱匹配已注册用户：${plan.memberRows.map(m => '@' + m.ref).join(' ')}（没注册的会跳过，"@ref" 写成 null）`);
   if (opts.ids) {
     console.log('\nkey → uuid：');
     for (const k of [...plan.definedKeys].sort()) console.log(`  ${k.padEnd(40)} ${uuidv5(`${plan.tripId}:${k}`)}`);
@@ -713,7 +728,7 @@ function printSummary(plan, opts) {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   if (opts.help || !opts.file) {
-    console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(2, 16).map(l => l.replace(/^\/\/ ?/, '')).join('\n'));
+    console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(2, 17).map(l => l.replace(/^\/\/ ?/, '')).join('\n'));
     process.exit(opts.help ? 0 : 1);
   }
   if (!/^[a-z]{20}$/.test(opts.projectRef || '')) throw new Error('--project-ref 应为 20 位小写字母');
@@ -732,6 +747,7 @@ async function main() {
     console.error(`\n共 ${plan.p.errors.length} 处错误，没有写入任何数据。`);
     process.exit(1);
   }
+  if (opts.onlyKeys) restrictPlan(plan, opts.onlyKeys);
 
   if (opts.printSql) {
     process.stdout.write(buildSql(plan, opts));

@@ -41,11 +41,19 @@ const rect = (page, sel) => page.$eval(sel, (el) => {
   return { x: r.x, y: r.y, w: r.width, h: r.height };
 });
 
+/** 元素里文字实际占的框（块本身可能比字宽） */
+const textRect = (page, sel) => page.$eval(sel, (el) => {
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const r = range.getBoundingClientRect();
+  return { x: r.x, y: r.y, w: r.width, h: r.height };
+});
+
 // ---------------------------------------------------------------------
 // P0 天数分段条：天多（10 格）时滑块的宽度和位置
 // ---------------------------------------------------------------------
 
-test('分段条 10 格（三城 9 天）：滑块正好盖住选中的那一格（概览、D6、D9；390 和 375；点格子换天以后也是）', async () => {
+test('分段条 10 格（三城 9 天）：滑块（「杂志纸本」：选中那天下面一道海色短线）正好在选中的那一格、居中（概览、D6、D9；390 和 375；点格子换天以后也是）', async () => {
   for (const device of ['mobile', 'small']) {
     for (const [hash, label] of [['#/t/demo-cities', '概览'], ['#/t/demo-cities/day/2026-03-19', 'D6'], ['#/t/demo-cities/day/2026-03-22', 'D9']]) {
       const app = await open({ hash, device, now: '2026-03-19T10:00:00+08:00' });
@@ -54,9 +62,11 @@ test('分段条 10 格（三城 9 天）：滑块正好盖住选中的那一格�
         const { page } = app;
         const cell = await page.$eval(`${T('day-strip')} .ds__cell[aria-current="page"]`, (el) => el.querySelector('.ds__big').textContent);
         assert.equal(cell, label);
-        const thumb = await rect(page, `${T('day-strip')} .ds__thumb > span`);
+        const thumb = await rect(page, `${T('day-strip')} .ds__thumb`);
+        const line = await rect(page, `${T('day-strip')} .ds__thumb > span`);
         const sel = await rect(page, `${T('day-strip')} .ds__cell[aria-current="page"]`);
         for (const k of ['x', 'w']) assert.ok(Math.abs(thumb[k] - sel[k]) <= 1, `${device} ${label}：滑块 ${k}=${thumb[k]}，选中格 ${k}=${sel[k]}`);
+        assert.ok(Math.abs(line.x + line.w / 2 - (sel.x + sel.w / 2)) <= 1 && line.w > 8 && line.w < sel.w, `${device} ${label}：短线在选中格正中：${JSON.stringify({ line, sel })}`);
         const cells = await page.$$eval(`${T('day-strip')} .ds__cell`, (els) => els.map((e) => e.getBoundingClientRect().width));
         assert.equal(cells.length, 10);
         for (const w of cells) assert.ok(w >= 63.5, `每格至少 64px（${w}）`);
@@ -78,9 +88,11 @@ test('分段条 10 格（三城 9 天）：滑块正好盖住选中的那一格�
     await app.idle();
     await new Promise((r) => setTimeout(r, 400));
     await app.idle();
-    const thumb = await rect(page, `${T('day-strip')} .ds__thumb > span`);
+    const thumb = await rect(page, `${T('day-strip')} .ds__thumb`);
+    const line = await rect(page, `${T('day-strip')} .ds__thumb > span`);
     const sel = await rect(page, T('day-strip-2026-03-22'));
     assert.ok(Math.abs(thumb.x - sel.x) <= 1 && Math.abs(thumb.w - sel.w) <= 1, `点 D9 后滑块 ${JSON.stringify(thumb)} 选中格 ${JSON.stringify(sel)}`);
+    assert.ok(Math.abs(line.x + line.w / 2 - (sel.x + sel.w / 2)) <= 1, `点 D9 后短线在选中格正中：${JSON.stringify({ line, sel })}`);
     await page.screenshot({ path: path.join(SHOTS, 'daystrip-10-d9.png'), clip: { x: 0, y: 80, width: 390, height: 120 } });
     // Home / End：焦点跳到第一格 / 最后一格
     await page.focus(T('day-strip-2026-03-22'));
@@ -101,14 +113,14 @@ test('按需样式表：页面第一帧就有样式（kit 卡片出现时它的�
   const app = await open({ hash: '#/trips', waitForApp: false });
   try {
     const { page } = app;
-    // 记下 .k-card 第一次出现那一刻它有没有样式（圆角不是 0 = kit 的样式已经生效）
+    // 记下 .k-card 第一次出现那一刻它有没有样式（「杂志纸本」：块直接排在纸上、上面一根细线、上边距 22px——上边距不是 0 = kit 的样式已经生效）
     await page.evaluate(() => {
       window.__firstCard = null;
       const check = () => {
         const el = document.querySelector('.k-card');
         if (el && !window.__firstCard) {
           const s = getComputedStyle(el);
-          window.__firstCard = { radius: s.borderTopLeftRadius, links: document.querySelectorAll('link[data-chunk-css]').length };
+          window.__firstCard = { pad: s.paddingTop, line: s.borderTopWidth, links: document.querySelectorAll('link[data-chunk-css]').length };
         }
       };
       new MutationObserver(check).observe(document.documentElement, { childList: true, subtree: true });
@@ -119,7 +131,7 @@ test('按需样式表：页面第一帧就有样式（kit 卡片出现时它的�
     await app.idle();
     const first = await page.evaluate(() => window.__firstCard);
     assert.ok(first, '看到了 kit 卡片');
-    assert.notEqual(first.radius, '0px', `卡片第一次出现时已经有圆角（kit 样式已经生效）：${JSON.stringify(first)}`);
+    assert.ok(first.pad !== '0px' && first.line === '1px', `卡片第一次出现时已经有上边距和细线（kit 样式已经生效）：${JSON.stringify(first)}`);
     assert.ok(first.links >= 1, '按需样式表是 <link> 加进来的');
     // 首屏样式表里没有页面级样式；进别的页面再加载它自己的；同一个 href 只有一个 <link>
     await app.go('#/t/demo-island/ledger');
@@ -250,7 +262,7 @@ async function recordFrames(page, fn, stopAfter) {
   }, fn.toString(), stopAfter);
 }
 
-test('换行程：旧内容很快淡出、新内容随后浮上来，没有两份叠在一起；<html> 上的主题色只写一次；光场新层在不透明的旧层上淡入；底栏跟着补间、播完撤掉', async () => {
+test('换行程：旧内容很快淡出、新内容随后浮上来，没有两份叠在一起；<html> 上的主题色只写一次；纸不变（不再有光场）；底栏跟着补间、播完撤掉', async () => {
   const app = await open({ hash: '#/t/demo-island' });
   try {
     await ready(app);
@@ -274,9 +286,15 @@ test('换行程：旧内容很快淡出、新内容随后浮上来，没有两�
       const op = (el) => (el ? Number(getComputedStyle(el).opacity) : null);
       const ghost = document.querySelector('.shell-ghost[data-ghost="page"]');
       const fresh = document.querySelector('[data-shell-page] > * > *');
-      const layers = [...document.querySelectorAll('.shell-field .light-field__layer')].map((l) => ({ state: l.dataset.state, o: Number(getComputedStyle(l).opacity) }));
+      const paper = document.querySelector('.shell-field');
       const tab = document.querySelector('[data-testid="shell-tabbar"]');
-      return { ghost: op(ghost), fresh: op(fresh), layers, scoped: tab?.classList.contains('accent-scope') || false };
+      return {
+        ghost: op(ghost),
+        fresh: op(fresh),
+        layers: document.querySelectorAll('.light-field__layer, .light-field__blob').length,
+        paper: paper ? `${getComputedStyle(paper).backgroundColor} ${getComputedStyle(paper).opacity}` : null,
+        scoped: tab?.classList.contains('accent-scope') || false,
+      };
     }, 1600);
     await page.click(T('switcher-trip-demo-cities'));
     await page.waitForFunction(() => location.hash.startsWith('#/t/demo-cities'));
@@ -287,28 +305,30 @@ test('换行程：旧内容很快淡出、新内容随后浮上来，没有两�
     // 重影：旧内容的幽灵和新内容同时都看得清的帧
     const overlap = frames.filter((f) => f.ghost !== null && f.fresh !== null && f.ghost + f.fresh > 1.15);
     assert.deepEqual(overlap.map((f) => `${Math.round(f.t)}ms 幽灵 ${f.ghost.toFixed(2)} + 新 ${f.fresh.toFixed(2)}`), [], '旧内容和新内容叠在一起');
-    // 光场：两层同时在的帧里，下面的旧层一直不透明（不透出底色发灰）
-    const both = frames.filter((f) => f.layers?.length >= 2);
-    assert.ok(both.length > 3, '有交叉的帧');
-    for (const f of both) assert.ok(f.layers[0].o > 0.99, `${Math.round(f.t)}ms 旧层透明度 ${f.layers[0].o}`);
-    assert.ok(both.some((f) => f.layers[f.layers.length - 1].o > 0.1 && f.layers[f.layers.length - 1].o < 0.9), '新层是慢慢淡入的');
+    // 纸：换行程时一直是同一张不透明的纸（没有光场的层、颜色和透明度每一帧都不变）
+    assert.ok(frames.length > 20, `记到了足够的帧：${frames.length}`);
+    assert.ok(frames.every((f) => f.layers === 0), '没有光场的层和光斑');
+    assert.equal(new Set(frames.map((f) => f.paper)).size, 1, `纸每一帧都一样：${[...new Set(frames.map((f) => f.paper))].join(' | ')}`);
+    assert.match(frames[0].paper, / 1$/, '纸是不透明的');
     // 底栏补间：中途带 accent-scope，播完撤掉
     assert.ok(frames.some((f) => f.scoped), '换色时底栏在自己身上补间主题色');
     assert.equal(await page.$eval(T('shell-tabbar'), (el) => el.classList.contains('accent-scope') || el.style.getPropertyValue('--trip-accent') !== ''), false, '播完撤掉，回到跟随 <html>');
-    assert.equal(await page.$$eval('.shell-field .light-field__layer', (els) => els.length), 1, '旧层删掉了');
+    assert.equal(await page.$$eval('.shell-field *', (els) => els.length), 0, '纸里面没有子元素（纸纹是伪元素）');
     app.assertClean();
   } finally {
     await app.close();
   }
 });
 
-test('减弱动态效果：光场五个光斑都不漂（第 2、4 个以前还在漂）', async () => {
+test('减弱动态效果：纸上没有任何在跑的动画（不再有光场；以前第 2、4 个光斑还在漂）', async () => {
   const app = await open({ reducedMotion: true });
   try {
     await ready(app);
-    const running = await app.page.evaluate(() => [...document.querySelectorAll('.light-field__blob')]
-      .flatMap((b) => b.getAnimations()).filter((a) => a.playState === 'running').length);
-    assert.equal(running, 0);
+    const running = await app.page.evaluate(() => {
+      const paper = document.querySelector('.shell-field');
+      return { paper: Boolean(paper), blobs: document.querySelectorAll('.light-field__blob').length, anims: paper.getAnimations({ subtree: true }).filter((a) => a.playState === 'running').length };
+    });
+    assert.deepEqual(running, { paper: true, blobs: 0, anims: 0 });
     app.assertClean();
   } finally {
     await app.close();
@@ -593,7 +613,7 @@ test('「更多」按钮的字跟着图标换：刚点下时「关闭」还没�
 // 「更多」一屏放下（视觉 P1-6）、演示角标不挡东西（三份评审）、深色强调色（视觉 P1-3）
 // ---------------------------------------------------------------------
 
-test('「更多」菜单（390×844）：四行瓷砖、外观和签名一屏放下，签名在底栏上面', async () => {
+test('「更多」菜单（390×844）：一列八行的目录（「杂志纸本」）、外观和签名一屏放下，签名在底栏上面', async () => {
   for (const colorScheme of ['light', 'dark']) {
     const app = await open({ hash: '#/t/demo-island?sheet=menu', colorScheme });
     try {
@@ -613,7 +633,7 @@ test('「更多」菜单（390×844）：四行瓷砖、外观和签名一屏放
         };
       });
       assert.equal(r.tiles, 8);
-      assert.equal(r.rows, 4, '两列四行');
+      assert.equal(r.rows, 8, '一列八行（像书的目录）');
       assert.ok(r.sign <= r.tabbar - 8, `签名底边 ${r.sign} 在底栏上沿 ${r.tabbar} 上面`);
       assert.equal(r.scroll, 0);
       await page.screenshot({ path: path.join(SHOTS, `menu-${colorScheme}.png`) });
@@ -650,7 +670,7 @@ test('演示角标：页面最上面才显示；往下滚、打开弹层、同�
   }
 });
 
-test('演示角标：没有副标题的页面（行程列表、设置）挪到大标题那一行、右上按钮左边，不压第一张卡片；有副标题的页面还在副标题右端', async () => {
+test('演示角标：没有副标题的页面（行程列表、设置）挪到大标题那一行、右上按钮左边，不压第一张卡片；有副标题的页面副标题右端放得下就放那儿，放不下（演示行程的副标题长）也挪到大标题那一行', async () => {
   const overlaps = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
   for (const [hash, title, button] of [['#/trips', '全部行程', T('shell-settings')], ['#/settings', '设置', null], ['#/t/demo-island', '椰影岛', null]]) {
     const app = await open({ hash });
@@ -675,7 +695,11 @@ test('演示角标：没有副标题的页面（行程列表、设置）挪到�
       assert.ok(!overlaps(badge, titleBox), `${hash} 角标不压大标题`);
       if (button) assert.ok(!overlaps(badge, await rect(page, button)), `${hash} 角标不压右上按钮`);
       const slot = await page.$eval(T('demo-badge'), (el) => el.dataset.slot || 'sub');
-      assert.equal(slot, hash.startsWith('#/t/') ? 'sub' : 'title-row', `${hash} 放的位置`);
+      if (hash.startsWith('#/t/')) {
+        // 有副标题：放在副标题右端时不能压着副标题的字；挪到大标题那一行时不能压右上按钮
+        if (slot === 'sub') assert.ok(!overlaps(badge, await textRect(page, '[data-shell-head] .shell-head__sub')), `${hash} 角标不压副标题`);
+        else assert.equal(slot, 'title-row', `${hash} 放的位置`);
+      } else assert.equal(slot, 'title-row', `${hash} 放的位置`);
       await page.screenshot({ path: path.join(SHOTS, `demo-badge-${hash.replace(/[#/]+/g, '-').replace(/^-|-$/g, '')}.png`) });
       app.assertClean();
     } finally {

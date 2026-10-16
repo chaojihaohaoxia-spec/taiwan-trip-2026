@@ -362,7 +362,7 @@ test('地图底图：跟着深浅色切换——有 CARTO key 用 light_all / da
     } finally {
       await app.close();
     }
-    // 2. 没有 key（现状）：OSM；深色时底图图层带压暗滤镜
+    // 2. 没有 key（现状）：OSM；深色时底图图层带压暗滤镜，浅色时降饱和
     const osm = await open({ colorScheme: scheme });
     try {
       await ready(osm);
@@ -374,7 +374,7 @@ test('地图底图：跟着深浅色切换——有 CARTO key 用 light_all / da
       assert.ok(tiles.every((u) => /^https:\/\/tile\.openstreetmap\.org\/\d+\/\d+\/\d+\.png$/.test(u)), tiles[0]);
       const filter = await osm.page.$eval('[data-testid="trip-map"] .tm-tiles', (el) => getComputedStyle(el).filter);
       if (scheme === 'dark') assert.match(filter, /invert\(1\)/);
-      else assert.equal(filter, 'none');
+      else assert.match(filter, /saturate\(0\.3\)/, '浅色底图降饱和（纸本：OSM 原色太花）');
       assert.match(await text(osm.page, '[data-testid="trip-map"] .leaflet-control-attribution'), /© OpenStreetMap/);
       assert.deepEqual(osm.external.filter((u) => !u.includes('tile.openstreetmap.org')), []);
       osm.external.length = 0;

@@ -9,52 +9,38 @@
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1);
+  gap: 0 10px;
   min-width: 0;
 }
 
+/* 纸本：一行灰字「D1 · 备选」「今天」，不做胶囊、不画虚线框；今天是海色字 */
 .pl-day {
   display: inline-flex;
   flex: none;
-  align-items: center;
-  gap: 3px;
-  height: 22px;
-  padding: 0 7px;
-  border-radius: var(--radius-pill);
-  background: var(--color-fill);
+  align-items: baseline;
   color: var(--color-text-2);
-  font: var(--type-label);
-  font-size: var(--text-caption-1);
+  font: var(--weight-medium) var(--text-caption-1) / 1.3 var(--font-label);
   font-variant-numeric: tabular-nums;
-  letter-spacing: var(--tracking-label);
-  line-height: 1;
   white-space: nowrap;
 }
 
-.pl-day--alt {
-  border: 1px dashed var(--color-border-strong);
-  background: transparent;
+.pl-day__alt {
+  color: var(--color-text-3);
+  font-weight: var(--weight-regular);
 }
 
-.pl-day__alt {
-  font-size: var(--text-caption-2);
-  font-weight: var(--weight-medium);
+.pl-day__alt::before {
+  content: "\00a0·\00a0";
 }
 
 .pl-day--today {
-  border-color: transparent;
-  background: var(--color-accent-soft);
   color: var(--color-accent-text);
 }
 
-.pl-day--more {
-  background: transparent;
-}
-
+.pl-day--more,
 .pl-day--pool {
-  border: 1px dashed var(--color-border-strong);
-  background: transparent;
-  font-weight: var(--weight-medium);
+  color: var(--color-text-3);
+  font-weight: var(--weight-regular);
 }
 
 /* ---------- 排进 / 加进哪天 ---------- */
@@ -147,12 +133,9 @@
   place-items: center;
   width: 100%;
   height: 100%;
-  /* 没有照片：行程主题色的浅底（左上高光、右下一点第二主题色），和种类图标方块同一种“浅底 + 强调色图形” */
-  background:
-    radial-gradient(120% 100% at 100% 100%, color-mix(in srgb, var(--color-accent-2) 13%, transparent), transparent 62%),
-    radial-gradient(110% 80% at 18% 0%, var(--color-sheen), transparent 60%),
-    var(--color-accent-soft);
-  color: var(--color-accent-text);
+  /* 没有照片：一块很浅的纸灰 + 灰色种类图形（纸本不做渐变；地点页列表里干脆不画这一块，见 pages/places/places.css） */
+  background: var(--color-fill);
+  color: var(--color-text-3);
 }
 
 /* 照片上的种类小图标（左下角，凸起的白圆；网格里大一号） */

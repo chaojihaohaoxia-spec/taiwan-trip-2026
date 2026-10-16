@@ -2,7 +2,7 @@
 
 两个人一起用的旅行手帐。手机为主（iPhone Safari、装到主屏的 PWA），桌面浏览器也好用。
 
-- 技术：Preact 10 + @preact/signals + JSX，esbuild 打包；没有任何运行时 CDN（supabase-js、leaflet、图标、网页字体全部打包进来）。字体自托管：标题思源宋体（按字切片，只下载用到的）、数字 Instrument Serif、标签 Geist，正文仍用系统字体（见 `static/fonts/README.md`）。
+- 技术：Preact 10 + @preact/signals + JSX，esbuild 打包；没有任何运行时 CDN（supabase-js、leaflet、图标、网页字体全部打包进来）。字体自托管：标题思源宋体（按字切片，只下载用到的）、几个主数字 Instrument Serif，其余（正文、标签、小号数字）用系统字体（见 `static/fonts/README.md`）。
 - 源码在 `app/`，**构建产物写到仓库根目录**（GitHub Pages 从 main 分支根目录发布）：
   `index.html`、`assets/`（带内容哈希的 js/css/图片/字体）、`sw.js`、`manifest.webmanifest`、`icons/`、`fonts/`（字体授权文件）、`.nojekyll`。
 - 旧版单文件网站移到了 `../legacy/`（原样保留，没有删）。

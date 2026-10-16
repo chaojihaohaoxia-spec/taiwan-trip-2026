@@ -38,7 +38,6 @@ export const BUDGET = { initialJs: 60 * 1024, css: 25 * 1024 };
 export const FONT_LICENSE_FILES = Object.freeze({
   'fonts/licenses/Noto-Serif-SC-OFL.txt': 'fonts/licenses/Noto-Serif-SC-OFL.txt',
   'fonts/licenses/Instrument-Serif-OFL.txt': 'fonts/licenses/Instrument-Serif-OFL.txt',
-  'fonts/licenses/Geist-OFL.txt': 'fonts/licenses/Geist-OFL.txt',
   'fonts/licenses/README.md': 'fonts/README.md',
 });
 

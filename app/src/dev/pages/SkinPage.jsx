@@ -40,10 +40,6 @@ function usePalettes() {
   return [{ name: '默认（海岛）', accent: null, accent2: null }, ...trips];
 }
 
-function Blobs() {
-  return [1, 2, 3, 4, 5].map((i) => <i key={i} class="light-field__blob" />);
-}
-
 function scopeStyle(p) {
   const s = {};
   if (p.accent) s['--trip-accent'] = p.accent;
@@ -180,7 +176,7 @@ function FontRoles({ report }) {
         </div>
       </div>
       <div class="skin-font">
-        <code>--font-label · Geist（tabular-nums）+ 系统中文</code>
+        <code>--font-label · 系统字体（tabular-nums）</code>
         <p class="t-label skin-font__label">10-16 周五 · 08:30 – 21:00 · 还剩 5 项 · 2/3</p>
         <p class="skin-font__note">小号日期、计数、时间轴时间、标签里的拉丁字母和数字</p>
       </div>
@@ -215,43 +211,21 @@ function Materials() {
   );
 }
 
+/** 纸上的主题色：每趟行程只影响强调色（纸本身不变） */
 function Fields() {
   const PALETTES = usePalettes();
-  const [pick, setAt] = useState(0);
-  const at = pick % PALETTES.length;
-  const a = PALETTES[at];
-  const b = PALETTES[(at + 1) % PALETTES.length];
   return (
-    <>
-      <div class="skin-fields">
-        {PALETTES.map((p) => (
-          <figure key={p.name} class="skin-field accent-scope" style={scopeStyle(p)}>
-            <div class="light-field" aria-hidden="true">
-              <div class="light-field__layer"><Blobs /></div>
-              <div class="light-field__grain" />
-            </div>
-            <figcaption>
-              <span class="skin-field__dot" />
-              {p.name}
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-      <div class="skin-switch">
-        <div class="skin-field skin-field--wide" data-testid="skin-field-switch">
-          <div class="light-field light-field--drift" aria-hidden="true">
-            {PALETTES.map((p, i) => (
-              <div key={p.name} class="light-field__layer accent-scope" style={scopeStyle(p)} data-hidden={i === at ? undefined : ''} data-paused={i === at ? undefined : ''}>
-                <Blobs />
-              </div>
-            ))}
-            <div class="light-field__grain" />
-          </div>
-          <span class="skin-switch__name t-serif">{a.name}</span>
-        </div>
-        <Button variant="secondary" onClick={() => setAt((at + 1) % PALETTES.length)}>切到「{b.name}」</Button>
-      </div>
-    </>
+    <div class="skin-fields">
+      {PALETTES.map((p) => (
+        <figure key={p.name} class="skin-field accent-scope" style={scopeStyle(p)}>
+          <div class="paper" aria-hidden="true" />
+          <figcaption>
+            <span class="skin-field__dot" />
+            {p.name}
+          </figcaption>
+        </figure>
+      ))}
+    </div>
   );
 }
 
@@ -270,12 +244,12 @@ export default function SkinPage() {
       </section>
       <section class="dev-section">
         <h2 class="dev-section__title">材质</h2>
-        <p class="dev-section__note">卡片不开 backdrop-filter（iPhone 上几十张卡片都开会掉帧）；真玻璃只给悬浮层，同屏 ≤8 个。</p>
+        <p class="dev-section__note">「杂志纸本」：内容直接排在纸上；浮层是不透明的纸 + 细线框；不用玻璃。</p>
         <Materials />
       </section>
       <section class="dev-section">
-        <h2 class="dev-section__title">光场</h2>
-        <p class="dev-section__note">每趟行程一套：--trip-accent / --trip-accent-2 派生出底色和五个光斑；切换行程时两层交叉淡入（1.1 秒）。</p>
+        <h2 class="dev-section__title">纸和主题色</h2>
+        <p class="dev-section__note">页面是不透明的纸；每趟行程的主题色只派生强调色（压成墨一样深的海色）。</p>
         <Fields />
       </section>
     </div>

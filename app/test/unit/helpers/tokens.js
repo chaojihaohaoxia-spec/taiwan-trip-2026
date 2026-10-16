@@ -236,7 +236,7 @@ export function resolveRelativeOklch(expr, vars) {
   return [...rgb, alpha === undefined ? 1 : Number(alpha)];
 }
 
-/** tokens.css 里 @supports (color: oklch(from red l c h)) 那一块（光场的鲜亮版本）的变量 */
+/** tokens.css 里 @supports (color: oklch(from red l c h)) 那一块（强调色的 OKLCH 版本）的变量 */
 export function readRelativeBlock(css) {
   const start = css.indexOf('@supports (color: oklch(from red l c h))');
   if (start === -1) return {};

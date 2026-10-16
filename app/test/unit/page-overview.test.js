@@ -181,25 +181,31 @@ test('今天的待办：挂在今天的 + 今天到期的在前，更早过期�
 // ---------------------------------------------------------------------
 
 test('出发前的顺序：倒计时永远第一；急的免费取消紧跟其后；3 天内出发还没打包完的打包提前；7 天内天气提前', () => {
-  assert.deepEqual(upcomingOrder({ daysUntil: 20, packingLeft: 10 }), ['hero', 'todos', 'deadlines', 'days', 'weather', 'packing', 'pool']);
-  assert.deepEqual(upcomingOrder({ daysUntil: 5, packingLeft: 10 }), ['hero', 'todos', 'deadlines', 'weather', 'days', 'packing', 'pool']);
-  assert.deepEqual(upcomingOrder({ daysUntil: 2, packingLeft: 3 }), ['hero', 'todos', 'deadlines', 'packing', 'weather', 'days', 'pool']);
-  assert.deepEqual(upcomingOrder({ daysUntil: 2, packingLeft: 0 }), ['hero', 'todos', 'deadlines', 'weather', 'days', 'packing', 'pool']);
-  assert.deepEqual(upcomingOrder({ daysUntil: 2, urgentDeadline: true, packingLeft: 0 }), ['hero', 'deadlines', 'todos', 'weather', 'days', 'packing', 'pool']);
-  assert.deepEqual(upcomingOrder({ daysUntil: null }), ['hero', 'todos', 'deadlines', 'days', 'weather', 'packing', 'pool']);
+  assert.deepEqual(upcomingOrder({ daysUntil: 20, packingLeft: 10 }), ['hero', 'todos', 'deadlines', 'days', 'weather', 'packing']);
+  assert.deepEqual(upcomingOrder({ daysUntil: 5, packingLeft: 10 }), ['hero', 'todos', 'deadlines', 'weather', 'days', 'packing']);
+  assert.deepEqual(upcomingOrder({ daysUntil: 2, packingLeft: 3 }), ['hero', 'todos', 'deadlines', 'packing', 'weather', 'days']);
+  assert.deepEqual(upcomingOrder({ daysUntil: 2, packingLeft: 0 }), ['hero', 'todos', 'deadlines', 'weather', 'days', 'packing']);
+  assert.deepEqual(upcomingOrder({ daysUntil: 2, urgentDeadline: true, packingLeft: 0 }), ['hero', 'deadlines', 'todos', 'weather', 'days', 'packing']);
+  assert.deepEqual(upcomingOrder({ daysUntil: null }), ['hero', 'todos', 'deadlines', 'days', 'weather', 'packing']);
+  assert.ok(!upcomingOrder({ daysUntil: 2 }).includes('pool'), '备选池不在概览上（在地点页）');
 });
 
-test('进行中的顺序：现在 / 接下来第一；最后一天紧跟回程航班；傍晚或都做完了住哪提前；急的待办、快日落提前', () => {
-  const base = ongoingOrder({ minutes: 10 * 60, hasUpcoming: true });
-  assert.deepEqual(base, ['now', 'timeline', 'spend', 'weather', 'stay', 'todos', 'deadlines', 'tomorrow', 'pool']);
-  assert.deepEqual(ongoingOrder({ minutes: 19 * 60, hasUpcoming: true }).slice(0, 2), ['now', 'stay']);
-  assert.deepEqual(ongoingOrder({ minutes: 10 * 60, hasUpcoming: false }).slice(0, 2), ['now', 'stay']);
-  assert.deepEqual(ongoingOrder({ minutes: 19 * 60, hasUpcoming: true, isLastDay: true }).slice(0, 3), ['now', 'flight', 'timeline']);
-  assert.deepEqual(ongoingOrder({ minutes: 10 * 60, hasUpcoming: true, todoSoon: true }).slice(0, 2), ['now', 'todos']);
-  const sunset = ongoingOrder({ minutes: 16 * 60, hasUpcoming: true, sunsetSoon: true });
-  assert.deepEqual(sunset.slice(0, 2), ['now', 'weather']);
+test('进行中的顺序（一屏一个主角）：现在 → 今晚住 → 天气 → 今天的待办 → 免费取消 → 明天；最后一天紧跟回程航班；傍晚以后今晚住哪紧跟现在；急的待办、快日落提前；不再有时间轴缩略、今天花了、备选池', () => {
+  const base = ongoingOrder({});
+  assert.deepEqual(base, ['now', 'stay', 'weather', 'todos', 'deadlines', 'tomorrow']);
+  assert.deepEqual(ongoingOrder({ isLastDay: true }).slice(0, 3), ['now', 'flight', 'stay']);
+  assert.deepEqual(ongoingOrder({ outbound: true }).slice(0, 2), ['now', 'outflight']);
+  assert.deepEqual(ongoingOrder({ todoSoon: true }).slice(0, 3), ['now', 'todos', 'stay']);
+  // 傍晚以后：今晚住哪紧跟「现在」，排在急的待办和日落前面；最后一天还是回程航班优先（当晚不住）
+  assert.deepEqual(ongoingOrder({ evening: true, todoSoon: true, sunsetSoon: true }).slice(0, 4), ['now', 'stay', 'todos', 'weather']);
+  assert.deepEqual(ongoingOrder({ evening: true, isLastDay: true }).slice(0, 3), ['now', 'flight', 'stay']);
+  const sunset = ongoingOrder({ sunsetSoon: true });
+  assert.deepEqual(sunset.slice(0, 3), ['now', 'weather', 'stay']);
   assert.equal(sunset.filter((k) => k === 'weather').length, 1);
-  for (const o of [base, sunset]) assert.equal(new Set(o).size, o.length, '每种卡只出现一次');
+  for (const o of [base, sunset, ongoingOrder({ todoSoon: true, sunsetSoon: true, isLastDay: true }), ongoingOrder({ evening: true, todoSoon: true, sunsetSoon: true })]) {
+    assert.equal(new Set(o).size, o.length, '每种卡只出现一次');
+    for (const gone of ['timeline', 'spend', 'pool']) assert.ok(!o.includes(gone), `${gone} 不在概览上`);
+  }
 });
 
 // ---------------------------------------------------------------------

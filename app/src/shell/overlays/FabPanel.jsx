@@ -1,7 +1,8 @@
 // =====================================================================
 // shell/overlays/FabPanel.jsx：＋ 快速添加面板（sheet id fab；样稿 03-加号面板.png、13 / 14-帧条）。
 //
-// 从底栏的 ＋ 原位长出来（overlay/AnchoredPanel：按钮的颜色变成面板，加号转 ×）；底栏这时浮在面板上面、一直能点。
+// 从底栏的 ＋ 原位长出来（overlay/AnchoredPanel，加号转 ×；纸本：tintOnEnter={false}，不先盖一大块实心海色，
+// 是纸色的面板从按钮的形状长出来、内容跟着淡入）；底栏这时浮在面板上面、一直能点。
 // 收回：原路缩回 ＋，最后一段淡掉（tintOnExit={false}：底栏浮在面板上面，染成按钮色的形状会从底栏上沿冒出一块青绿，
 // 样稿 14-帧条里是白色的形状缩进加号）。
 // 五个动作（打开 sheets/ 的弹层，参数照 sheets/index.js 的帮手写）：
@@ -12,7 +13,8 @@
 //   加待办     todo      openTodoSheet({ list: 'todo' })
 // 只读成员：记一笔 / 加条目 / 加待办变淡、不能点，副标题写原因（view-rules.js 的 fabActions）。
 // date：在某一天的页面上就是那天；行程进行中是今天；否则不预填。
-// 顺序按阶段：进行中「记一笔」最大最前；出发前先「加条目」「加待办」；回顾先「写日记」。最后一个占整行。
+// 外观（「杂志纸本」）：像酒店房间手册的目录——一列单色的行，线条图标 + 宋体名字 + 一行灰字说明，行间细线。
+// 顺序按阶段：进行中「记一笔」放第一行、大一号；出发前先「加条目」「加待办」；回顾先「写日记」。
 //
 // 衔接：点了以后面板先原路收回到 ＋（--spring-smooth），同时目标面板从底部滑上来——两段动画同时进行，
 // 中间没有空白帧（e2e 截半路图核对）；历史里只留目标面板一条（返回手势直接回到页面）。
@@ -78,12 +80,12 @@ export default function FabPanel() {
   };
 
   return (
-    <AnchoredPanel sheetId="fab" placement="above" align="center" width={520} gap={GAP} title="快速添加" class="fab-panel" testId="fab-panel" tintOnExit={false}>
+    <AnchoredPanel sheetId="fab" placement="above" align="center" width={520} gap={GAP} title="快速添加" class="fab-panel" testId="fab-panel" tintOnEnter={false} tintOnExit={false}>
       <div class="fab-grid" data-phase={phase}>
         {actions.map((a) => {
           const inner = (
             <>
-              <span class="fab-tile__ico" aria-hidden="true"><Glyph name={a.glyph} size={a.hero ? 26 : 22} /></span>
+              <span class="fab-tile__ico" aria-hidden="true"><Glyph name={a.glyph} size={24} /></span>
               <span class="fab-tile__text" aria-hidden={a.id === 'photo' ? 'true' : undefined}>
                 <b>{a.title}</b>
                 <i>{a.hint}</i>
@@ -92,9 +94,7 @@ export default function FabPanel() {
           );
           const common = {
             class: a.id === 'photo' ? 'fab-tile fab-tile--file' : 'fab-tile',
-            'data-tone': a.tone,
             'data-hero': a.hero ? '' : undefined,
-            'data-wide': a.wide ? '' : undefined,
             'data-disabled': a.disabled ? '' : undefined,
             'data-press': a.disabled ? undefined : 'scale',
             'data-testid': `fab-${a.id}`,

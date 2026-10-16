@@ -1,12 +1,13 @@
 /* =====================================================================
    styles/tokens.css：设计变量（唯一的取值来源）
 
-   皮肤：A「液态玻璃 · 海岛光」+ P2「杂志宋体」（样稿 $S/design/fontpairs/P2-serif/）。
-   - 页面铺在“光场”上（每趟行程一套主题色光斑，见第 9 节 --field-* 和 styles/field.css 的 .light-field）；
-   - 内容卡片是高不透明度的磨砂白（深色是磨砂深灰）：半透明底 + 细描边 + 顶部高光模拟玻璃，**不开 backdrop-filter**
-     （--material-card，styles/materials.css 的 .material-card）；
-   - 真玻璃（backdrop-filter）只给悬浮层：顶栏、底栏、悬浮按钮、弹层、菜单（--material-glass / --material-glass-strong、.material-glass）；
-   - 字体：标题思源宋体 600、大号数字 Instrument Serif、小号数字和标签 Geist、正文系统字体（第 5 节）。
+   视觉：「杂志纸本」（SPEC §11，10-15 定）——内容像印在纸上的旅行手帐，界面往后退。
+   - 页面是米白的纸（深色是深墨色的纸），纯色，只留一点纸纹（styles/field.css 的 .paper）；
+   - 内容直接排在纸上，用 1px 细线分组；只有「现在」、预订卡、弹层是一张细线框的纸片（--color-card）；
+   - 不用玻璃、不要光斑 / 渐变 / 发光：顶栏、底栏、弹层都是不透明的纸（--glass-filter: none）；
+   - 墨色的字，只用一种海水绿（--color-accent，“下一步要按的那个”和“现在”）；其他颜色只用来报警（砖红过期、赭石快到期，都只是字）；
+   - 字：宋体做标题、栏目名、D1–D4、预订名；数字和正文用系统字体（SF 自带等宽数字）；Instrument Serif 只给倒计时、航班起降、
+     账本总额、入住 / 退房时刻（第 5 节）。
 
    规则：
    - 组件只能用 var(--…) 取颜色、圆角、阴影、模糊、字体、字号、间距、层级、动效；
@@ -14,9 +15,9 @@
    - 深色模式：跟随系统时用 @media (prefers-color-scheme: dark)；用户在设置里强制浅色/深色时，
      <html data-theme="light|dark"> 优先（lib/theme.js 负责写这个属性）。
    - 行程主题色（trips.cover.accent / accent_2）：整页换色用 lib/theme.js 的 setTripAccent(hex)（写在 <html> 的 --trip-accent）；
-     第二主题色（光场下半部分的暖色）写 --trip-accent-2（不写就用默认的珊瑚色）。
-     只给某个容器换色（例如行程列表里每张卡片各用各的色、光场的每一层），在容器上设置
-     style="--trip-accent: #…; --trip-accent-2: #…" 并加 class="accent-scope"。不设置就用默认的海岛青绿。
+     第二主题色写 --trip-accent-2（不写就用默认的沙色）。主题色当强调色时会被压暗、降饱和成“墨一样深”的颜色（见强调色派生）。
+     只给某个容器换色（例如行程列表里每张卡片各用各的色），在容器上设置
+     style="--trip-accent: #…; --trip-accent-2: #…" 并加 class="accent-scope"。不设置就用默认的海水绿。
    - --spring-* 那一段由 src/motion/springs.js 生成（npm run tokens），不要手改。
 
    构建脚本会从这里读取 --color-canvas 的浅色/深色值，写进 manifest 和 <meta name="theme-color">。
@@ -27,141 +28,141 @@
      1. 颜色（语义命名，浅色）
      --------------------------------------------------------------- */
 
-  /* 页面底色：光场最上面的那层薄荷色（theme-color、PWA 启动底色、iOS 回弹时露出来的底）。
-     页面本身铺在光场上（.light-field），canvas 平时看不见 */
-  --color-canvas: #dff1ed;
-  /* 卡片：高不透明度的磨砂白。这里是平均色（给“只要一个颜色”的地方用）；完整材质（渐变 + 高光 + 描边）用 --material-card */
-  --color-surface: rgba(255, 255, 255, 0.66);
-  /* 卡片里再分层：往下凹的浅灰（输入框底、数字格、统计块） */
-  --color-surface-2: rgba(10, 28, 35, 0.04);
-  --color-surface-3: rgba(10, 28, 35, 0.07);
-  /* 浮层面（弹层、菜单、确认框）：配合 backdrop-filter 用（--material-glass-strong） */
-  --color-surface-raised: rgba(255, 255, 255, 0.82);
-  /* 控件滑块（分段控件的选中块、开关的圆钮）：近乎不透明的白，浮在玻璃胶囊上 */
-  --color-thumb: rgba(255, 255, 255, 0.94);
+  /* 纸（页面底色，也是 theme-color、PWA 启动底色、iOS 回弹时露出来的底）。纸上：正文 15.1:1、次要 6.0:1、装饰 3.25:1 */
+  --color-canvas: #f4f1ea;
+  /* 纸片：「现在」、预订卡、弹层这几样细线框的纸（比纸亮一点）；“只要一个颜色”的地方也用它 */
+  --color-surface: #fbf9f4;
+  /* 纸上往下凹一点的浅墨：输入框底、数字格（几乎不用了，内容靠细线分组） */
+  --color-surface-2: rgba(29, 28, 26, 0.04);
+  --color-surface-3: rgba(29, 28, 26, 0.07);
+  /* 浮层的纸（弹层、菜单、确认框）：不透明 */
+  --color-surface-raised: #f7f4ee;
+  /* 控件滑块（分段控件的选中块、开关的圆钮）：一张纸片 */
+  --color-thumb: #fbf9f4;
 
-  /* 文字：text = 正文；text-2 = 次要说明（≥4.5:1）；text-3 = 占位、禁用、装饰（≥3:1，不要用于正文）。
-     次要文字用半透明的墨色：放在玻璃、光场上会带一点底下的颜色，比纯灰更融 */
-  --color-text: #0a1c23;
-  --color-text-2: rgba(10, 28, 35, 0.74);
-  --color-text-3: rgba(10, 28, 35, 0.6);
-  --color-text-inverse: #ffffff;
+  /* 文字：text = 正文（墨）；text-2 = 次要说明（6.0:1）；text-3 = 小字标注、计数、占位（纸上 4.76:1：
+     天数条的日期、栏目计数、「香港时间」这些户外强光下也要读得清，所以不再用 3:1 的装饰灰） */
+  --color-text: #1d1c1a;
+  --color-text-2: #5f5b54;
+  --color-text-3: #6f6a62;
+  --color-text-inverse: #f4f1ea;
+  /* 给司机看（sheets/driver）：全站唯一的纯白底，户外强光下给别人看，越清楚越好（这一屏不改，SPEC §11） */
+  --color-driver-bg: #ffffff;
 
-  /* 线 */
-  --color-border: rgba(10, 28, 35, 0.12);
-  --color-border-strong: rgba(10, 28, 35, 0.3);
-  --color-separator: rgba(10, 28, 35, 0.09);
+  /* 线：细线取代大部分盒子 */
+  --color-border: rgba(29, 28, 26, 0.14);
+  --color-border-strong: rgba(29, 28, 26, 0.34);
+  --color-separator: rgba(29, 28, 26, 0.12);
   /* 轨道：开关的底、时间轴的竖线、路线底色 */
-  --color-rail: rgba(10, 28, 35, 0.16);
+  --color-rail: rgba(29, 28, 26, 0.16);
 
-  /* 中性填充（往下凹）：输入框底、分段控件的轨道、标签、列表行按下（半透明，叠在任何面上都成立） */
-  --color-fill: rgba(10, 28, 35, 0.055);
-  --color-fill-hover: rgba(10, 28, 35, 0.08);
-  --color-fill-pressed: rgba(10, 28, 35, 0.11);
-  /* 凸起的白（往上浮）：次要按钮、图标按钮、筛选胶囊、卡片里的小方块（配 --shadow-raised 的顶部高光和细边） */
-  --color-raised: rgba(255, 255, 255, 0.7);
-  --color-raised-hover: rgba(255, 255, 255, 0.84);
-  --color-raised-pressed: rgba(255, 255, 255, 0.52);
+  /* 中性填充（往下凹）：输入框底、分段控件的轨道、列表行按下 */
+  --color-fill: rgba(29, 28, 26, 0.05);
+  --color-fill-hover: rgba(29, 28, 26, 0.07);
+  --color-fill-pressed: rgba(29, 28, 26, 0.1);
+  /* 纸片（往上一点）：次要按钮、图标按钮、筛选胶囊的底（配 --shadow-raised 的细线） */
+  --color-raised: #fbf9f4;
+  --color-raised-hover: #fffdf9;
+  --color-raised-pressed: #eeeae2;
 
-  /* 卡片材质的两端（左上 → 右下的渐变，不开 backdrop-filter） */
-  --color-card: rgba(255, 255, 255, 0.74);
-  --color-card-2: rgba(255, 255, 255, 0.56);
+  /* 纸片的颜色（--material-card 用；两端一样，没有渐变） */
+  --color-card: #fbf9f4;
+  --color-card-2: #fbf9f4;
 
-  /* 玻璃材质（只用在悬浮层，配合 backdrop-filter）：glass = 普通玻璃两端；glass-strong = 顶栏、弹层用的厚一点的玻璃两端 */
-  --color-glass: rgba(255, 255, 255, 0.7);
-  --color-glass-2: rgba(255, 255, 255, 0.5);
-  --color-glass-strong: rgba(255, 255, 255, 0.8);
-  --color-glass-strong-2: rgba(255, 255, 255, 0.6);
-  /* 叠在 glass-strong-2 上、把左上角提亮到 glass-strong 的那层（--material-glass-lift 用） */
-  --color-glass-lift: rgba(255, 255, 255, 0.5);
-  /* 玻璃的边：细描边 / 顶部高光 / 底部暗边 / 内发光 */
-  --color-glass-border: rgba(255, 255, 255, 0.55);
-  --color-glass-highlight: rgba(255, 255, 255, 0.95);
-  --color-glass-shade: rgba(255, 255, 255, 0.3);
-  --color-glass-glow: rgba(255, 255, 255, 0.22);
-  /* 边缘折射高光（左上亮、右下次亮的 1px 渐变描边）和左上角的镜面光斑 */
-  --color-rim: #ffffff;
-  --color-rim-2: rgba(255, 255, 255, 0.65);
-  --color-sheen: rgba(255, 255, 255, 0.42);
-  /* 滚动边缘：内容滑进顶栏、底栏下面时渐隐用的底色；底栏那头淡得多（底栏的玻璃要看得见后面的内容，不能先被它洗白） */
-  --color-edge-tint: rgba(232, 244, 241, 0.55);
-  --color-edge-tint-bottom: rgba(232, 244, 241, 0.25);
-  /* 底栏的液态玻璃（shell/tabbar.css，照 iOS 26 Apple Music）：比顶栏、弹层通透得多，后面内容的颜色和形状看得见。
-     glass / glass-2 上下两端的薄色；sheen 内侧上半部极淡的光泽；rim 上沿的折射亮边、rim-shade 下沿的暗边；border 细描边；
-     lens / lens-2 选中块（更亮、更透的一块玻璃）；lens-clear / lens-ring 按住时浮起的透镜（更透、亮边更亮）；
-     ink 没选中的字和图标；halo 字和图标后面那层贴着字形的晕（“活力”：浅色白晕、深色暗晕，最亮 / 最暗 / 最花的背景上字都 ≥4.5:1、图标 ≥3:1）；
-     halo-strong 选中那格用的晕（强调色的字比 ink 浅，要更足的晕；在选中块上面本来就看不出来）；
-     shadow 悬浮阴影的颜色 */
-  --color-tabbar-glass: rgba(255, 255, 255, 0.4);
-  --color-tabbar-glass-2: rgba(255, 255, 255, 0.24);
-  --color-tabbar-sheen: rgba(255, 255, 255, 0.55);
-  --color-tabbar-rim: rgba(255, 255, 255, 0.95);
-  --color-tabbar-rim-shade: rgba(10, 28, 35, 0.14);
-  --color-tabbar-border: rgba(255, 255, 255, 0.42);
-  --color-tabbar-lens: rgba(255, 255, 255, 0.64);
-  --color-tabbar-lens-2: rgba(255, 255, 255, 0.46);
-  --color-tabbar-lens-clear: rgba(255, 255, 255, 0.16);
-  --color-tabbar-lens-ring: rgba(255, 255, 255, 0.95);
-  --color-tabbar-ink: rgba(10, 28, 35, 0.86);
-  --color-tabbar-halo: rgba(255, 255, 255, 0.85);
-  --color-tabbar-halo-strong: rgba(255, 255, 255, 1);
-  --color-tabbar-shadow: rgba(12, 52, 62, 0.3);
+  /* 浮层（顶栏收起后、天数条、弹层、菜单）：不透明的纸，不用玻璃 */
+  --color-glass: #f7f4ee;
+  --color-glass-2: #f7f4ee;
+  --color-glass-strong: #f7f4ee;
+  --color-glass-strong-2: #f7f4ee;
+  /* 以前叠在玻璃左上角的提亮层：纸上不要 */
+  --color-glass-lift: transparent;
+  /* 浮层的细线框；以前玻璃的顶部高光 / 底部暗边 / 内发光：不要 */
+  --color-glass-border: rgba(29, 28, 26, 0.14);
+  --color-glass-highlight: transparent;
+  --color-glass-shade: transparent;
+  --color-glass-glow: transparent;
+  /* 以前的折射描边和镜面光斑：不要 */
+  --color-rim: transparent;
+  --color-rim-2: transparent;
+  --color-sheen: transparent;
+  /* 滚动边缘：顶栏那一条是实心纸色（像印刷页眉，内容不从按钮后面透出来）；底栏下面只淡淡一层 */
+  --color-edge-tint: #f4f1ea;
+  --color-edge-tint-bottom: rgba(244, 241, 234, 0.6);
+  /* 底栏（shell/tabbar.css）：一张不透明的纸片 + 细线框，选中只是海色的字。
+     glass / glass-2 纸色；border 细线框；ink 没选中的字和图标；shadow 很浅的悬浮阴影的颜色。
+     sheen / rim / rim-shade / lens / lens-2 / lens-clear / lens-ring / halo / halo-strong 是以前液态玻璃的光泽、折射边、选中块、
+     透镜和字后面的晕：纸上都不要（透明） */
+  --color-tabbar-glass: #fbf9f4;
+  --color-tabbar-glass-2: #fbf9f4;
+  --color-tabbar-sheen: transparent;
+  --color-tabbar-rim: transparent;
+  --color-tabbar-rim-shade: transparent;
+  --color-tabbar-border: rgba(29, 28, 26, 0.14);
+  --color-tabbar-lens: transparent;
+  --color-tabbar-lens-2: transparent;
+  --color-tabbar-lens-clear: transparent;
+  --color-tabbar-lens-ring: transparent;
+  --color-tabbar-ink: #5f5b54;
+  --color-tabbar-halo: transparent;
+  --color-tabbar-halo-strong: transparent;
+  --color-tabbar-shadow: rgba(29, 28, 26, 0.1);
 
-  /* 强调色：accent 用作实心底（主按钮、选中态、进度）；accent-text 用作文字和小图标（在玻璃上 ≥4.5:1）；
-     on-accent 是放在 accent 实心底上的文字色；accent-soft 是浅色底（选中的标签、高亮行）；
-     accent-2 是第二主题色（光场的暖色、天气图标、路线的终点）。
+  /* 强调色（一笔海水绿，墨一样深）：accent 用作实心底（主按钮、＋、选中的天）；accent-text 用作文字和小图标（链接、「现在」）；
+     on-accent 是放在 accent 实心底上的文字色；accent-soft 是很浅的底（选中的行）；
+     accent-2 是第二主题色（沙色，路线终点、地图上少量点缀）。
      派生色在文件后面的「强调色派生」一节里计算（那一节同时作用于 .accent-scope），这里只放默认色和派生参数。 */
   --trip-accent: initial;
   --trip-accent-2: initial;
-  --color-accent-default: #0a7c75;
-  --color-accent-2-default: #e85d3f;
-  --color-on-accent: #ffffff;
-  /* 行程主题色当实心底时：浅色压暗一点（白字才清楚）；深色提亮（深底上才看得清、才配得上深色字）。
+  --color-accent-default: #1f5f5b;
+  --color-accent-2-default: #8c7550;
+  --color-on-accent: #f7f4ee;
+  /* 行程主题色当实心底时：压暗、降饱和（墨一样深，纸色字才清楚；深色模式提亮、配深墨色字）。
      所有浏览器：和黑 / 白混合；支持相对颜色语法的浏览器：在 OKLCH 里把亮度夹在 [lmin, lmax]、彩度乘 c（见后面 @supports） */
   --accent-solid-mix: 88%;
   --accent-solid-toward: #000000;
   --accent-solid-lmin: 0;
-  --accent-solid-lmax: 0.55;
-  --accent-solid-c: 1;
+  --accent-solid-lmax: 0.43;
+  --accent-solid-c: 0.62;
   --accent-hover-mix: 90%;
   --accent-hover-toward: #000000;
   --accent-pressed-mix: 82%;
-  --accent-soft-mix: 13%;
+  --accent-soft-mix: 8%;
   --accent-text-mix: 76%;
   --accent-text-toward: #000000;
-  /* 支持 OKLCH 时：强调色文字的亮度夹在这个范围（浅色 ≤0.48 才在玻璃上 ≥4.5:1；深色 ≥0.9：深色的选中块
-     （白色滑块 --color-thumb）叠在光场最亮处时，上面的强调色小字——底栏选中的「行程」、分段条的「今天」——也 ≥4.5:1） */
+  /* 支持 OKLCH 时：强调色文字的亮度夹在这个范围（浅色 ≤0.42：纸上 7:1 左右；深色 ≥0.8） */
   --accent-text-lmin: 0;
-  --accent-text-lmax: 0.48;
-  --accent-glow-mix: 40%;
+  --accent-text-lmax: 0.42;
+  /* 实心强调色下面的柔光：纸上不要（0%） */
+  --accent-glow-mix: 0%;
 
-  /* 状态色：solid 实心底 / soft 浅底 / text 文字 / on 实心底上的文字 */
-  --color-success: #0f7a57;
-  --color-success-soft: rgba(15, 127, 92, 0.14);
-  --color-success-text: #0a5e45;
-  --color-on-success: #ffffff;
+  /* 状态色：solid 实心底 / soft 浅底 / text 文字 / on 实心底上的文字。
+     只标异常：成功、信息（已订、已付、备选……）都是次要灰字、没有底；只有砖红（过期、紧急、还没订）和赭石（快到期），而且只是字 */
+  --color-success: #3f6b55;
+  --color-success-soft: transparent;
+  --color-success-text: #5f5b54;
+  --color-on-success: #f7f4ee;
 
-  --color-warning: #e8921e;
-  --color-warning-soft: rgba(232, 146, 30, 0.2);
-  --color-warning-text: #7a4100;
-  --color-on-warning: #0a1c23;
+  --color-warning: #806020;
+  --color-warning-soft: rgba(122, 90, 22, 0.07);
+  --color-warning-text: #7a5a16;
+  --color-on-warning: #f7f4ee;
 
-  --color-danger: #c8372d;
-  --color-danger-soft: rgba(200, 55, 45, 0.12);
-  --color-danger-text: #a8261d;
-  --color-on-danger: #ffffff;
+  --color-danger: #9a3b2e;
+  --color-danger-soft: rgba(154, 59, 46, 0.06);
+  --color-danger-text: #9a3b2e;
+  --color-on-danger: #f7f4ee;
 
-  --color-info: #1b64a8;
-  --color-info-soft: rgba(27, 100, 168, 0.13);
-  --color-info-text: #17558c;
-  --color-on-info: #ffffff;
+  --color-info: #4e5d6c;
+  --color-info-soft: transparent;
+  --color-info-text: #5f5b54;
+  --color-on-info: #f7f4ee;
 
-  /* 遮罩（弹层后面那层，带一点青灰；配合 --scrim-filter 把页面压暗、虚化） */
-  --color-scrim: rgba(14, 36, 44, 0.22);
+  /* 遮罩（弹层后面那层：压暗一点，不虚化） */
+  --color-scrim: rgba(29, 28, 26, 0.2);
 
   /* 骨架屏、加载占位 */
-  --color-skeleton: rgba(10, 28, 35, 0.07);
-  --color-skeleton-shine: rgba(255, 255, 255, 0.55);
+  --color-skeleton: rgba(29, 28, 26, 0.07);
+  --color-skeleton-shine: rgba(251, 249, 244, 0.6);
 
   /* 评级五档（reviews.rating）：5 夯 / 4 顶级 / 3 人上人 / 2 NPC / 1 拉完了。实心底，配白字 */
   --color-rating-5: #c8371f;
@@ -171,7 +172,7 @@
   --color-rating-1: #6a7377;
   --color-on-rating: #ffffff;
 
-  /* 分类色（图表、记账分类、地图上的分段）。和面的对比度 ≥3:1 */
+  /* 分类色（图表、记账分类、头像）。和面的对比度 ≥3:1 */
   --color-cat-1: #1b64a8;
   --color-cat-2: #d24a14;
   --color-cat-3: #0f7a57;
@@ -180,146 +181,141 @@
   --color-cat-6: #0a7c75;
   --color-cat-7: #a35c00;
   --color-cat-8: #56656b;
-  
-  /* ＋ 面板图标块的渐变（左上亮 → 右下深，白图标；照样稿 03 的 .ft-ico：记一笔青绿、拍照珊瑚、日记蓝、加条目琥珀；
-     加待办的紫按同样的明度另配）。分类色是为了“在面上 ≥3:1”调深的，拿来做渐变会发泥，所以单独一套 */
-  --color-tile-teal-1: #38d1b8;
-  --color-tile-teal-2: #0a7c75;
-  --color-tile-coral-1: #ffb38a;
-  --color-tile-coral-2: #b8462c;
-  --color-tile-blue-1: #8fb8ff;
-  --color-tile-blue-2: #4a6fd8;
-  --color-tile-amber-1: #ffc85a;
-  --color-tile-amber-2: #c98309;
-  --color-tile-violet-1: #c4a6ff;
-  --color-tile-violet-2: #7a4fd6;
-  --color-on-tile: #ffffff;
-  /* 第几天的颜色（全站一套：概览的 D1–D4 徽章、地图的图钉 / 路线 / 筛选小点、以后日记账本的 D 徽章都用它；
-     视觉评审 P1-2：以前概览是 青蓝珊瑚紫、地图是 蓝橙绿紫，同一天两处颜色相反）。
-     --color-day-N：跟主题走（浅色是深色调、配白字 / --color-text-inverse；深色模式换成同一色相的浅色调、配深色字），图钉、路线、小点用；
-     --color-day-N-deep：两种主题都一样的深色调，白字（--color-on-tile）≥ 4.5:1，徽章这种白字压在色块上的用。
-     顺序：青、蓝、珊瑚、紫、玫红、琥珀、绿（7 天一轮）。 */
-  --color-day-1: #0a7c75;
-  --color-day-2: #4a6fd8;
-  --color-day-3: #b8462c;
-  --color-day-4: #7a4fd6;
-  --color-day-5: #c2255c;
-  --color-day-6: #a35c00;
-  --color-day-7: #0f7a57;
-  --color-day-1-deep: #0a7c75;
-  --color-day-2-deep: #4a6fd8;
-  --color-day-3-deep: #b8462c;
-  --color-day-4-deep: #7a4fd6;
-  --color-day-5-deep: #c2255c;
-  --color-day-6-deep: #a35c00;
-  --color-day-7-deep: #0f7a57;
+
+  /* 以前 ＋ 面板的五色渐变图标块：纸上不要（透明；面板是一列单色的行）。on-tile 是“压在深色块上的纸色字”（第几天的深色徽章） */
+  --color-tile-teal-1: transparent;
+  --color-tile-teal-2: transparent;
+  --color-tile-coral-1: transparent;
+  --color-tile-coral-2: transparent;
+  --color-tile-blue-1: transparent;
+  --color-tile-blue-2: transparent;
+  --color-tile-amber-1: transparent;
+  --color-tile-amber-2: transparent;
+  --color-tile-violet-1: transparent;
+  --color-tile-violet-2: transparent;
+  --color-on-tile: #fbf9f4;
+  /* 第几天的颜色：一组低饱和的大地色，**只在地图上用**（图钉、路线、筛选小点，四天的路线要分得开）。
+     页面上的 D1–D4 一律是墨色的字（今天用海色），不上色。
+     --color-day-N：跟主题走（浅色是深色调、配纸色字 / --color-text-inverse；深色模式换成同一色相的浅色调、配深色字），图钉、路线、小点用；
+     --color-day-N-deep：两种主题都一样的深色调，纸色字（--color-on-tile）≥ 4.5:1，字压在色块上的用。
+     顺序：海绿、灰蓝、陶土、橄榄、灰紫、沙、苔绿（7 天一轮）。 */
+  --color-day-1: #2f6b66;
+  --color-day-2: #4e5d6c;
+  --color-day-3: #8f5440;
+  --color-day-4: #5f5e36;
+  --color-day-5: #6b4e62;
+  --color-day-6: #75603f;
+  --color-day-7: #4a6545;
+  --color-day-1-deep: #2f6b66;
+  --color-day-2-deep: #4e5d6c;
+  --color-day-3-deep: #8f5440;
+  --color-day-4-deep: #5f5e36;
+  --color-day-5-deep: #6b4e62;
+  --color-day-6-deep: #75603f;
+  --color-day-7-deep: #4a6545;
 
   /* ---------------------------------------------------------------
-     2. 圆角（大致同心：外层圆角 ≈ 内层圆角 + 内边距）
+     2. 圆角：收小，像纸片（卡片 14、按钮 10、弹层 22）；胶囊只留给底栏、开关这类
      --------------------------------------------------------------- */
-  --radius-xs: 8px;
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 22px;
-  --radius-xl: 26px;
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  /* 按钮、小块 */
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  /* 纸片（「现在」、预订卡） */
+  --radius-xl: 14px;
   /* 悬浮面板（从加号长出来的面板、行程切换面板） */
-  --radius-2xl: 32px;
-  /* 底部面板（四边离屏幕 8px 的浮动卡片，和 iPhone 屏幕圆角同心） */
-  --radius-sheet: 38px;
+  --radius-2xl: 18px;
+  /* 底部面板 */
+  --radius-sheet: 22px;
   --radius-pill: 999px;
   --radius-round: 50%;
-  /* 图标小方块（40 / 34 / 30px 见方）：圆角约为边长的三分之一（13 / 11 / 10px），只用在正方形上 */
-  --radius-tile: 32%;
+  /* 小方块（缩略图、色块）：只用在正方形上 */
+  --radius-tile: 8px;
 
   /* ---------------------------------------------------------------
-     3. 阴影（四级：贴面 → 卡片 → 悬浮 → 弹层）。光场上的卡片几乎不投影，靠材质的高光和描边分层
+     3. 阴影：纸上几乎不投影（分组靠 1px 细线）；悬浮层、弹层一层很浅的柔影
      --------------------------------------------------------------- */
-  --shadow-1: 0 1px 2px rgba(12, 52, 62, 0.06);
-  --shadow-2: 0 6px 16px -6px rgba(12, 52, 62, 0.22);
-  --shadow-3: 0 18px 40px -16px rgba(12, 52, 62, 0.35), 0 4px 12px -4px rgba(12, 52, 62, 0.12);
-  --shadow-4: 0 28px 64px -20px rgba(12, 52, 62, 0.42), 0 8px 22px -8px rgba(12, 52, 62, 0.16);
-  /* 按下时：阴影变浅，配合缩放 */
-  --shadow-pressed: 0 2px 6px -3px rgba(12, 52, 62, 0.25);
-  /* 浮在光场上的小圆按钮（顶栏搜索） */
-  --shadow-btn: 0 8px 20px -10px rgba(12, 52, 62, 0.38);
-  /* 滑块（分段控件的白色选中块）：外阴影 + 顶部高光 + 细边 */
-  --shadow-thumb: 0 6px 16px -6px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 0.5px rgba(255, 255, 255, 0.6);
-  /* 玻璃的边：顶部高光 + 底部暗边 + 细描边（inset，叠在 shadow-* 后面用：box-shadow: var(--shadow-3), var(--shadow-glass-edge)） */
-  --shadow-glass-edge: inset 0 1px 0.5px var(--color-glass-highlight), inset 0 -1px 0.5px var(--color-glass-shade), inset 0 0 0 0.5px var(--color-glass-border);
-  /* 凸起的白（--color-raised）的边：顶部高光 + 细描边 */
-  --shadow-raised: inset 0 1px 0 var(--color-glass-highlight), inset 0 0 0 0.5px var(--color-glass-border);
-  /* 玻璃内侧的柔光（顶栏、分段控件、底部面板、确认框；叠在 --shadow-glass-edge 后面） */
-  --shadow-glass-glow: inset 0 0 26px var(--color-glass-glow);
-  /* 实心小色块顶上的一道细高光（头像、计数徽章、勾上的圆） */
-  --shadow-highlight: inset 0 1px 0 color-mix(in srgb, var(--color-glass-highlight) 38%, transparent);
-  /* 实心小按钮的立体感：顶部细高光 + 底部往里暗一点（数量步进器收起时的加号） */
-  --shadow-bevel: var(--shadow-highlight), inset 0 -2px 6px color-mix(in srgb, var(--color-text) 10%, transparent);
+  --shadow-1: 0 0 0 0 transparent;
+  --shadow-2: 0 0 0 0 transparent;
+  --shadow-3: 0 12px 30px -16px rgba(29, 28, 26, 0.22);
+  --shadow-4: 0 20px 48px -22px rgba(29, 28, 26, 0.28);
+  /* 按下时：不投影 */
+  --shadow-pressed: 0 0 0 0 transparent;
+  /* 以前浮在光场上的小圆按钮的投影：纸上不要 */
+  --shadow-btn: 0 0 0 0 transparent;
+  /* 滑块（分段控件的选中块）：一根细线框，不投影 */
+  --shadow-thumb: inset 0 0 0 1px var(--color-border-strong);
+  /* 浮层的边：一根细线框（inset，叠在 shadow-* 后面用：box-shadow: var(--shadow-3), var(--shadow-glass-edge)） */
+  --shadow-glass-edge: inset 0 0 0 1px var(--color-glass-border);
+  /* 纸片（--color-raised）的边：一根细线 */
+  --shadow-raised: inset 0 0 0 1px var(--color-border);
+  /* 以前玻璃内侧的柔光、实心小色块顶上的高光、实心小按钮的立体感：纸上都不要 */
+  --shadow-glass-glow: 0 0 0 0 transparent;
+  --shadow-highlight: 0 0 0 0 transparent;
+  --shadow-bevel: 0 0 0 0 transparent;
 
   /* ---------------------------------------------------------------
-     4. 模糊（backdrop-filter）和材质
+     4. 模糊和材质：不用玻璃（浮层是不透明的纸），材质都是纯色
      --------------------------------------------------------------- */
   --blur-sm: 8px;
   --blur-md: 20px;
   --blur-lg: 28px;
   --blur-xl: 40px;
-  --glass-saturate: 190%;
-  /* 玻璃的完整滤镜；写的时候带上 -webkit- 前缀：
+  --glass-saturate: 100%;
+  /* 浮层的 backdrop-filter：纸上不用（none）。写的时候仍带上 -webkit- 前缀：
      -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); */
-  --glass-filter: blur(var(--blur-lg)) saturate(var(--glass-saturate));
-  /* 小块玻璃（顶栏的圆按钮）：模糊半径小一点 */
-  --glass-filter-sm: blur(var(--blur-md)) saturate(185%);
-  /* 全屏菜单：整屏铺满，模糊得更重 */
-  --glass-filter-xl: blur(var(--blur-xl)) saturate(var(--glass-saturate));
-  /* 底栏的液态玻璃：模糊轻一点（后面的形状还认得出）+ 提饱和度 + 浅色提亮（深色模式压暗，见深色一节） */
-  --tabbar-blur: 14px;
-  --tabbar-glass-filter: blur(var(--tabbar-blur)) saturate(190%) brightness(1.08);
-  /* 遮罩：轻轻虚化背后的页面 */
-  --scrim-filter: blur(6px) saturate(120%);
+  --glass-filter: none;
+  --glass-filter-sm: none;
+  --glass-filter-xl: none;
+  --tabbar-blur: 0px;
+  --tabbar-glass-filter: none;
+  /* 遮罩：只压暗，不虚化 */
+  --scrim-filter: none;
 
-  /* 材质（background 的值，不是颜色）：左上角的镜面光斑 + 左上 → 右下的渐变。
-     card：内容卡片，不开 backdrop-filter；glass / glass-strong：悬浮层，配合 --glass-filter。
-     对应的边：卡片 --material-card-edge（box-shadow），玻璃 --shadow-glass-edge；折射高光描边 --material-rim（见 styles/materials.css） */
-  --material-sheen: radial-gradient(130% 90% at 18% 0%, var(--color-sheen), transparent 55%);
-  --material-card: var(--material-sheen), linear-gradient(155deg, var(--color-card), var(--color-card-2));
-  --material-card-edge: inset 0 1px 0.5px var(--color-glass-highlight), inset 0 -1px 0.5px var(--color-glass-shade), inset 0 0 0 0.5px var(--color-glass-border), inset 0 0 26px var(--color-glass-glow);
-  --material-glass: var(--material-sheen), linear-gradient(155deg, var(--color-glass), var(--color-glass-2));
-  --material-glass-strong: var(--material-sheen), linear-gradient(155deg, var(--color-glass-strong), var(--color-glass-strong-2));
-  /* 弹层（底部面板、从按钮长出来的面板、确认框、小菜单）的默认材质：比 glass-strong 更厚、更不透明的玻璃，表单、长内容好读 */
-  --material-glass-dense: var(--material-sheen), linear-gradient(155deg, var(--color-surface-raised), color-mix(in srgb, var(--color-surface-raised) 86%, transparent));
-  /* 只有高光的那一半（叠在 background-color: var(--color-glass-strong-2) 上 = glass-strong 的效果）：
-     底色要被 JS 插值的玻璃（顶栏）用它，底色照样能动 */
-  --material-glass-lift: var(--material-sheen), linear-gradient(155deg, var(--color-glass-lift), transparent 75%);
-  --material-rim: linear-gradient(140deg, var(--color-rim) 0%, transparent 30%, transparent 68%, var(--color-rim-2) 100%);
-  /* 底栏（shell/tabbar.css）：薄玻璃 + 内侧上半部的光泽；折射边上亮下暗；选中块；按住时的透镜 */
-  --material-tabbar: radial-gradient(70% 120% at 50% -24%, var(--color-tabbar-sheen), transparent 70%), linear-gradient(180deg, var(--color-tabbar-glass), var(--color-tabbar-glass-2));
-  --material-tabbar-rim: linear-gradient(180deg, var(--color-tabbar-rim) 0%, color-mix(in srgb, var(--color-tabbar-rim) 30%, transparent) 34%, transparent 56%, var(--color-tabbar-rim-shade) 100%);
-  --material-tabbar-lens: linear-gradient(180deg, var(--color-tabbar-lens), var(--color-tabbar-lens-2));
-  --material-tabbar-lens-clear: radial-gradient(110% 70% at 50% 0%, color-mix(in srgb, var(--color-tabbar-lens-ring) 45%, transparent), transparent 64%), linear-gradient(var(--color-tabbar-lens-clear), var(--color-tabbar-lens-clear));
-  --shadow-tabbar: 0 16px 36px -14px var(--color-tabbar-shadow), 0 3px 10px -4px color-mix(in srgb, var(--color-tabbar-shadow) 45%, transparent);
-  --shadow-tabbar-edge: inset 0 10px 14px -12px var(--color-tabbar-rim), inset 0 -10px 16px -14px var(--color-tabbar-rim-shade), inset 0 0 0 0.5px var(--color-tabbar-border);
-  --shadow-tabbar-lens: 0 4px 12px -6px var(--color-tabbar-shadow), inset 0 1px 0 var(--color-tabbar-lens-ring), inset 0 -1px 0 color-mix(in srgb, var(--color-tabbar-rim-shade) 60%, transparent), inset 0 0 0 0.5px var(--color-tabbar-border);
-  --shadow-tabbar-lens-clear: 0 10px 24px -10px var(--color-tabbar-shadow), inset 0 0 0 1.25px var(--color-tabbar-lens-ring), inset 0 7px 10px -7px var(--color-tabbar-lens-ring), inset 0 -6px 12px -8px var(--color-tabbar-rim-shade);
-  /* 成功色实心按钮的材质（提交按钮打勾那一刻） */
-  --material-success: linear-gradient(140deg, color-mix(in srgb, var(--color-success) 72%, #ffffff), var(--color-success) 55%, color-mix(in srgb, var(--color-success) 88%, #000000));
-  /* 遮罩用的“整块不透明”（mask 只看透明度）：折射高光描边用它挖掉中间、只留 1px 的边 */
+  /* 材质（background 的值，不是颜色）：纸上都是纯色，没有光斑、没有渐变。
+     card：纸片（「现在」、预订卡、少数要成组的块）；glass / glass-strong / glass-dense：浮层的纸；
+     对应的边：纸片 --material-card-edge（一根细线），浮层 --shadow-glass-edge */
+  --material-sheen: linear-gradient(transparent, transparent);
+  --material-card: linear-gradient(var(--color-card), var(--color-card));
+  --material-card-edge: inset 0 0 0 1px var(--color-border);
+  --material-glass: linear-gradient(var(--color-glass), var(--color-glass));
+  --material-glass-strong: linear-gradient(var(--color-glass-strong), var(--color-glass-strong));
+  /* 弹层（底部面板、从按钮长出来的面板、确认框、小菜单）的默认材质 */
+  --material-glass-dense: linear-gradient(var(--color-surface-raised), var(--color-surface-raised));
+  /* 叠在 background-color 上的那层（顶栏的底色由 JS 插值）：纸上就是透明 */
+  --material-glass-lift: linear-gradient(transparent, transparent);
+  --material-rim: linear-gradient(transparent, transparent);
+  /* 底栏（shell/tabbar.css）：一张纸片 + 细线框 + 很浅的悬浮阴影；选中只是海色的字（选中块、透镜都是透明的） */
+  --material-tabbar: linear-gradient(var(--color-tabbar-glass), var(--color-tabbar-glass-2));
+  --material-tabbar-rim: linear-gradient(transparent, transparent);
+  --material-tabbar-lens: linear-gradient(var(--color-tabbar-lens), var(--color-tabbar-lens-2));
+  --material-tabbar-lens-clear: linear-gradient(var(--color-tabbar-lens-clear), var(--color-tabbar-lens-clear));
+  --shadow-tabbar: 0 8px 24px -14px var(--color-tabbar-shadow);
+  --shadow-tabbar-edge: inset 0 0 0 1px var(--color-tabbar-border);
+  --shadow-tabbar-lens: 0 0 0 0 transparent;
+  --shadow-tabbar-lens-clear: 0 0 0 0 transparent;
+  /* 成功色实心按钮的材质（提交按钮打勾那一刻）：纯色 */
+  --material-success: linear-gradient(var(--color-success), var(--color-success));
+  /* 遮罩用的“整块不透明”（mask 只看透明度） */
   --mask-fill: linear-gradient(#000000 0 0);
 
   /* ---------------------------------------------------------------
-     5. 字体（P2「杂志宋体」，@font-face 在 styles/fonts.css，文件在 app/static/fonts/）
+     5. 字体（三种：宋体做标题、系统字体做其余一切、Instrument Serif 只给少数几个主数字；@font-face 在 styles/fonts.css）
      --------------------------------------------------------------- */
-  /* 正文、说明、用户输入：系统字体（苹方优先），保证清晰 */
+  /* 正文、说明、按钮、标签、日期、小号数字、用户输入：系统字体（苹方 / SF，SF 自带等宽数字），不下载 */
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", "Noto Sans SC",
     "Helvetica Neue", Arial, sans-serif;
-  /* 标题、卡片标题、行程名、菜单 / 面板标题、大按钮：思源宋体 600。只在 ≥15px 用；中文标题字距 --tracking-display */
+  /* 标题、栏目名、卡片标题、行程名、D1–D4、预订名、面板标题：思源宋体 600。只在 ≥15px 用；按钮不用宋体 */
   --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
-  /* 大号数字（航班时间、金额、天气、数量）：Instrument Serif；它的「1」像小写 l、又没有越南盾符号「₫」，
+  /* 少数几个主数字（倒计时、航班起降、账本总额、入住 / 退房时刻）：Instrument Serif；它的「1」像小写 l、又没有越南盾符号「₫」，
      前面叠一个只管「1」「₫」的思源宋体 Regular 字形（P2 Figure One） */
   --font-figure: "P2 Figure One", "Instrument Serif", var(--font-serif);
   /* 斜体大号数字（倒计时）：同样叠 P2 Figure One 的斜体（按 Instrument Serif 斜体的角度斜切），「1 天」不读成「l 天」 */
   --font-figure-italic: "P2 Figure One", "Instrument Serif", var(--font-serif);
-  /* 小号数字、日期、计数、标签里的拉丁字母：Geist（配 tabular-nums）；中文仍走系统字体 */
-  --font-label: "Geist", var(--font-sans);
+  /* 小号数字、日期、计数、标签：系统字体（配 tabular-nums）。以前是 Geist，去掉了（三种字就够） */
+  --font-label: var(--font-sans);
   /* 旧名：大标题 = 宋体；圆体数字 = 大号数字 */
   --font-display: var(--font-serif);
   --font-rounded: var(--font-figure);
@@ -334,18 +330,18 @@
   /* 宋体只有 600 一个字重（标题统一用它） */
   --weight-serif: 600;
 
-  /* 字号阶梯（标题照样稿放大、列表文字照样稿收紧一号；行高按中文阅读放宽）。
+  /* 字号阶梯（行高按中文阅读放宽）。
      --text-<级别> 是字号，--leading-<级别> 是行高，--type-<级别> 是可直接用于 font 简写的组合。
-     large-title / title-1 / title-2 / title-3 / title-4 是宋体（思源宋体 600），其余是系统字体。 */
-  --text-large-title: 40px;
-  --leading-large-title: 46px;
-  --text-title-1: 28px;
-  --leading-title-1: 36px;
+     large-title / title-1 / title-2 / title-3 是宋体（思源宋体 600）：页面大标题 32、每天标题 26、区块标题 / 面板标题 21、卡片标题 18；其余是系统字体。 */
+  --text-large-title: 32px;
+  --leading-large-title: 38px;
+  --text-title-1: 26px;
+  --leading-title-1: 34px;
   --text-title-2: 21px;
-  --leading-title-2: 29px;
+  --leading-title-2: 28px;
   --text-title-3: 18px;
   --leading-title-3: 26px;
-  /* 宋体小标题（只有字号，行高跟着用处走）：大按钮、全屏菜单项、顶栏收起后的标题、天数分段的 D1（样稿里宋体的 17px） */
+  /* 小标题字号（只有字号，行高跟着用处走）：大按钮（系统字体）、顶栏收起后的标题、全屏菜单项（宋体） */
   --text-title-4: 17px;
   --text-headline: 16px;
   --leading-headline: 22px;
@@ -373,12 +369,12 @@
   --type-footnote: var(--weight-regular) var(--text-footnote) / var(--leading-footnote) var(--font-sans);
   --type-caption-1: var(--weight-regular) var(--text-caption-1) / var(--leading-caption-1) var(--font-sans);
   --type-caption-2: var(--weight-medium) var(--text-caption-2) / var(--leading-caption-2) var(--font-sans);
-  /* 标签：小按钮、分段、胶囊（拉丁和数字走 Geist，中文走系统字体） */
-  --type-label: var(--weight-semibold) var(--text-subhead) / 1.2 var(--font-label);
-  /* 眉标：卡片上方的小栏目名（「距离出发还有」「快速添加」），字距 --tracking-eyebrow */
-  --type-eyebrow: var(--weight-semibold) var(--text-caption-1) / var(--leading-caption-1) var(--font-label);
+  /* 标签：小按钮、分段、胶囊（系统字体 500） */
+  --type-label: var(--weight-medium) var(--text-subhead) / 1.2 var(--font-label);
+  /* 眉标：块上方的小栏目名（「距离起飞还有」「快速添加」），装饰灰、字距很小 */
+  --type-eyebrow: var(--weight-medium) var(--text-caption-1) / var(--leading-caption-1) var(--font-label);
 
-  /* 大号数字（Instrument Serif，只有 400，分量靠字号补；斜体用 --font-figure-italic） */
+  /* 大号数字的字号（--text-figure-*）。Instrument Serif 只有 400，分量靠字号补；斜体用 --font-figure-italic */
   --text-figure-hero: 84px;
   --text-figure-1: 48px;
   --text-figure-2: 40px;
@@ -387,19 +383,19 @@
   /* 小号数字：日出日落、小号数量 */
   --text-figure-5: 19px;
 
-  /* 字距：宋体标题放开（读起来像杂志标题），系统字体小字略放，眉标大字距 */
-  --tracking-display: 0.04em;
-  --tracking-title: 0.03em;
-  /* 旧名：大标题字距（A 皮肤的大标题是宋体，放开而不是收紧） */
+  /* 字距：都不放宽（放宽的字距像请柬、像数据面板）。宋体标题只留一点点 */
+  --tracking-display: 0.01em;
+  --tracking-title: 0.01em;
+  /* 旧名：大标题字距 */
   --tracking-tight: var(--tracking-display);
   --tracking-normal: 0;
-  --tracking-wide: 0.04em;
-  --tracking-label: 0.03em;
-  --tracking-tab: 0.08em;
-  --tracking-eyebrow: 0.12em;
-  --tracking-button: 0.08em;
-  --tracking-button-lg: 0.14em;
-  --tracking-figure: -0.005em;
+  --tracking-wide: 0.02em;
+  --tracking-label: 0;
+  --tracking-tab: 0;
+  --tracking-eyebrow: 0.04em;
+  --tracking-button: 0;
+  --tracking-button-lg: 0;
+  --tracking-figure: 0;
 
   /* ---------------------------------------------------------------
      6. 间距（4pt 网格）与布局
@@ -416,13 +412,13 @@
   --space-9: 48px;
   --space-10: 64px;
 
-  /* 页面左右留白（手机 16px）、内容最大宽度（桌面居中） */
-  --gutter: 16px;
+  /* 页面左右留白（手机 22px：内容直接排在纸上，留白就是页边）、内容最大宽度（桌面居中） */
+  --gutter: 22px;
   --content-max: 720px;
   --content-max-wide: 1120px;
   /* 最小触控尺寸：所有能点的东西 ≥ 44×44 */
   --tap-min: 44px;
-  /* 常驻框架：顶栏、底栏都是浮在光场上的玻璃胶囊（离屏幕边 16px）。
+  /* 常驻框架：顶栏在纸上（收起后是一张纸片），底栏是浮在纸上的纸片胶囊。
      --topbar-h / --tabbar-h = 给内容留出来的高度（胶囊本身 + 离屏幕边的距离，不含安全区）；
      胶囊本身的高度和离边距离分开给，外壳摆位置用 */
   --topbar-bar-h: 60px;
@@ -431,19 +427,14 @@
   --tabbar-bar-h: 70px;
   --tabbar-inset: 14px;
   --tabbar-h: calc(var(--tabbar-bar-h) + var(--tabbar-inset));
-  /* 底栏选中块离上下边的距离；按下时底栏里的按钮放大多少（行程 / 地图 / 账本 / 更多、＋） */
+  /* 底栏选中块（看不见，拖动选择的几何用它；按住时是一层很浅的墨）离上下边的距离；按下时底栏里的按钮放大多少（行程 / 地图 / 账本 / 更多、＋） */
   --tabbar-lens-inset: 3px;
-  /* 按住时（透镜浮起）平时那块亮玻璃还留多少（更透，但透镜下的字还要清楚） */
-  --tabbar-lens-up-fill: 0.7;
-  /* 图标后面的“活力”晕：同一个图形描到多粗（viewBox 24 的单位）、虚化多少 */
-  --tabbar-halo-stroke: 4.6;
-  --tabbar-halo-blur: 1.4px;
-  /* 底栏选中那格的强调色（--color-tabbar-accent，在强调色派生那一节）：浅色模式把 --color-accent-text 的亮度再压到 0.42
-     （不支持相对颜色语法时按 keep 和 ink 混）；深色模式不变 */
-  --tabbar-accent-lmax: 0.42;
-  --tabbar-accent-keep: 82%;
-  --tabbar-press-grow: 1.06;
-  --tabbar-fab-press-grow: 1.1;
+  /* 底栏选中那格的强调色（--color-tabbar-accent，在强调色派生那一节）：纸是不透明的，就是 --color-accent-text
+     （lmax / keep 留着调：亮度上限、和 ink 混多少） */
+  --tabbar-accent-lmax: 1;
+  --tabbar-accent-keep: 100%;
+  --tabbar-press-grow: 1.03;
+  --tabbar-fab-press-grow: 1.05;
 
   /* 安全区（刘海、Home 指示条、横屏两侧） */
   --safe-top: env(safe-area-inset-top, 0px);
@@ -479,25 +470,23 @@
   --dur-base: 240ms;
   --dur-slow: 360ms;
   --dur-slower: 520ms;
-  /* 光场换色（切换行程时两层交叉淡入） */
+  /* 换行程时外壳部件（底栏的 ＋、选中的 tab……）的主题色补间（shell/trip-state.js） */
   --dur-field: 1100ms;
-  /* 光场光斑漂一个来回（很慢，几乎察觉不到在动；每个光斑在这个基础上乘不同的倍数） */
-  --dur-drift: 28s;
 
   /* 普通缓动 */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.55, 0, 0.75, 0.2);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  /* 光场换色（切换行程）：样稿 07-ui.js Field.show 的曲线；外壳的主题色补间（shell/trip-state.js）用同一条、同样长 */
+  /* 换行程时主题色补间的曲线（shell/trip-state.js） */
   --ease-field: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* 按压反馈：按下用 --press-duration + --ease-out 缩到 --press-scale；松手用 --spring-bouncy 回弹 */
-  --press-scale: 0.96;
+  /* 按压反馈：按下用 --press-duration + --ease-out 缩到 --press-scale；松手用 --spring-smooth 回来（不过冲，更安静） */
+  --press-scale: 0.98;
   --press-duration: 90ms;
   /* 按压的过渡（motion/press.css 用；组件写 transition: var(--press-transition), 其他过渡…）。
-     这里是松手的弹簧回弹；元素按下时 press.css 在元素上把它换成 --press-duration 的缓出 */
-  --press-transition: scale var(--spring-bouncy-duration) var(--spring-bouncy);
+     这里是松手的回弹；元素按下时 press.css 在元素上把它换成 --press-duration 的缓出 */
+  --press-transition: scale var(--spring-smooth-duration) var(--spring-smooth);
 
   /* 弹簧（linear() 采样，物理参数见 src/motion/springs.js） */
   /* <springs:generated> 由 `npm run tokens` 生成，勿手改 */
@@ -513,22 +502,11 @@
   /* </springs:generated> */
 
   /* ---------------------------------------------------------------
-     9. 光场（页面背景：每趟行程一套主题色光斑 + 细颗粒，styles/field.css 的 .light-field 用）
-     颜色由主题色派生（见后面「强调色派生」一节）；这里只放和主题色无关的参数
+     9. 纸（页面背景：纯色 --color-canvas + 一点点纸纹，styles/field.css 的 .paper 用）
      --------------------------------------------------------------- */
-  /* 光斑的整体不透明度、颗粒的不透明度（深色下光斑压暗、颗粒略重） */
-  --field-blob-opacity: 0.9;
-  --field-grain-opacity: 0.07;
-  /* 光场底色的三个点往哪边混：浅色混向近白，深色混向近黑 */
-  --field-base-toward: #f6fbfa;
-  --field-base-mid: #f1f4ee;
-  --field-base-warm-toward: #fffaf6;
-  --field-base-mix: 11%;
-  --field-base-warm-mix: 14%;
-  /* 细颗粒（SVG 噪点，叠加模式 overlay） */
-  --field-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  /* 「更多」全屏菜单上主题色光晕的强度 */
-  --field-menu-glow: 22%;
+  /* 纸纹（SVG 噪点，正片叠底）和它的不透明度（深色下几乎看不出） */
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --paper-grain-opacity: 0.035;
 }
 
 /* ---------------------------------------------------------------------
@@ -548,34 +526,23 @@
   --color-accent-pressed: color-mix(in srgb, var(--color-accent) var(--accent-pressed-mix), #000000);
   --color-accent-soft: color-mix(in srgb, var(--color-accent) var(--accent-soft-mix), transparent);
   --color-accent-text: color-mix(in srgb, var(--color-accent) var(--accent-text-mix), var(--accent-text-toward));
-  /* 底栏选中 / 手指下那格的强调色：底栏比卡片通透得多（后面可能是照片、深色），浅色模式比 accent-text 再深一点（深色模式不变） */
+  /* 底栏选中 / 手指下那格的强调色（纸上就是 accent-text；--tabbar-accent-keep / -lmax 留着调） */
   --color-tabbar-accent: color-mix(in srgb, var(--color-accent-text) var(--tabbar-accent-keep), var(--color-tabbar-ink));
-  /* 实心强调色下面的柔光（主按钮、悬浮加号、选中的胶囊） */
+  /* 实心强调色下面的柔光：纸上不要（--accent-glow-mix 0%，透明） */
   --color-accent-glow: color-mix(in srgb, var(--color-accent) var(--accent-glow-mix), transparent);
   /* 焦点环（键盘操作时出现） */
   --color-focus-ring: var(--color-accent-text);
-  /* 强调色实心按钮的材质：左上亮、右下暗的渐变（悬浮加号、提交按钮、主按钮） */
-  --material-accent: linear-gradient(140deg, color-mix(in srgb, var(--color-accent) 74%, #ffffff), var(--color-accent) 48%, color-mix(in srgb, var(--color-accent) 84%, #000000));
-  --shadow-accent: 0 10px 24px -8px var(--color-accent-glow), inset 0 1.5px 1px rgba(255, 255, 255, 0.5), inset 0 -2px 6px rgba(0, 0, 0, 0.12);
-  /* 小号强调色柔光（勾上的圆、标签页下划线、选中的小胶囊） */
-  --shadow-accent-sm: 0 4px 10px -4px var(--color-accent-glow);
-
-  /* 光场：底色三个点 + 五个光斑（左上大块主题色 / 右上偏冷 / 左中浅 / 右下第二主题色浅 / 底部第二主题色）。
-     这里是所有浏览器都认的近似（和白混合）；支持相对颜色语法的浏览器在下面的 @supports 里换成更鲜亮的版本 */
-  --field-base-top: color-mix(in srgb, var(--color-accent) var(--field-base-mix), var(--field-base-toward));
-  --field-base-bottom: color-mix(in srgb, var(--color-accent-2) var(--field-base-warm-mix), var(--field-base-warm-toward));
-  --field-base: linear-gradient(172deg, var(--field-base-top) 0%, var(--field-base-mid) 46%, var(--field-base-bottom) 100%);
-  --field-1: color-mix(in srgb, color-mix(in srgb, var(--color-accent) 58%, #ffffff) 78%, transparent);
-  --field-2: color-mix(in srgb, color-mix(in srgb, var(--color-accent) 36%, #8ec5f0) 60%, transparent);
-  --field-3: color-mix(in srgb, color-mix(in srgb, var(--color-accent) 34%, #ffffff) 55%, transparent);
-  --field-4: color-mix(in srgb, color-mix(in srgb, var(--color-accent-2) 46%, #ffffff) 70%, transparent);
-  --field-5: color-mix(in srgb, color-mix(in srgb, var(--color-accent-2) 74%, #ffffff) 62%, transparent);
+  /* 强调色实心按钮的材质（悬浮加号、提交按钮、主按钮）：纯色，没有渐变 */
+  --material-accent: linear-gradient(var(--color-accent), var(--color-accent));
+  /* 以前实心强调色的同色发光和高光：纸上不要 */
+  --shadow-accent: 0 0 0 0 transparent;
+  --shadow-accent-sm: 0 0 0 0 transparent;
 }
 
 /* 支持相对颜色语法（iOS 18 / Safari 18、Chrome 119 起）：
-   - 行程主题色当实心底：在 OKLCH 里只调亮度（浅色最亮 0.55、深色最暗 0.78），色相不变，任何主题色都配得上白字 / 深色字；
-   - 强调色文字：同样只调亮度（浅色最亮 0.48、深色最暗 0.84），放在玻璃、卡片上都 ≥4.5:1；
-   - 光斑：按主题色的色相、在 OKLCH 里提亮，颜色更鲜、更像样稿（参数照样稿富国岛那一套的五个光斑反推） */
+   - 行程主题色当实心底：在 OKLCH 里把亮度夹住（浅色最亮 0.43、深色 0.70–0.76）、彩度乘 --accent-solid-c（浅色 0.62、深色 0.5），
+     色相不变：任何主题色都变成“墨一样深”的颜色，配得上纸色字 / 深墨色字；
+   - 强调色文字：同样只调亮度（浅色最亮 0.42、深色 0.80–0.86），纸上、纸片上都 ≥4.5:1 */
 @supports (color: oklch(from red l c h)) {
   :root,
   .accent-scope {
@@ -583,11 +550,6 @@
     --trip-accent-2-solid: oklch(from var(--trip-accent-2) clamp(var(--accent-solid-lmin), l, var(--accent-solid-lmax)) calc(c * var(--accent-solid-c)) h);
     --color-accent-text: oklch(from var(--color-accent) clamp(var(--accent-text-lmin), l, var(--accent-text-lmax)) c h);
     --color-tabbar-accent: oklch(from var(--color-accent-text) min(l, var(--tabbar-accent-lmax)) c h);
-    --field-1: oklch(from var(--color-accent) 0.74 calc(c * 1.38) h / 0.78);
-    --field-2: oklch(from var(--color-accent) 0.73 calc(c * 1.3) calc(h + 50) / 0.6);
-    --field-3: oklch(from var(--color-accent) 0.87 calc(c * 1.08) calc(h - 15) / 0.55);
-    --field-4: oklch(from var(--color-accent-2) 0.82 calc(c * 0.62) calc(h + 16) / 0.7);
-    --field-5: oklch(from var(--color-accent-2) 0.72 calc(c * 0.98) h / 0.62);
   }
 }
 
@@ -613,100 +575,98 @@
 }
 
 /* ---------------------------------------------------------------------
-   深色（两处写同一套值：跟随系统 + 用户强制深色）。
+   深色（两处写同一套值：跟随系统 + 用户强制深色）：深墨色的纸 #141413，不偏青也不偏棕；海色降成灰青、不发光。
    改深色时两处要一起改；单元测试会核对两处完全一致，并且覆盖了浅色里的每个颜色变量。
    --------------------------------------------------------------------- */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-canvas: #04161c;
-    --color-surface: rgba(28, 40, 48, 0.66);
-    --color-surface-2: rgba(255, 255, 255, 0.05);
-    --color-surface-3: rgba(255, 255, 255, 0.08);
-    --color-surface-raised: rgba(30, 43, 52, 0.84);
-    --color-thumb: rgba(255, 255, 255, 0.12);
-    --color-text: #eef6f7;
-    --color-text-2: rgba(238, 246, 247, 0.8);
-    --color-text-3: rgba(238, 246, 247, 0.62);
-    --color-text-inverse: #0a1c23;
-    --color-border: rgba(255, 255, 255, 0.14);
-    --color-border-strong: rgba(255, 255, 255, 0.32);
+    --color-canvas: #141413;
+    --color-surface: #1c1c1a;
+    --color-surface-2: rgba(255, 255, 255, 0.04);
+    --color-surface-3: rgba(255, 255, 255, 0.07);
+    --color-surface-raised: #1c1c1a;
+    --color-thumb: #1c1c1a;
+    --color-text: #ece8e1;
+    --color-text-2: #a39f97;
+    --color-text-3: #8e8a82;
+    --color-text-inverse: #141413;
+    --color-driver-bg: #141413;
+    --color-border: rgba(255, 255, 255, 0.12);
+    --color-border-strong: rgba(255, 255, 255, 0.3);
     --color-separator: rgba(255, 255, 255, 0.1);
-    --color-rail: rgba(255, 255, 255, 0.18);
+    --color-rail: rgba(255, 255, 255, 0.16);
     --color-fill: rgba(255, 255, 255, 0.06);
     --color-fill-hover: rgba(255, 255, 255, 0.09);
-    --color-fill-pressed: rgba(255, 255, 255, 0.13);
-    --color-raised: rgba(255, 255, 255, 0.11);
-    --color-raised-hover: rgba(255, 255, 255, 0.15);
-    --color-raised-pressed: rgba(255, 255, 255, 0.07);
-    --color-card: rgba(40, 54, 63, 0.7);
-    --color-card-2: rgba(16, 25, 33, 0.62);
-    --color-glass: rgba(38, 52, 61, 0.68);
-    --color-glass-2: rgba(14, 22, 30, 0.58);
-    --color-glass-strong: rgba(46, 61, 71, 0.74);
-    --color-glass-strong-2: rgba(20, 29, 37, 0.66);
-    --color-glass-lift: rgba(84, 104, 116, 0.3);
-    --color-glass-border: rgba(255, 255, 255, 0.1);
-    --color-glass-highlight: rgba(255, 255, 255, 0.24);
-    --color-glass-shade: rgba(255, 255, 255, 0.05);
-    --color-glass-glow: rgba(255, 255, 255, 0.03);
-    --color-rim: rgba(255, 255, 255, 0.48);
-    --color-rim-2: rgba(255, 255, 255, 0.14);
-    --color-sheen: rgba(255, 255, 255, 0.09);
-    --color-edge-tint: rgba(6, 18, 24, 0.5);
-    --color-edge-tint-bottom: rgba(6, 18, 24, 0.3);
-    --color-tabbar-glass: rgba(30, 42, 50, 0.28);
-    --color-tabbar-glass-2: rgba(12, 19, 25, 0.36);
-    --color-tabbar-sheen: rgba(255, 255, 255, 0.1);
-    --color-tabbar-rim: rgba(255, 255, 255, 0.42);
-    --color-tabbar-rim-shade: rgba(0, 0, 0, 0.5);
-    --color-tabbar-border: rgba(255, 255, 255, 0.1);
-    --color-tabbar-lens: rgba(255, 255, 255, 0.1);
-    --color-tabbar-lens-2: rgba(255, 255, 255, 0.06);
-    --color-tabbar-lens-clear: rgba(255, 255, 255, 0.06);
-    --color-tabbar-lens-ring: rgba(255, 255, 255, 0.5);
-    --color-tabbar-ink: rgba(238, 246, 247, 0.9);
-    --color-tabbar-halo: rgba(2, 12, 16, 0.7);
-    --color-tabbar-halo-strong: rgba(2, 12, 16, 0.82);
-    --color-tabbar-shadow: rgba(0, 0, 0, 0.55);
-    --tabbar-glass-filter: blur(var(--tabbar-blur)) saturate(180%) brightness(0.82);
-    --color-accent-default: #4fd8c9;
-    --color-accent-2-default: #ff9576;
-    --color-on-accent: #08191b;
+    --color-fill-pressed: rgba(255, 255, 255, 0.12);
+    --color-raised: #1c1c1a;
+    --color-raised-hover: #22221f;
+    --color-raised-pressed: #181816;
+    --color-card: #1c1c1a;
+    --color-card-2: #1c1c1a;
+    --color-glass: #1a1a18;
+    --color-glass-2: #1a1a18;
+    --color-glass-strong: #1a1a18;
+    --color-glass-strong-2: #1a1a18;
+    --color-glass-lift: transparent;
+    --color-glass-border: rgba(255, 255, 255, 0.12);
+    --color-glass-highlight: transparent;
+    --color-glass-shade: transparent;
+    --color-glass-glow: transparent;
+    --color-rim: transparent;
+    --color-rim-2: transparent;
+    --color-sheen: transparent;
+    --color-edge-tint: #141413;
+    --color-edge-tint-bottom: rgba(20, 20, 19, 0.6);
+    --color-tabbar-glass: #1c1c1a;
+    --color-tabbar-glass-2: #1c1c1a;
+    --color-tabbar-sheen: transparent;
+    --color-tabbar-rim: transparent;
+    --color-tabbar-rim-shade: transparent;
+    --color-tabbar-border: rgba(255, 255, 255, 0.12);
+    --color-tabbar-lens: transparent;
+    --color-tabbar-lens-2: transparent;
+    --color-tabbar-lens-clear: transparent;
+    --color-tabbar-lens-ring: transparent;
+    --color-tabbar-ink: #a39f97;
+    --color-tabbar-halo: transparent;
+    --color-tabbar-halo-strong: transparent;
+    --color-tabbar-shadow: rgba(0, 0, 0, 0.5);
+    --color-accent-default: #8fb8b1;
+    --color-accent-2-default: #b8a88a;
+    --color-on-accent: #141413;
     --accent-solid-mix: 58%;
     --accent-solid-toward: #ffffff;
-    --accent-solid-lmin: 0.78;
-    --accent-solid-lmax: 1;
-    --accent-solid-c: 1.15;
+    --accent-solid-lmin: 0.7;
+    --accent-solid-lmax: 0.76;
+    --accent-solid-c: 0.5;
     --accent-hover-mix: 90%;
     --accent-hover-toward: #ffffff;
     --accent-pressed-mix: 84%;
-    --accent-soft-mix: 18%;
+    --accent-soft-mix: 14%;
     --accent-text-mix: 45%;
     --accent-text-toward: #ffffff;
-    --accent-text-lmin: 0.9;
-    --accent-text-lmax: 1;
-    --tabbar-accent-lmax: 1;
-    --tabbar-accent-keep: 100%;
-    --accent-glow-mix: 34%;
-    --color-success: #34c38f;
-    --color-success-soft: rgba(95, 220, 174, 0.14);
-    --color-success-text: #80ecc4;
-    --color-on-success: #08191b;
-    --color-warning: #f2a93b;
-    --color-warning-soft: rgba(255, 175, 80, 0.16);
-    --color-warning-text: #ffc77a;
-    --color-on-warning: #0a1c23;
-    --color-danger: #ff7466;
-    --color-danger-soft: rgba(255, 110, 100, 0.16);
-    --color-danger-text: #ff9a90;
-    --color-on-danger: #08191b;
-    --color-info: #6cb2ff;
-    --color-info-soft: rgba(120, 180, 255, 0.14);
-    --color-info-text: #9dcdff;
-    --color-on-info: #08191b;
-    --color-scrim: rgba(0, 0, 0, 0.4);
+    --accent-text-lmin: 0.8;
+    --accent-text-lmax: 0.86;
+    --accent-glow-mix: 0%;
+    --color-success: #7fa58f;
+    --color-success-soft: transparent;
+    --color-success-text: #a39f97;
+    --color-on-success: #141413;
+    --color-warning: #d9b26a;
+    --color-warning-soft: rgba(217, 178, 106, 0.08);
+    --color-warning-text: #d9b26a;
+    --color-on-warning: #141413;
+    --color-danger: #e09a8c;
+    --color-danger-soft: rgba(224, 154, 140, 0.08);
+    --color-danger-text: #e09a8c;
+    --color-on-danger: #141413;
+    --color-info: #8a9aab;
+    --color-info-soft: transparent;
+    --color-info-text: #a39f97;
+    --color-on-info: #141413;
+    --color-scrim: rgba(0, 0, 0, 0.45);
     --color-skeleton: rgba(255, 255, 255, 0.08);
-    --color-skeleton-shine: rgba(255, 255, 255, 0.07);
+    --color-skeleton-shine: rgba(255, 255, 255, 0.06);
     --color-rating-5: #c8371f;
     --color-rating-4: #7a45cf;
     --color-rating-3: #1b64a8;
@@ -721,147 +681,136 @@
     --color-cat-6: #4fd8c9;
     --color-cat-7: #f2b04a;
     --color-cat-8: #a4b2b8;
-    /* ＋ 面板图标块：深色也用样稿的亮渐变（深色面上更跳），白图标 */
-    --color-tile-teal-1: #38d1b8;
-    --color-tile-teal-2: #0a7c75;
-    --color-tile-coral-1: #ffb38a;
-    --color-tile-coral-2: #b8462c;
-    --color-tile-blue-1: #8fb8ff;
-    --color-tile-blue-2: #4a6fd8;
-    --color-tile-amber-1: #ffc85a;
-    --color-tile-amber-2: #c98309;
-    --color-tile-violet-1: #c4a6ff;
-    --color-tile-violet-2: #7a4fd6;
-    --color-on-tile: #ffffff;
-    --color-day-1: #4fd8c9;
-    --color-day-2: #8fb8ff;
-    --color-day-3: #ff9a78;
-    --color-day-4: #bb92ff;
-    --color-day-5: #ff6f9e;
-    --color-day-6: #f2b04a;
-    --color-day-7: #4fd8a4;
-  --color-day-1-deep: #0a7c75;
-  --color-day-2-deep: #4a6fd8;
-  --color-day-3-deep: #b8462c;
-  --color-day-4-deep: #7a4fd6;
-  --color-day-5-deep: #c2255c;
-  --color-day-6-deep: #a35c00;
-  --color-day-7-deep: #0f7a57;
-    --color-day-1-deep: #0a7c75;
-    --color-day-2-deep: #4a6fd8;
-    --color-day-3-deep: #b8462c;
-    --color-day-4-deep: #7a4fd6;
-    --color-day-5-deep: #c2255c;
-    --color-day-6-deep: #a35c00;
-    --color-day-7-deep: #0f7a57;
-    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-2: 0 6px 16px -6px rgba(0, 0, 0, 0.5);
-    --shadow-3: 0 18px 40px -14px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.3);
-    --shadow-4: 0 28px 64px -18px rgba(0, 0, 0, 0.7), 0 8px 22px -8px rgba(0, 0, 0, 0.35);
-    --shadow-pressed: 0 2px 6px -3px rgba(0, 0, 0, 0.5);
-    --shadow-btn: 0 8px 20px -10px rgba(0, 0, 0, 0.6);
-    --shadow-thumb: 0 6px 16px -6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 0.5px rgba(255, 255, 255, 0.12);
-    --field-blob-opacity: 0.42;
-    --field-grain-opacity: 0.09;
-    --field-base-toward: #03131a;
-    --field-base-mid: #08151f;
-    --field-base-warm-toward: #170c12;
-    --field-base-mix: 6%;
-    --field-base-warm-mix: 7%;
-    --field-menu-glow: 10%;
+    --color-tile-teal-1: transparent;
+    --color-tile-teal-2: transparent;
+    --color-tile-coral-1: transparent;
+    --color-tile-coral-2: transparent;
+    --color-tile-blue-1: transparent;
+    --color-tile-blue-2: transparent;
+    --color-tile-amber-1: transparent;
+    --color-tile-amber-2: transparent;
+    --color-tile-violet-1: transparent;
+    --color-tile-violet-2: transparent;
+    --color-on-tile: #fbf9f4;
+    --color-day-1: #7fb0aa;
+    --color-day-2: #93a3b3;
+    --color-day-3: #cf9a84;
+    --color-day-4: #b3b27f;
+    --color-day-5: #b597ab;
+    --color-day-6: #c9b38c;
+    --color-day-7: #95b38f;
+    --color-day-1-deep: #2f6b66;
+    --color-day-2-deep: #4e5d6c;
+    --color-day-3-deep: #8f5440;
+    --color-day-4-deep: #5f5e36;
+    --color-day-5-deep: #6b4e62;
+    --color-day-6-deep: #75603f;
+    --color-day-7-deep: #4a6545;
+    --shadow-1: 0 0 0 0 transparent;
+    --shadow-2: 0 0 0 0 transparent;
+    --shadow-3: 0 12px 30px -14px rgba(0, 0, 0, 0.6);
+    --shadow-4: 0 20px 48px -20px rgba(0, 0, 0, 0.7);
+    --shadow-pressed: 0 0 0 0 transparent;
+    --shadow-btn: 0 0 0 0 transparent;
+    --shadow-glass-glow: 0 0 0 0 transparent;
+    --shadow-highlight: 0 0 0 0 transparent;
+    --shadow-bevel: 0 0 0 0 transparent;
+    --shadow-tabbar-lens: 0 0 0 0 transparent;
+    --shadow-tabbar-lens-clear: 0 0 0 0 transparent;
+    --tabbar-accent-lmax: 1;
+    --tabbar-accent-keep: 100%;
+    --paper-grain-opacity: 0.03;
   }
 }
 
 :root[data-theme="dark"] {
-  --color-canvas: #04161c;
-  --color-surface: rgba(28, 40, 48, 0.66);
-  --color-surface-2: rgba(255, 255, 255, 0.05);
-  --color-surface-3: rgba(255, 255, 255, 0.08);
-  --color-surface-raised: rgba(30, 43, 52, 0.84);
-  --color-thumb: rgba(255, 255, 255, 0.12);
-  --color-text: #eef6f7;
-  --color-text-2: rgba(238, 246, 247, 0.8);
-  --color-text-3: rgba(238, 246, 247, 0.62);
-  --color-text-inverse: #0a1c23;
-  --color-border: rgba(255, 255, 255, 0.14);
-  --color-border-strong: rgba(255, 255, 255, 0.32);
+  --color-canvas: #141413;
+  --color-surface: #1c1c1a;
+  --color-surface-2: rgba(255, 255, 255, 0.04);
+  --color-surface-3: rgba(255, 255, 255, 0.07);
+  --color-surface-raised: #1c1c1a;
+  --color-thumb: #1c1c1a;
+  --color-text: #ece8e1;
+  --color-text-2: #a39f97;
+  --color-text-3: #8e8a82;
+  --color-text-inverse: #141413;
+  --color-driver-bg: #141413;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.3);
   --color-separator: rgba(255, 255, 255, 0.1);
-  --color-rail: rgba(255, 255, 255, 0.18);
+  --color-rail: rgba(255, 255, 255, 0.16);
   --color-fill: rgba(255, 255, 255, 0.06);
   --color-fill-hover: rgba(255, 255, 255, 0.09);
-  --color-fill-pressed: rgba(255, 255, 255, 0.13);
-  --color-raised: rgba(255, 255, 255, 0.11);
-  --color-raised-hover: rgba(255, 255, 255, 0.15);
-  --color-raised-pressed: rgba(255, 255, 255, 0.07);
-  --color-card: rgba(40, 54, 63, 0.7);
-  --color-card-2: rgba(16, 25, 33, 0.62);
-  --color-glass: rgba(38, 52, 61, 0.68);
-  --color-glass-2: rgba(14, 22, 30, 0.58);
-  --color-glass-strong: rgba(46, 61, 71, 0.74);
-  --color-glass-strong-2: rgba(20, 29, 37, 0.66);
-  --color-glass-lift: rgba(84, 104, 116, 0.3);
-  --color-glass-border: rgba(255, 255, 255, 0.1);
-  --color-glass-highlight: rgba(255, 255, 255, 0.24);
-  --color-glass-shade: rgba(255, 255, 255, 0.05);
-  --color-glass-glow: rgba(255, 255, 255, 0.03);
-  --color-rim: rgba(255, 255, 255, 0.48);
-  --color-rim-2: rgba(255, 255, 255, 0.14);
-  --color-sheen: rgba(255, 255, 255, 0.09);
-  --color-edge-tint: rgba(6, 18, 24, 0.5);
-  --color-edge-tint-bottom: rgba(6, 18, 24, 0.3);
-  --color-tabbar-glass: rgba(30, 42, 50, 0.28);
-  --color-tabbar-glass-2: rgba(12, 19, 25, 0.36);
-  --color-tabbar-sheen: rgba(255, 255, 255, 0.1);
-  --color-tabbar-rim: rgba(255, 255, 255, 0.42);
-  --color-tabbar-rim-shade: rgba(0, 0, 0, 0.5);
-  --color-tabbar-border: rgba(255, 255, 255, 0.1);
-  --color-tabbar-lens: rgba(255, 255, 255, 0.1);
-  --color-tabbar-lens-2: rgba(255, 255, 255, 0.06);
-  --color-tabbar-lens-clear: rgba(255, 255, 255, 0.06);
-  --color-tabbar-lens-ring: rgba(255, 255, 255, 0.5);
-  --color-tabbar-ink: rgba(238, 246, 247, 0.9);
-  --color-tabbar-halo: rgba(2, 12, 16, 0.7);
-  --color-tabbar-halo-strong: rgba(2, 12, 16, 0.82);
-  --color-tabbar-shadow: rgba(0, 0, 0, 0.55);
-  --tabbar-glass-filter: blur(var(--tabbar-blur)) saturate(180%) brightness(0.82);
-  --color-accent-default: #4fd8c9;
-  --color-accent-2-default: #ff9576;
-  --color-on-accent: #08191b;
+  --color-fill-pressed: rgba(255, 255, 255, 0.12);
+  --color-raised: #1c1c1a;
+  --color-raised-hover: #22221f;
+  --color-raised-pressed: #181816;
+  --color-card: #1c1c1a;
+  --color-card-2: #1c1c1a;
+  --color-glass: #1a1a18;
+  --color-glass-2: #1a1a18;
+  --color-glass-strong: #1a1a18;
+  --color-glass-strong-2: #1a1a18;
+  --color-glass-lift: transparent;
+  --color-glass-border: rgba(255, 255, 255, 0.12);
+  --color-glass-highlight: transparent;
+  --color-glass-shade: transparent;
+  --color-glass-glow: transparent;
+  --color-rim: transparent;
+  --color-rim-2: transparent;
+  --color-sheen: transparent;
+  --color-edge-tint: #141413;
+  --color-edge-tint-bottom: rgba(20, 20, 19, 0.6);
+  --color-tabbar-glass: #1c1c1a;
+  --color-tabbar-glass-2: #1c1c1a;
+  --color-tabbar-sheen: transparent;
+  --color-tabbar-rim: transparent;
+  --color-tabbar-rim-shade: transparent;
+  --color-tabbar-border: rgba(255, 255, 255, 0.12);
+  --color-tabbar-lens: transparent;
+  --color-tabbar-lens-2: transparent;
+  --color-tabbar-lens-clear: transparent;
+  --color-tabbar-lens-ring: transparent;
+  --color-tabbar-ink: #a39f97;
+  --color-tabbar-halo: transparent;
+  --color-tabbar-halo-strong: transparent;
+  --color-tabbar-shadow: rgba(0, 0, 0, 0.5);
+  --color-accent-default: #8fb8b1;
+  --color-accent-2-default: #b8a88a;
+  --color-on-accent: #141413;
   --accent-solid-mix: 58%;
   --accent-solid-toward: #ffffff;
-  --accent-solid-lmin: 0.78;
-  --accent-solid-lmax: 1;
-  --accent-solid-c: 1.15;
+  --accent-solid-lmin: 0.7;
+  --accent-solid-lmax: 0.76;
+  --accent-solid-c: 0.5;
   --accent-hover-mix: 90%;
   --accent-hover-toward: #ffffff;
   --accent-pressed-mix: 84%;
-  --accent-soft-mix: 18%;
+  --accent-soft-mix: 14%;
   --accent-text-mix: 45%;
   --accent-text-toward: #ffffff;
-  --accent-text-lmin: 0.9;
-  --accent-text-lmax: 1;
-  --tabbar-accent-lmax: 1;
-  --tabbar-accent-keep: 100%;
-  --accent-glow-mix: 34%;
-  --color-success: #34c38f;
-  --color-success-soft: rgba(95, 220, 174, 0.14);
-  --color-success-text: #80ecc4;
-  --color-on-success: #08191b;
-  --color-warning: #f2a93b;
-  --color-warning-soft: rgba(255, 175, 80, 0.16);
-  --color-warning-text: #ffc77a;
-  --color-on-warning: #0a1c23;
-  --color-danger: #ff7466;
-  --color-danger-soft: rgba(255, 110, 100, 0.16);
-  --color-danger-text: #ff9a90;
-  --color-on-danger: #08191b;
-  --color-info: #6cb2ff;
-  --color-info-soft: rgba(120, 180, 255, 0.14);
-  --color-info-text: #9dcdff;
-  --color-on-info: #08191b;
-  --color-scrim: rgba(0, 0, 0, 0.4);
+  --accent-text-lmin: 0.8;
+  --accent-text-lmax: 0.86;
+  --accent-glow-mix: 0%;
+  --color-success: #7fa58f;
+  --color-success-soft: transparent;
+  --color-success-text: #a39f97;
+  --color-on-success: #141413;
+  --color-warning: #d9b26a;
+  --color-warning-soft: rgba(217, 178, 106, 0.08);
+  --color-warning-text: #d9b26a;
+  --color-on-warning: #141413;
+  --color-danger: #e09a8c;
+  --color-danger-soft: rgba(224, 154, 140, 0.08);
+  --color-danger-text: #e09a8c;
+  --color-on-danger: #141413;
+  --color-info: #8a9aab;
+  --color-info-soft: transparent;
+  --color-info-text: #a39f97;
+  --color-on-info: #141413;
+  --color-scrim: rgba(0, 0, 0, 0.45);
   --color-skeleton: rgba(255, 255, 255, 0.08);
-  --color-skeleton-shine: rgba(255, 255, 255, 0.07);
+  --color-skeleton-shine: rgba(255, 255, 255, 0.06);
   --color-rating-5: #c8371f;
   --color-rating-4: #7a45cf;
   --color-rating-3: #1b64a8;
@@ -876,45 +825,43 @@
   --color-cat-6: #4fd8c9;
   --color-cat-7: #f2b04a;
   --color-cat-8: #a4b2b8;
-  /* ＋ 面板图标块：深色也用样稿的亮渐变（深色面上更跳），白图标 */
-  --color-tile-teal-1: #38d1b8;
-  --color-tile-teal-2: #0a7c75;
-  --color-tile-coral-1: #ffb38a;
-  --color-tile-coral-2: #b8462c;
-  --color-tile-blue-1: #8fb8ff;
-  --color-tile-blue-2: #4a6fd8;
-  --color-tile-amber-1: #ffc85a;
-  --color-tile-amber-2: #c98309;
-  --color-tile-violet-1: #c4a6ff;
-  --color-tile-violet-2: #7a4fd6;
-  --color-on-tile: #ffffff;
-  --color-day-1: #4fd8c9;
-  --color-day-2: #8fb8ff;
-  --color-day-3: #ff9a78;
-  --color-day-4: #bb92ff;
-  --color-day-5: #ff6f9e;
-  --color-day-6: #f2b04a;
-  --color-day-7: #4fd8a4;
-  --color-day-1-deep: #0a7c75;
-  --color-day-2-deep: #4a6fd8;
-  --color-day-3-deep: #b8462c;
-  --color-day-4-deep: #7a4fd6;
-  --color-day-5-deep: #c2255c;
-  --color-day-6-deep: #a35c00;
-  --color-day-7-deep: #0f7a57;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-2: 0 6px 16px -6px rgba(0, 0, 0, 0.5);
-  --shadow-3: 0 18px 40px -14px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.3);
-  --shadow-4: 0 28px 64px -18px rgba(0, 0, 0, 0.7), 0 8px 22px -8px rgba(0, 0, 0, 0.35);
-  --shadow-pressed: 0 2px 6px -3px rgba(0, 0, 0, 0.5);
-  --shadow-btn: 0 8px 20px -10px rgba(0, 0, 0, 0.6);
-  --shadow-thumb: 0 6px 16px -6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 0.5px rgba(255, 255, 255, 0.12);
-  --field-blob-opacity: 0.42;
-  --field-grain-opacity: 0.09;
-  --field-base-toward: #03131a;
-  --field-base-mid: #08151f;
-  --field-base-warm-toward: #170c12;
-  --field-base-mix: 6%;
-  --field-base-warm-mix: 7%;
-  --field-menu-glow: 10%;
+  --color-tile-teal-1: transparent;
+  --color-tile-teal-2: transparent;
+  --color-tile-coral-1: transparent;
+  --color-tile-coral-2: transparent;
+  --color-tile-blue-1: transparent;
+  --color-tile-blue-2: transparent;
+  --color-tile-amber-1: transparent;
+  --color-tile-amber-2: transparent;
+  --color-tile-violet-1: transparent;
+  --color-tile-violet-2: transparent;
+  --color-on-tile: #fbf9f4;
+  --color-day-1: #7fb0aa;
+  --color-day-2: #93a3b3;
+  --color-day-3: #cf9a84;
+  --color-day-4: #b3b27f;
+  --color-day-5: #b597ab;
+  --color-day-6: #c9b38c;
+  --color-day-7: #95b38f;
+  --color-day-1-deep: #2f6b66;
+  --color-day-2-deep: #4e5d6c;
+  --color-day-3-deep: #8f5440;
+  --color-day-4-deep: #5f5e36;
+  --color-day-5-deep: #6b4e62;
+  --color-day-6-deep: #75603f;
+  --color-day-7-deep: #4a6545;
+  --shadow-1: 0 0 0 0 transparent;
+  --shadow-2: 0 0 0 0 transparent;
+  --shadow-3: 0 12px 30px -14px rgba(0, 0, 0, 0.6);
+  --shadow-4: 0 20px 48px -20px rgba(0, 0, 0, 0.7);
+  --shadow-pressed: 0 0 0 0 transparent;
+  --shadow-btn: 0 0 0 0 transparent;
+  --shadow-glass-glow: 0 0 0 0 transparent;
+  --shadow-highlight: 0 0 0 0 transparent;
+  --shadow-bevel: 0 0 0 0 transparent;
+  --shadow-tabbar-lens: 0 0 0 0 transparent;
+  --shadow-tabbar-lens-clear: 0 0 0 0 transparent;
+  --tabbar-accent-lmax: 1;
+  --tabbar-accent-keep: 100%;
+  --paper-grain-opacity: 0.03;
 }

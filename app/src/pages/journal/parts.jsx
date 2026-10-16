@@ -155,27 +155,25 @@ export function EntryCard({ entry, member, name, mine, draft = false, timeZone, 
 }
 
 /**
- * 还没写。我的那格给入口（拍照打卡一步到位、写日记）；对方的那格只说一句。
+ * 还没写：纸本只留一行灰字。我的那格后面跟文字链接（「写一篇 ›」；今天多一个「拍照打卡」；有草稿是「继续写 ›」）；
+ * 对方的那格只说一句「Cathy 还没写」（不画虚线框）。
  * @param {{ name: string, mine: boolean, draft?: boolean, onWrite?: () => void, onPhotos?: (files: File[]) => void, isToday?: boolean }} props
  */
 export function EntryEmpty({ name, mine, draft = false, onWrite, onPhotos, isToday = false }) {
   if (!mine) {
     return (
-      <div class="jn-entry jn-entry--empty jn-entry--theirs" data-testid="journal-entry-empty" data-mine="false">
-        <Glyph name="pen" size={16} />
-        <span>{name} 还没写</span>
-      </div>
+      <p class="jn-empty jn-empty--theirs" data-testid="journal-entry-empty" data-mine="false">{name} 还没写</p>
     );
   }
   return (
-    <div class="jn-entry jn-entry--empty material-card" data-testid="journal-entry-empty" data-mine="true">
-      <p class="jn-entry__empty-title">{draft ? '写了一半，还没保存' : isToday ? '今天还没写' : '你还没写这一天'}</p>
-      <div class="jn-entry__empty-actions">
-        <PhotoInput camera onFiles={onPhotos} size="md" testId="journal-empty-camera">拍照打卡</PhotoInput>
-        <Button variant={draft ? 'primary' : 'tinted'} leading={<Glyph name="pen" size={20} />} onClick={onWrite} data-testid="journal-empty-write">
-          {draft ? '继续写' : '写日记'}
-        </Button>
-      </div>
+    <div class="jn-empty" data-testid="journal-entry-empty" data-mine="true" data-draft={draft ? '' : undefined}>
+      <span class="jn-empty__text">{draft ? '写了一半，还没保存' : isToday ? '今天还没写' : '还没写'}</span>
+      {isToday && !draft && (
+        <PhotoInput camera onFiles={onPhotos} variant="text" size="sm" icon={false} class="jn-empty__link" testId="journal-empty-camera">拍照打卡</PhotoInput>
+      )}
+      <Button variant="text" size="sm" class="jn-empty__link" trailing={<Glyph name="chev-r" size={14} stroke={2.2} />} onClick={onWrite} data-testid="journal-empty-write">
+        {draft ? '继续写' : isToday ? '写日记' : '写一篇'}
+      </Button>
     </div>
   );
 }

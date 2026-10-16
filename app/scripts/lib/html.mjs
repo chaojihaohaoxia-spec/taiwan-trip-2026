@@ -4,7 +4,7 @@
 // 主题色：从 src/styles/tokens.css 读 --color-canvas 的浅色值（:root）和深色值
 // （:root[data-theme="dark"]），写进 manifest 和两条带 media 的 <meta name="theme-color">。
 // 所有网址都是相对路径（assets/…、icons/…、manifest.webmanifest），不写死仓库名。
-// 字体：首屏用到的几个拉丁字体（Instrument Serif 正体 / 斜体、Geist、P2 Figure One）<link rel="preload" as="font">，
+// 字体：首屏用到的几个拉丁字体（Instrument Serif 正体 / 斜体、P2 Figure One）<link rel="preload" as="font">，
 // 文件名由 scripts/fonts/preload.mjs 算（和 esbuild 打包出来的 assets/<名>-<哈希>.woff2 一致）；思源宋体的分片不预加载。
 // =====================================================================
 

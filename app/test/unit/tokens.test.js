@@ -97,7 +97,7 @@ for (const theme of ['light', 'dark']) {
   });
 }
 
-test('行程主题色：设置 --trip-accent 后 --color-accent 跟着变（浅色压暗一点、深色提亮），没设就是默认的海岛青绿', () => {
+test('行程主题色：设置 --trip-accent 后 --color-accent 跟着变（浅色压暗一点、深色提亮），没设就是默认的海水绿', () => {
   const round = (c) => c.slice(0, 3).map(Math.round);
   const light = { ...themeVars(tokens, 'light'), '--trip-accent': '#0e8a8a' };
   // 所有浏览器都认的写法：浅色和黑按 88% 混（白字更清楚）；深色和白按 58% 混（深底上看得清）
@@ -105,9 +105,9 @@ test('行程主题色：设置 --trip-accent 后 --color-accent 跟着变（浅�
   const dark = { ...themeVars(tokens, 'dark'), '--trip-accent': '#0e8a8a' };
   assert.deepEqual(round(resolveColor(dark['--color-accent'], dark)), [115, 187, 187]);
   const defaults = themeVars(tokens, 'light');
-  assert.deepEqual(round(resolveColor(defaults['--color-accent'], defaults)), [10, 124, 117]);
+  assert.deepEqual(round(resolveColor(defaults['--color-accent'], defaults)), [31, 95, 91], '默认海水绿 #1f5f5b（墨一样深）');
   const darkDefaults = themeVars(tokens, 'dark');
-  assert.deepEqual(round(resolveColor(darkDefaults['--color-accent'], darkDefaults)), [79, 216, 201]);
+  assert.deepEqual(round(resolveColor(darkDefaults['--color-accent'], darkDefaults)), [143, 184, 177], '深色默认 #8fb8b1（灰青，不发光）');
   // 第二主题色同样
   const two = { ...themeVars(tokens, 'light'), '--trip-accent-2': '#f59f00' };
   assert.notDeepEqual(round(resolveColor(two['--color-accent-2'], two)), round(resolveColor(defaults['--color-accent-2'], defaults)));

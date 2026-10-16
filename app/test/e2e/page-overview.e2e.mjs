@@ -1,6 +1,6 @@
 // 行程概览页（pages/trip，#/t/:tripId）：出发前 / 进行中 / 结束后三种版式、空行程、加载中骨架 → 入场、出错重试；
-// 勾待办原地收起（截半路）、每天安排列表 ↔ 网格（FLIP 半路）、备选池「排进」某天、?item= 标出备选池条目；
-// 进行中的「现在 / 接下来」动作行、「完成」转圈打勾后换到下一项、傍晚住哪提前、最后一天回程航班；回顾的照片点开大图；
+// 勾待办原地收起（截半路）、每天安排列表 ↔ 网格（FLIP 半路）、备选池挪到地点页（概览上没有，「排进」在地点页）；
+// 进行中（「杂志纸本」：一屏一个主角）的「现在 / 接下来」动作行、「完成」转圈打勾后换到下一项、傍晚住哪提前、最后一天回程航班；回顾的照片点开大图；
 // 375 / 1280 / 深色 / 减弱动态效果下不横向滚动、触控区 ≥44。截图在 __screenshots__/page-overview/，半路图在 __shots__/page-overview/。
 
 import { test, before, after } from 'node:test';
@@ -59,7 +59,7 @@ async function midShot(app, name) {
 // 出发前
 // ---------------------------------------------------------------------
 
-test('出发前（01-08 09:00）：倒计时数到起飞（1 天 22 小时）、登机牌式航班（起降各按时区、时差提示、机票已出票）、急的免费取消紧跟其后、待办、打包、天气、四天安排、备选池；不横向滚动、触控区 ≥44', async () => {
+test('出发前（01-08 09:00）：倒计时数到起飞（1 天 22 小时）、登机牌式航班（起降各按时区、时差提示、机票已出票）、急的免费取消紧跟其后、待办、打包、天气、四天安排；备选池不在概览上（在地点页）；不横向滚动、触控区 ≥44', async () => {
   const app = await open();
   try {
     await ready(app);
@@ -84,7 +84,8 @@ test('出发前（01-08 09:00）：倒计时数到起飞（1 天 22 小时）、
     assert.deepEqual(ids.slice(0, 3), ['ov-hero', 'ov-deadlines', 'ov-todos']);
     assert.ok(await page.$(`${T('ov-deadlines')}[data-urgent]`), '免费取消卡是警示色');
     assert.ok(ids.indexOf('ov-packing') > ids.indexOf('ov-todos'));
-    assert.ok(ids.includes('ov-weather') && ids.includes('ov-days') && ids.includes('ov-pool'));
+    assert.ok(ids.includes('ov-weather') && ids.includes('ov-days'), ids.join());
+    assert.ok(!ids.includes('ov-pool'), '备选池不在概览上（挪到地点页）');
     // 待办：最多 5 条、最急的在前、每条有截止 / 备注小字
     const todos = await page.$$eval(T('ov-todo'), (els) => els.map((el) => ({ title: el.querySelector('.check__label').textContent, due: el.querySelector('.ov-due')?.textContent, state: el.querySelector('.ov-due')?.dataset.state })));
     assert.ok(todos.length >= 3 && todos.length <= 5);
@@ -106,9 +107,8 @@ test('出发前（01-08 09:00）：倒计时数到起飞（1 天 22 小时）、
     assert.ok(days.every((d) => d[1] === 'list'));
     assert.match(days[0][2], /#\/t\/demo-island\/day\/2027-01-10$/);
     assert.match(await text(page, T('ov-days')), /四天安排/);
-    // 备选池：有「排进」按钮
-    assert.ok((await page.$$(T('ov-pool-row'))).length >= 3);
-    assert.ok(await page.$(T('ov-pool-schedule')));
+    // 备选池：概览上没有（「排进」在地点页）
+    assert.equal((await page.$$(`${T('ov-pool-row')}, ${T('ov-pool-schedule')}`)).length, 0);
     await assertNoHorizontalOverflow(page);
     await assertTapTargets(page);
     await app.shot('upcoming');
@@ -202,31 +202,33 @@ test('四天安排：列表 ↔ 网格切换是 FLIP（半路底板在动），�
   }
 });
 
-test('备选池：「排进」弹出小菜单（D1–D4 + 编辑这一条），选 D2 后条目从备选池消失并提示；?item= 标出那一条', async () => {
+test('备选池（「杂志纸本」挪到地点页）：概览上没有备选池；地点页按天看时备选池展开，点「D2」排进那天、条目从备选池消失并提示；旧的 ?item=<备选池条目> 链接打开概览不出错', async () => {
   const app = await open();
   try {
     await ready(app);
     const { page } = app;
-    const rows0 = await page.$$eval(T('ov-pool-row'), (els) => els.map((el) => el.dataset.itemId));
+    assert.equal(await page.$(T('ov-pool')), null, '概览上没有备选池');
+    // 地点页按天看：备选池默认展开
+    await app.go('#/t/demo-island/places?by=day');
+    await page.waitForSelector(`${T('places-pool')}[data-open]`, { timeout: 10000 });
+    await app.idle();
+    const poolIds = () => page.$$eval('.plp-pool__row', (els) => els.map((el) => el.dataset.testid.replace(/^pool-/, '')));
+    const rows0 = await poolIds();
+    assert.ok(rows0.length >= 3, `备选池 ${rows0.length} 条`);
     const target = rows0[0];
-    await page.$eval(`${T('ov-pool-row')}[data-item-id="${target}"]`, (el) => el.scrollIntoView({ block: 'center' }));
-    await page.click(`${T('ov-pool-row')}[data-item-id="${target}"] ${T('ov-pool-schedule')}`);
-    await page.waitForFunction(() => /sheet=pool-day/.test(location.hash));
-    await page.waitForSelector(T('ov-pool-day-2'), { visible: true });
-    const labels = await page.$$eval('[role="menu"] [role="menuitem"]', (els) => els.map((el) => el.textContent.trim()));
-    assert.ok(labels.length === 5, `菜单 ${labels.length} 项`);
-    assert.match(labels[1], /^D2/);
-    assert.match(labels[4], /编辑这一条/);
-    await page.click(T('ov-pool-day-2'));
-    await page.waitForFunction((id) => ![...document.querySelectorAll('[data-testid="ov-pool-row"]')].some((el) => el.dataset.itemId === id), { timeout: 5000 }, target);
-    await page.waitForFunction(() => document.body.textContent.includes('已排进 D2'), { timeout: 5000 });
-    assert.ok(!/sheet=pool-day/.test(await page.evaluate(() => location.hash)), '小菜单关掉了');
-    const rows1 = await page.$$eval(T('ov-pool-row'), (els) => els.map((el) => el.dataset.itemId));
-    assert.equal(rows1.length, rows0.length - 1);
-    // ?item= 指向备选池里剩下的一条：那一行标出来
-    await app.go(`#/t/demo-island?item=${rows1[0]}`);
+    await page.$eval(T(`pool-${target}`), (el) => el.scrollIntoView({ block: 'center' }));
+    await app.idle();
+    // 出发前：D1–D4 都能排；点第二个（D2）
+    const days = await page.$$eval(`${T(`pool-days-${target}`)} [data-day]`, (els) => els.map((e) => e.dataset.day));
+    assert.equal(days.length, 4, `能排进的天：${days.length}`);
+    await page.click(`${T(`pool-days-${target}`)} [data-day="${days[1]}"]`);
+    await page.waitForFunction((id) => !document.querySelector(`[data-testid="pool-${id}"]`), { timeout: 5000 }, target);
+    await page.waitForFunction(() => [...document.querySelectorAll('.ov-toast__message')].some((el) => /排进了 D2/.test(el.textContent)), { timeout: 5000 });
+    assert.equal((await poolIds()).length, rows0.length - 1);
+    // 以前搜索结果里备选池的条目会带着 ?item= 打开概览：现在那个链接照样能打开、不报错
+    await app.go(`#/t/demo-island?item=${rows0[1]}`);
     await ready(app);
-    assert.ok(await page.$(`${T('ov-pool-row')}[data-item-id="${rows1[0]}"][data-focus]`), '?item= 那一条标出来了');
+    assert.equal(await page.$(T('ov-pool')), null);
     app.assertClean();
   } finally {
     await app.close();
@@ -237,15 +239,15 @@ test('备选池：「排进」弹出小菜单（D1–D4 + 编辑这一条），�
 // 进行中
 // ---------------------------------------------------------------------
 
-test('进行中（01-11 10:00）：「现在」是半日浮潜（导航 / 叫 Grab / 给司机看 / 记一笔 + 完成 / 跳过 + 接下来），然后时间轴、今天花了、天气和日落、今晚住哪、待办、截止、明天、备选池、每天安排', async () => {
+test('进行中（01-11 10:00）：「现在」是半日浮潜（导航 / 叫 Grab / 给司机看 / 记一笔 + 完成 / 跳过 + 接下来），然后今晚住哪、天气和日落一行、待办、截止、明天（「杂志纸本」：没有时间轴缩略、今天花了、备选池、每天安排）', async () => {
   const app = await open({ now: DURING });
   try {
     await ready(app);
     const { page } = app;
     assert.equal(await page.$eval(T('page-trip'), (el) => el.dataset.phase), 'ongoing');
     const ids = await order(page);
-    assert.deepEqual(ids.slice(0, 6), ['ov-now', 'ov-timeline', 'ov-spend', 'ov-today-weather', 'ov-stay', 'ov-todos']);
-    assert.deepEqual(ids.slice(-1), ['ov-days']);
+    assert.deepEqual(ids, ['ov-now', 'ov-stay', 'ov-today-weather', 'ov-todos', 'ov-deadlines', 'ov-tomorrow']);
+    for (const gone of ['ov-timeline', 'ov-spend', 'ov-pool', 'ov-days']) assert.equal(await page.$(T(gone)), null, `${gone} 不在概览上`);
     // 现在
     assert.equal(await page.$eval(T('ov-now'), (el) => el.dataset.mode), 'current');
     assert.match(await text(page, `${T('ov-now')} .k-card__eyebrow`), /^现在$/);
@@ -259,16 +261,9 @@ test('进行中（01-11 10:00）：「现在」是半日浮潜（导航 / 叫 Gr
     assert.ok(await page.$(T('ov-now-done')));
     assert.ok(await page.$(T('ov-now-skip')));
     assert.match(await text(page, T('ov-now-next')), /接下来.*老码头海鲜午餐.*还有 3 小时/);
-    // 时间轴：有一条是“现在”
-    const tl = await page.$$eval(T('ov-tl-row'), (els) => els.map((el) => el.dataset.state));
-    assert.equal(tl.filter((s) => s === 'current').length, 1);
-    assert.ok(tl.length <= 5);
-    assert.match(await text(page, T('ov-timeline')), /前面还有 1 条/);
-    // 今天花了：折合港币 + 按币种
-    assert.match(await rolled(page, T('ov-spend-hkd')), /^HK\$[\d,]+$/);
-    assert.match(await text(page, T('ov-spend')), /1,710,000₫/);
-    assert.match(await text(page, T('ov-spend')), /¥35/);
-    assert.equal(await page.$eval(T('ov-spend'), (el) => el.dataset.count), '5');
+    // 时间轴和今天花了不在概览上：「现在」的标题点进那一天（时间轴在那里），「记一笔」在动作行里
+    assert.equal(await page.$(T('ov-tl-row')), null);
+    assert.equal(await page.$(T('ov-spend-hkd')), null);
     // 天气和日落
     assert.equal(await text(page, T('ov-sunset')), '17:42');
     assert.match(await text(page, T('ov-sunset-left')), /^离日落还有 7 小时 4\d 分$/);
@@ -289,7 +284,7 @@ test('进行中（01-11 10:00）：「现在」是半日浮潜（导航 / 叫 Gr
   }
 });
 
-test('进行中：点「完成」转圈打勾，这一条标记完成，大卡换成「接下来 · 老码头海鲜午餐」，时间轴上它打了勾', async () => {
+test('进行中：点「完成」转圈打勾，这一条标记完成，大卡换成「接下来 · 老码头海鲜午餐」，那一天的时间轴上它打了勾', async () => {
   const app = await open({ now: DURING });
   try {
     await ready(app);
@@ -314,10 +309,12 @@ test('进行中：点「完成」转圈打勾，这一条标记完成，大卡�
     assert.equal(await page.$eval(T('ov-now'), (el) => el.dataset.mode), 'next');
     assert.match(await text(page, `${T('ov-now')} .k-card__eyebrow`), /^接下来 · 还有 3 小时$/);
     assert.match(await text(page, T('ov-now-title')), /老码头海鲜午餐/);
-    const done = await page.$eval(`${T('ov-tl-row')}[href*="${itemId}"]`, (el) => el.dataset.state);
-    assert.equal(done, 'done');
-    assert.match(await text(page, `${T('ov-timeline')} .k-card__meta`), /^1 \/ 13 已完成$/);
     await app.shot('ongoing-after-done', { fullPage: false });
+    // 概览上不再有时间轴缩略：到那一天的页面看，这一条打了勾
+    await app.go(`#/t/demo-island/day/2027-01-11?item=${itemId}`);
+    await page.waitForSelector(`li[data-item-id="${itemId}"]`, { timeout: 10000 });
+    await app.idle();
+    assert.equal(await page.$eval(`li[data-item-id="${itemId}"]`, (el) => el.dataset.status), 'done', '那一天的时间轴上它打了勾（标记完成）');
     app.assertClean();
   } finally {
     await app.close();

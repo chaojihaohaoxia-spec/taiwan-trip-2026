@@ -2,7 +2,8 @@
 
 职责：页面之间共用、长得一样的东西——内容卡片、段标题、列表行、金额、种类图标、状态芯片、成员芯片、倒计时、点按复制、
 **地点动作行 `PlaceActions`（导航 / 叫 Grab / 给司机看 / 复制地址 / 记一笔 / 打电话）**、空状态 / 出错、行内快速添加、左滑行；
-`kit/search/` 是行程里的全局搜索（引擎 + 结果列表，外壳的搜索层用）。外观照样稿 P2-serif（A 液态玻璃 · 海岛光 + P2 杂志宋体），
+`kit/search/` 是行程里的全局搜索（引擎 + 结果列表，外壳的搜索层用）。外观是「杂志纸本」（SPEC §11：内容直接排在纸上、细线分组、
+墨色的字和一种海水绿；不要图标方块、圆底箭头、彩色徽章、胶囊；状态是一行灰字，只有过期、还没订是砖红），
 颜色、圆角、阴影、字体、动效只用 `styles/tokens.css` 的变量；交互用 `ui/` 的原语和 `motion/` 的动效，不另写一套。
 
 **现场演示**：本机 `#/dev/kit`（`dev/pages/KitPage.jsx`，每个组件的各种状态，浅色 / 深色都看）。e2e：`test/e2e/kit.e2e.mjs`；
@@ -36,39 +37,40 @@ kit 只给**按需加载**的页面、弹层、外壳的按需面板用：首屏
 
 | 参数 | 说明 |
 |---|---|
-| `title` | 标题（宋体 title-3，18px，字距 .04em，只在标点处折行） |
-| `eyebrow` | 标题上面的眉标（小字大字距，「距离出发还有」） |
-| `meta` | 标题区右边的说明（「还剩 5 项」，标签字体 13px 次要色） |
+| `title` | 标题（宋体 title-2，21px，只在标点处折行） |
+| `eyebrow` | 标题上面的眉标（装饰灰的小字，「距离起飞还有」） |
+| `meta` | 标题区右边的说明（「还剩 5 项」，13px 灰字） |
 | `action` | 标题区右边的一个动作（不可点的卡片才用，例如 `<Badge>`、小按钮） |
-| `glyph` | 标题前的小图标（`kit/glyphs.js` 的名字，强调色浅底的 30px 方块） |
+| `glyph` | 标题前的小图标（`kit/glyphs.js` 的名字）：「杂志纸本」不显示（参数留着） |
 | `footer` | 底部（整行按钮「查看全部待办」） |
-| `to` / `href` | 整张卡是站内链接（路由目标 / 拼好的 `#/…`）：右上角凸起的白圆箭头，按下整张一缩 |
+| `to` / `href` | 整块是站内链接（路由目标 / 拼好的 `#/…`）：右上角一个灰色小箭头，按下整块一缩 |
 | `onClick` | 整张卡是按钮：外层仍是 `<section>`，上面铺一个透明按钮接点击（标题语义不丢）；读屏名字 `label`，没给就用标题 |
-| `tone` | `'neutral'`（默认；旧写法 `'default'`）/ `'accent'`（强调色浅底：“现在 / 接下来”）/ `'warning'`（警示色细边：快到期的提醒） |
-| `padding` | `'md'`（18）/ `'sm'`（14：里面放 ListRow 的列表卡）/ `'none'` |
+| `tone` | `'neutral'`（默认；旧写法 `'default'`）/ `'accent'`（纸本里和 neutral 一样）/ `'warning'`（上面那根线是赭石色：快到期的提醒） |
+| `padding` | `'md'` / `'sm'`（都是上 22、左右 0：和页面标题对齐）/ `'none'` |
 | `as`、`level`、`class`、`testId` | 外层标签（section 默认）、标题级别（h2 默认） |
 
 **可点的卡片里不要再放按钮、链接**（嵌套的可点元素）；要放动作用不可点的卡片 + `action` / `footer`。
 
 ### `SectionHeader`（段标题）
 
-样稿 `.sec-h`：宋体 title-2（21px），上 26、下 8（第一个不留上边距）。
+宋体 title-2（21px），上 26、下 8（第一个不留上边距），和页面左边对齐；标题旁的列表 / 网格切换是一个灰色图标（不是白圆）。
 
 | 参数 | 说明 |
 |---|---|
-| `title`、`count` | 标题、跟在后面的计数（标签字体次要色；可以是「2/8」这种字符串） |
+| `title`、`count` | 标题、跟在后面的计数（灰字；可以是「2/8」这种字符串） |
 | `meta` | 标题下面一行小字说明 |
-| `action` | `{ label, to \| href \| onClick, glyph? }` → 强调色浅底的小胶囊（右边小箭头，可点区域 ≥44）；也可以直接给组件 |
+| `action` | `{ label, to \| href \| onClick, glyph? }` → 海色文字链接（右边小箭头，没有底，可点区域 ≥44）；也可以直接给组件 |
 | `level`、`id`、`class` | |
 
 ### `ListRow`（列表行）、`InfoRow`（信息行）、`Divider`（分隔线）
 
-`ListRow`：样稿账本流水、地点列表那种一行。行在卡片里左右各伸出 10px（按下的底色铺开），文字和卡片标题对齐；行间 1px 分隔线从文字处画起；最少 48 高，有副标题 58 高。
+`ListRow`：账本流水、地点列表那种一行。行左右各伸出 10px（按下的底色铺开），文字和块标题对齐；行间 1px 细线；最少 48 高，有副标题 58 高；
+行尾是灰色小箭头（没有底）；**前导图标（`leading` / `glyph`）纸本不显示**（字和留白就够了）。
 
 | 参数 | 说明 |
 |---|---|
 | `title`、`subtitle` | 主文字（15px 半粗，最多两行）、副文字（12px 标签字体、一行省略） |
-| `leading` / `glyph` | 左边的东西（`KindIcon tile`、`Avatar`…）/ 只给图形名时自动放 40px 图标方块 |
+| `leading` / `glyph` | 左边的东西（`KindIcon tile`、`Avatar`…）/ 只给图形名时自动放一个图标（纸本都不显示） |
 | `value` | 右边的值（`MoneyText`、计数、`StatusChip`） |
 | `chevron` | 右边的强调色小圆箭头（可点时默认有）。**能点的行不要写 `chevron={false}`**，除非另有底色、一眼看得出能点 |
 | `to` / `href` / `onClick` | 整行可点（`data-press="highlight"`：按下换底色）；都没有就是只看的一行 |
@@ -88,9 +90,10 @@ kit 只给**按需加载**的页面、弹层、外壳的按需面板用：首屏
 | 参数 | 说明 |
 |---|---|
 | `amount`、`currency` | 原币金额（数字）、币种 |
-| `size` | `'sm'` 13 · `'md'` 15（默认，标签字体）· `'lg'` 22 · `'xl'` 27 · `'2xl'` 40 · `'3xl'` 48（后四档 Instrument Serif；「1」和越南盾符号「₫」由 P2 Figure One 顶替——Instrument Serif 没有 ₫，以前会回退到粗的宋体 600） |
+| `size` | `'sm'` 13 · `'md'` 15（默认）· `'lg'` 22 · `'xl'` 27 · `'2xl'` 40 · `'3xl'` 48（后四档是大号数字：系统字体 400 等宽数字） |
+| `serif` | 主数字用 Instrument Serif（全站只有账本总额这类；「1」和越南盾符号「₫」由 P2 Figure One 顶替） |
 | `hkd` | `'auto'`（默认：小号跟在后面「（约 HK$121）」、大号换到下一行）· `'inline'` · `'below'` · `'none'`。港币本身、0、不支持的币种自动不标 |
-| `readable` | 越南盾用“万”：「45 万越南盾」。大号时中文单位单独拆出来用小一号的宋体（不小于 15px），像样稿的「5 天」 |
+| `readable` | 越南盾用“万”：「45 万越南盾」。大号时中文单位单独拆出来小一号 |
 | `fx` | 汇率快照（`lib/services/fx.js`），不给用固定参考汇率 |
 | `signed` | 正数前面加 +；`tone`：`'auto'`（signed 时正绿负红）· `'none'` / `'neutral'` · `'positive'` / `'success'` · `'negative'` / `'danger'` · `'muted'` |
 | `align` | 两行时 `'start'` / `'end'`（列表右边的金额用 end） |
@@ -104,8 +107,8 @@ kit 只给**按需加载**的页面、弹层、外壳的按需面板用：首屏
 
 | 参数 | 说明 |
 |---|---|
-| `tile` | `true`/`'md'` 40px（图标 20）· `'sm'` 34 · `'xs'` 30 · `'lg'` 48；圆角 `--radius-tile`（样稿 13px） |
-| `tone` | `'accent'`（默认：浅灰底 + 强调色图标）· `'soft'`（强调色浅底）· `'solid'`（强调色实心 + 白图标）· `'neutral'` |
+| `tile` | 「杂志纸本」：没有底块、没有圆，就是一个次要灰的线条小图标（24px 见方的位置，图标 18px）；各档大小不再区分 |
+| `tone` | `'solid'` 海色图标；其余（`'accent'` / `'soft'` / `'neutral'`）都是次要灰 |
 | `labelled` | 读屏读出种类名（默认是装饰） |
 | `size` | 图标大小（不放方块时默认 22） |
 
@@ -120,14 +123,15 @@ kit 只给**按需加载**的页面、弹层、外壳的按需面板用：首屏
 
 ### `StatusChip`、`PhaseChip`、`PersonChip`、`CountdownText`、`DateLabel`
 
-外观是 `ui/Badge`（24px 小胶囊，浅底 + 深一号的同色字），图标用 kit 的线条图形。中文名和语气在 `status.js`（`STATUS`、`statusInfo()`）。
+外观是 `ui/Badge`：**一行字**（不是胶囊、不带图标），几个挨着写时中间自动加「·」。只标异常：已订、已付、计划中灰字；待确认、快到期赭石；
+过期、还没订砖红（`booking.idea` 的语气是 danger）。中文名和语气在 `status.js`（`STATUS`、`statusInfo()`）。
 
 | 组件 | 用法 |
 |---|---|
-| `StatusChip` | `kind="booking"`（还没订 / 待确认 / 已订 / 已取消）、`"payment"`（未付款 / 已付 / 付了订金 / 到店付 / 免费 / 已退款）、`"item"`（计划中 / 已完成 / 已跳过）、`"trip"`；`value`；`variant`、`size`、`glyph={false}` |
+| `StatusChip` | `kind="booking"`（还没订 / 待确认 / 已订 / 已取消）、`"payment"`（未付款 / 已付 / 付了订金 / 到店付 / 免费 / 已退款）、`"item"`（计划中 / 已完成 / 已跳过）、`"trip"`；`value`；`variant`、`size`、`glyph`（默认不带图标） |
 | `StatusChip deadline` | `deadline={b.free_cancel_until} timeZone={b.start_tz} start={b.start_at}`：免费取消倒计时（`freeCancelInfo()`，**全站一套**：预订页、预订详情、概览、每天页）——过了「已不可免费取消」灰；≤24 小时「免费取消还剩 5 小时」红；≤48 小时「还剩 1 天 20 小时」警示色；再往后「1月9日 23:59 前可免费取消」蓝；给了 `start` 且预订已经开始就不显示。`short` 只说「还剩 1 天 20 小时」。自己每 30 秒刷新 |
 | `PhaseChip` | `trip={trip}`：出发前 / 进行中（实心）/ 回顾 / 日期未定；`detail` 后面接一句「还有 3 天出发」「第 2 天 · 共 4 天」 |
-| `PersonChip` | `name` / `member`（trip_members 行）、`color`（`trip_members.color`，没有就按名字固定一个分类色）、`you`（后面加「我」）、`size` |
+| `PersonChip` | `name` / `member`（trip_members 行）、`color`（数据里留着，纸本不用：前面是一个灰色小点）、`you`（后面加灰字「我」）、`size` |
 | `CountdownText` | `to`（时刻）、`prefix`（默认「还有」）、`suffix`、`expired`（到点后显示什么）、`interval`：「还有 2 天 3 小时」（`formatLeft()`） |
 | `DateLabel` | `date`（当地日期）或 `at`（时刻，要给 `timeZone`）、`time`、`relative`（今天 / 明天）、`weekday`、`year`：渲染 `<time>`，标签字体等宽数字 |
 
@@ -146,7 +150,7 @@ kit 只给**按需加载**的页面、弹层、外壳的按需面板用：首屏
 |---|---|
 | `place` | places 行（或同样字段的对象：`id trip_id name name_local name_en address phone lat lng coord_precision maps_url google_place_id extra`） |
 | `places` | 同一趟行程的地点（Map / 数组 / `(id) => 地点`），解析下车点用；**不传就按 `place.trip_id` 从数据层自动拿**（页面一般不用传） |
-| `size` | `'full'`（默认：带文字的大按钮，等宽几列、58 高，样稿 `.act`）/ `'compact'`（一排 44px 凸起的白圆，读屏有名字） |
+| `size` | `'full'`（默认：一行纯文字链接——海色字、没有图标，上面一根细线、中间短竖线隔开，多于 4 个折两行）/ `'compact'`（一排 44px 纸片圆图标，读屏有名字） |
 | `actions` | 要哪几个，默认 `['nav', 'grab', 'driver', 'copy']` |
 | `call` | 有电话时加「打电话」（没有电话就不显示） |
 | `expense` | 加「记一笔」；给对象就是预填 `{ itemId, bookingId, date }`（`placeId` 默认就是这个地点） |
@@ -227,9 +231,9 @@ kit 只给**按需加载**的页面、弹层、外壳的按需面板用：首屏
 - **`item-clock.js`**：`itemClock(item, { timeZone, booking })` / `itemTimeText(item, …)` / `flightLeg(item, booking, timeZone)`——时间轴条目的钟点怎么写，
   每天页的时间栏、概览的「现在 / 接下来」和时间轴缩略共用（以前概览只按行程时区算，人在香港时和每天页对不上）。规则：没标签的钟点是这一天的时区；
   `extra.local_time` 的条目写那边的钟点 + `zone`「香港」；航班条目（起飞那一刻）起飞按起飞地、落地按到达地（`arrow`、`endZone`）；超过 4 个字的模糊时间放 `fuzzy`（副标题里写）。
-- **`day-tone.js`**：第几天的颜色，全站一套（tokens `--color-day-1…7`：跟主题走，图钉 / 路线 / 小点；`--color-day-N-deep`：两种主题一样的深色调，白字徽章）。
-  `dayToneIndex(n)` 7 天一轮、不合法 8（灰）；`dayTone(n)`、`dayToneDeep(n)` 返回 CSS 值。概览的 D 徽章、地图、账本、日记都用它。
-- **`DayBadge.jsx`**：「D1」徽章 `<DayBadge n size="sm|md|lg" today />`（小号标签字体，大号宋体；颜色 `--color-day-N-deep` + 白字）。
+- **`day-tone.js`**：第几天的颜色（tokens `--color-day-1…7`，一组低饱和的大地色：跟主题走；`--color-day-N-deep`：两种主题一样的深色调）。
+  「杂志纸本」里**只在地图上用**（图钉、路线、筛选小点）；页面上的 D1–D4 是墨色的字。`dayToneIndex(n)` 7 天一轮、不合法 8（灰）；`dayTone(n)`、`dayToneDeep(n)` 返回 CSS 值。
+- **`DayBadge.jsx`**：「D1」徽章 `<DayBadge n size="sm|md|lg" today />`：墨色的字（小号系统字体，中号、大号宋体），今天海色；不是色块。
 - **`place-actions.js`**：`rideHintOfMode(mode)` / `rideHintFor(transport_in)`——交通方式 → 主按钮（走路 = 导航、打车 = 叫 Grab）和导航方式，每天页和概览同一套。
 - **`status.js`**：`deadlineWhen(until, { timeZone, at })`——截止正好零点写成前一天「24:00（周五深夜）」；`freeCancelInfo` 用它。
 - **`MoneyText`**：新参数 `hkdValue`（已经算好的折合港币，例如记账时记下的 `amount_home`）：给了就不再按汇率估，同一屏的合计、小计、每一行同一套数。
@@ -263,7 +267,7 @@ const groups = searchTrip(store.bundle, query, { limit: 5 });
 - **`icon`**：`{ type, kind }`，`<KindIcon {...r.icon} tile="sm" />`。
 - 演示行程（30 多个地点、50 多条条目）里一次搜索 2–20ms。
 
-`SearchResults`：分组标题（眉标 + 计数「3 / 7」）+ 结果行（种类图标方块、标题 / 副标题、关键字高亮 `<mark class="k-hl">`、右边箭头）。
+`SearchResults`：分组标题（眉标 + 计数「3 / 7」）+ 结果行（种类图标、标题 / 副标题、关键字高亮 `<mark class="k-hl">`、右边箭头）。
 参数 `groups`、`query`（空查询什么都不显示；有查询没结果显示「没有找到」空状态）、`activeIndex`（键盘选中的那一行有底色、自动滚进可见区域）、
 `onActiveChange`（鼠标移上去）、`onSelect(result, e)`（不给就由路由器直接跳链接）、`idPrefix`、`emptyText`。
 列表是 `role="listbox"`，每行 `<a href role="option" aria-selected>`；搜索框写 `role="combobox" aria-controls="${idPrefix}-list" aria-activedescendant={optionId(idPrefix, i)}`。

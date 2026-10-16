@@ -1,17 +1,18 @@
 // =====================================================================
 // ui/Chip.jsx：小胶囊（筛选、标签）。
 //
-//   <Chip selected={on} onToggle={setOn}>美食</Chip>              筛选：点了切换，选中时左侧对勾“长”出来（aria-pressed）
+//   <Chip selected={on} onToggle={setOn}>美食</Chip>              筛选：点了切换，选中是墨色细线框（aria-pressed）
 //   <Chip icon={IconMapPin}>3 个地点</Chip>                       只展示（不可点，不加按压）
 //   <Chip onRemove={() => remove(tag)}>海边</Chip>                 可删除：右侧 × 按钮（独立的可点区域，中文 label）
 //   <Chip onClick={…} count={12}>全部</Chip>                       可点 + 数字
 //
-// 视觉 32px 高；可点的用 ::after 把热区扩到 44px。选中：强调色浅底 + 强调色字 + 对勾。
+// 视觉 44px（sm 32px，可点的用 ::after 把热区扩到 44px）。「杂志纸本」：细线框的纸片；选中是墨色字 + 墨色细线框（没有实心色块、没有对勾）。
+// 图标少用（只在比字更快认出时用）。
 // =====================================================================
 
 import './Chip.css';
 import { Pressable } from './Pressable.jsx';
-import { IconCheck, IconX } from './icons.js';
+import { IconX } from './icons.js';
 import { cx, renderIcon } from './util.js';
 
 /**
@@ -24,11 +25,6 @@ export function Chip({ selected, onToggle, onClick, onRemove, removeLabel, icon,
   const interactive = toggle || Boolean(onClick);
   const body = (
     <>
-      {toggle && (
-        <span class="chip__check" aria-hidden="true">
-          <span class="chip__check-inner"><IconCheck size={14} strokeWidth={3} /></span>
-        </span>
-      )}
       {icon && <span class="chip__icon">{renderIcon(icon, 15)}</span>}
       <span class="chip__label">{children}</span>
       {count !== undefined && count !== null && <span class="chip__count">{count}</span>}

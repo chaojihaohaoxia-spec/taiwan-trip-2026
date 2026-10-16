@@ -168,7 +168,7 @@ test('给司机看：从按钮长出来（第 0 帧和按钮一样大、整张�
     assert.equal(info.secondary, f.secondary);
     assert.ok(info.nameSize >= 32 && info.addrSize >= 28, JSON.stringify(info));
     assert.equal(info.bg, 'rgb(255, 255, 255)');
-    assert.equal(info.fg, 'rgb(10, 28, 35)');
+    assert.equal(info.fg, 'rgb(29, 28, 26)');
     assert.equal(info.call, 'tel:+0000000000001');
     assert.equal(info.clip, 'none', '长完以后不再裁切');
     await assertTapTargets(page);

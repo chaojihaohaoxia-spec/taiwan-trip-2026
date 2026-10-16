@@ -51,22 +51,7 @@
   height: 58px;
   border-radius: var(--radius-pill);
   background: var(--material-glass);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
-  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
-}
-
-.mp-strip::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
+  box-shadow: var(--shadow-glass-edge);
 }
 
 .mp-strip__scroll {
@@ -263,6 +248,11 @@
 /* OSM 底图的深色：反相 + 转回原来的色相，再压低对比和饱和度（水是深蓝、路是深灰） */
 .mp-frame .mp-tiles--dark-filter {
   filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.55);
+}
+
+/* 浅色底图也降饱和（纸本：OSM 原色是全站最花的一屏；路线和图钉的颜色才是主角） */
+.mp-frame .mp-tiles--light {
+  filter: saturate(0.3) contrast(0.95);
 }
 
 /* Leaflet 自带的控件不用（缩放按钮自己画；署名自己画） */

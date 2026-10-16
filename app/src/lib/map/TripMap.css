@@ -59,6 +59,11 @@
   filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.55);
 }
 
+/* 浅色底图也降饱和（纸本：OSM 原色是全站最花的一屏；路线和图钉的颜色才是主角） */
+.tm-map .tm-tiles--light {
+  filter: saturate(0.3) contrast(0.95);
+}
+
 /* ---------- 叠在地图上的东西 ---------- */
 .tm-map__badge {
   position: absolute;
@@ -68,8 +73,6 @@
   padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--color-glass);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
   color: var(--color-text-2);
   font: var(--type-caption-2);
   pointer-events: none;
@@ -191,8 +194,6 @@
   padding: 1px var(--space-2);
   border-top-left-radius: var(--radius-sm);
   background: var(--color-glass);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
   color: var(--color-text-2);
   font: var(--type-caption-2);
 }

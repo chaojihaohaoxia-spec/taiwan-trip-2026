@@ -1,17 +1,18 @@
 // =====================================================================
 // kit/Chips.jsx：状态芯片、阶段芯片、成员芯片、倒计时、日期。
 //
-//   <StatusChip kind="booking" value="pending" />            待确认（警示色）
+//   <StatusChip kind="booking" value="pending" />            待确认（赭石字）
 //   <StatusChip kind="payment" value="pay_at_property" />    到店付
 //   <StatusChip kind="item" value="done" />                  已完成
 //   <StatusChip deadline={b.free_cancel_until} timeZone={b.start_tz} start={b.start_at} />   免费取消还剩 1 天 20 小时（≤48 小时警示色、≤24 小时红色、过了「已不可免费取消」灰色；预订开始后不显示；自己会走）
 //   <PhaseChip trip={trip} />                                出发前 / 进行中 / 回顾（detail：「还有 3 天出发」）
-//   <PersonChip name="Cathy" color={member.color} />         成员色点 + 名字（you：后面加「我」）
+//   <PersonChip name="Cathy" color={member.color} />         灰色小点 + 名字（you：后面加灰字「我」）
 //   <CountdownText to={b.start_at} prefix="还有" />           还有 2 天 3 小时（到点后显示 expired）
 //   <DateLabel date="2027-01-10" relative />                  今天 / 1月10日 周日（<time>，标签字体）
 //   <DateLabel at={b.start_at} timeZone={b.start_tz} time />  1月10日 08:05
 //
-// 芯片外观是 ui/Badge（24px 小胶囊、浅底 + 深一号的同色字），图标用 kit 的线条图形。
+// 「杂志纸本」：状态是 ui/Badge 的**一行字**——不带图标、没有底色；几个状态挨着写时中间自动加「·」。
+// 只标异常：已订、已付、计划中是灰字；快到期、待确认是赭石；过期、还没订是砖红（kit/status.js 的 tone）。
 // =====================================================================
 
 import './Chips.css';
@@ -30,7 +31,7 @@ function DeadlineChip({ deadline, timeZone, start, short = false, size, class: c
   const info = freeCancelInfo(deadline, { at, timeZone, start });
   if (!info) return null;
   return (
-    <Badge tone={info.tone} icon={icon(info.glyph)} size={size} class={className} data-deadline={info.state} title={`免费取消截止：${info.at}`} {...rest}>
+    <Badge tone={info.tone} size={size} class={className} data-deadline={info.state} title={`免费取消截止：${info.at}`} {...rest}>
       {short ? info.short : info.label}
     </Badge>
   );
@@ -39,9 +40,9 @@ function DeadlineChip({ deadline, timeZone, start, short = false, size, class: c
 /**
  * @param {{ kind?: 'booking'|'payment'|'item'|'trip', value?: string, deadline?: string, timeZone?: string, short?: boolean,
  *           variant?: 'soft'|'solid'|'outline', size?: 'sm'|'md', glyph?: boolean, class?: string }} props
- *   glyph：带不带图标（默认带）
+ *   glyph：带不带图标（纸本默认不带：状态就是一行字）
  */
-export function StatusChip({ kind, value, deadline, timeZone, start, short, variant = 'soft', size, glyph = true, class: className, ...rest }) {
+export function StatusChip({ kind, value, deadline, timeZone, start, short, variant = 'soft', size, glyph = false, class: className, ...rest }) {
   if (deadline !== undefined) {
     return <DeadlineChip deadline={deadline} timeZone={timeZone} start={start} short={short} size={size} class={className} {...rest} />;
   }
@@ -64,7 +65,7 @@ export function PhaseChip({ trip, detail = false, size, class: className, ...res
   const variant = info.phase === 'ongoing' ? 'solid' : 'soft';
   return (
     <span class={className ? `k-phase ${className}` : 'k-phase'} data-phase={info.phase} {...rest}>
-      <Badge tone={info.tone} variant={variant} size={size} icon={icon(info.glyph)}>{info.label}</Badge>
+      <Badge tone={info.tone} variant={variant} size={size}>{info.label}</Badge>
       {detail && <span class="k-phase__detail">{info.detail}</span>}
     </span>
   );

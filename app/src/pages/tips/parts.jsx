@@ -7,7 +7,7 @@
 //   TemplateCard   消息模板：用法说明 + 原文（超过 6 行收起，「显示全文」用 motion 的 useHeightFlip 平滑展开）
 //                  + 复制原文 / 给对方看 + 能直接发给谁（同一个预订 / 地点的联系人：WhatsApp 预填原文、Zalo 先复制、邮件预填）
 //   PhraseCard     常用语：中文 → 大字原文（能读就点一下读出来）→ 复制 / 给对方看；网格里长句占满一行
-//   「相关」小胶囊、小标在 common.jsx（联系人页也用）
+//   「相关」文字链接、小标在 common.jsx（联系人页也用）
 // 给对方看 = sheets/ 的 driver 弹层（arg 是贴士 id），从按钮长出来。
 // =====================================================================
 
@@ -228,14 +228,12 @@ export function TipCard({ tip, hit, ctx, acc, variant = 'card', pinnedTag = fals
   );
 }
 
-/** 置顶：最上面一张暖色的卡，一行一条（行内展开） */
+/** 置顶：最上面一组（纸本：和别的组一样排在纸上，不做暖色底和图钉圆），一行一条（行内展开） */
 export function PinnedCard({ rows, ctx, acc }) {
   return (
     <section class="tp-pinned" aria-labelledby="tp-pinned-title" data-testid="tips-pinned">
       <header class="tp-pinned__head">
-        <span class="tp-pinned__icon" aria-hidden="true"><Glyph name="pin2" size={16} stroke={2} /></span>
-        <h2 class="tp-pinned__title" id="tp-pinned-title">置顶提醒</h2>
-        <span class="tp-pinned__count">{rows.length} 条</span>
+        <h2 class="tp-pinned__title" id="tp-pinned-title">置顶<span class="tp-pinned__count">{rows.length}</span></h2>
       </header>
       <div class="tp-pinned__list">
         {rows.map(({ tip, hit }) => (

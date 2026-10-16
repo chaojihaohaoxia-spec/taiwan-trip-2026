@@ -1,8 +1,8 @@
 /* =====================================================================
    overlay/Dialog.css：居中确认框（iOS 提示框风格）。
    出场 / 退场的缩放和淡入淡出由 Dialog.jsx 驱动。
-   A 皮肤：真玻璃卡片（圆角 --radius-2xl）+ 高光细边 + 折射描边；标题宋体；按钮是胶囊：
-   取消 = 凸起的白，确认 = 强调色渐变，危险操作 = 红色浅底红字（横排两个、竖排一列，中间留 8px）。
+   「杂志纸本」：一张不透明的纸（圆角 --radius-2xl）+ 细线框 + 很浅的柔影；标题宋体；按钮：
+   取消 = 纸片 + 细线，确认 = 实色海色，危险操作 = 砖红浅底砖红字（都是圆角 10 的纸片；横排两个、竖排一列，中间留 8px）。
    ===================================================================== */
 
 .ov-dialog-wrap {
@@ -27,28 +27,11 @@
   overflow: hidden;
   border-radius: var(--radius-2xl);
   background: var(--material-glass-dense);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
-  box-shadow: var(--shadow-4), var(--shadow-glass-edge), var(--shadow-glass-glow);
+  box-shadow: var(--shadow-4), var(--shadow-glass-edge);
   color: var(--color-text);
   text-align: center;
   pointer-events: auto;
   outline: none;
-}
-
-/* 折射高光描边 */
-.ov-dialog::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-raised);
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
 }
 
 .ov-dialog__content {
@@ -92,7 +75,7 @@
   position: relative;
   min-height: 48px;
   padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background-color: var(--dlg-bg);
   box-shadow: var(--shadow-raised);
   color: var(--dlg-fg);
@@ -103,15 +86,14 @@
 }
 
 .ov-dialog__action[data-preferred] {
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-semibold);
 }
 
-/* 确认类的默认操作：强调色渐变胶囊 */
+/* 确认类的默认操作：实色海色（方一点的纸片，和全站按钮一样） */
 .ov-dialog__action[data-role="default"][data-preferred] {
   --dlg-bg: var(--color-accent);
   --dlg-fg: var(--color-on-accent);
-  background-image: var(--material-accent);
-  box-shadow: var(--shadow-accent);
+  box-shadow: none;
 }
 
 .ov-dialog__action[data-role="destructive"] {

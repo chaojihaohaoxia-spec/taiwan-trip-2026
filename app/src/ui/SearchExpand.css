@@ -5,8 +5,8 @@
    逐帧驱动（裁切、放大镜和文字的平移、「取消」、原来那一行内容），所以这些属性在这里不写过渡。
    data-phase（JS 写）：closed = 收好了（显示按钮）；moving = 正在展开 / 收起（显示输入框那一层，按钮让位）；
    open = 展开好了；fading = 减弱动态效果时的交叉淡化。
-   A 皮肤：按钮和输入框是同一种材质（凸起的白 + 高光细边；加 class="search-x--glass" 换成真玻璃，浮在光场上时用），
-   第 0 帧两者完全重合；放大镜展开后变成强调色（--sx-icon-open，JS 读这两个变量做颜色插值）；
+   「杂志纸本」：按钮和输入框是同一种材质（纸片 + 细线；加 class="search-x--glass" 换成浮层的纸，顶栏里用——
+   顶栏的放大镜按钮本身没有圆底，见 shell/topbar.css），第 0 帧两者完全重合；放大镜展开后变成强调色（--sx-icon-open，JS 读这两个变量做颜色插值）；
    「取消」是强调色浅底的胶囊（样稿的 .search-cancel）；输入框聚焦时一圈强调色细边。
    ===================================================================== */
 
@@ -68,27 +68,11 @@
   }
 }
 
-/* 真玻璃版（浮在光场上的顶栏里）：按钮和输入框都开 backdrop-filter */
+/* 浮层版（顶栏里）：浮层的纸 + 细线框 */
 .search-x--glass {
   --sx-bg: transparent;
   --sx-image: var(--material-glass-strong);
   --sx-edge: var(--shadow-glass-edge);
-}
-
-.search-x--glass .search-x__trigger,
-.search-x--glass .search-x__field {
-  -webkit-backdrop-filter: var(--glass-filter-sm);
-  backdrop-filter: var(--glass-filter-sm);
-}
-
-/* 看不见的那一层不做背景模糊（iPhone 上每一层 backdrop-filter 都要算）：展开时的按钮、收好时的输入框（两者都是一下子藏起来的，不用等淡出） */
-.search-x--glass[data-phase="moving"] .search-x__trigger,
-.search-x--glass[data-phase="open"] .search-x__trigger,
-.search-x--glass[data-state="open"]:not([data-phase]) .search-x__trigger,
-.search-x--glass[data-phase="closed"] .search-x__field,
-.search-x--glass[data-state="closed"]:not([data-phase]) .search-x__field {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
 }
 
 /* 展开中 / 展开着：按钮让位给输入框那一层（两者在 p = 0 时完全重合，切换看不出来） */

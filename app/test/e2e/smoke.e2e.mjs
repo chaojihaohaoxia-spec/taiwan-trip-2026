@@ -32,9 +32,9 @@ test('首页（演示模式、手机、浅色）：行程列表（外壳的大�
     assert.match(trips[0], /椰影岛/, '按 trips.sort 排序：海岛在前');
     assert.match(await page.$eval('[data-testid="account-name"]', (el) => el.textContent), /Jeremy/);
     assert.ok(await page.waitForSelector('.demo-badge', { timeout: 5000 }), '演示模式角标（按需加载的小分包）');
-    // 背景色来自设计变量：底色在 <html> 上（--color-canvas，A 皮肤的薄荷色），body 透明（光场铺在它下面才露得出来）
+    // 背景色来自设计变量：底色在 <html> 上（--color-canvas，米白的纸），body 透明（纸和纸纹铺在它下面才露得出来）
     const bg = await page.evaluate(() => [getComputedStyle(document.documentElement).backgroundColor, getComputedStyle(document.body).backgroundColor]);
-    assert.deepEqual(bg, ['rgb(223, 241, 237)', 'rgba(0, 0, 0, 0)']);
+    assert.deepEqual(bg, ['rgb(244, 241, 234)', 'rgba(0, 0, 0, 0)']);
     await assertNoHorizontalOverflow(page);
     await assertTapTargets(page);
     await app.shot('home');
@@ -48,9 +48,9 @@ test('首页（深色）：深色变量生效，截图', async () => {
   const app = await openApp({ browser, server, colorScheme: 'dark' });
   try {
     const bg = await app.page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
-    assert.equal(bg, 'rgb(4, 22, 28)');
+    assert.equal(bg, 'rgb(20, 20, 19)', '深墨色的纸');
     const color = await app.page.$eval('h1', (el) => getComputedStyle(el).color);
-    assert.equal(color, 'rgb(238, 246, 247)');
+    assert.equal(color, 'rgb(236, 232, 225)');
     await app.page.waitForSelector('[data-testid="trip-demo-island"]');
     await app.shot('home-dark');
     app.assertClean();

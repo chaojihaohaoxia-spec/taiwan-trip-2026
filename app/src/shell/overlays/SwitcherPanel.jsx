@@ -4,10 +4,10 @@
 // 从被点的标题原位长出来（overlay/AnchoredPanel：大标题、顶栏胶囊、整条顶栏里的行程按钮都是它的触发按钮，
 // 哪个被点就从哪个长出来）；面板停在屏幕顶上（盖住顶栏，样稿同款），标题这时在顶栏里淡掉（Frame 的 covered）。
 //   - 头：当前行程的封面点 +「切换行程」+「N 趟 · 点一下切换」+ 收起按钮（↑）；
-//   - 列表：每趟一行（封面方块、名称、日期「2026-10-16 – 10-19 · 3 晚」、阶段：进行中 / N 天后出发 / 已结束 · 回顾），
+//   - 列表：每趟一行（封面方块、名称、日期「10-16 周五 – 10-19 周一 · 3 晚」（和全站同一种写法）、阶段：进行中 / N 天后出发 / 已结束 · 回顾），
 //     当前那趟描边 + 实心对勾；按「进行中 → 未开始 → 已结束」排（数据层 sortTripsForList）；
 //   - 点一趟：触感，换过去并留在同一种页面（在账本就去新行程的账本；在概览 / 某一天就去新行程的概览），
-//     面板收回到新的标题上，光场和主题色一起过渡（Field、trip-state）；
+//     面板收回到新的标题上，主题色一起过渡（trip-state；纸不变）；
 //   - 底部：「全部行程」（行程列表）和「新建行程」（sheet id trip-new，sheets/ 的 openTripNewSheet）；
 //   - 键盘：打开时焦点落在当前那趟上；↑ ↓ / Home / End 在行程之间移动，回车换过去，Esc 收起。
 // 列表在面板长出来之前就渲染好（缓存先到），长出来的动画期间不做重活。
@@ -27,7 +27,7 @@ import { haptic } from '../../lib/native.js';
 import { Glyph } from '../../kit/Glyph.jsx';
 import { openTripNewSheet } from '../../sheets/index.js';
 import { CoverDot } from '../CoverDot.jsx';
-import { switcherDates, phaseChip } from '../format.js';
+import { switcherDates, phaseChip, parseYmd } from '../format.js';
 import { switchTarget } from '../view-rules.js';
 import { tripInfo } from '../trip-state.js';
 
@@ -168,7 +168,8 @@ export default function SwitcherPanel() {
           ) : (
             <ul class="sw__list" onKeyDown={onListKey}>
               {entries.map(({ id, trip }) => {
-                const chip = phaseChip(selectors.tripPhase(trip, at));
+                const phase = selectors.tripPhase(trip, at);
+                const chip = phaseChip(phase);
                 const on = id === checked;
                 return (
                   <li key={id}>
@@ -185,7 +186,7 @@ export default function SwitcherPanel() {
                       <TripCover trip={trip} />
                       <span class="sw__info">
                         <b>{trip.title}</b>
-                        <i>{switcherDates(trip)}</i>
+                        <i>{switcherDates(trip, { thisYear: parseYmd(phase.today)?.y ?? null })}</i>
                         <span class="sw__chip" data-tone={chip.tone}>{chip.text}</span>
                       </span>
                       <span class="sw__check" aria-hidden="true"><Glyph name="check" size={16} stroke={2.6} /></span>

@@ -42,16 +42,16 @@ export function fabActions({ phase, localCurrency, todayCount = 0, canEdit = tru
   const cur = localCurrency && localCurrency !== 'HKD' ? currencyName(localCurrency) : null;
   const all = {
     expense: {
-      id: 'expense', glyph: 'wallet', tone: 'teal', title: '记一笔',
+      id: 'expense', glyph: 'wallet', title: '记一笔',
       // 进行中的副标题短一点（375 宽一行放得下）：「今天已记 5 笔 · 自动折合港币」
       hint: phase === 'ongoing'
         ? (todayCount ? `今天已记 ${todayCount} 笔${cur ? ' · 自动折合港币' : ''}` : cur ? `${cur}自动折合港币` : '谁付的、怎么分都记上')
         : cur ? `${cur}自动折合港币` : '谁付的、怎么分都记上',
     },
-    photo: { id: 'photo', glyph: 'camera', tone: 'coral', title: '拍照打卡', hint: '照片自动归到当天' },
-    journal: { id: 'journal', glyph: 'pen', tone: 'blue', title: '写日记', hint: phase === 'ended' ? '趁还记得，补上那天的事' : '今天的小事和心情' },
-    item: { id: 'item', glyph: 'cal-plus', tone: 'amber', title: '加条目', hint: '插进某一天的时间轴' },
-    todo: { id: 'todo', glyph: 'checklist', tone: 'violet', title: '加待办', hint: phase === 'ongoing' ? '提醒自己别忘了' : '出发前要办的事' },
+    photo: { id: 'photo', glyph: 'camera', title: '拍照打卡', hint: '照片自动归到当天' },
+    journal: { id: 'journal', glyph: 'pen', title: '写日记', hint: phase === 'ended' ? '趁还记得，补上那天的事' : '今天的小事和心情' },
+    item: { id: 'item', glyph: 'cal-plus', title: '加条目', hint: '插进某一天的时间轴' },
+    todo: { id: 'todo', glyph: 'checklist', title: '加待办', hint: phase === 'ongoing' ? '提醒自己别忘了' : '出发前要办的事' },
   };
   const READ_ONLY = { expense: '只读成员不能记账', item: '只读成员不能改行程', todo: '只读成员不能加待办' };
   let order = phase === 'ongoing'
@@ -66,7 +66,6 @@ export function fabActions({ phase, localCurrency, todayCount = 0, canEdit = tru
       ...all[k],
       ...(disabled ? { hint: READ_ONLY[k], disabled: true } : {}),
       hero: canEdit && phase === 'ongoing' && i === 0,
-      wide: (phase !== 'ongoing' || !canEdit) && i === order.length - 1,
     };
   });
 }

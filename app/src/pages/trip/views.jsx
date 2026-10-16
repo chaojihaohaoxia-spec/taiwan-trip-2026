@@ -1,22 +1,23 @@
 // =====================================================================
 // pages/trip/views.jsx：按阶段把卡片排好（“这一刻最需要什么”排前面，顺序由 model.js 的 upcomingOrder / ongoingOrder 决定）。
 //
-//   <UpcomingView …>  出发前：倒计时 + 去程航班 → 出发前待办 → 免费取消截止 → 打包进度 → 天气预报 → 每天概要 → 备选池
-//                     （不到 1 天就截止的免费取消紧跟倒计时；3 天内出发且还有没打包的，打包提前；7 天内出发天气提前）
-//   <OngoingView …>   进行中：现在 / 接下来 → （最后一天：回程航班）→ 今晚住哪（傍晚以后提前）→ 今天的待办 → 天气和日落
-//                     → 今天的时间轴 → 今天花了多少 → 免费取消截止 → 明天 → 备选池 → 每天概要
+//   <UpcomingView …>  出发前：倒计时 + 去程航班 → 出发前待办 → 免费取消截止 → 打包进度 → 天气预报 → 每天概要（四天目录）
+//                     （不到 1 天就截止的免费取消紧跟倒计时；3 天内出发且还有没打包的，打包提前；7 天内出发天气提前）。
+//                     备选池不在概览上（在地点页）。
+//   <OngoingView …>   进行中（「杂志纸本」：一屏一个主角，约 2.4 屏）：现在 / 接下来 →（最后一天：回程航班）→ 今晚住哪
+//                     → 天气一行 → 今天的待办 → 免费取消截止 → 明天。今天的时间轴缩略、今天花了、备选池、每天安排都不渲染
+//                     （和那一天的页面、账本、地点页、天数条重复）。
 //   <EndedView …>     结束后：回顾 → 总花费 → 结算 → 每天一张照片 → 评级最高 → 日记摘录 → 每天概要
 //
 // 每个 View 返回的是一串“直接子元素”（Fragment）：外壳的换页动效按页面根元素的直接子元素错落入场，这里不能再包一层。
 // =====================================================================
 
 import { useFx } from '../../lib/services/fx.js';
-import { selectors } from '../../data/index.js';
 import { CountdownHero } from './Countdown.jsx';
 import {
-  TodoCard, DeadlinesCard, PackingCard, ForecastCard, TodayWeatherCard, DaysSection, PoolCard, StayCard, FlightCard,
+  TodoCard, DeadlinesCard, PackingCard, ForecastCard, TodayWeatherCard, DaysSection, StayCard, FlightCard,
 } from './cards-shared.jsx';
-import { NowCard, TimelineCard, SpendCard, TomorrowCard } from './cards-ongoing.jsx';
+import { NowCard, TomorrowCard } from './cards-ongoing.jsx';
 import { RecapHero, SpendTotalCard, SettlementCard, PhotosCard, TopPlacesCard, JournalCard, RecapEmpty } from './cards-ended.jsx';
 import {
   outboundFlight, returnFlight, pendingTodos, todayTodoGroups, dueInfo, upcomingOrder, ongoingOrder, nowModel,
@@ -58,9 +59,9 @@ function common(store, trip, at) {
 }
 
 /**
- * @param {{ store: object, tripId: string, trip: object, at: Date, focusId: string|null }} props
+ * @param {{ store: object, tripId: string, trip: object, at: Date }} props
  */
-export function UpcomingView({ store, tripId, trip, at, focusId }) {
+export function UpcomingView({ store, tripId, trip, at }) {
   const c = common(store, trip, at);
   const pending = pendingTodos(c.todos, { lists: ['confirm', 'todo'] });
   const packing = packingSummary(c.todos);
@@ -85,21 +86,19 @@ export function UpcomingView({ store, tripId, trip, at, focusId }) {
     packing: <PackingCard key="packing" todos={c.todos} nameOf={c.nameOf} tripId={tripId} />,
     weather: <ForecastCard key="weather" tripId={tripId} trip={trip} days={c.days} query={weatherQuery(store, trip, c.days)} />,
     days: <DaysSection key="days" store={store} tripId={tripId} trip={trip} days={c.days} today={null} returnFlight={c.back} />,
-    pool: <PoolCard key="pool" store={store} tripId={tripId} pool={c.v.pool.value} days={c.days} canEdit={c.canEdit} focusId={focusId} timeZone={c.tz} />,
   };
   return <>{order.map((k) => cards[k] || null)}</>;
 }
 
 /**
- * @param {{ store: object, tripId: string, trip: object, at: Date, focusId: string|null }} props
+ * @param {{ store: object, tripId: string, trip: object, at: Date }} props
  */
-export function OngoingView({ store, tripId, trip, at, focusId }) {
+export function OngoingView({ store, tripId, trip, at }) {
   const c = common(store, trip, at);
-  const fx = useFx(undefined, { ensure: false }).snapshot;
   const today = c.v.today.value;
   const day = today.day;
   // 行程时区的今天不在 days 表里（日期有空缺）：退回出发前的版式，至少能看每天概要
-  if (!day) return <UpcomingView store={store} tripId={tripId} trip={trip} at={at} focusId={focusId} />;
+  if (!day) return <UpcomingView store={store} tripId={tripId} trip={trip} at={at} />;
   const plans = c.v.plans.value;
   const primary = plans.get(day.id)?.primary || [];
   const nowMinutes = today.local?.minutes ?? 0;
@@ -120,16 +119,15 @@ export function OngoingView({ store, tripId, trip, at, focusId }) {
   const sun = sunInfo(day, null);
   const left = sunsetLeft(sun.sunset, nowMinutes);
   const sunsetSoon = left !== null && left > 0 && left <= 150;
-  const order = ongoingOrder({ minutes: nowMinutes, hasUpcoming: m.mode === 'current' || m.mode === 'next' || m.mode === 'loose', isLastDay, todoSoon, sunsetSoon, outbound: outboundSoon });
-  const stayFirst = order.indexOf('stay') === 1 || order.indexOf('stay') === 2;
+  // 傍晚以后（18:00）或今天的安排都做完了：今晚住哪紧跟「现在」，「叫 Grab」做成主要动作（回酒店是最常用的打车场景）
+  const evening = nowMinutes >= 18 * 60 || !(m.mode === 'current' || m.mode === 'next' || m.mode === 'loose');
+  const order = ongoingOrder({ isLastDay, todoSoon, sunsetSoon, outbound: outboundSoon, evening });
   const tomorrow = tomorrowOf(c.days, day.date);
-  const home = trip.home_currency || 'HKD';
-  const homeOf = (e) => selectors.expenseHomeAmount(e, home)?.value ?? null;
   const cards = {
     now: <NowCard key="now" store={store} tripId={tripId} trip={trip} today={today} primary={primary} canEdit={c.canEdit} />,
     flight: c.back ? <FlightCard key="flight" flight={c.back} trip={trip} at={at} /> : null,
     outflight: outboundSoon ? <FlightCard key="outflight" flight={c.outbound} trip={trip} at={at} kind="out" /> : null,
-    stay: <StayCard key="stay" stay={store.stayForDay(day)} day={day} trip={trip} tripId={tripId} canEdit={c.canEdit} isLast={isLastDay} first={stayFirst} />,
+    stay: <StayCard key="stay" stay={store.stayForDay(day)} day={day} trip={trip} tripId={tripId} canEdit={c.canEdit} isLast={isLastDay} first={evening && !isLastDay} />,
     todos: (
       <TodoCard
         key="todos"
@@ -146,18 +144,10 @@ export function OngoingView({ store, tripId, trip, at, focusId }) {
       />
     ),
     weather: <TodayWeatherCard key="weather" tripId={tripId} day={day} query={query} nowMinutes={nowMinutes} />,
-    timeline: <TimelineCard key="timeline" tripId={tripId} day={day} primary={primary} currentId={m.focus?.id || null} places={c.places} bookings={c.bookingsMap} timeZone={dayTz} />,
-    spend: <SpendCard key="spend" tripId={tripId} date={day.date} expenses={c.v.expenses.value} homeOf={homeOf} home={home} fx={fx} canEdit={c.canEdit} />,
     deadlines: <DeadlinesCard key="deadlines" list={c.deadlines.list} urgent={c.deadlines.urgent} bookings={c.bookingsMap} timeZone={c.tz} />,
     tomorrow: tomorrow ? <TomorrowCard key="tomorrow" tripId={tripId} day={tomorrow} plan={plans.get(tomorrow.id)} stay={store.stayForDay(tomorrow)} places={c.places} index={c.days.indexOf(tomorrow)} /> : null,
-    pool: <PoolCard key="pool" store={store} tripId={tripId} pool={c.v.pool.value} days={c.days} canEdit={c.canEdit} focusId={focusId} timeZone={c.tz} />,
   };
-  return (
-    <>
-      {order.map((k) => cards[k] || null)}
-      <DaysSection key="days" store={store} tripId={tripId} trip={trip} days={c.days} today={day.date} returnFlight={c.back} title="每天安排" />
-    </>
-  );
+  return <>{order.map((k) => cards[k] || null)}</>;
 }
 
 /**

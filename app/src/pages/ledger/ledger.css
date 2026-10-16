@@ -1,6 +1,6 @@
 /* =====================================================================
-   pages/ledger/ledger.css：账本页（.lg）。照样稿账本页（02-style.html「账本页」+ 06-render.js ledgerView）：
-   结算大字（Instrument Serif）、两格统计块、流水行（图标方块 40 + 标题 / 副标题 + 右边金额和折合港币）。
+   pages/ledger/ledger.css：账本页（.lg）。「杂志纸本」：总额是唯一的 Instrument Serif 主数字，其他金额都是系统字体；
+   两人各付多少是左右两栏文字（中间一根细线，不是两个方块）；汇率是页底一行灰字；流水按天分组、细线分隔。
    颜色、圆角、阴影、字体、间距只用 tokens.css 的变量。
    ===================================================================== */
 
@@ -45,9 +45,10 @@
 
 .lg-total__count {
   flex: none;
-  color: var(--color-text-2);
+  color: var(--color-text-3);
   font: var(--type-label);
   font-size: var(--text-footnote);
+  font-weight: var(--weight-regular);
 }
 
 .lg-hkd {
@@ -65,12 +66,13 @@
   font-weight: var(--weight-semibold);
 }
 
-/* 两人各付了多少：两格往下凹的块 */
+/* 两人各付了多少：左右两栏文字，中间一根细线 */
 .lg-people {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--space-2);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-separator);
 }
 
 .lg-person {
@@ -78,8 +80,22 @@
   flex-direction: column;
   gap: 4px;
   min-width: 0;
-  padding: 12px;
-  border-radius: var(--radius-md);
+  padding: 2px 0 0;
+}
+
+.lg-person + .lg-person {
+  padding-left: 14px;
+  box-shadow: inset 1px 0 0 var(--color-separator);
+}
+
+.lg-person .k-person__dot {
+  display: none;
+}
+
+.lg-person .k-money {
+  font-size: var(--text-title-3);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
 }
 
 .lg-person__paid {
@@ -99,11 +115,8 @@
 }
 
 .lg-fx {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   margin-top: var(--space-3);
-  color: var(--color-text-2);
+  color: var(--color-text-3);
   font: var(--type-caption-1);
   font-family: var(--font-label);
   font-variant-numeric: tabular-nums;
@@ -135,7 +148,7 @@
 }
 
 .lg-fx[data-tone="offline"] {
-  color: var(--color-info-text);
+  color: var(--color-text-2);
 }
 
 /* ---------- 结算 ---------- */
@@ -173,9 +186,9 @@
 }
 
 .lg-settle__plus {
-  color: var(--color-text-2);
-  font-family: var(--font-figure);
+  color: var(--color-text-3);
   font-size: var(--text-figure-4);
+  font-weight: var(--weight-regular);
   line-height: 1;
 }
 
@@ -192,10 +205,6 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-round);
-  background: var(--color-success-soft);
 }
 
 .lg-settle__last {
@@ -224,13 +233,6 @@
 
 .lg-settle__btn {
   margin-top: var(--space-3);
-}
-
-.lg-settle__hint {
-  margin-top: var(--space-2);
-  color: var(--color-text-2);
-  font: var(--type-caption-1);
-  text-align: center;
 }
 
 /* ---------- 视图切换 + 筛选 ---------- */
@@ -267,17 +269,6 @@
   background: var(--color-border-strong);
 }
 
-/* 「Jeremy 付」芯片前面的成员色点（和 PersonChip 同一个颜色） */
-.lg-filter__dot {
-  --lg-dot: var(--color-accent);
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-round);
-  background: var(--lg-dot);
-  box-shadow: var(--shadow-highlight);
-}
-
 /* ---------- 日期头（吸顶） ---------- */
 .lg-group {
   display: flex;
@@ -296,16 +287,15 @@
   pointer-events: none;
 }
 
-/* 吸住时整条的玻璃底（材质是渐变，没法过渡颜色：放在伪元素上用透明度交叉淡化）。
-   看不见时不开背景模糊（透明度 0 的层照样每帧算模糊） */
+/* 吸住时整条的纸底（不透明的纸，通栏，下面一根细线，像印刷页眉；放在伪元素上用透明度交叉淡化） */
 .lg-date::before {
   content: "";
   position: absolute;
-  inset: -3px -4px;
+  inset: -4px calc(-1 * var(--gutter));
   z-index: 0;
-  border-radius: var(--radius-pill);
+  border-radius: 0;
   background: var(--material-glass-strong);
-  box-shadow: var(--shadow-2), var(--shadow-glass-edge);
+  box-shadow: inset 0 -1px 0 var(--color-separator);
   opacity: 0;
   transition: opacity var(--dur-fast) var(--ease-out);
 }
@@ -320,11 +310,11 @@
   align-items: center;
   gap: 6px;
   min-height: 32px;
-  padding: 0 12px;
-  border-radius: var(--radius-pill);
+  padding: 0;
+  border-radius: 0;
 }
 
-/* 胶囊自己的卡片底色也放伪元素上，吸住时淡出 */
+/* 以前胶囊自己的底色放在伪元素上、吸住时淡出；纸本的日期头就是纸上的一行字（宋体日期 + 灰字合计），伪元素留着但不画东西 */
 .lg-date__pill::before,
 .lg-date__sum::before {
   content: "";
@@ -332,17 +322,15 @@
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: var(--material-card);
-  box-shadow: var(--material-card-edge);
+  background: none;
+  box-shadow: none;
   transition: opacity var(--dur-fast) var(--ease-out);
 }
 
-/* 吸住了：内容从它下面滚过。整条变成一块真玻璃 + 投影（同一时间只有一两个日期头吸着，模糊开销很小），
+/* 吸住了：内容从它下面滚过。整条变成一张不透明的纸，
    两个胶囊自己的底色撤掉——不然流水的字会从两个胶囊之间露出来 */
 .lg-date[data-stuck]::before {
   opacity: 1;
-  -webkit-backdrop-filter: var(--glass-filter-sm);
-  backdrop-filter: var(--glass-filter-sm);
 }
 
 .lg-date[data-stuck] .lg-date__pill::before,
@@ -351,21 +339,16 @@
 }
 
 .lg-date__pill {
-  align-items: center;
-  padding-left: 10px;
+  align-items: baseline;
 }
 
-/* 「D1」：第几天的颜色和概览、地图同一套（kit/day-tone.js，--lg-day 由 parts.jsx 写）；12px 的小字用标签字体（宋体只在 15px 以上用，视觉评审 P2-7） */
+/* 「D1」：墨色的字（不是色块）；12px 的小字用标签字体（宋体只在 15px 以上用，视觉评审 P2-7） */
 .lg-date__d {
-  --lg-day: var(--color-accent);
   display: inline-grid;
   place-items: center;
-  min-width: 24px;
+  min-width: 22px;
   height: 22px;
-  padding: 0 5px;
-  border-radius: var(--radius-xs);
-  background: var(--lg-day);
-  color: var(--color-on-tile);
+  color: var(--color-text);
   font-family: var(--font-label);
   font-weight: var(--weight-semibold);
   font-size: var(--text-caption-1);
@@ -373,9 +356,8 @@
 }
 
 .lg-date__main {
-  font: var(--type-label);
-  font-size: var(--text-subhead);
-  letter-spacing: var(--tracking-label);
+  font: var(--weight-serif) var(--text-callout) / 1.3 var(--font-serif);
+  letter-spacing: var(--tracking-title);
 }
 
 .lg-date__sub {

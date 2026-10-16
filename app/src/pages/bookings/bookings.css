@@ -1,6 +1,6 @@
 /* =====================================================================
-   pages/bookings/bookings.css：预订页（.bkp）——顶部汇总格子、今天、工具行、段标题、按日期时酒店的退房 / 续住行（.bkp-stay）、
-   预订卡片（.bk-card）、已取消、骨架。
+   pages/bookings/bookings.css：预订页（.bkp）——顶部汇总（一行字）、今天、工具行、段标题、按日期时酒店的退房 / 续住行（.bkp-stay）、
+   预订卡片（.bk-card：「杂志纸本」里少数几样细线框的纸片之一，像酒店确认单）、已取消、骨架。
    卡片里共用的部件（订单号、登机牌、入住退房、价格、芯片、联系人按钮）的样式在 sheets/booking/booking.css。
    颜色、圆角、阴影、字体、间距、动效只用 tokens.css 的变量；局部变量前缀 --bkp-。
    ===================================================================== */
@@ -17,190 +17,114 @@
   gap: 14px;
 }
 
-/* ---------- 顶部汇总：四格 ---------- */
-.bkp-sum__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-@media (min-width: 640px) {
-  .bkp-sum__grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.bkp-tile {
-  --bkp-tone: var(--color-accent-text);
-  position: relative;
+/* ---------- 顶部汇总：一行字（「2 还没订 · 2 待确认 · 1 到店付」），每一类能点（只看那一类） ---------- */
+.bkp-sum {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  min-width: 0;
-  min-height: 116px;
-  padding: 12px 14px 13px;
-  border-radius: var(--radius-lg);
-  background: var(--material-card);
-  box-shadow: var(--material-card-edge);
-  color: var(--color-text);
-  text-align: left;
-  transition: var(--press-transition), box-shadow var(--dur-fast) var(--ease-out);
+  gap: 2px;
 }
 
-.bkp-tile__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  width: 100%;
-}
-
-.bkp-tile__label {
-  color: var(--color-text-2);
-  font: var(--type-eyebrow);
-  letter-spacing: var(--tracking-eyebrow);
-}
-
-/* 能点的格子：右上角凸起的白圆（一眼看得出能点） */
-.bkp-tile__chev {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  margin: -2px -4px -2px 0;
-  border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
-}
-
-.bkp-tile__num {
+.bkp-sum__line {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0 3px;
-  margin-top: 2px;
-  color: var(--bkp-tone);
-}
-
-.bkp-tile__num b {
-  font-family: var(--font-figure);
-  font-size: var(--text-figure-2);
-  font-weight: var(--weight-regular);
-  font-variant-numeric: lining-nums;
-  letter-spacing: var(--tracking-figure);
-  line-height: 1;
-}
-
-.bkp-tile__num span {
-  font-family: var(--font-serif);
-  font-size: var(--text-callout);
-  font-weight: var(--weight-serif);
-}
-
-.bkp-tile__num--time b {
-  font-size: var(--text-figure-3);
-}
-
-.bkp-tile__num--time span {
-  margin-right: 2px;
-}
-
-.bkp-tile__num--icon {
-  padding: 4px 0 2px;
-  color: var(--color-success-text);
-}
-
-.bkp-tile__sub {
-  display: -webkit-box;
-  width: 100%;
-  overflow: hidden;
+  margin: 0;
   color: var(--color-text-2);
-  font: var(--type-caption-1);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow-wrap: anywhere;
-  text-wrap: pretty;
+  font: var(--type-subhead);
 }
 
-.bkp-tile__sub--money {
-  display: block;
+.bkp-sum__item {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 2px;
+  min-height: var(--tap-min);
+  padding: 10px 0;
+  color: var(--color-text-2);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--press-transition), color var(--dur-fast) var(--ease-out);
+}
+
+/* 中间的「·」挂在前一项的末尾：折行时点留在行尾，不跑到下一行开头 */
+.bkp-sum__item:not(:last-child)::after {
+  content: "·";
+  margin: 0 8px;
+  color: var(--color-text-3);
+}
+
+.bkp-sum__n {
   color: var(--color-text);
-  -webkit-line-clamp: unset;
-}
-
-.bkp-tile__when {
-  color: var(--color-text-2);
-  font: var(--type-caption-2);
-  font-family: var(--font-label);
+  font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
 }
 
-/* 选中（正在只看这一类）：强调色浅底 + 一圈强调色 */
-.bkp-tile[aria-pressed="true"] {
-  background: linear-gradient(var(--color-accent-soft), var(--color-accent-soft)), var(--material-card);
-  box-shadow: var(--material-card-edge), inset 0 0 0 1.5px var(--color-accent);
+/* 还没订：砖红（只标异常） */
+.bkp-sum__item--idea,
+.bkp-sum__item--idea .bkp-sum__n {
+  color: var(--color-danger-text);
 }
 
-.bkp-tile[aria-pressed="true"] .bkp-tile__chev {
-  background: var(--material-accent);
-  box-shadow: var(--shadow-accent-sm);
-  color: var(--color-on-accent);
+/* 正在只看这一类：海色 + 下划线 */
+.bkp-sum__item[aria-pressed="true"],
+.bkp-sum__item[aria-pressed="true"] .bkp-sum__n {
+  color: var(--color-accent-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
-/* 是 0 的格子：不能点，数字是次要色，下面一句「都订好了」 */
-.bkp-tile:disabled,
-.bkp-tile--none {
-  --bkp-tone: var(--color-text-2);
-  cursor: default;
+.bkp-sum__money {
+  color: var(--color-text-3);
+  font: var(--type-footnote);
+  font-variant-numeric: tabular-nums;
 }
 
-.bkp-tile:disabled .bkp-tile__sub,
-.bkp-tile--none .bkp-tile__sub {
-  color: var(--color-success-text);
-  font-weight: var(--weight-medium);
+.bkp-sum__done {
+  padding: 10px 0;
 }
 
-/* 免费取消那一格：按剩下的时间换颜色（≤48 小时警示、≤24 小时红） */
-.bkp-tile--deadline {
-  --bkp-tone: var(--color-info-text);
-}
-
-.bkp-tile--soon {
-  --bkp-tone: var(--color-warning-text);
-  box-shadow: var(--material-card-edge), inset 0 0 0 1.5px var(--color-warning);
-}
-
-.bkp-tile--urgent {
-  --bkp-tone: var(--color-danger-text);
-  background: linear-gradient(var(--color-danger-soft), var(--color-danger-soft)), var(--material-card);
-  box-shadow: var(--material-card-edge), inset 0 0 0 1.5px var(--color-danger);
-}
-
-.bkp-tile--deadline .bkp-tile__sub {
-  -webkit-line-clamp: 1;
-  color: var(--color-text);
-  font-weight: var(--weight-medium);
-}
-
-.bkp-tile--none .bkp-tile__sub {
-  -webkit-line-clamp: 2;
-}
-
-button.bkp-tile:not(:disabled) {
+/* 最近的免费取消截止：一行（快到期赭石、不到一天砖红），点了打开那个预订 */
+.bkp-sum__deadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  max-width: 100%;
+  min-height: var(--tap-min);
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  text-align: left;
   cursor: pointer;
+  transition: var(--press-transition);
 }
 
-@media (hover: hover) {
-  button.bkp-tile:not(:disabled):hover .bkp-tile__chev {
-    background: var(--color-raised-hover);
-  }
+.bkp-sum__deadline--soon {
+  color: var(--color-warning-text);
+}
 
-  .bkp-tile[aria-pressed="true"]:hover .bkp-tile__chev {
-    background: var(--material-accent);
-  }
+.bkp-sum__deadline--urgent {
+  color: var(--color-danger-text);
+}
+
+.bkp-sum__deadline-title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bkp-sum__deadline-title::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--color-text-3);
+}
+
+.bkp-sum__deadline .glyph {
+  flex: none;
+  color: var(--color-text-3);
 }
 
 /* 一串金额（到店付格子、回顾） */
@@ -279,8 +203,9 @@ button.bkp-tile:not(:disabled) {
 /* ---------- 今天（进行中） ---------- */
 .bkp-today {
   padding: 14px 8px 8px;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  background: linear-gradient(var(--color-accent-soft), var(--color-accent-soft)), var(--material-card);
+  background: var(--color-card);
 }
 
 .bkp-today__eyebrow {
@@ -294,11 +219,7 @@ button.bkp-tile:not(:disabled) {
 }
 
 .bkp-today__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-round);
-  background: var(--color-accent);
-  box-shadow: 0 0 0 4px var(--color-accent-soft);
+  display: none;
 }
 
 .bkp-today__list {
@@ -368,20 +289,17 @@ button.bkp-tile:not(:disabled) {
   font-variant-numeric: tabular-nums;
 }
 
+/* 还没订、待确认：一行字（砖红 / 赭石），不是胶囊 */
 .bkp-today__tag {
-  padding: 0 6px;
-  border-radius: var(--radius-pill);
   font-style: normal;
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
 }
 
 .bkp-today__tag--idea {
-  background: var(--color-fill);
-  color: var(--color-text-2);
+  color: var(--color-danger-text);
 }
 
 .bkp-today__tag--pending {
-  background: var(--color-warning-soft);
   color: var(--color-warning-text);
 }
 
@@ -389,12 +307,9 @@ button.bkp-tile:not(:disabled) {
   display: grid;
   flex: none;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
 }
 
 /* ---------- 工具行：数量 / 正在筛选 + 分组方式 ---------- */
@@ -464,14 +379,10 @@ button.bkp-tile:not(:disabled) {
   margin: 0;
 }
 
-/* 今天那组：标题照常用正文色（段标题直接压在光场上，强调色字强光下只有 3.6:1，视觉评审 P2-6），
-   「今天 · D2」做成实心的强调色小胶囊 */
+/* 今天那组：「今天 · D2」是海色小字（不是实心横条） */
 .bkp-head--today .k-sec__meta {
-  padding: 1px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  font-weight: var(--weight-semibold);
+  color: var(--color-accent-text);
+  font-weight: var(--weight-medium);
 }
 
 .bkp-head--past .k-sec__title {
@@ -495,7 +406,7 @@ button.bkp-tile:not(:disabled) {
 }
 
 .bkp-stay[data-current] {
-  box-shadow: var(--material-card-edge), 0 0 0 2px var(--color-accent);
+  box-shadow: var(--material-card-edge), inset 2px 0 0 var(--color-accent);
 }
 
 .bkp-stay__text {
@@ -526,24 +437,19 @@ button.bkp-tile:not(:disabled) {
 }
 
 .bkp-stay__tag {
-  padding: 0 7px;
-  border-radius: var(--radius-pill);
   font-style: normal;
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
 }
 
 .bkp-stay__tag--out {
-  background: var(--color-warning-soft);
   color: var(--color-warning-text);
 }
 
 .bkp-stay__tag--night {
-  background: var(--color-accent-soft);
   color: var(--color-accent-text);
 }
 
 .bkp-stay__tag--done {
-  background: var(--color-fill);
   color: var(--color-text-2);
 }
 
@@ -555,35 +461,28 @@ button.bkp-tile:not(:disabled) {
   display: grid;
   flex: none;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
 }
 
-/* ---------- 预订卡片 ---------- */
+/* ---------- 预订卡片：一张细线框的纸片（像酒店确认单） ---------- */
 .bk-card {
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
-  padding: 16px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
+  background: var(--color-card);
   color: var(--color-text);
-  transition: var(--press-transition), box-shadow var(--dur-fast) var(--ease-out);
+  transition: var(--press-transition), border-color var(--dur-fast) var(--ease-out);
 }
 
-/* 还没订的：虚线边（一眼看出“只是打算”） */
-.bk-card[data-status="idea"] {
-  outline: 1.5px dashed var(--color-border-strong);
-  outline-offset: -1.5px;
-}
-
-/* 正在看详情的那张 */
+/* 正在看详情的那张：细线框变成海色 */
 .bk-card[data-current] {
-  box-shadow: var(--material-card-edge), 0 0 0 2px var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 /* 铺满整张卡的透明按钮（点了看详情）：按下时整张卡跟着缩 */
@@ -627,6 +526,7 @@ button.bkp-tile:not(:disabled) {
 .bk-card__title {
   margin: 0;
   font: var(--type-title-3);
+  font-family: var(--font-serif);
   letter-spacing: var(--tracking-display);
   text-wrap: balance;
   /* 句子式的长标题按正常中文规则断行（keep-all 只在标点、空格处折，「JW」会单独掉到下一行，长标题折得很碎，视觉评审 P2-1） */
@@ -654,27 +554,23 @@ button.bkp-tile:not(:disabled) {
   display: grid;
   flex: none;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  margin: 1px -2px 0 0;
-  border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
-  transition: background-color var(--dur-fast) var(--ease-out);
+  width: 20px;
+  height: 20px;
+  margin-top: 3px;
+  color: var(--color-text-3);
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 @media (hover: hover) {
   .bk-card:hover .bk-card__chev {
-    background: var(--color-raised-hover);
+    color: var(--color-text-2);
   }
 }
 
-/* 登机牌那一块 */
+/* 登机牌那一块（纸本：上下两根细线，不是灰底块；和住宿的入住 / 退房两栏同一种写法） */
 .bk-card__ticket {
-  padding: 14px 14px 12px;
-  border-radius: var(--radius-lg);
-  background: var(--color-fill);
+  padding: 12px 0;
+  box-shadow: inset 0 1px 0 var(--color-separator), inset 0 -1px 0 var(--color-separator);
 }
 
 .bk-card__line {
@@ -690,7 +586,7 @@ button.bkp-tile:not(:disabled) {
 .bk-card__line .glyph {
   flex: none;
   margin-top: 2px;
-  color: var(--color-accent-text);
+  color: var(--color-text-3);
 }
 
 .bk-card__line span {
@@ -728,12 +624,7 @@ button.bkp-tile:not(:disabled) {
   margin-top: -2px;
 }
 
-/* 圆角同心：卡片 26 − 缩进 16 ≈ 12（视觉评审 P2-17） */
-.bk-card__acts .k-act {
-  border-radius: var(--radius-sm);
-}
-
-/* 确认单、管理链接：一排小胶囊（凸起的白，一眼看得出能点） */
+/* 确认单、管理链接：一排细线框的小纸片（一眼看得出能点） */
 .bk-card__extras {
   display: flex;
   flex-wrap: wrap;
@@ -749,7 +640,7 @@ button.bkp-tile:not(:disabled) {
   max-width: 100%;
   min-height: 34px;
   padding: 0 12px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: var(--color-raised);
   box-shadow: var(--shadow-raised);
   color: var(--color-text);
@@ -780,15 +671,14 @@ button.bkp-tile:not(:disabled) {
   background-color: var(--color-raised-pressed);
 }
 
-/* 一键联系：名字 + 打电话 / WhatsApp / Zalo */
+/* 一键联系：名字 + 打电话 / WhatsApp / Zalo（细线下面的一行，不是灰胶囊） */
 .bk-card__contact {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 6px 6px 6px 12px;
-  border-radius: var(--radius-pill);
-  background: var(--color-fill);
+  padding: 8px 0 0;
+  border-top: 1px solid var(--color-separator);
 }
 
 .bk-card__contact-name {
@@ -803,7 +693,7 @@ button.bkp-tile:not(:disabled) {
 
 .bk-card__contact-name .glyph {
   flex: none;
-  color: var(--color-accent-text);
+  color: var(--color-text-3);
 }
 
 .bk-card__contact-name span {
@@ -839,21 +729,8 @@ button.bkp-tile:not(:disabled) {
 }
 
 .bkp-skel__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-@media (min-width: 640px) {
-  .bkp-skel__grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.bkp-skel__tile {
-  min-height: 116px;
-  padding: 14px;
-  border-radius: var(--radius-lg);
+  display: block;
+  padding: 10px 0;
 }
 
 .bkp-skel__card {

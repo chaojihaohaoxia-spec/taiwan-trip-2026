@@ -582,7 +582,7 @@ function JournalForm({ controller, onStatus, photoMode }) {
           <span class="jn-f__saved-at">{entry.updated_at ? `上次保存 ${formatInstant(entry.updated_at, { timeZone, relative: true })}` : ''}</span>
         </div>
       )}
-      <p class="jn-f__hint">草稿会自动留在这台设备上，往下拉关掉也不会丢。</p>
+      <p class="jn-f__hint">草稿会自动保存</p>
     </div>
   );
 }

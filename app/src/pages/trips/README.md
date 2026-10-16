@@ -11,7 +11,7 @@
 | 还有一个邀请没加入 | 本机记着一个没加入的邀请码（`pages/join/model.js` 的 `pendingInvite`）→ 点了去加入页 | `trips-invite` |
 | 总览一行 | 「3 趟旅行 · 下一趟 5 天后出发」/「· 1 趟进行中」+ 列表 ↔ 网格切换（`ui/ViewToggle`，图标变形；本机记住 `rs7885:trips:view`） | `trips-summary`、`trips-view` |
 | 今天 | 有进行中的行程：「今天：富国岛 · 重阳 3 晚 / 第 2 天 · 共 4 天 · 打开今天的安排」→ 那一趟今天的 day 页（一步到位） | `trips-today` |
-| 行程卡片 | `ui/ViewSwitch`（FLIP）里每趟一张 `TripCard`：主题色渐变封面 + emoji（`shell/CoverDot`，和切换面板同一个）/ 封面照片（`cover.image_path`，签名链接）、宋体行程名（列表两行、网格三行）、日期（Geist 等宽数字；今年不写年）、阶段芯片（和切换面板同一套说法：`5 天后出发` / `进行中 · 第 2 天`（实心）/ `已结束 · 回顾` / `日期未定` / `已归档`）、几天几晚、只读成员标「只读」。进行中的卡片有强调色细边。整张卡是站内链接 → 行程概览 | `trips-list`、`trip-<id>` |
+| 行程卡片 | `ui/ViewSwitch`（FLIP）里每趟一张 `TripCard`：主题色纯色封面 + 宋体首字（`shell/CoverDot`，和切换面板同一个）/ 封面照片（`cover.image_path`，签名链接）、宋体行程名（列表两行、网格三行）、日期（系统字体等宽数字；今年不写年）、阶段芯片（和切换面板同一套说法：`5 天后出发` / `进行中 · 第 2 天`（实心）/ `已结束 · 回顾` / `日期未定` / `已归档`）、几天几晚、只读成员标「只读」。进行中的卡片有强调色细边。整张卡是站内链接 → 行程概览 | `trips-list`、`trip-<id>` |
 | 新建行程 | 次要按钮（宋体），打开 `trip-new` 弹层（`keyboard: true`：iOS 先叫出键盘） | `trips-new` |
 | 账号条 | kit 卡片（小内边距）：头像、名字、邮箱（离线时标出）、「退出登录」（有没同步的改动先确认，`pages/settings/account.js`） | `trips-account`、`account-name`、`sign-out` |
 

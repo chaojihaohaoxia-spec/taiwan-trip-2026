@@ -4,7 +4,7 @@
 //   storageLabel(s)       syncStatus.storage → { text, tone }
 //   syncTone(state)       syncStatus.state → InfoRow 的语气
 //   versionParts(v)       '2.0.0+0a1b2c3d4e' → { version: '2.0.0', build: '0a1b2c3d4e' }
-//   FONT_LICENSES         三种字体的授权文件（构建时复制到产物的 fonts/licenses/，scripts/build.mjs 的 FONT_LICENSE_FILES）
+//   FONT_LICENSES         两种字体（思源宋体、Instrument Serif）的授权文件（构建时复制到产物的 fonts/licenses/，scripts/build.mjs 的 FONT_LICENSE_FILES）
 // =====================================================================
 
 /** 字节数 → 'KB / MB / GB'（一位小数，整数不带小数） */
@@ -47,7 +47,6 @@ export function versionParts(v) {
 
 /** 字体授权文件（相对网站根目录） */
 export const FONT_LICENSES = Object.freeze([
-  { key: 'noto', name: '思源宋体 Noto Serif SC', use: '标题、行程名、大按钮', file: 'fonts/licenses/Noto-Serif-SC-OFL.txt' },
-  { key: 'instrument', name: 'Instrument Serif', use: '大号数字（倒计时、金额、时间）', file: 'fonts/licenses/Instrument-Serif-OFL.txt' },
-  { key: 'geist', name: 'Geist', use: '日期、计数、标签', file: 'fonts/licenses/Geist-OFL.txt' },
+  { key: 'noto', name: '思源宋体 Noto Serif SC', use: '标题、栏目名、行程名', file: 'fonts/licenses/Noto-Serif-SC-OFL.txt' },
+  { key: 'instrument', name: 'Instrument Serif', use: '几个主数字（倒计时、航班、账本总额）', file: 'fonts/licenses/Instrument-Serif-OFL.txt' },
 ]);

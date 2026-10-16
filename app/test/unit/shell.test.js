@@ -54,10 +54,11 @@ test('顶栏副标题 = 行程名后半段 + 日期区间；什么都没有写�
   assert.equal(tripSubtitle({ title: '空' }), '日期未定');
 });
 
-test('切换面板的日期行：「2026-10-16 – 10-19 · 3 晚」；跨年写全；一天的不写晚数', () => {
-  assert.equal(switcherDates({ start_date: '2026-10-16', end_date: '2026-10-19' }), '2026-10-16 – 10-19 · 3 晚');
-  assert.equal(switcherDates({ start_date: '2026-12-30', end_date: '2027-01-02' }), '2026-12-30 – 2027-01-02 · 3 晚');
-  assert.equal(switcherDates({ start_date: '2026-10-16', end_date: '2026-10-16' }), '2026-10-16');
+test('切换面板的日期行：「10-16 周五 – 10-19 周一 · 3 晚」（和全站同一种写法）；不是今年、跨年写年份；一天的不写晚数', () => {
+  assert.equal(switcherDates({ start_date: '2026-10-16', end_date: '2026-10-19' }, { thisYear: 2026 }), '10-16 周五 – 10-19 周一 · 3 晚');
+  assert.equal(switcherDates({ start_date: '2026-12-30', end_date: '2027-01-02' }, { thisYear: 2026 }), '2026-12-30 周三 – 2027-01-02 周六 · 3 晚');
+  assert.equal(switcherDates({ start_date: '2027-01-10', end_date: '2027-01-13' }, { thisYear: 2026 }), '2027-01-10 周日 – 01-13 周三 · 3 晚');
+  assert.equal(switcherDates({ start_date: '2026-10-16', end_date: '2026-10-16' }, { thisYear: 2026 }), '10-16 周五');
   assert.equal(switcherDates({}), '日期未定');
   assert.equal(nightsOf({ start_date: '2026-05-11', end_date: '2026-05-19' }), 8);
 });
@@ -273,16 +274,15 @@ test('天数分段条：概览格随阶段写出发前 / 进行中 / 回顾，�
   assert.equal(dayStripCells({ tripId: 'x', dates: [], phase: 'ended' })[0].top, '回顾');
 });
 
-test('＋ 面板：进行中「记一笔」最前、最大（今天记了几笔）；出发前先加条目、加待办；回顾先写日记；最后一个占整行', () => {
+test('＋ 面板：进行中「记一笔」最前、最大（今天记了几笔）；出发前先加条目、加待办；回顾先写日记；单色列表（没有色块的颜色）', () => {
   const on = fabActions({ phase: 'ongoing', localCurrency: 'VND', todayCount: 3 });
   assert.deepEqual(on.map((a) => a.id), ['expense', 'photo', 'journal', 'item', 'todo']);
   assert.equal(on[0].hero, true);
   assert.equal(on[0].hint, '今天已记 3 笔 · 自动折合港币');
-  assert.ok(on.every((a) => !a.wide));
+  assert.ok(on.every((a) => !('tone' in a) && !('wide' in a)), '一列单色的行：不再有图标块的颜色、不再有占整行的瓷砖');
   const pre = fabActions({ phase: 'upcoming', localCurrency: 'VND' });
   assert.deepEqual(pre.map((a) => a.id), ['item', 'todo', 'expense', 'journal', 'photo']);
   assert.ok(pre.every((a) => !a.hero));
-  assert.equal(pre[4].wide, true);
   assert.equal(pre.find((a) => a.id === 'expense').hint, '越南盾自动折合港币');
   assert.equal(fabActions({ phase: 'ended', localCurrency: 'HKD' })[0].id, 'journal');
   assert.equal(fabActions({ phase: 'ended', localCurrency: 'HKD' }).find((a) => a.id === 'expense').hint, '谁付的、怎么分都记上');
@@ -295,7 +295,6 @@ test('＋ 面板：只读成员的记一笔 / 加条目 / 加待办变淡、写�
   assert.deepEqual(ro.filter((a) => a.disabled).map((a) => a.id), ['expense', 'item', 'todo']);
   assert.equal(ro.find((a) => a.id === 'expense').hint, '只读成员不能记账');
   assert.equal(ro.find((a) => a.id === 'item').hint, '只读成员不能改行程');
-  assert.equal(ro[4].wide, true);
   assert.ok(!ro.find((a) => a.id === 'photo').disabled);
 });
 

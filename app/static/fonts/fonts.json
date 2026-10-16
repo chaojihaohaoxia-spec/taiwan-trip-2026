@@ -730,17 +730,6 @@
    "preload": false
   },
   {
-   "family": "Geist",
-   "weight": "100 900",
-   "style": "normal",
-   "file": "geist.woff2",
-   "slice": "all",
-   "chars": 338,
-   "bytes": 38872,
-   "unicodeRange": "U+20-7E,U+A0-AC,U+AE-FF,U+102-103,U+110-111,U+128-129,U+131,U+152-153,U+168-169,U+1A0-1A1,U+1AF-1B0,U+2BC,U+2C6,U+2DA,U+2DC,U+300-301,U+303-304,U+308-309,U+323,U+1EA0-1EF9,U+2013-2014,U+2018-201A,U+201C-201E,U+2020-2022,U+2026,U+2028-2029,U+2030,U+2032-2033,U+2039-203A,U+2044,U+20AC,U+2122,U+2190-2194,U+2212,U+2248,U+2260,U+2264-2265",
-   "preload": true
-  },
-  {
    "family": "P2 Figure One",
    "weight": "400",
    "style": "normal",
@@ -772,5 +761,5 @@
   "slices": 54,
   "slicesBytes": 902464
  },
- "sha256": "bc44886e04abc622"
+ "sha256": "167b8b420a3438a0"
 }

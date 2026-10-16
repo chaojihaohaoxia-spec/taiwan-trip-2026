@@ -1,4 +1,4 @@
-// 网页字体（P2「杂志宋体」）：@font-face、思源宋体的分片、预加载、授权文件、字体角色变量。
+// 网页字体（「杂志纸本」的三种字：宋体、Instrument Serif、系统字体）：@font-face、思源宋体的分片、预加载、授权文件、字体角色变量。
 // 字体文件和 styles/fonts.css 由 scripts/fonts/build-fonts.py 生成；这里核对生成结果守得住约定。
 
 import { test } from 'node:test';
@@ -42,10 +42,10 @@ function parseRanges(spec) {
 }
 const covers = (ranges, c) => ranges.some(([a, b]) => c >= a && c <= b);
 
-test('@font-face：只有四个字族（不要 Geist Mono），全部 font-display: swap，文件都在 static/fonts/', () => {
+test('@font-face：只有三个字族（不要 Geist：标签、小号数字用系统字体），全部 font-display: swap，文件都在 static/fonts/', () => {
   const list = faces();
   assert.ok(list.length > 10);
-  assert.deepEqual([...new Set(list.map((f) => f.family))].sort(), ['Geist', 'Instrument Serif', 'Noto Serif SC', 'P2 Figure One']);
+  assert.deepEqual([...new Set(list.map((f) => f.family))].sort(), ['Instrument Serif', 'Noto Serif SC', 'P2 Figure One']);
   for (const f of list) {
     assert.equal(f.display, 'swap', `${f.file}`);
     assert.match(f.file, /^\.\.\/\.\.\/static\/fonts\/[a-z0-9-]+\.woff2$/);
@@ -56,15 +56,14 @@ test('@font-face：只有四个字族（不要 Geist Mono），全部 font-displ
   }
   assert.ok(list.filter((f) => f.family === 'Noto Serif SC').every((f) => f.weight === '600' && f.style === 'normal'), '思源宋体只要 600');
   assert.deepEqual(list.filter((f) => f.family === 'Instrument Serif').map((f) => f.style).sort(), ['italic', 'normal']);
-  assert.equal(list.find((f) => f.family === 'Geist').weight, '100 900', 'Geist 是可变字重');
-  assert.ok(!/Geist Mono/.test(css));
+  assert.ok(!/Geist/.test(css), '没有 Geist');
 });
 
 test('P2 Figure One：只接管「1」和「₫」（U+31、U+20AB），size-adjust 92%；正体 + 斜体（按 Instrument Serif 斜体的角度斜切）', () => {
   const one = faces().filter((f) => f.family === 'P2 Figure One');
   assert.deepEqual(one.map((f) => f.style).sort(), ['italic', 'normal']);
   for (const f of one) {
-    assert.equal(f.range, 'U+31,U+20AB', `${f.file}：越南盾符号「₫」也由它接管（Instrument Serif、Geist 都没有 ₫，否则回退到粗的宋体 600）`);
+    assert.equal(f.range, 'U+31,U+20AB', `${f.file}：越南盾符号「₫」也由它接管（Instrument Serif 没有 ₫，否则回退到粗的宋体 600）`);
     assert.equal(f.sizeAdjust, '92%');
     assert.equal(f.weight, '400');
   }
@@ -111,11 +110,11 @@ test('分片够小：每片不超过 40 KB；字体文件和 fonts.json 一一�
   assert.deepEqual(onDisk, manifest.faces.map((f) => f.file).sort());
 });
 
-test('预加载：Instrument Serif 正体、Geist、P2 Figure One 正体；名字和 esbuild 打包出来的一致；斜体（只给倒计时用）和宋体分片不预加载', async () => {
+test('预加载：Instrument Serif 正体、P2 Figure One 正体；名字和 esbuild 打包出来的一致；斜体（只给倒计时用）和宋体分片不预加载', async () => {
   const sources = preloadSources().map((p) => path.basename(p)).sort();
-  assert.deepEqual(sources, ['geist.woff2', 'instrument-serif-400.woff2', 'p2-figure-one.woff2']);
+  assert.deepEqual(sources, ['instrument-serif-400.woff2', 'p2-figure-one.woff2']);
   const hrefs = fontPreloadHrefs('assets');
-  assert.equal(hrefs.length, 3);
+  assert.equal(hrefs.length, 2);
   // 用真正的 CSS 打包流程打一遍 fonts.css，预加载的文件名必须在产物里
   const out = await buildCss({ dev: false, outdir: path.join(APP, '.font-test-out', 'assets'), files: [CSS_FILE] });
   const emitted = new Set(out.files.filter((f) => f.kind === 'asset').map((f) => `assets/${path.basename(f.path)}`));
@@ -129,21 +128,22 @@ test('预加载：Instrument Serif 正体、Geist、P2 Figure One 正体；名�
   assert.ok(html.indexOf('rel="preload"') < html.indexOf('rel="stylesheet"'), '预加载写在样式表前面');
 });
 
-test('授权：三套字体的 OFL 1.1 原文随字体一起放在 static/fonts/licenses/', () => {
+test('授权：两套字体的 OFL 1.1 原文随字体一起放在 static/fonts/licenses/（没有多余的）', () => {
   const dir = path.join(FONTS_DIR, 'licenses');
-  for (const f of ['Noto-Serif-SC-OFL.txt', 'Instrument-Serif-OFL.txt', 'Geist-OFL.txt']) {
+  assert.deepEqual(readdirSync(dir).sort(), ['Instrument-Serif-OFL.txt', 'Noto-Serif-SC-OFL.txt']);
+  for (const f of ['Noto-Serif-SC-OFL.txt', 'Instrument-Serif-OFL.txt']) {
     const text = readFileSync(path.join(dir, f), 'utf8');
     assert.match(text, /SIL OPEN FONT LICENSE Version 1\.1/, f);
   }
   assert.ok(existsSync(path.join(FONTS_DIR, 'README.md')));
 });
 
-test('字体角色变量：宋体 / 大号数字 / 斜体数字 / 标签；正体、斜体数字都先走 P2 Figure One；全站不假粗', () => {
+test('字体角色变量：宋体 / 主数字 / 斜体数字 / 标签（系统字体）；正体、斜体数字都先走 P2 Figure One；全站不假粗', () => {
   const t = loadTokens();
   assert.match(t.light['--font-serif'], /^"Noto Serif SC"/);
   assert.match(t.light['--font-figure'], /^"P2 Figure One", "Instrument Serif"/);
   assert.match(t.light['--font-figure-italic'], /^"P2 Figure One", "Instrument Serif"/);
-  assert.match(t.light['--font-label'], /^"Geist"/);
+  assert.equal(t.light['--font-label'], 'var(--font-sans)', '标签、小号数字用系统字体（SF 自带等宽数字）');
   assert.equal(t.light['--font-display'], 'var(--font-serif)');
   const base = readFileSync(path.join(APP, 'src/styles/base.css'), 'utf8');
   assert.match(base, /font-synthesis: none;/);

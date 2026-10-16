@@ -2,7 +2,7 @@
    ui/ViewSwitch.css：列表 / 网格容器（.vs）和标准卡片（.vs-card）。
    卡片本身没有底色：底色在 .vs-card__bg（单独 FLIP，可以随意拉伸），
    图片在 .vs-card__media（等比裁切 FLIP），文字在 .vs-card__text（只平移）。
-   A 皮肤（样稿的「四天安排」）：底板是磨砂白材质 + 折射高光描边，标题宋体，副标题次要色小字。
+   「杂志纸本」：底板是纸片（--material-card + 细线框），标题宋体，副标题次要色小字。
    FLIP 途中卡片会互相穿过：底板在下、文字在上（底板 z-index 低），字不会被别的卡片盖住。
    ===================================================================== */
 
@@ -78,20 +78,6 @@
   transition: box-shadow var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
 }
 
-/* 折射高光描边 */
-.vs-card__bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
-}
-
 .vs-card[data-pressed] .vs-card__bg {
   background-color: var(--color-fill);
 }
@@ -140,8 +126,9 @@
   place-items: center;
   width: 100%;
   height: 100%;
-  background: linear-gradient(150deg, var(--color-accent-soft), color-mix(in srgb, var(--color-accent-2) 16%, transparent));
-  color: var(--color-accent-text);
+  /* 纸本：没有照片就是一块很浅的纸灰 + 灰色图形（不做渐变） */
+  background: var(--color-fill);
+  color: var(--color-text-3);
 }
 
 .vs-card__text {

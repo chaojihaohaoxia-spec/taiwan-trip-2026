@@ -84,6 +84,7 @@ function fallbackAnchor(vp) {
  * @param {boolean} [props.closeOnScrim=true]
  * @param {boolean} [props.closeOnEsc=true]
  * @param {boolean} [props.tintOnExit=true]  收回时形状染回按钮色；false = 不染、最后一段淡掉（按钮在更高的层上、形状会从它后面露出来时）
+ * @param {boolean} [props.tintOnEnter=true] 长出来时先盖一层按钮色；false = 不盖（面板本身的纸色从按钮的形状长出来，内容跟着形状淡入）
  * @param {'solid'|'glass'} [props.material='solid']
  * @param {string} [props.class]
  * @param {string} [props.testId]
@@ -104,7 +105,7 @@ function PanelLayer(props) {
   const {
     ov, anchorRef, placement = 'auto', align = 'center', width = 360, gap = 10, title, label, children,
     anchorProxy, closeOnScrim = true, closeOnEsc = true, material = 'solid', class: cls = '', testId, onClosed, onOpened,
-    tintOnExit = true,
+    tintOnExit = true, tintOnEnter = true,
   } = props;
   const gate = useOpenedGate(onOpened);
   const layerRef = useRef(null);
@@ -196,7 +197,7 @@ function PanelLayer(props) {
     stopAnimation(panel, CH_HANDOFF, { commit: false });
     clearStyle(panel, ['opacity']);
     const reduced = prefersReducedMotion.peek();
-    const color = reduced ? null : solidColorOf(anchorEl.current);
+    const color = reduced || !tintOnEnter ? null : solidColorOf(anchorEl.current);
     // 色层、内容的不透明度由形变逐帧给（收回到一半又打开：从此刻的形状、此刻的浓淡接着走）
     prepareTint(color);
     gate.reset();

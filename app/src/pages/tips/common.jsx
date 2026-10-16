@@ -6,7 +6,7 @@
 //   useUrlText(route, key)                搜索框的字：本地先变、网址延迟写（?q=），返回 / 前进跟着网址
 //   PageSearch                            本页搜索框（放大镜 + 输入框 + 清除；16px 字 iOS 不放大；Esc 清空）
 //   FilterChips                           单选筛选芯片（全部 / 每一类，带数量；layout 'wrap' 折行全部看得见 / 'scroll' 一行横滑）
-//   RelatedLinks                          「相关」小胶囊：那一天（去那天）、地点（地点详情）、预订（预订详情）、分段（只显示）
+//   RelatedLinks                          「相关」文字链接：那一天（去那天）、地点（地点详情）、预订（预订详情）、分段（只显示）
 //   Tags                                  「置顶」「今天」小标
 //   useFocusOnce(id, ready, selector)     网址带 ?tip= / ?contact=（搜索结果）进来：滚到那一条并闪一下（不抢手动滚动）
 //   onMarkdownLink                        正文里的链接走 lib/native.js 的 openExternal（以后 iOS 外壳接管外链）
@@ -188,7 +188,6 @@ export function FilterChips({ value, onChange, options, total, label, testId, cl
           selected={value === o.value}
           onToggle={(on) => onChange(on ? o.value : 'all')}
           count={o.count}
-          icon={o.glyph ? (p) => <Glyph name={o.glyph} size={p.size} /> : undefined}
           data-value={o.value}
           disabled={!o.count && value !== o.value}
         >
@@ -200,7 +199,7 @@ export function FilterChips({ value, onChange, options, total, label, testId, cl
 }
 
 // ---------------------------------------------------------------------
-// 「相关」小胶囊、小标
+// 「相关」文字链接、小标
 // ---------------------------------------------------------------------
 
 const RELATED_GLYPH = { day: 'route', segment: 'map' };

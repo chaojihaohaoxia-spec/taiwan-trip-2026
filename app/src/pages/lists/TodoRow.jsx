@@ -116,7 +116,6 @@ export function TodoRow({ todo, ctx, focused = false, showOwner = true, held = f
             <span class="lrow__meta">
               {showDue && (
                 <span class={`lrow__due lrow__due--${due.tone}`} data-testid={`todo-due-${todo.id}`}>
-                  <Glyph name={due.state === 'overdue' ? 'alert' : 'clock'} size={14} stroke={2} />
                   {/* 读屏念完整的一句（带时区）；看的是分段、每段自己不折行，只在「 · 」处折行；钟点和行程时区不同时跟一个「香港时间」小标签 */}
                   <span class="visually-hidden">截止：{due.label}</span>
                   <span class="lrow__duet" aria-hidden="true">

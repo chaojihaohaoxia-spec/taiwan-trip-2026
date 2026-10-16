@@ -1,12 +1,13 @@
 # pages/day/ —— 每天页（SPEC §5.3）
 
 路由 `day`（`#/t/:tripId/day/:date`）。大标题、天数分段条、顶栏、底栏由外壳画（`shell/Frame.jsx`），这里从分段条下面开始。
-视觉照样稿 P2-serif 的 `.day-head` / `.tl-*`（`04-body.html`、`02-style.html`）：左边一栏时间（Geist 等宽数字）、中间竖线和圆点、右边是可原地展开的卡片。
+视觉是「杂志纸本」（SPEC §11）：像印出来的行程单——左边一栏时间（系统字体等宽数字）、中间细竖线和 8px 小圆点、右边是直接排在纸上、上面一根细线的条目（原地展开），
+当前条目左边一道 2px 海色线、标题和钟点海色；「现在」是海色小字 + 小点 + 1px 海色线（不是实心胶囊和进度条）。
 
 | 文件 | 内容 |
 |---|---|
 | `DayPage.jsx` | 页面：接数据（`hooks.js`）、手风琴（`ui/useAccordion`）、`?item=` 展开并滚到那一条、行程中自动滚到当前条目附近、左右滑动换天（`swipe.js`）、备选换主方案（`model.js` 的 `promotePlan` + Toast 撤销）、加载 / 出错 / 找不到行程 / 日期不在行程里的状态 |
-| `parts.jsx` | 时间轴以外的几块：`DayHead`（眉标、宋体标题、概要、节奏 / 天气 / 日落 / 住哪 / 规划状态的小胶囊、天气提示）、`RoutePlanCard`（`days.route_plan`，docs B5.3；指标值短（≤ 7 个汉字宽、不多于 4 个）时是 Instrument Serif 大数字的格子，真实行程那种长值「约 2 小时 50 分」「12–20 万越南盾（约 HK$…）」改成一行一个、左标签右值，`model.js` 的 `metricsLayout`）、`DecisionsCard`（`days.decisions`，收着的 ExpandableCard）、`RemindersCard`（这一天自己的贴士 + 待办，待办能直接勾）、`BookingBlock`（关联预订：状态 / 付款 / 免费取消倒计时 / 订单号点一下复制）、`DaySkeleton`、`DayEmpty` |
+| `parts.jsx` | 时间轴以外的几块：`DayHead`（眉标、宋体标题（不放 `day.icon` 的 emoji）、概要、一行事实「天气 · 日落 · 规划状态」、一行海色链接「住 … ›」；节奏、条数不上屏，数据里的天气提示不上屏）、`RoutePlanCard`（`days.route_plan`，docs B5.3；指标值短（≤ 7 个汉字宽、不多于 4 个）时是 Instrument Serif 大数字的格子，真实行程那种长值「约 2 小时 50 分」「12–20 万越南盾（约 HK$…）」改成一行一个、左标签右值，`model.js` 的 `metricsLayout`）、`DecisionsCard`（`days.decisions`，收着的 ExpandableCard）、`RemindersCard`（这一天自己的贴士 + 待办，待办能直接勾）、`BookingBlock`（关联预订：状态 / 付款 / 免费取消倒计时 / 订单号点一下复制）、`DaySkeleton`、`DayEmpty` |
 | `timeline.jsx` | `Timeline`（主方案 + 「现在」；`ui/FlipGroup` 包着：加了 / 换了条目其余的平滑让位）、`AltList`（当天通用备选）、`TimelineItem`（一条：收起 / 展开）、展开后的各块：**动作行在最前面**（导航 / 叫 Grab / 给司机看 / 记一笔，一排四个；「复制地址」在地址那一行：点地址就复制），然后说明 Markdown（里面的电话能点）、怎么过去、费用估算、地址、步行路线、链接、关联预订、相关贴士、相关待办、实际情况，最后打卡 / 写日记 / 评级 / 编辑和标记完成 / 跳过的小表单；挂在主方案下的备选切换 |
 | `model.js` | **纯逻辑**（单元测试 `test/unit/page-day.test.js`、`page-fix-pages.test.js`）：时间栏（`itemClock` 转出 `kit/item-clock.js`，概览共用；含别的时区 `extra.local_time` 和航班两头的时区）、贴士第一行（`firstLine`：先去掉 Markdown）、待办那行小字（`todoHint`：截止 + 备注）、“现在”在哪（`nowOnTimeline` / `nowLineIndex`）、怎么过去 / 费用 / 路线卡 / 步行路线的显示数据、关联贴士和待办、收起时的副标题和标签、排序值（`sortKeyForTime` / `sortKeyAfter` / `inTimeOrder`）、备选换主方案要改哪些行（`promotePlan`）、左右滑动的判定 |
 | `hooks.js` | `useDayData(route)`（useTrip + 这一天的派生：主方案 / 备选、住处、时区、权限、阶段、状态）、`useDayWeather`（`lib/services/weather.js`，当晚住处的坐标）、`useNowOnDay`（每分钟刷新的“现在”；钟点按人此刻所在的时区写，`store.presenceZone`，和行程时区不同时带 `zone`「香港」） |
@@ -31,7 +32,7 @@
 - **完成 / 跳过**：出发前直接标；行程中和结束后出小表单（实际开始默认这一天当地的现在、实际情况），`SubmitButton` 转圈打勾；之后「恢复为计划中」。
 - **备选**：挂在主方案下的 backup / rain 在展开后顶上一个小分段切换（「主方案 · 备选 · 雨天方案」，多于一个编号），切过去显示备选的内容和「换成主方案」；当天通用的备选在时间轴后面单独一组，同样能换成主方案。
   换成主方案：`promotePlan` 算出要改的行（接替主方案的位置和钟点、原来的主方案变成它的备选、其他备选挂到它下面；通用备选按钟点插进时间轴），Toast「撤销」改回去。
-- **行程中的今天**：当前条目强调色细边 + 「进行中」标签 + 标题行底部进度条，「现在」的钟点跟在它的时间栏下面（正常文档流，放在开始 / 结束钟点、时区小标签后面，所以收起的矮卡片也不会压住钟点；圆点和接到卡片的小横线是 `.tl__nowmark` 的伪元素，位置按 `--tl-time-w` / `--tl-rail-w` 算）；没有进行中的条目时「现在」是两条之间的一条指示线。每分钟刷新（`useNow(60_000)`；后台不刷新）。进来自动滚到当前条目附近（`scrollIntoComfort`，已经在舒服的位置就不动；用户先滚过 / 按过就不抢；同一条历史记录只做一次）。
+- **行程中的今天**：当前条目左边一道海色线 + 「进行中」（一行字），「现在」的钟点跟在它的时间栏下面（正常文档流，放在开始 / 结束钟点、时区小标签后面，所以收起的矮卡片也不会压住钟点；圆点和接到卡片的小横线是 `.tl__nowmark` 的伪元素，位置按 `--tl-time-w` / `--tl-rail-w` 算）；没有进行中的条目时「现在」是两条之间的一条指示线。每分钟刷新（`useNow(60_000)`；后台不刷新）。进来自动滚到当前条目附近（`scrollIntoComfort`，已经在舒服的位置就不动；用户先滚过 / 按过就不抢；同一条历史记录只做一次）。
 - **`?item=<id>`**：展开并滚到那一条；挂在主方案下的备选 → 展开主方案并切到它。
 - **左右滑动**：见 `swipe.js`。同一趟行程 D1 往右滑回概览；最后一天往左只有橡皮筋。
 - **只读成员**：不显示编辑 / 完成 / 跳过 / 换方案，记一笔禁用并说明；导航 / 叫车 / 给司机看 / 打卡照常。

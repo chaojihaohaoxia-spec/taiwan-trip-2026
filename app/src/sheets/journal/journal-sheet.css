@@ -1,7 +1,7 @@
 /* =====================================================================
    sheets/journal/journal-sheet.css：写日记 / 拍照打卡面板的内容（.jn-f）。
    面板本身（玻璃、把手、标题、底部按钮）由 overlay/Sheet 画；这里只排表单：
-   日期条（横向滚动的小格）→ 心情（一排 emoji）→ 正文（自动增高）→ 照片（拍照 / 选图 + 缩略图网格）。
+   日期条（横向滚动的细线小格，选中是墨色框）→ 心情（一排 emoji，没选的去色压淡）→ 正文（自动增高）→ 照片（拍照 / 选图 + 缩略图网格）。
    只用 tokens.css 的变量。
    ===================================================================== */
 
@@ -75,19 +75,21 @@
   min-height: var(--tap-min);
   padding: 4px 10px;
   border-radius: var(--radius-md);
-  background: var(--color-fill);
-  color: var(--color-text);
+  /* 纸本：没选的是纸上细线框，选中是墨色细线框（不铺实心海色） */
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  color: var(--color-text-2);
   scroll-snap-align: center;
   transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 
 .jn-f__day[aria-checked="true"] {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  box-shadow: var(--shadow-accent-sm);
+  box-shadow: inset 0 0 0 1px var(--color-text);
+  color: var(--color-text);
 }
 
 .jn-f__day-n {
+  font-family: var(--font-serif);
   font-size: var(--text-headline);
   line-height: 1.1;
 }
@@ -109,9 +111,7 @@
   background: var(--color-accent);
 }
 
-.jn-f__day[aria-checked="true"] .jn-f__day-dot {
-  background: var(--color-on-accent);
-}
+
 
 /* ---------- 来自条目 / 地点、恢复草稿 ---------- */
 .jn-f__context,
@@ -164,19 +164,26 @@
   transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 
+/* 纸本：选中是墨色细线框（和别处的小胶囊一样，不铺色块） */
 .jn-f__mood[aria-checked="true"] {
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--color-text);
+  color: var(--color-text);
 }
 
+/* 一排彩色 emoji 太花：没选的去色、压淡，选中的那一个才是原色 */
 .jn-f__emoji {
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1.15;
-  transition: scale var(--spring-bouncy-duration) var(--spring-bouncy);
+  filter: grayscale(1);
+  opacity: 0.55;
+  transition: scale var(--spring-bouncy-duration) var(--spring-bouncy), opacity var(--dur-fast) var(--ease-out), filter var(--dur-fast) var(--ease-out);
 }
 
 .jn-f__mood[aria-checked="true"] .jn-f__emoji {
-  scale: 1.12;
+  scale: 1.08;
+  filter: none;
+  opacity: 1;
 }
 
 .jn-f__mood-name {

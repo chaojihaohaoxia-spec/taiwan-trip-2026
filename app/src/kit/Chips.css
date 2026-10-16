@@ -1,6 +1,6 @@
 /* =====================================================================
-   kit/Chips.css：阶段芯片（.k-phase）、成员芯片（.k-person）、倒计时（.k-count）、日期（.k-date）。
-   状态芯片本身是 ui/Badge（.badge），这里不重复写。
+   kit/Chips.css：阶段（.k-phase）、成员（.k-person）、倒计时（.k-count）、日期（.k-date）。
+   状态本身是 ui/Badge（.badge，一行字），这里不重复写。「杂志纸本」：成员不再一青一红，是一个灰色小点 + 名字，「我」是灰字。
    ===================================================================== */
 
 .k-phase {
@@ -37,16 +37,15 @@
 
 .k-person__dot {
   flex: none;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: var(--radius-round);
-  background: var(--k-person);
-  box-shadow: 0 0 0 2px var(--color-glass-highlight), var(--shadow-highlight);
+  background: var(--color-text-3);
 }
 
 .k-person--sm .k-person__dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 .k-person__name {
@@ -55,12 +54,8 @@
 }
 
 .k-person__you {
-  padding: 0 6px;
-  border-radius: var(--radius-pill);
-  background: var(--color-fill);
-  color: var(--color-text-2);
-  font-size: var(--text-caption-2);
-  line-height: 18px;
+  color: var(--color-text-3);
+  font-size: var(--text-caption-1);
 }
 
 .k-count,

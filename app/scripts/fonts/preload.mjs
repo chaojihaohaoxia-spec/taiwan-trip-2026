@@ -6,7 +6,7 @@
 // 这里用同样的 esbuild 设置把要预加载的几个文件“打包”一遍（不写盘），拿到同样的文件名——
 // 不用改构建脚本，开发服务器、生产构建、e2e 拿到的名字都和真实产物一致（build.mjs 的自检会核对 index.html 引用的文件都存在）。
 //
-// 预加载哪些：static/fonts/fonts.json 里 preload: true 的（Instrument Serif 正体 / 斜体、Geist、P2 Figure One）。
+// 预加载哪些：static/fonts/fonts.json 里 preload: true 的（Instrument Serif 正体、P2 Figure One 正体）。
 // 思源宋体的分片不预加载：一屏只用到其中几片，浏览器按 unicode-range 自己挑。
 // =====================================================================
 
@@ -32,7 +32,7 @@ export function preloadSources() {
 }
 
 /**
- * 预加载的字体在构建产物里的路径（相对站点根目录，例如 assets/geist-ABCD1234.woff2）
+ * 预加载的字体在构建产物里的路径（相对站点根目录，例如 assets/instrument-serif-400-ABCD1234.woff2）
  * @param {string} [assetsDir='assets']
  * @returns {string[]}
  */

@@ -119,15 +119,15 @@ test('账本页（进行中）：总花费按币种分开、外币带折合港�
     await app.idle();
     const head = await page.$eval(`${T('ledger-group-2027-01-11')} .lg-date`, (el) => el.getBoundingClientRect().top);
     assert.ok(head > 40 && head < 160, `日期头吸在顶栏下面：${head}`);
-    // 吸住时整条日期头是一块真玻璃（流水的字不会从两个胶囊之间露出来），两个胶囊自己没有底色
+    // 吸住时整条日期头是一张不透明的纸（「杂志纸本」：不用玻璃；流水的字不会从两个胶囊之间露出来），两个胶囊自己没有底色
     const stuck = await page.$eval(`${T('ledger-group-2027-01-11')} .lg-date`, (el) => {
       const bar = getComputedStyle(el, '::before');
       const pill = getComputedStyle(el.querySelector('.lg-date__pill'), '::before');
       return { filter: bar.backdropFilter || bar.webkitBackdropFilter, bar: bar.opacity, bg: bar.backgroundImage, pill: pill.opacity };
     });
-    assert.notEqual(stuck.filter, 'none', `吸住的日期头有背景模糊：${JSON.stringify(stuck)}`);
-    assert.equal(stuck.bar, '1', '吸住的整条玻璃底显示出来');
-    assert.notEqual(stuck.bg, 'none', '玻璃底有材质');
+    assert.equal(stuck.filter, 'none', `吸住的日期头是不透明的纸，不开背景模糊：${JSON.stringify(stuck)}`);
+    assert.equal(stuck.bar, '1', '吸住的整条纸底显示出来');
+    assert.notEqual(stuck.bg, 'none', '纸底有颜色（不透明）');
     assert.equal(stuck.pill, '0', '胶囊自己的底色撤掉');
     await app.shot('ledger-sticky', { fullPage: false });
     // 滚回最上面：玻璃底淡掉、胶囊的底色回来、模糊关掉
@@ -597,8 +597,14 @@ test('一键「记为已结清」：结算变成已结清、记录谁什么时�
     const linesBefore = await count(page, T('ledger-settle-line'));
     assert.ok(linesBefore > 0);
     // 「已记为结清」的提示在 r.saved 之后才弹：看到它 = 改动已经写进本机队列
+    // 按钮可能正好在底栏后面（纸本版式内容更紧凑）：先滚到屏幕中间再点，不然点到的是底栏的 ＋
+    const clickSettle = async () => {
+      await page.$eval(T('ledger-settle-btn'), (el) => el.scrollIntoView({ block: 'center' }));
+      await app.idle();
+      await page.click(T('ledger-settle-btn'));
+    };
     const settledToast = () => page.waitForFunction(() => /已记为结清/.test(document.querySelector('[data-testid="toast"]')?.textContent || ''), { timeout: 8000 });
-    await page.click(T('ledger-settle-btn'));
+    await clickSettle();
     // 先问一句：确认框里列出要记下的金额（按币种分别列）；点「还没给」什么都不变
     await page.waitForSelector(T('dialog-confirm'), { visible: true, timeout: 8000 });
     const ask = await page.$eval('[role="alertdialog"], [role="dialog"]', (el) => el.textContent);
@@ -607,7 +613,7 @@ test('一键「记为已结清」：结算变成已结清、记录谁什么时�
     await page.click(T('dialog-cancel'));
     await sleep(600);
     assert.equal(await count(page, T('ledger-settle-line')), linesBefore, '取消以后照旧');
-    await page.click(T('ledger-settle-btn'));
+    await clickSettle();
     await page.waitForSelector(T('dialog-confirm'), { visible: true, timeout: 8000 });
     await page.click(T('dialog-confirm'));
     await page.waitForSelector(T('ledger-settle-even'), { timeout: 8000 });
@@ -639,7 +645,7 @@ test('一键「记为已结清」：结算变成已结清、记录谁什么时�
     await page.click(T('ledger-settle-undo'));
     await page.waitForFunction((n) => document.querySelectorAll('[data-testid="ledger-settle-line"]').length === n && !document.querySelector('[data-testid="ledger-settle-last"]'), { timeout: 6000 }, linesBefore);
     // 刷新后结清记录还在（存在行程里，演示模式的 IndexedDB；等提示弹出来 = 已经写进本机队列再刷新）
-    await page.click(T('ledger-settle-btn'));
+    await clickSettle();
     await page.waitForSelector(T('dialog-confirm'), { visible: true, timeout: 8000 });
     await page.click(T('dialog-confirm'));
     await page.waitForSelector(T('ledger-settle-even'), { timeout: 8000 });

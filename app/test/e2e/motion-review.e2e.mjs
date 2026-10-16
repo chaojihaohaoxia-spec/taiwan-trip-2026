@@ -568,13 +568,17 @@ test('#8 分段控件：按在选中的那一段上，不用拖，选中块马�
     await page.mouse.move(box.x, box.y);
     await page.mouse.down();
     await sleep(200);
-    const pressed = await page.$eval(`${tid('seg-main')} .seg__thumb`, (el) => ({ scale: parseFloat(getComputedStyle(el).scale), attr: el.hasAttribute('data-pressed') }));
+    const pressed = await page.$eval(`${tid('seg-main')} .seg__thumb`, (el) => ({
+      scale: parseFloat(getComputedStyle(el).scale),
+      attr: el.hasAttribute('data-pressed'),
+      target: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--press-scale')),
+    }));
     await page.mouse.up();
     await waitForAnimationsDone(page, 3000);
     await sleep(800);
     const released = await page.$eval(`${tid('seg-main')} .seg__thumb`, (el) => ({ scale: getComputedStyle(el).scale, attr: el.hasAttribute('data-pressed') }));
     assert.equal(pressed.attr, true);
-    assert.ok(Math.abs(pressed.scale - 0.96) < 0.005, `按住 200ms 已经缩到 0.96：${pressed.scale}`);
+    assert.ok(pressed.target < 1 && Math.abs(pressed.scale - pressed.target) < 0.005, `按住 200ms 已经缩到 --press-scale（${pressed.target}）：${pressed.scale}`);
     assert.equal(released.attr, false);
     assert.ok(released.scale === 'none' || Math.abs(parseFloat(released.scale) - 1) < 0.002, `松手弹回：${released.scale}`);
     app.assertClean();

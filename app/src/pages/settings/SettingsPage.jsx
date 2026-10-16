@@ -53,7 +53,7 @@ export default function SettingsPage() {
       <AccountCard color={myColor(entries)} />
       <LegacyCards scan={scan} />
 
-      <SectionHeader title="成员和邀请" meta="每趟行程分别邀请；只有创建者能邀请和改权限" />
+      <SectionHeader title="成员和邀请" meta="每趟分别邀请" />
       {ready ? (
         <MembersSection entries={entries} currentId={currentId} />
       ) : list.status === 'error' ? (
@@ -71,7 +71,7 @@ export default function SettingsPage() {
       <SectionHeader title="外观" />
       <Card padding="sm" class="set-card" testId="settings-appearance">
         <SegmentedControl block label="外观" options={THEMES} value={themePreference.value} onChange={(v) => { haptic('selection'); setThemePreference(v); }} data-testid="settings-theme" />
-        <p class="set-hint">「自动」跟着手机的浅色 / 深色走；晚上在外面看，深色更不刺眼。</p>
+        <p class="set-hint">「自动」跟着手机走。</p>
       </Card>
 
       <SectionHeader title="这台设备" />
@@ -119,7 +119,7 @@ function AccountCard({ color }) {
           {busy ? '正在同步改动后退出…' : '退出登录'}
         </Button>
       )}
-      <p class="set-hint">只退出这台设备。退出前会先把还没同步的改动传上去；传不上去会先问你。</p>
+      <p class="set-hint">只退出这台设备，没同步的改动会先传上去。</p>
     </Card>
   );
 }
@@ -202,7 +202,7 @@ function DeviceCard() {
           </span>
         </InfoRow>
       )}
-      <p class="set-hint">行程和改动都存在这台设备上，没网也能看、也能改，联网后自动同步。{persisted === false ? '没开启「长期保存」时，长时间不打开，系统可能清掉本机缓存（云端的不受影响）；加到主屏幕的 App 更不容易被清。' : ''}</p>
+      <p class="set-hint">没网也能看、能改，联网后自动同步。{persisted === false ? '没开「长期保存」，久不打开可能被系统清掉本机缓存（云端不受影响）。' : ''}</p>
     </Card>
   );
 }
@@ -250,7 +250,7 @@ function AboutCard() {
       <p class="set-hint">{controlled ? '没网也能打开，看到的是上次同步的内容。' : '第一次打开还没有离线缓存：再打开一次（最好加到主屏幕）就有了。'}</p>
       <div class="set-fonts" data-testid="settings-fonts">
         <p class="set-fonts__title">字体授权</p>
-        <p class="set-hint">标题、数字、标签用的三种字体都是开源字体，按 SIL Open Font License 1.1 授权随网站一起发布。</p>
+        <p class="set-hint">两种字体按 SIL Open Font License 1.1 授权使用。</p>
         <ul class="set-fonts__list">
           {FONT_LICENSES.map((f) => (
             <li key={f.file}>

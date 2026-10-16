@@ -1,5 +1,6 @@
 /* =====================================================================
-   sheets/booking/booking.css：预订详情弹层（.bks）+ 预订页和弹层共用的部件（parts.jsx）：
+   sheets/booking/booking.css：预订详情弹层（.bks）+ 预订页和弹层共用的部件（parts.jsx）。「杂志纸本」：订单号是纯文字 + 复制图标、
+   入住退房是两栏加上下细线、状态是一行字、拨号是细线框的圆：
    标题分段 .bk-seg、订单号 .bk-code、芯片排 .bk-chips、登机牌 .bk-pass、票根 .bk-stub、入住退房 .bk-stay、价格 .bk-price、联系人动作 .bk-cact。
    颜色、圆角、阴影、字体、间距、动效只用 tokens.css 的变量；局部变量前缀 --bk-。
    ===================================================================== */
@@ -20,9 +21,7 @@
   max-width: 100%;
   min-width: 0;
   min-height: 36px;
-  padding: 3px 4px 3px 12px;
-  border-radius: var(--radius-pill);
-  background: var(--color-fill);
+  padding: 3px 4px 3px 0;
   vertical-align: middle;
 }
 
@@ -30,13 +29,12 @@
   --bk-code-size: var(--text-title-3);
   display: flex;
   min-height: 56px;
-  padding: 8px 8px 8px 16px;
-  border-radius: var(--radius-lg);
+  padding: 8px 8px 8px 0;
 }
 
 .bk-code__label {
   flex: none;
-  color: var(--color-text-2);
+  color: var(--color-text-3);
   font: var(--type-caption-1);
   font-weight: var(--weight-medium);
 }
@@ -61,11 +59,11 @@
   flex: 1;
   min-width: 0;
   color: var(--color-text);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: var(--bk-code-size);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   line-height: 1.25;
   overflow-wrap: anywhere;
   cursor: copy;
@@ -83,9 +81,7 @@
   width: 30px;
   height: 30px;
   border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
+  color: var(--color-text-3);
   transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 
@@ -107,12 +103,11 @@
 }
 
 .bk-code--done .bk-code__btn {
-  background: var(--color-success);
-  color: var(--color-on-success);
+  color: var(--color-accent-text);
 }
 
 .bk-code__btn[data-pressed] {
-  background-color: var(--color-raised-pressed);
+  background-color: var(--color-fill-pressed);
 }
 
 /* ---------- 芯片排 ---------- */
@@ -305,12 +300,14 @@
   color: var(--color-accent-text);
 }
 
-/* ---------- 入住 / 退房 ---------- */
+/* ---------- 入住 / 退房：两栏，上下各一根细线（登机牌的写法，不是两个凹进去的格子） ---------- */
 .bk-stay {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: stretch;
   gap: var(--space-2);
+  border-top: 1px solid var(--color-separator);
+  border-bottom: 1px solid var(--color-separator);
 }
 
 .bk-stay__cell {
@@ -318,9 +315,7 @@
   flex-direction: column;
   gap: 1px;
   min-width: 0;
-  padding: 10px 12px 11px;
-  border-radius: var(--radius-md);
-  background: var(--color-fill);
+  padding: 10px 0 11px;
 }
 
 .bk-stay__cell--out {
@@ -334,18 +329,17 @@
   letter-spacing: var(--tracking-eyebrow);
 }
 
+/* 「今天」「明天」：海色小字 */
 .bk-stay__near {
   margin-left: 6px;
-  padding: 1px 6px;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent-soft);
   color: var(--color-accent-text);
   font-style: normal;
   letter-spacing: 0;
 }
 
+/* 入住 / 退房时刻：登机牌式的 Instrument Serif 主数字，墨色 */
 .bk-stay__time {
-  color: var(--color-accent-text);
+  color: var(--color-text);
   font-family: var(--font-figure);
   font-size: var(--text-figure-4);
   font-weight: var(--weight-regular);
@@ -440,8 +434,8 @@
   min-height: 44px;
   padding: 0 14px;
   border-radius: var(--radius-pill);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--color-border);
   color: var(--color-text);
   font: var(--type-label);
   font-size: var(--text-footnote);
@@ -454,22 +448,13 @@
   color: var(--color-accent-text);
 }
 
+/* 拨号：海色字和图标 + 细线框（不是实心海色圆） */
 .bk-cact--call {
-  background: var(--material-accent);
-  box-shadow: var(--shadow-accent-sm);
-  color: var(--color-on-accent);
-}
-
-.bk-cact--call .glyph {
-  color: var(--color-on-accent);
+  color: var(--color-accent-text);
 }
 
 .bk-cact[data-pressed] {
-  background: var(--color-raised-pressed);
-}
-
-.bk-cact--call[data-pressed] {
-  background: var(--color-accent-pressed);
+  background: var(--color-fill-pressed);
 }
 
 .bk-contact-acts--compact {
@@ -506,20 +491,22 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 16px;
-  border-radius: var(--radius-xl);
-  background: var(--color-fill);
+  /* 纸本：登机牌 / 入住退房排在纸上，上下各一根细线（不是一块灰底） */
+  padding: 16px 0;
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 var(--color-separator), inset 0 -1px 0 var(--color-separator);
 }
 
 .bks__hero--pass {
-  padding: 18px 16px 16px;
+  padding: 18px 0 16px;
 }
 
-/* 酒店：入住 / 退房两格本身就是浅灰格子，外面不再套一层 */
+/* 酒店：入住 / 退房两栏自己带线，外面不再套一层 */
 .bks__hero--stay {
   padding: 0;
   border-radius: 0;
   background: none;
+  box-shadow: none;
 }
 
 .bks__hero--stay .bks__hero-note {
@@ -617,7 +604,7 @@
   inset: -6px -2px;
 }
 
-/* 免费取消：一行带底色的提醒（≤48 小时警示、≤24 小时红、过了灰、还早是蓝） */
+/* 免费取消：一行提醒（纸本：只有字的颜色，不铺底色；≤48 小时赭石、≤24 小时砖红、过了和还早都是灰） */
 .bks-cancel {
   --bk-tone-bg: var(--color-info-soft);
   --bk-tone-fg: var(--color-info-text);
@@ -625,9 +612,7 @@
   align-items: flex-start;
   gap: var(--space-3);
   margin-top: calc(var(--space-2) * -1);
-  padding: 12px 14px;
-  border-radius: var(--radius-lg);
-  background: var(--bk-tone-bg);
+  padding: 4px 0;
   color: var(--bk-tone-fg);
 }
 
@@ -729,7 +714,7 @@
 .bks__box {
   padding: 2px 14px;
   border-radius: var(--radius-lg);
-  background: var(--color-fill);
+  box-shadow: inset 0 0 0 1px var(--color-separator);
 }
 
 .bks__box > .k-info--pair:last-child {
@@ -854,9 +839,8 @@
 }
 
 .bks__notes {
-  padding: 12px 14px;
-  border-radius: var(--radius-lg);
-  background: var(--color-fill);
+  /* 纸本：备注直接排在纸上（上面有「备注」小标），不放灰底块 */
+  padding: 0;
 }
 
 .bks__notes-text {
@@ -909,7 +893,7 @@
   flex-direction: column;
   padding: 2px 4px;
   border-radius: var(--radius-lg);
-  background: var(--color-fill);
+  box-shadow: inset 0 0 0 1px var(--color-separator);
 }
 
 .bks-row {
@@ -1113,7 +1097,7 @@ button.bks-row[data-pressed] {
 .bks__todos {
   padding: 2px 4px;
   border-radius: var(--radius-lg);
-  background: var(--color-fill);
+  box-shadow: inset 0 0 0 1px var(--color-separator);
 }
 
 .bks-todo + .bks-todo {

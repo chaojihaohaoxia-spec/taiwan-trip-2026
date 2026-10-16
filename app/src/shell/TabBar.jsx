@@ -1,20 +1,18 @@
 // =====================================================================
-// shell/TabBar.jsx：底栏（悬浮的液态玻璃胶囊：行程 / 地图 / ＋ / 账本 / 更多；样稿 .tabbar，手感照 iOS 26 Apple Music）。
+// shell/TabBar.jsx：底栏（浮在纸上的纸片胶囊：行程 / 地图 / ＋ / 账本 / 更多；手感照 iOS 26 Apple Music）。
 //
-// - 玻璃：更通透（--material-tabbar + --tabbar-glass-filter：模糊 + 提饱和度 + 提亮 / 压暗），上沿亮、下沿暗的折射边，
-//   内侧极淡的光泽，柔和的悬浮阴影；字和图标后面有一层贴着字形的“活力”晕（--color-tabbar-halo：字是 text-shadow，
-//   图标是叠在下面的同一个图形 .tabbar__halo，描得粗一点再虚化），后面再黑、再白、再花都清楚；
-// - 选中块：一块更亮、更透的玻璃药丸。切 tab 时 stretchSpring（motion/liquid.js）弹簧滑过去，移动中沿运动方向拉长、
+// - 外观（「杂志纸本」，SPEC §11）：不透明的纸片 + 细线框 + 很浅的悬浮阴影，不用玻璃；选中只是海色的字（tabbar.css）；
+// - 选中块：平时看不见，是拖动选择、切换的几何。切 tab 时 stretchSpring（motion/liquid.js）弹簧滑过去，移动中沿运动方向拉长、
 //   停下回弹一点点（两头按橡皮筋收住，不出底栏；从 ＋ 后面穿过时变淡）；二级页面（预订、清单……）停在「更多」上；
-// - 按下（行程 / 地图 / 账本，或二级页面时的「更多」）：选中块像透镜一样浮起放大（竖向能超出底栏一点），按的是别的格就用
-//   同一条弹簧滑到手指下（合成线程跑，不追手指——轻点不会甩出去），透镜下的图标、字放大一点；
+// - 按下（行程 / 地图 / 账本，或二级页面时的「更多」）：选中块浮起放大、显出一层很浅的墨，按的是别的格就用
+//   同一条弹簧滑到手指下（合成线程跑，不追手指——轻点不会甩出去），下面的图标、字放大一点；
 //   按住左右拖，选中块跟着手指走（trackSlideSelect + followSpring），经过的格子高亮、换格轻触感（换格有迟滞，手指抖不会来回闪）；
 //   松手停在高亮的那格并切过去；滑出底栏外松手 = 取消，回到原来那格。
 // - 轻点在**松手那一刻**就切（tabEl.click() 走 go，再拦掉浏览器随后的原生 click）：iOS 上按住超过约 0.7 秒再松手不会发 click，
 //   链接还会被系统的“拖拽链接”接管——所以 tab 关掉了拖拽（draggable=false、-webkit-user-drag: none、dragstart 取消），
 //   切换也不依赖原生 click。原生 click 只留给键盘（回车 / 空格）和读屏；
 // - 切过去以后新页面的代码还在下载：颜色先跟着选中块到新那格（data-pending），不会先回旧格再到新格；
-// - ＋：实心主题色圆钮（ui/IconButton variant="filled"，56px），按下放大、松手回弹；不参与拖动选择；从它长出 ＋ 面板，加号转 ×；
+// - ＋：实心海色圆钮（ui/IconButton variant="filled"，48px），按下放大、松手回弹；不参与拖动选择；从它长出 ＋ 面板，加号转 ×；
 // - 更多：三横线 ↔ ×（MorphIcon kind="menu"），标签「更多」↔「关闭」，打开全屏菜单（sheet id menu，从按钮圆形扩散）；
 // - 往下滚：整条等比收小、标签淡出只留图标、＋ 跟着缩小；往上滚一点 / 回到顶部弹回（compact，FrameUI 的滚动处理算）。
 //   ＋ 面板、更多菜单开着、键盘焦点在底栏里、减弱动态效果时一直是完整的；
@@ -25,8 +23,7 @@
 // - 安全区：离底 = --safe-bottom + --tabbar-inset；软键盘弹起时底栏沉下去藏起来；
 // - 减弱动态效果：只淡入淡出和换颜色——选中块不滑、不拉伸，跳到新格子淡入；按下不放大（按在当前格：亮边亮起；
 //   按在别的格：只给手指下那格换颜色）；不收小。
-// 动画只动 transform / scale / opacity；拖动时按下那一刻量好各格位置，之后每帧只写 transform（不读布局）；
-// 同屏 backdrop-filter 还是只有 .tabbar__glass 一层。参数在 tabbar-motion.js。
+// 动画只动 transform / scale / opacity；拖动时按下那一刻量好各格位置，之后每帧只写 transform（不读布局）。参数在 tabbar-motion.js。
 // =====================================================================
 
 import './tabbar.css';
@@ -498,7 +495,6 @@ export function TabBar({ tripId, active, shown, lifted, inert, routeName, compac
     >
       <span class="tabbar__mag">
         <span class="tabbar__icon">
-          <span class="tabbar__halo" aria-hidden="true"><ShellGlyph name={glyph} size={23} /></span>
           <ShellGlyph name={glyph} size={23} />
         </span>
         <span class="tabbar__label">{label}</span>
@@ -581,7 +577,6 @@ export function TabBar({ tripId, active, shown, lifted, inert, routeName, compac
         >
           <span class="tabbar__mag">
             <span class="tabbar__icon">
-              <span class="tabbar__halo" aria-hidden="true"><MorphIcon kind="menu" state={menu.isOpen} size={23} /></span>
               <MorphIcon kind="menu" state={menu.isOpen} size={23} />
             </span>
             {/* 「更多」↔「关闭」两个字叠在一起交叉淡化，跟着图标变形的中点换（不在图标还是 ≡ 时就写「关闭」） */}

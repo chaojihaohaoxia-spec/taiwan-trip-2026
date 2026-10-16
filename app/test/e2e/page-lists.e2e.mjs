@@ -148,7 +148,7 @@ test('四个标签带进度「3/7」、?list= 记住标签、换标签内容从�
   }
 });
 
-test('往下滚：标签栏贴在顶栏下面，变成玻璃胶囊；能直接换标签', async () => {
+test('往下滚：标签栏贴在顶栏下面，变成一张不透明的纸（「杂志纸本」：不用玻璃）；能直接换标签', async () => {
   const app = await openLists('#/t/demo-island/lists?list=packing');
   const { page } = app;
   try {
@@ -158,8 +158,9 @@ test('往下滚：标签栏贴在顶栏下面，变成玻璃胶囊；能直接�
     await app.idle();
     const top = await page.$eval('.lists__bar', (el) => el.getBoundingClientRect().top);
     assert.ok(top > 60 && top < 100, `贴在顶栏下面：${top}`);
-    const bf = await page.$eval('.lists__bar', (el) => getComputedStyle(el).backdropFilter || getComputedStyle(el).webkitBackdropFilter);
-    assert.match(bf, /blur/);
+    const bar = await page.$eval('.lists__bar', (el) => ({ bf: getComputedStyle(el).backdropFilter || getComputedStyle(el).webkitBackdropFilter || 'none', bg: getComputedStyle(el).backgroundImage }));
+    assert.equal(bar.bf, 'none', '不开背景模糊');
+    assert.match(bar.bg, /gradient\(rgb\(/, `贴住时有一层不透明的纸底：${bar.bg}`);
     await screen(page, 'tabs-stuck');
     await page.click('#lists-tab-buy');
     await page.waitForSelector(T('lists-panel-buy'));

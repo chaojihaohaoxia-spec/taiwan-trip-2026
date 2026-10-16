@@ -117,8 +117,6 @@
   padding: 0 var(--space-5) 0 var(--space-4);
   border-radius: var(--radius-pill);
   background: var(--color-glass-strong);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
   box-shadow: var(--shadow-3), var(--shadow-glass-edge);
   color: var(--color-accent-text);
   font: var(--type-headline);

@@ -1,15 +1,13 @@
 /* =====================================================================
-   kit/DayBadge.css：「D1」徽章（.k-dayb）。第几天的颜色全站一套（--color-day-N-deep，kit/day-tone.js 写进 --k-day）。
-   小号用标签字体（宋体只在 15px 以上用）；大号用宋体自带的拉丁字母。
+   kit/DayBadge.css：「D1」徽章（.k-dayb）。「杂志纸本」：不是色块，就是墨色的字（今天用海色）——像书的目录。
+   小号用系统字体（宋体只在 15px 以上用）；中号、大号用宋体自带的拉丁字母（Instrument Serif 的 1 像 l，D1 会读成 Dl）。
+   第几天的颜色（--color-day-N）只留给地图。
    ===================================================================== */
 .k-dayb {
-  --k-day: var(--color-accent);
   display: inline-grid;
   flex: none;
   place-items: center;
-  border-radius: var(--radius-xs);
-  background: var(--k-day);
-  color: var(--color-on-tile);
+  color: var(--color-text);
   line-height: 1;
   white-space: nowrap;
 }
@@ -17,7 +15,6 @@
 .k-dayb--sm {
   min-width: 24px;
   height: 22px;
-  padding: 0 5px;
   font: var(--weight-semibold) var(--text-caption-1) / 1 var(--font-label);
   letter-spacing: 0.02em;
 }
@@ -25,23 +22,15 @@
 .k-dayb--md {
   min-width: 34px;
   height: 30px;
-  padding: 0 7px;
-  border-radius: var(--radius-sm);
   font: var(--weight-serif) var(--text-headline) / 1 var(--font-serif);
 }
 
 .k-dayb--lg {
-  width: 48px;
+  min-width: 48px;
   height: 48px;
-  border-radius: var(--radius-tile);
-  /* 左上角一点亮、字落在深色那一端（和概览的 D 徽章同一种画法） */
-  background: var(--k-day);
-  background: linear-gradient(150deg, color-mix(in oklab, var(--k-day) 70%, var(--color-on-tile)) 0%, var(--k-day) 45%);
-  box-shadow: 0 8px 18px -10px var(--k-day), var(--shadow-highlight);
-  font: var(--weight-serif) var(--text-title-3) / 1 var(--font-serif);
+  font: var(--weight-serif) var(--text-title-2) / 1 var(--font-serif);
 }
 
 .k-dayb--today {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  color: var(--color-accent-text);
 }

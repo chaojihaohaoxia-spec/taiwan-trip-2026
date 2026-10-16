@@ -1,33 +1,29 @@
 /* =====================================================================
-   kit/Card.css：内容卡片（.k-card，配 .material-card 的材质和折射描边）。
-   样稿 .card：圆角 26、内边距 18；标题区最少 28 高、和内容隔 12；标题宋体 18px、计数 13px 次要色。
+   kit/Card.css：内容块（.k-card）。「杂志纸本」：不是一张卡片——直接排在纸上，上面一根 1px 细线，左右不缩进（和页面标题对齐）；
+   栏目上方 22px，标题是宋体（--type-title-2 那一档 21px），眉标是装饰灰的小字，计数是灰字；可点的块右上角一个灰色小箭头。
+   要一张“纸片”（「现在」、预订卡）的页面自己给 background: var(--material-card) + 细线框。
    ===================================================================== */
 
 .k-card {
   display: block;
-  padding: 18px;
-  border-radius: var(--radius-xl);
+  padding: 22px 0 8px;
+  border-top: 1px solid var(--color-separator);
   color: var(--color-text);
   text-align: left;
   text-decoration: none;
 }
 
 .k-card--pad-sm {
-  padding: 14px;
+  padding: 22px 0 8px;
 }
 
 .k-card--pad-none {
   padding: 0;
 }
 
-/* 强调：强调色浅底叠在卡片材质上（“现在 / 接下来”） */
-.k-card--accent {
-  background: linear-gradient(var(--color-accent-soft), var(--color-accent-soft)), var(--material-card);
-}
-
-/* 警示：卡片材质 + 一圈警示色细边（快到期的提醒） */
+/* 警示（快到期的提醒）：上面那根线是赭石色 */
 .k-card--warning {
-  box-shadow: var(--material-card-edge), inset 0 0 0 1.5px var(--color-warning);
+  border-top-color: var(--color-warning);
 }
 
 /* ---------- 标题区 ---------- */
@@ -43,25 +39,14 @@
   margin-top: var(--space-3);
 }
 
-.k-card__glyph {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: var(--radius-tile);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
-}
-
 .k-card__titles {
   flex: 1;
   min-width: 0;
 }
 
 .k-card__eyebrow {
-  color: var(--color-text-2);
-  font: var(--type-eyebrow);
+  color: var(--color-text-3);
+  font: var(--weight-medium) var(--text-caption-1) / 1.3 var(--font-sans);
   letter-spacing: var(--tracking-eyebrow);
 }
 
@@ -71,7 +56,7 @@
 
 .k-card__title {
   margin: 0;
-  font: var(--type-title-3);
+  font: var(--type-title-2);
   letter-spacing: var(--tracking-display);
   text-wrap: balance;
   word-break: keep-all;
@@ -81,25 +66,21 @@
 .k-card__meta {
   flex: none;
   max-width: 50%;
-  color: var(--color-text-2);
-  font: var(--weight-medium) var(--text-footnote) / 1.3 var(--font-label);
+  color: var(--color-text-3);
+  font: var(--weight-regular) var(--text-footnote) / 1.3 var(--font-label);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
-/* 可点的卡片：凸起的白圆箭头（和 ui/ExpandableCard 的箭头同一种） */
+/* 可点的块：一个灰色小箭头（和 ui/ExpandableCard 的箭头同一种） */
 .k-card__chev {
   display: grid;
   flex: none;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  margin: -3px -4px -3px 0;
-  border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
-  transition: background-color var(--dur-fast) var(--ease-out);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .k-card__footer {
@@ -137,6 +118,6 @@
 @media (hover: hover) {
   .k-card--link:hover .k-card__chev,
   .k-card--button:hover .k-card__chev {
-    background: var(--color-raised-hover);
+    color: var(--color-text-2);
   }
 }

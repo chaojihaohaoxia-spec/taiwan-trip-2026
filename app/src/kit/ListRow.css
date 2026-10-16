@@ -1,7 +1,7 @@
 /* =====================================================================
    kit/ListRow.css：列表行（.k-row）、信息行（.k-info）、分隔线（.k-div）。
-   样稿 .entry / .place：图标方块 40、间距 12、标题 15px 半粗、副标题 12px 次要色、行间 1px 分隔线。
-   行在卡片里左右各伸出 10px（按下的底色有地方铺开），文字仍和卡片标题对齐。
+   「杂志纸本」：没有图标方块（前导图标不显示：字和留白就够了），标题 15px 半粗、副标题 12px 次要色、行间 1px 细线，
+   行尾一个灰色小箭头（没有底）。行左右各伸出 10px（按下的底色有地方铺开），文字仍和块标题对齐。
    ===================================================================== */
 
 .k-row {
@@ -23,10 +23,6 @@
 
 .k-row--two {
   min-height: 58px;
-}
-
-.k-row--lead {
-  --k-row-indent: calc(var(--k-row-pad) + 52px);
 }
 
 /* 行与行之间的分隔线：从文字开始的位置画到右边 */
@@ -62,20 +58,9 @@
   opacity: 0.55;
 }
 
+/* 前导图标：纸本不显示 */
 .k-row__lead {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-}
-
-.k-row__glyph {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-tile);
-  background: var(--color-fill);
-  color: var(--color-accent-text);
+  display: none;
 }
 
 .k-row__text {
@@ -113,10 +98,8 @@
   color: var(--color-danger-text);
 }
 
-/* 危险的行（删除这趟行程……）：图标块、右箭头也换成危险色，整行一个颜色 */
-.k-row--danger .k-row__glyph,
+/* 危险的行（删除这趟行程……）：右箭头也换成危险色，整行一个颜色 */
 .k-row--danger .k-row__chev {
-  background: var(--color-danger-soft);
   color: var(--color-danger-text);
 }
 
@@ -151,24 +134,17 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  margin-right: -4px;
-  border-radius: var(--radius-round);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
 }
 
-/* 完成 / 跳过：标题变次要色并划掉、左边的图标淡一点；右边的状态芯片（「已完成」「已跳过」）不淡——
+/* 完成 / 跳过：标题变次要色并划掉；右边的状态（「已完成」「已跳过」）不淡——
    它是告诉你“这条怎么了”的字，淡掉以后对比度不到 3:1（外壳评审） */
 .k-row--dim .k-row__title {
   color: var(--color-text-2);
   text-decoration: line-through;
   text-decoration-color: var(--color-text-3);
-}
-
-.k-row--dim .k-row__lead {
-  opacity: 0.6;
 }
 
 /* ---------- 信息行 ---------- */
@@ -190,7 +166,7 @@
   flex: none;
   place-items: center;
   height: 1.45em;
-  color: var(--color-accent-text);
+  color: var(--color-text-3);
 }
 
 .k-info__label {

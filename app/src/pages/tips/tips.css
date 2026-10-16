@@ -1,6 +1,6 @@
 /* =====================================================================
    pages/tips/tips.css：贴士与常用语（.tp）。大标题、顶栏、底栏由外壳画，这里只排内容。
-   搜索框、筛选芯片、「相关」小胶囊、小标、闪一下在 common.css（和联系人页共用）。
+   搜索框、筛选芯片、「相关」文字链接、小标、闪一下在 common.css（和联系人页共用）。
    颜色、圆角、阴影、字体、动效只用 tokens.css 的变量。
    ===================================================================== */
 
@@ -81,51 +81,18 @@
   color: var(--color-text);
 }
 
+/* 纸本：短贴士也是排在纸上的一段（上面一根细线，和页面左边对齐），不加框 */
 .tp-static--card {
-  border-radius: var(--radius-lg);
-  background: var(--material-card);
-  box-shadow: var(--material-card-edge);
+  padding: 14px 0;
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 var(--color-separator);
 }
 
-/* 折射高光描边（和 ExpandableCard 卡片一样） */
-.tp-static--card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-raised);
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
-}
-
+/* 前面的 ⓘ / ⚠ / 灯泡图标块：纸本不要（分组标题已经说了是哪一类） */
 .tp-static__lead,
 .tp-xtip > .xcard__heading .xcard__leading,
 .tp-tpl .tp-static__lead {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-tile);
-  background: var(--color-fill);
-  color: var(--color-accent-text);
-}
-
-/* 种类的颜色：防坑 = 警示色（暖，不是红）；实用信息 = 信息蓝；其余强调色 */
-.tp-tip[data-kind="warning"] .tp-static__lead,
-.tp-xtip[data-kind="warning"] > .xcard__heading .xcard__leading {
-  background: var(--color-warning-soft);
-  color: var(--color-warning-text);
-}
-
-.tp-tip[data-kind="info"] .tp-static__lead,
-.tp-xtip[data-kind="info"] > .xcard__heading .xcard__leading {
-  background: var(--color-info-soft);
-  color: var(--color-info-text);
+  display: none;
 }
 
 .tp-static__main {
@@ -134,8 +101,6 @@
   flex-direction: column;
   gap: 6px;
   min-width: 0;
-  /* 和左边 40px 的图标块第一行居中对齐 */
-  padding-top: 9px;
 }
 
 .tp-static__head {
@@ -298,44 +263,31 @@
    置顶提醒：最上面一张暖色的卡（醒目但不吓人：浅暖色底 + 暖色图标，不用红）
    ===================================================================== */
 
+/* 纸本：置顶就是最上面一组，和别的组一样（标题 + 灰字计数，行间细线），不要暖色底和图钉圆 */
 .tp-pinned {
   position: relative;
-  padding: 12px 0 4px;
-  border-radius: var(--radius-xl);
-  background: linear-gradient(var(--color-warning-soft), var(--color-warning-soft)), var(--material-card);
-  box-shadow: var(--material-card-edge), inset 0 0 0 1px var(--color-warning-soft);
 }
 
 .tp-pinned__head {
   display: flex;
-  gap: var(--space-2);
   align-items: center;
-  padding: 0 18px 4px 14px;
-}
-
-.tp-pinned__icon {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-round);
-  background: var(--color-warning);
-  color: var(--color-on-warning);
+  min-height: 44px;
+  margin-bottom: var(--space-2);
 }
 
 .tp-pinned__title {
-  flex: 1;
   margin: 0;
-  font: var(--type-title-3);
-  letter-spacing: var(--tracking-title);
+  font: var(--type-title-2);
+  letter-spacing: var(--tracking-display);
 }
 
 .tp-pinned__count {
-  color: var(--color-warning-text);
-  font: var(--weight-semibold) var(--text-footnote) / 1 var(--font-label);
+  margin-left: var(--space-2);
+  color: var(--color-text-3);
+  font: var(--weight-regular) var(--text-callout) / 1 var(--font-label);
   font-variant-numeric: tabular-nums;
-  letter-spacing: var(--tracking-label);
+  letter-spacing: 0;
+  vertical-align: 0.08em;
 }
 
 .tp-pinned__list {
@@ -343,47 +295,24 @@
   flex-direction: column;
 }
 
-/* 置顶卡里的每一行：透明底、行间细线、图标块是凸起的白 */
+/* 置顶组里的每一行：上面一根细线，和页面左边对齐 */
 .tp-pinned .tp-static--row,
 .tp-pinned .xcard--row {
   background: transparent;
+  box-shadow: inset 0 1px 0 var(--color-separator);
 }
 
-.tp-pinned .tp-static--row + .tp-static--row::after,
-.tp-pinned .tp-static--row + .xcard--row::after,
-.tp-pinned .xcard--row + .tp-static--row::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 66px;
-  right: 0;
-  border-top: 1px solid var(--color-separator);
+.tp-pinned .tp-static--row {
+  padding-inline: 0;
 }
 
 .tp-pinned .xcard--row + .xcard--row::before {
-  left: 66px;
-}
-
-.tp-pinned .tp-static__lead,
-.tp-pinned .xcard__leading {
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
+  display: none;
 }
 
 .tp-pinned .xcard--row > .xcard__heading > .xcard__header {
+  padding-inline: 0 4px;
   border-radius: 0;
-}
-
-.tp-pinned .xcard--row:last-child > .xcard__heading > .xcard__header {
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-}
-
-.tp-pinned .xcard--row[data-open]:last-child > .xcard__heading > .xcard__header {
-  border-radius: 0;
-}
-
-.tp-pinned .xcard--row .xcard__content {
-  padding-right: 14px;
 }
 
 /* =====================================================================
@@ -454,7 +383,7 @@
   background: var(--color-fill-pressed);
 }
 
-/* 复制 / 给对方看：两个一样宽的大按钮 */
+/* 复制 / 给对方看：两个一样宽的按钮（纸片，圆角 10，细线框） */
 .tp-acts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -470,7 +399,7 @@
   min-height: 48px;
   padding: 0 14px;
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background: var(--color-raised);
   box-shadow: var(--shadow-raised);
   color: var(--color-text);
@@ -505,25 +434,9 @@
   color: var(--color-success-text);
 }
 
-/* 给对方看：强调色实心（全屏大字卡从它长出来） */
+/* 给对方看（全屏大字卡从它长出来）：纸本是细线框 + 海色字（一页五个模板，不做五个实心按钮） */
 .tp-btn--show {
-  background: var(--material-accent);
-  box-shadow: var(--shadow-accent-sm);
-  color: var(--color-on-accent);
-}
-
-.tp-btn--show > .glyph {
-  color: var(--color-on-accent);
-}
-
-.tp-btn--show[data-pressed] {
-  background: var(--color-accent-pressed);
-}
-
-@media (hover: hover) {
-  .tp-btn--show:not([data-pressed]):hover {
-    background: var(--color-accent-hover);
-  }
+  color: var(--color-accent-text);
 }
 
 .tp-btn--icon {
@@ -544,7 +457,7 @@
   align-items: center;
   min-height: 52px;
   padding: 6px 14px 6px 6px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background: var(--color-raised);
   box-shadow: var(--shadow-raised);
   color: var(--color-text);
@@ -568,19 +481,12 @@
   place-items: center;
   width: 40px;
   height: 40px;
-  border-radius: var(--radius-round);
-  background: var(--color-accent-soft);
   color: var(--color-accent-text);
 }
 
-.tp-send__icon--whatsapp {
-  background: var(--color-success-soft);
-  color: var(--color-success-text);
-}
-
+.tp-send__icon--whatsapp,
 .tp-send__icon--zalo {
-  background: var(--color-info-soft);
-  color: var(--color-info-text);
+  color: var(--color-text-2);
 }
 
 .tp-send__text {
@@ -610,30 +516,15 @@
 }
 
 /* ---------- 消息模板卡 ---------- */
+/* 纸本：消息模板也是排在纸上的一段（上面一根细线），原文块是一块很浅的纸灰 */
 .tp-tpl {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 12px 14px 14px;
-  border-radius: var(--radius-lg);
-  background: var(--material-card);
-  box-shadow: var(--material-card-edge);
+  padding: 14px 0 16px;
+  box-shadow: inset 0 1px 0 var(--color-separator);
   color: var(--color-text);
-}
-
-.tp-tpl::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-raised);
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
 }
 
 .tp-tpl__head {
@@ -648,7 +539,6 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-  padding-top: 9px;
 }
 
 .tp-tpl__note {
@@ -692,20 +582,6 @@
   background: var(--material-card);
   box-shadow: var(--material-card-edge);
   color: var(--color-text);
-}
-
-.tp-phrase::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-raised);
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
 }
 
 .tp-phrase[data-wide] {

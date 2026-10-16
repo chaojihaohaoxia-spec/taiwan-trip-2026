@@ -122,13 +122,9 @@
 .jn-day__today {
   display: inline-block;
   margin-left: 6px;
-  padding: 1px 7px;
-  border-radius: var(--radius-pill);
-  /* 实心小胶囊（浅底 + 强调色字在光场上只有 3.4:1，视觉评审 P2-6） */
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  font-size: var(--text-caption-2);
-  font-weight: var(--weight-semibold);
+  /* 纸本：海色小字（不做实心胶囊） */
+  color: var(--color-accent-text);
+  font-weight: var(--weight-medium);
 }
 
 /* 两个人：手机上下，宽一点并排 */
@@ -234,35 +230,37 @@
 }
 
 /* 还没写 */
-.jn-entry--empty {
-  gap: var(--space-3);
-}
-
-.jn-entry__empty-title {
-  color: var(--color-text-2);
-  font: var(--type-callout);
-}
-
-.jn-entry__empty-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-}
-
-.jn-entry__empty-actions > * {
-  min-width: 0;
-}
-
-.jn-entry--theirs {
-  flex-direction: row;
+/* ---------- 还没写：一行灰字 + 文字链接（纸本：不画卡、不画虚线框、不放大按钮） ---------- */
+.jn-empty {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
-  min-height: 48px;
-  padding: 12px 18px;
-  border: 1px dashed var(--color-border-strong);
-  background: transparent;
+  gap: 0 var(--space-1);
+  min-height: 36px;
+  margin: 0;
   color: var(--color-text-2);
   font: var(--type-footnote);
+}
+
+.jn-empty__text::after {
+  content: "\00a0·";
+  color: var(--color-text-3);
+}
+
+/* 文字链接和灰字对齐（按钮自己的左右内边距往回收） */
+.jn-empty__link.btn,
+.jn-empty__link > .btn {
+  --btn-px: var(--space-2);
+}
+
+/* 拍照打卡的透明 input 铺满按钮：视觉 36，可点区域上下扩到 44 */
+.jn-empty .jn-pi__input {
+  top: -4px;
+  height: calc(100% + 8px);
+}
+
+.jn-empty--theirs {
+  color: var(--color-text-3);
 }
 
 /* ---------- 正文：先显示几行，展开原地长高 ---------- */

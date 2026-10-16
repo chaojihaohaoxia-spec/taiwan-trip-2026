@@ -1,6 +1,6 @@
 /* =====================================================================
    pages/tips/common.css：贴士页、联系人页共用的样子——本页搜索框（和地点页同款）、筛选芯片行、
-   「相关」小胶囊、闪一下（从搜索结果进来）、外链小按钮。颜色、圆角、阴影、字体、动效只用 tokens.css 的变量。
+   「相关」文字链接、闪一下（从搜索结果进来）、外链小按钮。颜色、圆角、阴影、字体、动效只用 tokens.css 的变量。
    ===================================================================== */
 
 /* ---------- 搜索框 ---------- */
@@ -131,11 +131,12 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- 「相关」小胶囊（可点：凸起的白 + 强调色图标 + 小箭头；不可点：往下凹的浅灰） ---------- */
+/* ---------- 「相关」：一行海色文字链接（纸本：不做凸起的白胶囊、不放前面的图标；SPEC §11「能写成一行字的不做成胶囊」）
+   可点的海色字 + 小箭头；不可点的灰字。视觉 32 高，可点区域 44 × ≥44 ---------- */
 .pg-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 0 16px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -145,20 +146,20 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
   max-width: 100%;
+  min-width: 44px;
   min-height: 32px;
-  padding: 0 10px 0 9px;
+  padding: 0;
   border: 0;
-  border-radius: var(--radius-pill);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-text);
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-accent-text);
   font: var(--weight-medium) var(--text-footnote) / 1.25 var(--font-sans);
   text-align: left;
   text-decoration: none;
   cursor: pointer;
-  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+  transition: var(--press-transition), opacity var(--dur-fast) var(--ease-out);
 }
 
 /* 视觉 32，可点区域 44 */
@@ -169,18 +170,18 @@
 }
 
 .pg-link[data-pressed] {
-  background: var(--color-raised-pressed);
+  opacity: 0.6;
 }
 
 @media (hover: hover) {
-  .pg-link:not([data-pressed]):hover {
-    background: var(--color-raised-hover);
+  .pg-link:not([data-pressed]):hover .pg-link__text {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 }
 
 .pg-link > .glyph:first-child {
-  flex: none;
-  color: var(--color-accent-text);
+  display: none;
 }
 
 .pg-link__text {
@@ -192,23 +193,16 @@
 
 .pg-link__chev {
   flex: none;
-  margin-right: -3px;
-  color: var(--color-accent-text);
+  color: inherit;
 }
 
 .pg-link--static {
-  background: var(--color-fill);
-  box-shadow: none;
   color: var(--color-text-2);
   cursor: default;
 }
 
 .pg-link--static::after {
   display: none;
-}
-
-.pg-link--static > .glyph:first-child {
-  color: var(--color-text-2);
 }
 
 /* ---------- 小标：今天 / 置顶 ---------- */
@@ -224,19 +218,14 @@
   flex: none;
   align-items: center;
   gap: 3px;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
-  font: var(--weight-semibold) var(--text-caption-1) / 1 var(--font-label);
-  letter-spacing: var(--tracking-label);
+  color: var(--color-text-3);
+  font: var(--weight-medium) var(--text-caption-1) / 1 var(--font-label);
   white-space: nowrap;
 }
 
-.pg-tag--pin {
-  background: var(--color-warning-soft);
-  color: var(--color-warning-text);
+/* 「今天」：海色小字（纸本不做胶囊）；「置顶」：灰字 */
+.pg-tag:not(.pg-tag--pin) {
+  color: var(--color-accent-text);
 }
 
 /* ---------- 从搜索结果进来：闪一下（三次轻轻的强调色光圈） ---------- */

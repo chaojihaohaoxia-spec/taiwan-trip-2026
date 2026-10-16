@@ -1,12 +1,13 @@
 /* =====================================================================
-   styles/type.css：字体角色工具类（P2「杂志宋体」的分工）。base 层，组件、页面可以覆盖。
+   styles/type.css：字体角色工具类（「杂志纸本」的三种字）。base 层，组件、页面可以覆盖。
    组件里一般直接用变量（font: var(--type-title-2); letter-spacing: var(--tracking-display)），
    页面里临时要某个角色时用这些类，省得每次写三行。
 
-   宋体（思源宋体 600）：大标题、卡片标题、行程名、菜单 / 面板标题、大按钮。只在 ≥15px 用；不开 palt。
-   大号数字（Instrument Serif 400）：倒计时（斜体）、航班时间、金额、天气、数量。它的「1」由 P2 Figure One 顶替。
-                                    D1–D4 这种字母 + 数字的徽章别用它（「D1」会读成「Dl」），用宋体自带的拉丁字母（.t-serif）。
-   标签（Geist + tabular-nums）：小号日期、计数、时间轴时间、标签里的拉丁字母和数字；中文仍是系统字体。
+   宋体（思源宋体 600）：页面大标题、区块标题、卡片标题、行程名、D1–D4、预订名、面板标题。只在 ≥15px 用；不开 palt；按钮不用宋体。
+   数字（.t-figure）：天气、数量、日出日落、统计——系统字体的等宽数字（SF 自带），不再用 Instrument Serif。
+   主数字（.t-figure-serif / .t-figure-italic，Instrument Serif 400）：全站只有倒计时（斜体）、航班起降、账本总额、入住 / 退房时刻。
+                                    它的「1」由 P2 Figure One 顶替。D1–D4 这种字母 + 数字别用它（「D1」会读成「Dl」），用 .t-serif。
+   标签（.t-label）：小号日期、计数、时间轴时间——系统字体 + tabular-nums。
    正文、说明、用户输入：系统字体（body 默认），不用加类。
    ===================================================================== */
 
@@ -32,8 +33,16 @@
   letter-spacing: var(--tracking-title);
 }
 
-/* 大号数字；斜体（倒计时）用 Instrument Serif 自己的斜体「1」，不经过 P2 Figure One */
-.t-figure,
+/* 数字：系统字体的等宽数字（天气、数量、统计）。字号由使用者给 */
+.t-figure {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* 主数字：Instrument Serif（倒计时用斜体，P2 Figure One 的斜体「1」顶在前面） */
+.t-figure-serif,
 .t-figure-italic {
   font-family: var(--font-figure);
   font-weight: var(--weight-regular);
@@ -53,9 +62,9 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* 眉标：卡片上方的小栏目名，大字距 */
+/* 眉标：块上方的小栏目名（装饰灰、字距很小） */
 .t-eyebrow {
-  color: var(--color-text-2);
+  color: var(--color-text-3);
   font: var(--type-eyebrow);
   letter-spacing: var(--tracking-eyebrow);
 }

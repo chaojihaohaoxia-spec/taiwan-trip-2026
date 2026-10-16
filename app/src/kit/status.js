@@ -20,7 +20,7 @@ const S = (label, tone, glyph = null) => Object.freeze({ label, tone, glyph });
 export const STATUS = Object.freeze({
   /** bookings.status */
   booking: Object.freeze({
-    idea: S('还没订', 'neutral', 'pen'),
+    idea: S('还没订', 'danger', 'pen'),
     pending: S('待确认', 'warning', 'clock'),
     booked: S('已订', 'success', 'check'),
     cancelled: S('已取消', 'neutral', 'x'),

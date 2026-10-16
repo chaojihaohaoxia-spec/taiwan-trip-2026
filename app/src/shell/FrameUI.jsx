@@ -3,7 +3,7 @@
 // 启动画面等它到了才淡出，所以不会先出页面、后冒出顶栏）。shell/Frame.jsx 把它们摆进固定的位置：
 //
 //   <HeadArea/>  在 <main> 里、页面上面：大标题（PageHead，随页面滚走）+ 天数分段条（trip / day）
-//   <Chrome/>    <main> 外面：光场、滚动边缘、顶栏、同步状态条、底栏、搜索结果层
+//   <Chrome/>    <main> 外面：纸、滚动边缘、顶栏、同步状态条、底栏、搜索结果层
 //
 // 两块之间共享的东西（顶栏状态、大标题元素、同步条让出的高度）放在本文件的模块级信号里。
 // 规则（哪种页面有什么）在 chrome.js；当前行程在 trip-state.js；滚动 → 顶栏状态在 scroll-state.js；
@@ -105,7 +105,7 @@ function onSearchFocusOut(e) {
 
 /**
  * <main> 前面：滚动边缘、顶栏、同步状态条（DOM 里放在页面内容前面：键盘 Tab、读屏都先到顶栏的返回 / 搜索，
- * 再到页面内容，最后是底栏——外壳评审）。滚动处理、启动时的一次性工作也在这里。光场由 Frame 放在最下面。
+ * 再到页面内容，最后是底栏——外壳评审）。滚动处理、启动时的一次性工作也在这里。纸由 Frame 放在最下面。
  */
 export function Chrome() {
   const { r, info, chrome, kind } = useChrome();

@@ -94,19 +94,6 @@
   box-shadow: var(--material-card-edge);
 }
 
-.dev-section__body::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
-}
-
 .dev-pre {
   margin-top: var(--space-3);
   overflow-x: auto;
@@ -239,8 +226,6 @@
 
 .dev-glass {
   background: var(--material-glass-strong);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
   box-shadow: var(--shadow-3), var(--shadow-glass-edge);
 }
 

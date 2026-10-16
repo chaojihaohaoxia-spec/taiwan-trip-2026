@@ -33,7 +33,7 @@ const PAGES = [
     title: '皮肤',
     ready: async (page) => {
       await page.waitForSelector('[data-testid="skin-sample"]');
-      // 网页字体都到了：宋体分片、Instrument Serif、Geist、P2 Figure One 都在用（字体报告出来了）
+      // 网页字体都到了：宋体分片、Instrument Serif、P2 Figure One 都在用（字体报告出来了）；Geist 已经去掉，标签用系统字体
       await page.evaluate(() => document.fonts.ready);
       await page.waitForFunction(() => /思源宋体 \d+ 片/.test(document.querySelector('[data-testid="skin-font-report"]')?.textContent || ''), { timeout: 8000 });
       const ok = await page.evaluate(() => {
@@ -52,11 +52,11 @@ const PAGES = [
           serifReady('600', '椰影岛'),
           document.fonts.check('400 27px "Instrument Serif"', '16:45'),
           document.fonts.check('italic 400 84px "Instrument Serif"', '5'),
-          document.fonts.check('500 12px "Geist"', '10-16'),
+          ![...document.fonts].some((f) => /Geist/.test(f.family)),
           document.fonts.check('400 27px "P2 Figure One"', '1'),
         ];
       });
-      assert.deepEqual(ok, [true, true, true, true, true], '宋体 / Instrument Serif 正斜体 / Geist / P2 Figure One 都加载好了');
+      assert.deepEqual(ok, [true, true, true, true, true], '宋体 / Instrument Serif 正斜体 / P2 Figure One 都加载好了，没有 Geist');
     },
   },
   {
@@ -115,8 +115,8 @@ for (const p of PAGES) {
         assert.equal(env.width, c.device === 'desktop' ? 1280 : 390);
         assert.equal(env.dark, c.colorScheme === 'dark');
         assert.equal(env.reduced, Boolean(c.reducedMotion));
-        // 页面底色（A 皮肤：<html> 上的 --color-canvas；body 透明，光场在它下面）
-        assert.equal(env.bg, c.colorScheme === 'dark' ? 'rgb(4, 22, 28)' : 'rgb(223, 241, 237)');
+        // 页面底色（纸本：<html> 上的 --color-canvas；body 透明，纸和纸纹在它下面）
+        assert.equal(env.bg, c.colorScheme === 'dark' ? 'rgb(20, 20, 19)' : 'rgb(244, 241, 234)');
         await assertNoHorizontalOverflow(page);
         await assertTapTargets(page, { exclude: '.leaflet-container' });
         const files = await fullPageShots(page, path.join(DIR, `${p.id}-${c.id}.png`));

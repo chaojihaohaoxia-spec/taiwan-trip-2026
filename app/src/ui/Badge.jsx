@@ -1,14 +1,14 @@
 // =====================================================================
 // ui/Badge.jsx：角标与状态标签（只展示，不可点）。
 //
-//   <Badge tone="success">已确认</Badge>                    状态：neutral / accent / success / warning / danger / info
-//   <Badge tone="warning" variant="solid">待付款</Badge>     实心（更醒目）
-//   <Badge tone="accent" icon={IconPlane}>航班</Badge>       带图标
+//   <Badge tone="success">已确认</Badge>                    状态：一行字（neutral / success / info 灰字、accent 海色、warning 赭石、danger 砖红）
+//   <Badge tone="warning">待付款</Badge>                     几个 Badge 挨着放时中间自动加「·」
+//   <Badge tone="accent" icon={IconPlane}>航班</Badge>       带图标（少用：图标只在比字更快认出时用）
 //   <CountBadge count={3} />                                红色数字角标；数字变化时弹一下、数字滚动；0 时缩掉
 //   <DotBadge tone="danger" />                              小圆点（“有新东西”）
 //   <RatingBadge rating={5} />                              评级五档：5 夯 / 4 顶级 / 3 人上人 / 2 NPC / 1 拉完了
 //
-// 颜色只用设计变量（soft 浅底 + text 字色；solid 实心底 + on- 字色），对比度由 tokens 测试保证。
+// 「杂志纸本」：状态不做胶囊，只是字（Badge.css）；variant 留着兼容，不再改变外观。颜色只用设计变量（*-text），对比度由 tokens 测试保证。
 // =====================================================================
 
 import './Badge.css';

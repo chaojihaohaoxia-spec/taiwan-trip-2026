@@ -22,7 +22,7 @@ import { Button, IconButton, MorphIcon, SubmitButton, SegmentedControl, Tabs, St
 | 6 | 按钮变步进器 | `Stepper`（+ `RollingNumber`） | 「＋ 添加」原地伸展成「− 数字 ＋」（snappy），数字只滚变了的位，减到 0 收回（smooth）；底色的裁切和颜色同一条弹簧，「添加」和「− 数字 ＋」交叉淡化，任何时刻都不是空胶囊；半路反向速度连续；按住连加；禁用时键盘也改不了（`aria-disabled`） |
 | 7 | 列表项原地展开详情 | `ExpandableCard`（+ `useAccordion`） | `grid-template-rows 0fr → 1fr`：下面的内容平滑下移、可嵌套；收起时 `inert`；点的那张标题行一直待在手指下面（`keepInPlace`，`motion/anchor.js` 的 `holdPosition`）——“一次只开一张”时上面那张收起也不跑开；箭头旋转用弹簧（可打断） |
 | 8 | 列表 / 网格切换 | `ViewSwitch` + `ViewToggle` + `ViewCard`（`FlipGroup`） | 底板 / 图片 / 文字各自 FLIP：图片等比裁切、文字不压扁；增删排序也 FLIP；连点两下不闪、播完不留内联样式 |
-| 9 | 顶栏随滚动收成小胶囊 | `CollapsingHeader` | 往下滚整条**连续**收拢成顶部正中的胶囊（只有一层玻璃，改它的实际形状和圆角，不缩放、不重叠两层磨砂），往上滑恢复；完整标题 0–35% 淡出、短标题 25–75% 淡入（错开，不重影）；阴影和高光跟着形状；一条 smooth 弹簧，半路反向速度连续；滚动意图有防抖（`scroll-intent.js`）；带安全区 |
+| 9 | 顶栏随滚动收成小胶囊 | `CollapsingHeader` | 往下滚整条**连续**收拢成顶部正中的胶囊（只有一层纸片，改它的实际形状和圆角，不缩放、不重叠两层磨砂），往上滑恢复；完整标题 0–35% 淡出、短标题 25–75% 淡入（错开，不重影）；阴影和高光跟着形状；一条 smooth 弹簧，半路反向速度连续；滚动意图有防抖（`scroll-intent.js`）；带安全区 |
 | 10 | 菜单从按钮位置圆形扩散铺满全屏 | `overlay/FullscreenMenu`（原语 `motion/morph.js` 的 `revealCircle`）+ `MorphIcon kind="menu"` | 原语的演示在 #/dev/primitives；正式组件在 overlay/ |
 
 ## 组件一览
@@ -31,7 +31,7 @@ import { Button, IconButton, MorphIcon, SubmitButton, SegmentedControl, Tabs, St
 |---|---|---|
 | `Pressable.jsx` | `Pressable` | 所有能按的东西的基件（`as`、`feedback`、`scale`、`disabled`、`elRef`） |
 | `Button.jsx` | `Button` | `variant` primary / secondary / tinted / outline / text / danger / danger-soft；`size` sm 36 / md 44 / lg 56；`leading` / `trailing` 图标；`block`；`href` 变链接 |
-| `IconButton.jsx` | `IconButton` | 圆形，必须有中文 `label`；`variant` fill（凸起的白）/ tinted / filled（强调色渐变）/ glass（真玻璃，浮在光场上）/ plain；`size` sm 36 / md 44 / lg 56；`pressed` / `expanded` |
+| `IconButton.jsx` | `IconButton` | 圆形，必须有中文 `label`；`variant` fill（纸片圆 + 细线）/ tinted / filled（实色海色）/ glass（只是一个图标，顶栏用）/ plain；`size` sm 36 / md 44 / lg 56；`pressed` / `expanded` |
 | `Spinner.jsx` | `Spinner` | 转圈（只在加载时渲染） |
 | `MorphIcon.jsx` + `morph-shapes.js` | `MorphIcon` | `kind`、`state`、`size`、`spring`；几何定义和插值是纯函数（单元测试覆盖） |
 | `SubmitButton.jsx` + `shake.js` | `SubmitButton` | 不受控：`action` 返回 Promise；受控：`state`；`onSuccess`（对勾描完时）、`onError`、`resetAfter`、`minLoading`。失败的摇头参数在 `shake.js`（`SHAKE_SPRING`、`SHAKE_VELOCITY`，别的“输入有误”的抖动也用它） |
@@ -54,27 +54,29 @@ import { Button, IconButton, MorphIcon, SubmitButton, SegmentedControl, Tabs, St
 | `icons-core.js` | `Icon*` | 首屏代码（外壳、弹层）用的那几个图标；`icons.js` 会把它们一起转出 |
 | `util.js` | `cx`、`setRef`、`renderIcon`、`useId` | 小工具 |
 
-## A 皮肤（液态玻璃 · 海岛光 + P2 杂志宋体）里组件的样子
+## 「杂志纸本」里组件的样子（SPEC §11，10-15 定）
 
-照样稿 `$S/design/fontpairs/P2-serif/`（截图 `shots/`）和 `$S/design/A-glass/final/`。只改了外观（CSS、少量结构细节），组件的参数和行为没变；按压缩放 0.96、三条弹簧不变。现场看 `#/dev/skin`（样张）、`#/dev/primitives`。
+一句话：内容像印在纸上的旅行手帐，界面往后退——墨色的字、一种海水绿、细线分组，不用玻璃、不要渐变和发光。
+只改了外观（CSS、少量结构细节），组件的参数和行为没变；10 个交互全部保留；按压缩到 0.98、松手不过冲（`--press-transition` 是 smooth 弹簧）。
+现场看 `#/dev/primitives`、`#/dev/skin`。
 
 | 组件 | 样子 |
 |---|---|
-| `Button` | primary：强调色渐变（左上亮、右下暗）+ 同色柔光 + 顶部高光；secondary：凸起的白胶囊（`--color-raised` + 高光细边），图标强调色；tinted：强调色浅底；outline：强调色半透明细描边。sm / md 用标签字体（Geist + 系统中文，字距 .03em）；**lg（56px）和整行（block，48px）是宋体大字**（字距 .14em / .08em，末尾字距抵掉、文字真正居中），像样稿的「记下这笔」「查看全部待办」；整行的次要按钮字是强调色 |
-| `IconButton` | 默认凸起的白圆；filled 是悬浮加号那种强调色渐变（底色仍是实心强调色，从它长出来的面板读得到色层）；glass 是浮在光场上的真玻璃小圆（顶栏搜索） |
-| `SubmitButton` | 平时同 primary；成功变绿色渐变（`--material-success`）、失败红色实心 |
-| `SegmentedControl` | 轨道 = 往下凹的浅灰胶囊，选中块 = 白色滑块（`--color-thumb` + `--shadow-thumb`）；sm 36 / md 44 / lg 52（含 4px 内边距，每段可点区域都 ≥44）。直接放在光场上时加 `class="seg--glass"`（真玻璃胶囊，样稿顶部的天数条）。选中段的图标是强调色 |
-| `Tabs` | 标签字体，选中强调色字 + 带一点柔光的强调色指示条 |
-| `Checkbox` | 圆圈勾：1.8px 的墨色细圈，勾上强调色实心 + 白勾；划掉的字变淡墨色，线是次要色 |
-| `Chip` | 凸起的白胶囊（44px 高，样稿「记一笔」的分类），图标强调色；选中变强调色实心 + 柔光、字反白；sm 32（可点区域扩到 44） |
-| `Badge` | 24px 小胶囊，浅底 + 深一号的同色字（标签字体）；评级是实心底 + 白字 + 顶部高光 |
-| `Stepper` | 收起：强调色实心「＋ 加入」；展开：凸起的白胶囊，± 强调色，数字是 Instrument Serif 大号数字 |
-| `ExpandableCard` | 卡片是磨砂白材质（`--material-card`，不开 backdrop-filter）+ 折射描边；右边 34px 凸起的白圆箭头；标题 15px 半粗，副标题用标签字体（时间、距离对齐）；嵌套 / 列表行里换成强调色浅底的小圆 |
-| `ViewSwitch` / `ViewCard` | 底板是磨砂白材质 + 折射描边；标题宋体 `--text-headline`（16px），副标题小字（Geist）；占位图是主题色浅渐变 |
-| `CollapsingHeader` | **整条状态改成浮在页面上的玻璃条**：离屏幕两边 16px、离顶 10px（+ 安全区），60px 高、圆角 30px，投影 + 高光细边 + 折射描边；在页面最顶上时玻璃、投影、高光都透明。胶囊 44px 高，在玻璃条里竖直居中。标题宋体 `--text-title-4`（17px，胶囊里缩到 0.88）。几何由 CSS 变量 `--ch-bar-x`、`--ch-inset`、`--ch-bar-h`、`--ch-bar-radius`、`--ch-pill-h` 决定，JS 量看不见的 `.ch__probe` 拿像素值 |
-| `SearchExpand` | 按钮和输入框是同一种材质（默认凸起的白；加 `class="search-x--glass"` 换真玻璃），展开后放大镜变强调色（`--sx-icon` / `--sx-icon-open`，JS 读它们做颜色插值）；「取消」是强调色浅底胶囊；聚焦时一圈强调色细边 |
-| `EmptyState` | 图标在带高光细边的浅色方块里，标题宋体 `title-2`（21px，紧凑版 `--text-title-4`） |
-| `Avatar` | 首字用 Geist；叠放时描一圈亮边 |
+| `Button` | 方一点的纸片（圆角 `--radius-md` 10），系统字体 500、字距 0，没有渐变、没有发光。primary：实色海色（一屏最多一个）；secondary / tinted：透明底 + 1px `--color-border-strong` 细线框、墨色字（图标海色）；outline：海色字 + 细线框；text：只有海色字。lg（56px）和整行（block，48px）是系统字体 600（「记下这笔」「记为已结清」），不用宋体 |
+| `IconButton` | 默认纸片圆（`--color-raised` + 一根细线）；filled 是实色海色（底栏的 ＋；底色仍是实心强调色，从它长出来的面板读得到色层）；glass 只是一个图标（顶栏的搜索、返回，没有圆底） |
+| `SubmitButton` | 平时同 primary；成功变实色的绿（`--material-success`）、失败砖红实心，都不发光 |
+| `SegmentedControl` | 轨道 = 一根细线框起来的纸片（圆角 10，透明底）；选中块 = 一张纸片（`--color-thumb`）+ 深一点的细线框（`--shadow-thumb`），不投影；sm 36 / md 44 / lg 52。`class="seg--glass"` 现在和普通的一样 |
+| `Tabs` | 系统字体，选中海色字 + 海色指示条（不发光）；计数（`badge`）是跟在字后面的灰字 |
+| `Checkbox` | 圆圈勾：墨色细圈，勾上海色实心 + 纸色勾；划掉的字变淡墨色 |
+| `Chip` | 细线框的纸片（圆角 `--radius-sm`，透明底，系统字体 400）；选中是墨色字 + 墨色细线框（不是实心色块、没有对勾）；计数是灰字；sm 32（可点区域扩到 44） |
+| `Badge` | **一行字，不是胶囊**：13px 系统字体 500；neutral / success / info 次要灰，accent 海色，warning 赭石，danger 砖红；几个挨着放时中间自动加「·」；variant 不再改变外观。评级（`RatingBadge`）还是实心色块 + 白字 |
+| `Stepper` | 收起：海色实心「＋ 加入」；展开：纸片 + 细线，± 海色 |
+| `ExpandableCard` | card 样式不是一张卡：直接排在纸上，上面一根 1px 细线，标题行和正文和页面左边对齐；右边一个灰色小箭头（20px，没有底）；前导图标（`leading`）不显示；标题 15px 半粗，副标题等宽数字 |
+| `ViewSwitch` / `ViewCard` | 底板是纸片（`--material-card` + 细线框）；标题宋体，副标题次要色小字 |
+| `CollapsingHeader` | 整条状态是浮在页面上的纸条（圆角 = 半高，细线框），不用玻璃；在页面最顶上时纸片透明。胶囊 44px 高。几何由 CSS 变量 `--ch-bar-x`、`--ch-inset`、`--ch-bar-h`、`--ch-bar-radius`、`--ch-pill-h` 决定，JS 量看不见的 `.ch__probe` 拿像素值 |
+| `SearchExpand` | 按钮和输入框是同一种材质（默认纸片 + 细线；`class="search-x--glass"` 是浮层的纸），展开后放大镜变海色（`--sx-icon` / `--sx-icon-open`，JS 读它们做颜色插值）；聚焦时一圈海色细边 |
+| `EmptyState` | 标题宋体 `title-2`（21px，紧凑版 `--text-title-4`），说明一行就够 |
+| `Avatar` | 首字用系统字体；叠放时描一圈纸色的边 |
 
 ## 组件约定
 

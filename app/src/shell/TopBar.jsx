@@ -15,7 +15,7 @@
 //   - pill / bar → top：玻璃和字淡出（大标题这时已经回到眼前）；
 //   - 减弱动态效果：不变形，只淡入淡出（CSS）。
 // 搜索框 / 切换面板盖在顶栏上时（covered），顶栏里的字先淡掉，免得透过玻璃叠字（样稿 TopBar.cover）。
-// 两边的圆按钮是真玻璃（IconButton variant="glass"、SearchExpand 的 search-x--glass），任何状态都在原位。
+// 两边的按钮只是一个图标（IconButton variant="glass"、SearchExpand 的 search-x--glass：纸上没有圆底），任何状态都在原位。
 // 整条顶栏不吃点击，只有看得见的按钮吃：顶栏透明时下面的大标题照样能点。
 // 看不见的部分（不是当前状态的胶囊 / 整条、被盖住时两边的按钮）用 visibility: hidden 藏好（点不到、Tab 不到、读屏读不到），
 // 不用常驻的 inert 属性（弹层系统关掉以后页面上不应该还有 inert 的元素）。

@@ -5,8 +5,7 @@
    阴影不在面板身上（clip-path 会把它裁掉）：在下面单独一层 .ov-panel-shadow，形变时形状和面板逐帧一致。
    .ov-panel-tint：盖在面板上面、和按钮同色的色层（长出来 / 收回时的颜色过渡），平时透明；形状同样逐帧跟着面板。
    两层的尺寸用 --ov-panel-w / --ov-panel-h（JS 量好写在它们身上），形变时 JS 逐帧覆盖。
-   A 皮肤（样稿的 ＋ 面板）：真玻璃（backdrop-filter）+ 高光细边，圆角 32px；标题是大字距的眉标（「快速添加」）。
-   面板自己是滚动容器，折射描边（::before）会跟着内容滚走，所以这里不加，只用 inset 阴影画边。
+   「杂志纸本」：一张不透明的纸 + 细线框 + 一层很浅的柔影，圆角 --radius-2xl；标题是一行小眉标（「快速添加」）。
    局部变量：--ov-panel-radius 面板圆角
    ===================================================================== */
 
@@ -44,9 +43,7 @@
   padding: var(--space-4);
   border-radius: var(--ov-panel-radius);
   background: var(--material-glass-dense);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
-  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
+  box-shadow: var(--shadow-glass-edge);
   color: var(--color-text);
   pointer-events: auto;
   outline: none;
@@ -56,7 +53,7 @@
   background: var(--material-glass-strong);
 }
 
-/* 标题：眉标（大字距的小字，样稿的「快速添加」） */
+/* 标题：眉标（小字，「快速添加」） */
 .ov-panel__title {
   margin: 0 var(--space-1) 10px;
   color: var(--color-text-2);

@@ -10,7 +10,6 @@
 # 用到的字体（全部 SIL OFL 1.1，授权原文在 app/static/fonts/licenses/）：
 #   思源宋体 Noto Serif SC 2.003 SemiBold（600）      标题、行程名、大按钮
 #   Instrument Serif 1.000 正体 / 斜体（400）          大号数字
-#   Geist 1.800 可变字重（100–900）                     小号数字、标签里的拉丁字母
 #   「P2 Figure One」= 思源宋体 Regular 的「1」和「₫」（U+0031、U+20AB）：Instrument Serif 的 1 像小写 l、又没有 ₫（越南盾符号
 #   会回退到思源宋体 600，在细的数字旁边特别黑），大号数字里用它顶替；另有斜体（同样两个字，按 Instrument Serif 斜体的
 #   13° 斜切，给倒计时这类斜体数字用）
@@ -22,7 +21,6 @@
 #   <原始字体目录> 里要有（下载地址见 app/static/fonts/README.md）：
 #     NotoSerifSC-SemiBold.otf、NotoSerifSC-Regular.otf（notofonts/noto-cjk Serif2.003 的 SubsetOTF/SC）
 #     InstrumentSerif-Regular.ttf、InstrumentSerif-Italic.ttf（google/fonts ofl/instrumentserif）
-#     Geist-Variable.ttf（npm geist@1.7.2 的 dist/fonts/geist-sans）
 #   找不到时也会在子目录里递归找同名文件。
 #
 #   --extra-text：额外要收进思源宋体子集的文字（例如仓库外的真实行程 JSON，里面的生僻地名）。
@@ -82,7 +80,7 @@ TAIL_CHARS = 75
 GOOGLE_LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
 # 越南语 + 扩展拉丁（Google 的 vietnamese + latin-ext 里我们用得到的部分）
 VIETNAMESE = 'U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB'
-# 拉丁字体（Instrument Serif、Geist）收的范围：拉丁 + Latin-1 + 越南语 + 常用标点、货币、箭头、比较符号
+# 拉丁字体（Instrument Serif）收的范围：拉丁 + Latin-1 + 越南语 + 常用标点、货币、箭头、比较符号
 LATIN_FONT_RANGE = ('U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0300-0301,U+0303-0304,U+0308-0309,'
                     'U+0323,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2194,U+2212,U+2215,U+2248,U+2260,U+2264-2265,U+FEFF,U+FFFD,'
                     'U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+1EA0-1EF9,U+20AB')
@@ -417,7 +415,6 @@ def main():
         'serif400': find_file(raw, 'NotoSerifSC-Regular.otf'),
         'instr': find_file(raw, 'InstrumentSerif-Regular.ttf'),
         'instrI': find_file(raw, 'InstrumentSerif-Italic.ttf'),
-        'geist': find_file(raw, 'Geist-Variable.ttf'),
     }
 
     # ---------- 思源宋体：字符集 ----------
@@ -509,7 +506,6 @@ def main():
     instr = latin_face(src['instr'], 'Instrument Serif', '400', 'normal', 'instrument-serif-400.woff2', False)
     # 斜体只给倒计时这类少数地方用：不预加载（登录页、行程列表、设置页用不到，白下载 16KB）；Service Worker 第一次用到就缓存
     instr_i = latin_face(src['instrI'], 'Instrument Serif', '400', 'italic', 'instrument-serif-400-italic.woff2', False, preload=False)
-    geist = latin_face(src['geist'], 'Geist', '100 900', 'normal', 'geist.woff2', True)
 
     # ---------- P2 Figure One：思源宋体 Regular 的“1”和“₫”（正体 + 斜切的斜体） ----------
     one = subset_font(src['serif400'].read_bytes(), FIGURE_ONE_CPS, CJK_OPTIONS)
@@ -532,7 +528,7 @@ def main():
    styles/fonts.css：网页字体的 @font-face（scripts/fonts/build-fonts.py 生成，别手改）
    字体文件在 app/static/fonts/，构建时 esbuild 按这里的 url() 把它们带进 assets/（文件名加内容哈希）。
    全部 SIL OFL 1.1，授权原文在 app/static/fonts/licenses/，来源和版本见 app/static/fonts/README.md。
-   用法见 styles/README.md「字体」：标题 var(--font-serif) / 大号数字 var(--font-figure) / 小号数字和标签 var(--font-label)。
+   用法见 styles/README.md「字体」：标题 var(--font-serif) / 主数字 var(--font-figure)；其余（正文、标签、小号数字）用系统字体，不下载。
 
    思源宋体 Noto Serif SC 600 一共 {len(full_cmap)} 个码位，切成 {len(slices)} 片（合计 {total_slices / 1024:.0f} KB）：
    浏览器按 unicode-range 只下载页面上真的用到的那几片。@font-face 后声明的先匹配：
@@ -547,12 +543,9 @@ def main():
             label = f'常用字（Google 第 {"、".join(map(str, s["google"]))} 片）' if 'google' in s else '区块'
         css_parts.append(css_face('Noto Serif SC', name, '600', 'normal', rng, size, f'{s["id"]} · {label} · {len(s["chars"])} 字'))
     # 拉丁字体：不写 unicode-range（字体里没有的字浏览器照样逐字回退到字体栈里的下一个；实际覆盖范围记在 fonts.json），
-    # 省首屏 CSS。正体、Geist 预加载；斜体不预加载（只有倒计时这类少数地方用，用到时才下载）
+    # 省首屏 CSS。正体预加载；斜体不预加载（只有倒计时这类少数地方用，用到时才下载）
     css_parts.append('\n/* ---------- Instrument Serif 1.000 · 400 正体 / 斜体（大号数字；不写 unicode-range；正体预加载，斜体用到时才下载） ---------- */')
     for fam, name, w, st, rng, size in instr + instr_i:
-        css_parts.append(css_face(fam, name, w, st, None, size))
-    css_parts.append('\n/* ---------- Geist 1.800 · 可变字重 100–900（小号数字、标签；预加载，不写 unicode-range） ---------- */')
-    for fam, name, w, st, rng, size in geist:
         css_parts.append(css_face(fam, name, w, st, None, size))
     css_parts.append(f'''
 /* ---------- P2 Figure One：思源宋体 Regular 的「1」和「₫」 ----------

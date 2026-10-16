@@ -1,4 +1,4 @@
-// 外壳 · 常驻框架（src/shell/）：光场、顶栏（大标题 / 胶囊 / 整条）、天数分段条、底栏、＋ 面板、更多菜单、行程切换、
+// 外壳 · 常驻框架（src/shell/）：纸（背景）、顶栏（大标题 / 胶囊 / 整条）、天数分段条、底栏、＋ 面板、更多菜单、行程切换、
 // 搜索、同步状态条、换页、启动跳转。全部演示模式（虚构数据 demo-island / demo-cities / demo-empty），不连外网。
 //
 // 截图：<截图根目录>/__screenshots__/shell-frame/；半路截图：__shots__/shell-frame/。
@@ -80,8 +80,8 @@ test('行程概览（手机 390 浅色）：大标题 = 行程名 + 箭头、副
     assert.equal(cells[0][2], 'page');
     assert.equal(await page.$eval(T('tab-trip'), (el) => el.getAttribute('aria-current')), 'page');
     assert.equal(await page.$eval(T('shell-topbar'), (el) => el.dataset.state), 'top');
-    // 光场按这趟行程的主题色
-    assert.notEqual(await page.$eval(T('shell-field'), (el) => el.dataset.palette), 'default');
+    // 背景是纸（「杂志纸本」：不再有每趟行程一套颜色的光场）；行程的主题色只用在强调色上
+    assert.deepEqual(await page.$eval(T('shell-field'), (el) => ({ paper: el.classList.contains('paper'), kids: el.children.length, palette: el.dataset.palette ?? null })), { paper: true, kids: 0, palette: null });
     assert.match(await page.evaluate(() => document.documentElement.style.getPropertyValue('--trip-accent')), /^#0E8A8A$/i);
     await assertNoHorizontalOverflow(page);
     await assertTapTargets(page);
@@ -272,7 +272,7 @@ test('「更多」菜单：圆形扩散（半路截图）、瓷砖有实时状�
   }
 });
 
-test('行程切换：从大标题长出来、三趟行程、当前打勾；换到三城留在同一种页面（账本 → 账本），光场和主题色跟着换；Esc 关', async () => {
+test('行程切换：从大标题长出来、三趟行程、当前打勾；换到三城留在同一种页面（账本 → 账本），主题色跟着换（纸不变）；Esc 关', async () => {
   const app = await open({ hash: '#/t/demo-island/ledger' });
   try {
     await ready(app);
@@ -292,12 +292,30 @@ test('行程切换：从大标题长出来、三趟行程、当前打勾；换�
     await page.click(T('shell-title'));
     await page.waitForSelector(T('switcher-trip-demo-cities'));
     await app.idle();
+    const islandAccent = await page.evaluate(() => {
+      const probe = document.createElement('i');
+      probe.style.color = 'var(--color-accent)';
+      document.body.append(probe);
+      const c = getComputedStyle(probe).color;
+      probe.remove();
+      return c;
+    });
     await page.click(T('switcher-trip-demo-cities'));
     await page.waitForFunction(() => location.hash === '#/t/demo-cities/ledger');
     await ready(app, '三城');
     await page.waitForFunction(() => document.documentElement.style.getPropertyValue('--trip-accent').toUpperCase() === '#C2255C', { timeout: 5000 });
-    await page.waitForFunction(() => document.querySelectorAll('.light-field__layer').length === 1, { timeout: 5000 });
-    assert.match(await page.$eval(T('shell-field'), (el) => el.dataset.palette), /#C2255C/i);
+    // 纸不变：还是那一张、没有光场的层；强调色换成三城的（压暗以后的玫红）
+    assert.equal(await page.$$eval('.light-field__layer, .light-field__blob', (els) => els.length), 0);
+    assert.equal(await page.$eval(T('shell-field'), (el) => getComputedStyle(el).backgroundColor), 'rgb(244, 241, 234)');
+    const accentNow = () => page.evaluate(() => {
+      const probe = document.createElement('i');
+      probe.style.color = 'var(--color-accent)';
+      document.body.append(probe);
+      const c = getComputedStyle(probe).color;
+      probe.remove();
+      return c;
+    });
+    assert.notEqual(await accentNow(), islandAccent, '强调色换成了三城的');
     app.assertClean();
   } finally {
     await app.close();

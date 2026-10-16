@@ -2,10 +2,10 @@
 // kit/PlaceActions.jsx：地点的动作行——导航 / 叫 Grab / 给司机看 / 复制地址（可选：打电话、记一笔）。
 // 条目展开、地点面板、地图面板、预订（酒店 / 餐厅）里**都用这一个组件**（SPEC §6），保证一致。
 //
-//   <PlaceActions place={place} />                                       完整：带文字的大按钮（样稿时间轴展开的那一排）
+//   <PlaceActions place={place} />                                       完整：一行纯文字链接（「导航 | 叫 Grab | 给司机看 | 记一笔」）
 //   <PlaceActions place={place} size="compact" />                        紧凑：一排 44px 的圆图标按钮（读屏有名字）
 //   <PlaceActions place={place} primary="grab" call expense={{ itemId: item.id, date: day.date }} mode="walk" />
-//     primary：哪个做成强调色实心（一般不用；行程进行中的“接下来”卡可以把 grab 或 nav 设成主要）
+//     primary：哪个更醒目（完整版字重一点、紧凑版实心海色；一般不用）
 //     call：有电话时加「打电话」；expense：加「记一笔」（值是预填：{ itemId, placeId, bookingId, date }，placeId 默认就是这个地点）
 //     mode：导航的交通方式（walk / grab / taxi …，见 lib/maps-links.js 的 travelModeFor；默认 driving）
 //     actions：只要其中几个，例如 ['nav', 'copy']；readOnly：只读成员（记一笔禁用）
@@ -131,8 +131,7 @@ export function PlaceActions({
           const cls = ['k-act', a.key === primary && !a.disabled && 'k-act--primary'].filter(Boolean).join(' ');
           const inner = (
             <>
-              <Glyph name={a.glyph} size={compact ? 20 : 21} />
-              {compact ? null : <span class="k-act__label">{a.label}</span>}
+              {compact ? <Glyph name={a.glyph} size={20} /> : <span class="k-act__label">{a.label}</span>}
             </>
           );
           const common = {

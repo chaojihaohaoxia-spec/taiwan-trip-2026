@@ -1,18 +1,13 @@
 /* =====================================================================
-   shell/tabbar.css：底栏（TabBar.jsx，样稿 .tabbar；手感照 iOS 26 Apple Music 的 Liquid Glass 底栏）。
-   悬浮玻璃胶囊：离屏幕两边 --tabbar-x（手机 16px，宽屏最宽 440px、居中）、离底 --tabbar-inset + 安全区、高 --tabbar-bar-h；
-   五格平分，中间是 56px 的实心主题色 ＋（ui/IconButton filled lg）；选中格下面是一块更亮、更透的玻璃药丸（透镜）。
-
-   玻璃（同屏 backdrop-filter 只有 .tabbar__glass 一层）：
-     - 更通透：--material-tabbar（上浅下深的薄色 + 内侧极淡的光泽）+ --tabbar-glass-filter（模糊 + 提饱和度 + 浅色提亮 / 深色压暗）；
-     - 折射边：::before 1px 渐变描边（上沿亮、两侧渐隐、下沿暗）+ --shadow-tabbar-edge（上沿一道亮线和光带、下沿暗线和暗带）；
-     - 悬浮：--shadow-tabbar（大而软的投影 + 贴近的一层）；
-     - “活力”：字和图标后面一层贴着字形的晕（--color-tabbar-halo：浅色是白晕、深色是暗晕；选中那格更足 --color-tabbar-halo-strong；字是几层 text-shadow，
-       图标是垫在下面的同一个图形 .tabbar__halo），后面是什么颜色都看得清。
+   shell/tabbar.css：底栏（TabBar.jsx；手感照 iOS 26 Apple Music 的底栏：拖动选择、按压、滚动收小）。
+   「杂志纸本」：一张不透明的纸片胶囊 + 细线框 + 很浅的悬浮阴影，不用玻璃；选中只是海色的字（没有选中块、没有字后面的晕）。
+   离屏幕两边 --tabbar-x（手机 --gutter，宽屏最宽 440px、居中）、离底 --tabbar-inset + 安全区、高 --tabbar-bar-h；
+   五格平分，中间是 48px 的实心海色 ＋（ui/IconButton filled）。
+   .tabbar__ind / .tabbar__lens 是看不见的选中块：拖动选择、轻点切换的弹簧几何都跟着它走（TabBar.jsx）；按住时它是一层很浅的墨，手指下是哪格一眼看得出。
    状态（属性写在 <nav> 上）：
      data-shown      在行程里（不在时沉到屏幕下面藏起来，进出行程时弹簧滑上 / 滑下）
      data-lifted     ＋ 面板、更多菜单开着：抬到弹层上面
-     data-lens-up    按住了：透镜浮起（JS 放大 scale；这里换成更透的样子：底色变淡、亮边和高光出来）
+     data-lens-up    按住了：选中块浮起（JS 放大 scale），显出很浅的一层墨
      data-tracking   手指按在底栏里：颜色跟着手指下那格（data-hover），不跟 aria-current
      data-dragging   按住在拖
      data-pending    切过去了、新页面还没到：颜色在新那格（data-pending-tab），不先回旧格
@@ -71,7 +66,7 @@
   opacity: 0;
 }
 
-/* ---------- 玻璃 ---------- */
+/* ---------- 纸片 ---------- */
 .tabbar__shadow,
 .tabbar__glass {
   position: absolute;
@@ -86,22 +81,7 @@
 
 .tabbar__glass {
   background: var(--material-tabbar);
-  -webkit-backdrop-filter: var(--tabbar-glass-filter);
-  backdrop-filter: var(--tabbar-glass-filter);
   box-shadow: var(--shadow-tabbar-edge);
-}
-
-/* 折射边：1px 渐变描边，上沿最亮、两侧渐隐、下沿一道暗边（厚玻璃的边） */
-.tabbar__glass::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-tabbar-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
 }
 
 .tabbar__row {
@@ -113,9 +93,9 @@
   padding: 0 6px;
 }
 
-/* ---------- 选中块（透镜） ----------
+/* ---------- 选中块（平时看不见） ----------
    .tabbar__ind：一格宽，位置 + 拉伸（transform；静止位置由 --tab-index 决定，JS 动画后停在内联的 transform 上）；
-   .tabbar__lens：浮起的放大（scale）；::after 是平时那块亮玻璃，::before 是浮起时的透镜（亮边 + 高光）。
+   .tabbar__lens：浮起的放大（scale）；按住时（data-lens-up）显出一层很浅的墨（--color-fill），松手淡掉。
    .tabbar__ind 的 opacity 由 JS 写（从 ＋ 后面穿过时变淡），所以这里不给它过渡；不在任何一格时（底栏这时也藏起来了）直接不显示 */
 .tabbar__ind {
   position: absolute;
@@ -135,34 +115,12 @@
   position: absolute;
   inset: 0 2px;
   border-radius: var(--radius-pill);
-}
-
-.tabbar__lens::before,
-.tabbar__lens::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
+  background: var(--color-fill);
+  opacity: 0;
   transition: opacity var(--dur-fast) var(--ease-out);
 }
 
-.tabbar__lens::after {
-  background: var(--material-tabbar-lens);
-  box-shadow: var(--shadow-tabbar-lens);
-}
-
-.tabbar__lens::before {
-  z-index: 1;
-  background: var(--material-tabbar-lens-clear);
-  box-shadow: var(--shadow-tabbar-lens-clear);
-  opacity: 0;
-}
-
-.tabbar[data-lens-up] .tabbar__lens::after {
-  opacity: var(--tabbar-lens-up-fill);
-}
-
-.tabbar[data-lens-up] .tabbar__lens::before {
+.tabbar[data-lens-up] .tabbar__lens {
   opacity: 1;
 }
 
@@ -175,7 +133,7 @@
   height: 100%;
   border-radius: var(--radius-pill);
   color: var(--color-tabbar-ink);
-  font: var(--weight-semibold) var(--text-caption-2) / 1.2 var(--font-label);
+  font: var(--weight-medium) var(--text-caption-2) / 1.2 var(--font-label);
   letter-spacing: var(--tracking-tab);
   text-decoration: none;
   cursor: pointer;
@@ -200,7 +158,7 @@
   color: var(--color-tabbar-accent);
 }
 
-/* 透镜下的放大（JS 拖动时逐帧写 scale；松手清掉，这里弹簧回弹） */
+/* 按住时的放大（JS 拖动时逐帧写 scale；松手清掉，这里弹簧回弹） */
 .tabbar__mag {
   position: relative;
   display: flex;
@@ -215,46 +173,15 @@
   transition: none;
 }
 
-/* 图标 + 它后面的“活力”晕：.tabbar__halo 是同一个图形，描粗、虚化、换成晕的颜色，垫在图标下面（贴着图形走，不是一圈光斑） */
+/* 图标 */
 .tabbar__icon {
   position: relative;
   display: block;
   line-height: 0;
 }
 
-.tabbar__icon > svg {
-  position: relative;
-}
-
-.tabbar__halo {
-  position: absolute;
-  inset: 0;
-  color: var(--color-tabbar-halo);
-  filter: blur(var(--tabbar-halo-blur));
-}
-
-.tabbar__halo svg,
-.tabbar__halo .morph-icon__shape {
-  stroke: currentColor;
-  stroke-width: var(--tabbar-halo-stroke);
-}
-
 .tabbar__label {
   display: block;
-  /* 标签末尾的字距抵掉，字真正居中 */
-  margin-right: calc(-1 * var(--tracking-tab));
-  /* “活力”晕：贴着字形的几层（1px 和 1.5px 托住笔画，3px、7px 往外柔一点） */
-  text-shadow: 0 0 1px var(--color-tabbar-halo), 0 0 1.5px var(--color-tabbar-halo), 0 0 3px var(--color-tabbar-halo), 0 0 7px var(--color-tabbar-halo);
-}
-
-/* 选中那格（强调色的字，在选中块上）的晕更足：白晕在白玻璃上本来就看不出来，后面是深色时才托住字。
-   只跟 aria-current 走（换页时才变）——拖动时手指下那格不换晕：改的东西少，拖动时每帧不重新布局 */
-.tabbar__tab[aria-current="page"] .tabbar__label {
-  text-shadow: 0 0 1px var(--color-tabbar-halo-strong), 0 0 1.5px var(--color-tabbar-halo-strong), 0 0 3px var(--color-tabbar-halo-strong), 0 0 7px var(--color-tabbar-halo-strong);
-}
-
-.tabbar__tab[aria-current="page"] .tabbar__halo {
-  color: var(--color-tabbar-halo-strong);
 }
 
 /* 「更多」↔「关闭」：两个字叠在同一格里交叉淡化。走的那个马上淡出，来的那个晚一点（--dur-instant，约等于图标变形到一半）再淡入 */
@@ -281,8 +208,8 @@
   }
 }
 
-/* 按压：底栏里的按钮按下是“放大”（像玻璃被按得鼓起来），松手弹簧回弹（--press-transition 的松手段）。
-   行程 / 地图 / 账本的手指按压由透镜接管（TabBar.jsx 认领了这次按压），这里是键盘按住、「更多」和 ＋ */
+/* 按压：底栏里的按钮按下是轻轻“放大”，松手回弹（--press-transition 的松手段）。
+   行程 / 地图 / 账本的手指按压由选中块接管（TabBar.jsx 认领了这次按压），这里是键盘按住、「更多」和 ＋ */
 .tabbar__tab[data-pressed] {
   scale: var(--tabbar-press-grow);
 }
@@ -293,19 +220,23 @@
 }
 
 .tabbar__fab {
+  --icon-btn-size: 48px;
   touch-action: none;
+}
+
+/* 看得见的圆是 48px；滚动收小（整条 0.8）以后也要 ≥44px 好按：点按区往外扩 8px（收小后约 51px） */
+.tabbar__fab::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: var(--radius-round);
 }
 
 .tabbar__fab[data-pressed] {
   scale: var(--tabbar-fab-press-grow);
 }
 
-/* ＋ 开着时：按钮略暗一点，表示“这里收回” */
-.tabbar__fab[aria-expanded="true"] {
-  --icon-btn-shadow: var(--shadow-accent-sm);
-}
-
-/* 减弱动态效果：进出行程只淡入淡出；按压不放大（只换颜色）；透镜不缩放（JS 也不做） */
+/* 减弱动态效果：进出行程只淡入淡出；按压不放大（只换颜色）；选中块不缩放（JS 也不做） */
 @media (prefers-reduced-motion: reduce) {
   .tabbar {
     translate: 0 0;

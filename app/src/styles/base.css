@@ -7,8 +7,8 @@
 
    同一层（base）里还有（在这里 @import，跟着 base.css 一起进首屏样式表）：
      fonts.css      网页字体的 @font-face（scripts/fonts/build-fonts.py 生成）
-     materials.css  材质工具类：.material-card（卡片）、.material-glass（悬浮层真玻璃）、.material-raised、.material-inset
-     field.css      光场：.light-field（页面背景的主题色光斑 + 颗粒）
+     materials.css  材质工具类：.material-card（排在纸上的内容块）、.material-glass（浮层的纸）、.material-raised、.material-inset
+     field.css      纸：.paper（页面背景：纯色纸 + 一点点纸纹）
      type.css       字体角色工具类：.t-serif、.t-figure、.t-label、.t-eyebrow……
    ===================================================================== */
 
@@ -53,7 +53,7 @@ body {
   margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
-  /* 底色在 <html> 上（--color-canvas）；body 透明，光场（.light-field，z-index 在内容下面）才露得出来 */
+  /* 底色在 <html> 上（--color-canvas）；body 透明，纸（.paper，z-index 在内容下面）才露得出来 */
   background: transparent;
   color: var(--color-text);
   font: var(--type-body);

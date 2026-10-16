@@ -1,6 +1,6 @@
 /* =====================================================================
-   sheets/expense/expense.css：记一笔 / 编辑一笔（.xf）。照样稿 07a「记一笔面板」：
-   大号金额块（往下凹的浅灰块 + Instrument Serif 40px 数字 + 右边币种名 + 下面一行折合港币）、
+   sheets/expense/expense.css：记一笔 / 编辑一笔（.xf）。「杂志纸本」：
+   金额直接写在纸上（Instrument Serif 40px 数字 + 右边币种名，下面一根墨线；聚焦时线变深），下面一行折合港币、
    币种分段、分类胶囊、谁付分段、分摊、日期时间、关联条目、说明、小票；提交区在面板的 footer 里。
    颜色、圆角、阴影、字体、间距只用 tokens.css 的变量。
    ===================================================================== */
@@ -18,7 +18,7 @@
   gap: var(--space-2);
 }
 
-/* 字段名：小字、半粗、次要色（样稿 .f-label） */
+/* 字段名：小字、次要色 */
 .xf__label {
   display: flex;
   align-items: baseline;
@@ -27,36 +27,34 @@
   margin: 0 var(--space-1);
   color: var(--color-text-2);
   font: var(--type-caption-1);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-label);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0;
 }
 
 .xf__label-hint {
   font-weight: var(--weight-regular);
 }
 
-/* ---------- 金额块 ---------- */
+/* ---------- 金额：直接写在纸上，下面一根墨线 ---------- */
 .xf-amount {
-  --xf-amount-bg: var(--color-fill);
   position: relative;
-  padding: 14px 16px 14px;
-  border-radius: var(--radius-lg);
-  background: var(--xf-amount-bg);
-  transition: box-shadow var(--dur-fast) var(--ease-out);
-}
-
-.xf-amount:focus-within {
-  box-shadow: inset 0 0 0 1.5px var(--color-accent);
-}
-
-.xf-amount[data-invalid] {
-  box-shadow: inset 0 0 0 1.5px var(--color-danger);
+  padding: 0 2px 4px;
 }
 
 .xf-amount__row {
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border-strong);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.xf-amount:focus-within .xf-amount__row {
+  border-bottom-color: var(--color-text);
+}
+
+.xf-amount[data-invalid] .xf-amount__row {
+  border-bottom-color: var(--color-danger);
 }
 
 .xf-amount__input {
@@ -118,7 +116,7 @@
 /* 折合港币那一行 */
 .xf-amount__conv {
   min-height: 19px;
-  margin-top: 2px;
+  margin-top: 8px;
   color: var(--color-text-2);
   font: var(--type-footnote);
   font-family: var(--font-label);
@@ -134,7 +132,7 @@
   color: var(--color-warning-text);
 }
 
-/* 「千 / 万」快捷和清空：凸起的白胶囊，36 高（热区扩到 44） */
+/* 「千 / 万」快捷和清空：细线框的小键，36 高（热区扩到 44） */
 .xf-amount__quick {
   display: flex;
   flex-wrap: wrap;
@@ -149,9 +147,8 @@
   gap: 5px;
   height: 36px;
   padding: 0 14px;
-  border-radius: var(--radius-pill);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 1px var(--color-border);
   color: var(--color-text);
   font: var(--type-label);
   letter-spacing: var(--tracking-label);
@@ -167,7 +164,7 @@
 }
 
 .xf-quick[data-pressed] {
-  background: var(--color-raised-pressed);
+  background: var(--color-fill-pressed);
 }
 
 .xf-quick:disabled {
@@ -175,8 +172,6 @@
 }
 
 .xf-quick__unit {
-  font-family: var(--font-serif);
-  font-weight: var(--weight-serif);
   font-size: var(--text-callout);
 }
 
@@ -191,13 +186,8 @@
   color: var(--color-text-2);
 }
 
-/* 币种分段放在往下凹的块里：轨道再深一层 */
 .xf-amount__seg {
   margin-top: var(--space-3);
-}
-
-.xf-amount .seg {
-  background: var(--color-surface-3);
 }
 
 .xf-amount__other {
@@ -219,8 +209,8 @@
   flex: none;
   min-height: var(--tap-min);
   padding: 0 12px;
-  border-radius: var(--radius-pill);
-  background: var(--color-warning-soft);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 1px var(--color-border);
   color: var(--color-warning-text);
   font: var(--type-label);
   font-size: var(--text-footnote);
@@ -228,15 +218,15 @@
   transition: var(--press-transition);
 }
 
-/* ---------- 分类胶囊 ---------- */
+/* ---------- 分类：没选中的就是字（细线框很浅），选中的是墨色细线框 ---------- */
 .xf-cats {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
 
-.xf-cats .chip__icon {
-  display: inline-flex;
+.xf-cats .chip:not(.chip--selected) {
+  --chip-shadow: inset 0 0 0 1px var(--color-separator);
 }
 
 /* ---------- 分摊 ---------- */

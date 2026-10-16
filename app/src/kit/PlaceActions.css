@@ -1,7 +1,8 @@
 /* =====================================================================
    kit/PlaceActions.css：动作行（.k-acts）。
-   完整版照样稿 .tl-actions / .act：等宽几列、58 高、圆角 16、往下凹的浅底 + 强调色图标 + 12px 标签；
-   主要动作是强调色渐变实心。紧凑版：一排 44px 的凸起白圆。
+   「杂志纸本」完整版：一行纯文字链接（海色字、没有图标、没有灰方块），上面一根细线，中间用短竖线隔开；
+   多于 4 个时折成两行（每行 --k-acts-cols 个）。主要动作（primary）字重一点。
+   紧凑版：一排 44px 的纸片圆（图标，读屏有名字）。
    ===================================================================== */
 
 .k-acts {
@@ -11,33 +12,34 @@
 .k-acts__row {
   display: grid;
   grid-template-columns: repeat(var(--k-acts-cols), minmax(0, 1fr));
-  gap: var(--space-2);
+  /* 每格左边的短竖线画在格子外面 1px：第一列的那根被裁掉 */
+  overflow: hidden;
+  border-top: 1px solid var(--color-separator);
 }
 
 .k-act {
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
   min-width: 0;
-  min-height: 58px;
-  padding: 6px 4px;
-  border-radius: var(--radius-md);
-  background: var(--color-fill);
-  box-shadow: inset 0 1px 0 var(--color-glass-highlight);
-  color: var(--color-text);
-  font: var(--type-label);
-  font-size: var(--text-caption-1);
-  letter-spacing: var(--tracking-label);
+  min-height: 46px;
+  padding: 0 4px;
+  color: var(--color-accent-text);
+  font: var(--weight-medium) var(--text-subhead) / 1.2 var(--font-sans);
   text-align: center;
   text-decoration: none;
   transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
 }
 
-.k-act .glyph {
-  color: var(--color-accent-text);
+.k-act::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: -1px;
+  width: 1px;
+  background: var(--color-separator);
 }
 
 .k-act__label {
@@ -48,39 +50,31 @@
 }
 
 .k-act[data-pressed] {
-  background-color: var(--color-fill-pressed);
+  background-color: var(--color-fill);
 }
 
 @media (hover: hover) {
   .k-act:hover:not([data-pressed]):not(:disabled) {
-    background-color: var(--color-fill-hover);
+    background-color: var(--color-fill);
   }
 }
 
 .k-act--primary {
-  background: var(--material-accent);
-  box-shadow: var(--shadow-accent-sm);
-  color: var(--color-on-accent);
-}
-
-.k-act--primary .glyph {
-  color: var(--color-on-accent);
-}
-
-.k-act--primary[data-pressed] {
-  background: var(--color-accent-pressed);
+  font-weight: var(--weight-semibold);
 }
 
 .k-act:disabled {
+  color: var(--color-text-3);
   cursor: not-allowed;
-  opacity: 0.42;
 }
 
-/* 紧凑：一排凸起的白圆 */
+/* 紧凑：一排纸片圆（图标） */
 .k-acts--compact .k-acts__row {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  overflow: visible;
+  border-top: 0;
 }
 
 .k-acts--compact .k-act {
@@ -93,9 +87,14 @@
   box-shadow: var(--shadow-raised);
 }
 
+.k-acts--compact .k-act::before {
+  display: none;
+}
+
 .k-acts--compact .k-act--primary {
-  background: var(--material-accent);
-  box-shadow: var(--shadow-accent-sm);
+  background: var(--color-accent);
+  box-shadow: none;
+  color: var(--color-on-accent);
 }
 
 .k-acts--compact .k-act[data-pressed] {

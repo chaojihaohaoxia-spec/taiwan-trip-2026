@@ -1,5 +1,5 @@
-// 底栏 · 液态玻璃（src/shell/TabBar.jsx + tabbar.css + tabbar-motion.js，手感照 iOS 26 Apple Music）：
-// 通透的玻璃（同屏 backdrop-filter 不增加）、选中块弹簧滑过去时沿运动方向拉长（半路截图 20% / 50% / 80%）、从 ＋ 后面穿过时变淡、
+// 底栏（src/shell/TabBar.jsx + tabbar.css + tabbar-motion.js，手感照 iOS 26 Apple Music；外观是「杂志纸本」的纸片，SPEC §11）：
+// 不透明的纸片（不用玻璃、底栏里没有 backdrop-filter）、选中块弹簧滑过去时沿运动方向拉长（半路截图 20% / 50% / 80%）、从 ＋ 后面穿过时变淡、
 // 真人轻点（按 40 / 90ms）不过冲、不出底栏、按下透镜浮起放大、长按松手照样切（iOS 长按后不发 click）、tab 不能被拖走、
 // 按住拖动选择（跟手、高亮、换格迟滞不抖、松手切过去、滑出取消、不停在 ＋ 上）、新页面代码慢时颜色不先回旧格、
 // 键盘 ← → / Home / End、滚动收小再展开（和顶栏、键盘弹起兼容；收小时打开 ＋ 面板从展开后的按钮长出来）、
@@ -130,7 +130,7 @@ async function slide(page, a, b, steps = 10) {
   }
 }
 
-test('玻璃：更通透（模糊 + 提饱和度 + 提亮，浅色底色 ≤40%）、折射边、悬浮阴影；同屏 backdrop-filter 只有底栏这一层，总数 ≤8；深色对应一套', async () => {
+test('纸片（「杂志纸本」，SPEC §11）：不透明的纸 + 细线框 + 很浅的悬浮阴影，不用玻璃（没有模糊、折射边）；底栏里一层 backdrop-filter 都没有，同屏总数 ≤8；深色对应一套', async () => {
   for (const colorScheme of ['light', 'dark']) {
     const app = await open({ colorScheme });
     try {
@@ -139,19 +139,24 @@ test('玻璃：更通透（模糊 + 提饱和度 + 提亮，浅色底色 ≤40%�
       const g = await page.$eval('.tabbar__glass', (el) => {
         const s = getComputedStyle(el);
         const rim = getComputedStyle(el, '::before');
-        return { filter: s.backdropFilter || s.webkitBackdropFilter, bg: s.backgroundImage, shadow: s.boxShadow, rim: rim.backgroundImage };
+        const canvas = getComputedStyle(document.documentElement).backgroundColor;
+        return { filter: s.backdropFilter || s.webkitBackdropFilter || 'none', bg: s.backgroundImage, edge: s.boxShadow, rim: rim.content === 'none' ? 'none' : rim.backgroundImage, canvas, shadow: getComputedStyle(el.parentElement.querySelector('.tabbar__shadow')).boxShadow };
       });
-      assert.match(g.filter, /blur\(14px\)/);
-      assert.match(g.filter, /saturate\(1[6-9]\d%|saturate\(1\.[6-9]/);
-      assert.match(g.filter, colorScheme === 'light' ? /brightness\(1\.0[5-9]/ : /brightness\(0\.[6-8]/);
-      assert.match(g.rim, /linear-gradient/, '有一圈渐变的折射边');
-      // 底栏里只有玻璃那一层开了 backdrop-filter（选中块、透镜、＋ 都没有）
+      assert.equal(g.filter, 'none', '不用玻璃：没有背景模糊');
+      const paper = /^linear-gradient\((rgba?\([^)]*\)), (rgba?\([^)]*\))\)$/.exec(g.bg);
+      assert.ok(paper && paper[1] === paper[2], `纸是纯色（两端同色、没有渐变）：${g.bg}`);
+      assert.ok(!/rgba\([^)]*, 0?\.\d+\)/.test(paper[1]), `纸是不透明的：${paper[1]}`);
+      assert.notEqual(paper[1], g.canvas, '纸片比页面的纸亮一点（分得出来）');
+      assert.match(g.edge, /inset/, '一根细线框');
+      assert.equal(g.rim, 'none', '没有折射边');
+      assert.notEqual(g.shadow, 'none', '很浅的悬浮阴影');
+      // 底栏里一层 backdrop-filter 都没有（纸、选中块、＋）
       const inBar = await page.$$eval(`${BAR} *`, (els) => els.filter((el) => {
         const s = getComputedStyle(el);
         const f = s.backdropFilter || s.webkitBackdropFilter;
         return f && f !== 'none';
       }).map((el) => el.className));
-      assert.deepEqual(inBar, ['tabbar__glass']);
+      assert.deepEqual(inBar, []);
       const all = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((el) => {
         const s = getComputedStyle(el);
         const f = s.backdropFilter || s.webkitBackdropFilter;
@@ -753,7 +758,7 @@ test('滚动收小：往下滚收成更矮更窄的胶囊（半路截图形状�
   }
 });
 
-test('＋：按下放大（1.1）、松手回弹，不参与拖动选择；＋ 面板开着时底栏一直是完整的；收小时打开 ＋ 面板 / 更多菜单从按钮展开后的位置长出来', async () => {
+test('＋：按下放大（--tabbar-fab-press-grow，纸本 1.05）、松手回弹，不参与拖动选择；＋ 面板开着时底栏一直是完整的；收小时打开 ＋ 面板 / 更多菜单从按钮展开后的位置长出来', async () => {
   const app = await open();
   try {
     await ready(app);
@@ -761,10 +766,10 @@ test('＋：按下放大（1.1）、松手回弹，不参与拖动选择；＋ �
     const c = await slotCenters(page);
     await page.touchscreen.touchStart(c[2].x, c[2].y);
     await wait(250);
-    const s = await page.$eval(T('shell-fab'), (el) => ({ scale: getComputedStyle(el).scale, pressed: el.hasAttribute('data-pressed') }));
+    const s = await page.$eval(T('shell-fab'), (el) => ({ scale: getComputedStyle(el).scale, pressed: el.hasAttribute('data-pressed'), grow: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tabbar-fab-press-grow')) }));
     await shotBar(page, 'fab-press');
     assert.equal(s.pressed, true);
-    assert.ok(Math.abs(Number(s.scale) - 1.1) < 0.01, `＋ 按下放大：${s.scale}`);
+    assert.ok(s.grow > 1 && Math.abs(Number(s.scale) - s.grow) < 0.01, `＋ 按下放大到 ${s.grow}：${s.scale}`);
     assert.equal((await lensState(page)).up, false, '按 ＋ 不动选中块');
     await page.touchscreen.touchEnd();
     await page.waitForFunction(() => location.hash.endsWith('?sheet=fab'));
@@ -776,11 +781,12 @@ test('＋：按下放大（1.1）、松手回弹，不参与拖动选择；＋ �
       const r = el.getBoundingClientRect();
       return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     });
-    // ＋ 面板：拨到第 0 帧读色层（从按钮的样子出发）；更多菜单：圆心整个过程都不动（clip-path circle 的 at），打开时读一次
+    // ＋ 面板：拨到第 0 帧读形状（阴影层，从按钮的样子出发）；更多菜单：圆心整个过程都不动（clip-path circle 的 at），打开时读一次
     const fabOrigin = async () => {
       const cap = await captureAt(app, () => page.click(T('shell-fab')), { selector: '.ov-panel', progress: 0, evaluate: () => null });
       try {
-        return await centerOf('.ov-panel-tint');
+        // 阴影层逐帧跟着裁出来的形状（纸本的 ＋ 面板长出来时不盖按钮色，色层不动，读阴影层）
+        return await centerOf('.ov-panel-shadow');
       } finally {
         await release(cap);
       }

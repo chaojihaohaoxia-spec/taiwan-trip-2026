@@ -1,9 +1,9 @@
 /* =====================================================================
-   ui/IconButton.css：圆形图标按钮（.icon-btn）。A 液态玻璃：
-     fill（默认） 凸起的白圆（--color-raised + 顶部高光、细边），图标墨色
+   ui/IconButton.css：圆形图标按钮（.icon-btn）。「杂志纸本」：
+     fill（默认） 纸片圆（--color-raised + 一根细线），图标墨色
      tinted       强调色浅底 + 强调色图标
-     filled       强调色渐变 + 柔光（像悬浮加号）
-     glass        真玻璃小圆（浮在光场上的顶栏搜索按钮）：backdrop-filter + 投影 + 高光
+     filled       实色海色（底栏的 ＋），没有渐变、没有发光
+     glass        只是一个图标（顶栏的搜索、返回）：透明底、没有边；按下一层很浅的墨
      plain        透明，强调色图标
    ===================================================================== */
 
@@ -90,8 +90,7 @@
   --icon-btn-shadow: 0 0 0 0 transparent;
 }
 
-/* 实心：强调色渐变 + 同色柔光（样稿的悬浮加号）。底色仍写实心的强调色：
-   从它长出来的面板（overlay/AnchoredPanel）读这个底色做色层 */
+/* 实心：实色海色（底栏的 ＋）。底色写实心的强调色：从它长出来的面板（overlay/AnchoredPanel）读这个底色做色层 */
 .icon-btn--filled {
   --icon-btn-bg: var(--color-accent);
   --icon-btn-fg: var(--color-on-accent);
@@ -105,15 +104,12 @@
   --icon-btn-image: linear-gradient(var(--color-fill-pressed), var(--color-fill-pressed)), var(--material-accent);
 }
 
-/* 真玻璃小圆：浮在光场 / 页面上（顶栏的搜索）。真的 backdrop-filter，同屏别放太多 */
+/* 只是一个图标（顶栏的搜索、返回）：纸上不要圆底和边 */
 .icon-btn--glass {
   --icon-btn-bg: transparent;
-  --icon-btn-image: var(--material-glass-strong);
-  --icon-btn-bg-hover: color-mix(in srgb, var(--color-glass-highlight) 24%, transparent);
-  --icon-btn-bg-pressed: var(--color-fill);
-  --icon-btn-shadow: var(--shadow-btn), var(--shadow-glass-edge);
-  -webkit-backdrop-filter: var(--glass-filter-sm);
-  backdrop-filter: var(--glass-filter-sm);
+  --icon-btn-bg-hover: var(--color-fill);
+  --icon-btn-bg-pressed: var(--color-fill-pressed);
+  --icon-btn-shadow: 0 0 0 0 transparent;
 }
 
 .icon-btn--plain {

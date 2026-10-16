@@ -2,7 +2,7 @@
 // app.jsx：应用外壳。
 //
 // 结构：
-//   <ShellFrame>       常驻框架（shell/Frame.jsx）：光场、顶栏（行程名 + 切换 + 搜索）、大标题、天数分段条、
+//   <ShellFrame>       常驻框架（shell/Frame.jsx）：纸（背景）、顶栏（行程名 + 切换 + 搜索）、大标题、天数分段条、
 //                      同步状态条、底栏胶囊（行程 / 地图 / ＋ / 账本 / 更多）、页面切换动效。
 //                      里面的 <main id="main"> 放当前页面（RouterView 按路由渲染，每页有自己的错误边界）
 //   <OverlayHost>      弹层宿主（overlay/）：按网址里的 ?sheet= 弹层栈显示弹层（外壳的 switcher / fab / menu 和

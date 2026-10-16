@@ -233,7 +233,7 @@ export default function SearchLayer() {
             </div>
           </div>
         ) : (
-          <p class="search-hint">搜这趟行程里的条目、地点、预订、联系人、贴士、待办和账目。越南语不用打声调，「pho」就能搜到 Phở。</p>
+          <p class="search-hint">越南语不用打声调</p>
         )}
       </div>
     </div>

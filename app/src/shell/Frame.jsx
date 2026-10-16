@@ -2,7 +2,7 @@
 // shell/Frame.jsx：常驻框架的骨架（首屏代码，只管摆位置；看得见、会动的部分在按需加载的 FrameUI.jsx）。
 //
 //   <div.shell data-kind …>
-//     光场（FrameUI 的 Field，fixed 在最下面）
+//     纸（FrameUI 的 Field，fixed 在最下面）
 //     滚动边缘、顶栏、同步状态条（FrameUI 的 Chrome；DOM 里在页面前面：Tab、读屏先到顶栏）
 //     <main#main>   大标题 + 天数分段条（FrameUI 的 HeadArea）→ 当前页面（RouterView，app.jsx 放进来）
 //     底栏、搜索结果层（FrameUI 的 ChromeBottom；Tab 顺序在页面内容后面）

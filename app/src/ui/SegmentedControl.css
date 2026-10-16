@@ -1,8 +1,7 @@
 /* =====================================================================
-   ui/SegmentedControl.css：分段控件（.seg）。A 液态玻璃：
-   轨道 = 往下凹的浅灰胶囊（--color-fill，卡片、面板里用）；选中块 = 近乎不透明的白色滑块（--color-thumb）
-   + 投影 + 顶部高光（--shadow-thumb），浮在轨道上。
-   直接放在光场上时加 class="seg--glass"：轨道换成真玻璃胶囊（backdrop-filter，样稿顶部的「概览 · D1 … D4」）。
+   ui/SegmentedControl.css：分段控件（.seg）。「杂志纸本」：
+   轨道 = 一根细线框起来的纸片（圆角 --radius-md，透明底）；选中块 = 一张纸片（--color-thumb）+ 深一点的细线框（--shadow-thumb），不投影。
+   class="seg--glass"（以前放在光场上的玻璃轨道）现在和普通的一样。
    选中块的位置：translateX(calc(--seg-index × 100%))（块宽 = 一段的宽），首帧无需 JS；
    动画和拖动期间由 JS 写内联 transform，结束后清掉。
    尺寸：sm 36 / md 44 / lg 52（含 4px 内边距）；每段的可点区域都 ≥44px（不够的用 ::after 往上下扩）。
@@ -22,8 +21,9 @@
   align-items: stretch;
   min-height: var(--seg-h);
   padding: var(--seg-pad);
-  border-radius: var(--radius-pill);
-  background: var(--color-fill);
+  border-radius: var(--radius-md);
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--color-border);
   isolation: isolate;
   touch-action: pan-y;
   -webkit-user-select: none;
@@ -53,14 +53,6 @@
   --seg-hit: 0px;
 }
 
-/* 放在光场上：真玻璃胶囊（顶部的天数分段条、地图上的筛选） */
-.seg--glass {
-  background: var(--material-glass);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
-  box-shadow: var(--shadow-glass-edge), var(--shadow-glass-glow);
-}
-
 .seg[aria-disabled="true"] {
   opacity: 0.45;
 }
@@ -72,7 +64,7 @@
   bottom: var(--seg-pad);
   left: var(--seg-pad);
   width: calc((100% - 2 * var(--seg-pad)) / var(--seg-n));
-  border-radius: var(--radius-pill);
+  border-radius: calc(var(--radius-md) - 3px);
   background: var(--color-thumb);
   box-shadow: var(--shadow-thumb);
   transform: translateX(calc(var(--seg-index) * 100%));
@@ -83,7 +75,6 @@
 
 .seg__thumb[data-pressed] {
   scale: var(--press-scale);
-  box-shadow: var(--shadow-pressed);
   /* 按下：短缓出立刻缩（和全站按压一致）；松手回到上面的弹簧 */
   transition: scale var(--press-duration) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
@@ -97,7 +88,7 @@
   gap: var(--space-1);
   min-width: 0;
   padding: 0 var(--space-3);
-  border-radius: var(--radius-pill);
+  border-radius: calc(var(--radius-md) - 3px);
   color: var(--color-text-2);
   font: var(--type-label);
   letter-spacing: var(--tracking-label);

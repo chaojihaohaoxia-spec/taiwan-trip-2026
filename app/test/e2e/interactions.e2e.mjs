@@ -768,9 +768,10 @@ test('交互 9 顶栏：往下滚，悬浮的玻璃条连续收拢成胶囊（�
     const r = await threeShots(app, { name: 'header-collapse', frame: tid('ch-frame'), trigger: scrollDown, selector: CH_PARTS, progress: 0.3, read });
     assert.equal(r.start.state, 'bar');
     assert.equal(r.mid.layers, 1, '只有一层玻璃（不是两层交叉淡入淡出）');
-    // A 皮肤：整条状态是离屏幕两边 16px 的悬浮玻璃条，圆角 = 半高
-    assert.ok(Math.abs(r.start.w - (r.start.full - 32)) < 1 && Math.abs(r.start.radius - r.start.hh / 2) < 0.5,
-      `展开时是悬浮的玻璃条：${r.start.w}/${r.start.full}，${r.start.hh} 高、圆角 ${r.start.radius}`);
+    // 整条状态是离屏幕两边各 --gutter 的悬浮纸条，圆角 = 半高
+    const gutter = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter')));
+    assert.ok(Math.abs(r.start.w - (r.start.full - 2 * gutter)) < 1 && Math.abs(r.start.radius - r.start.hh / 2) < 0.5,
+      `展开时是悬浮的纸条：${r.start.w}/${r.start.full}（两边各 ${gutter}），${r.start.hh} 高、圆角 ${r.start.radius}`);
     assert.ok(between(r.mid.w, r.end.w, r.start.w, 2) && r.mid.w < r.start.w - 2 && r.mid.w > r.end.w + 2, `半路宽度介于胶囊和整条之间：${r.mid.w}`);
     // 胶囊的圆角写的是 999px（实际按半高画），按实际画出来的半高比
     const pillRadius = Math.min(r.end.radius, r.end.hh / 2);
@@ -792,7 +793,7 @@ test('交互 9 顶栏：往下滚，悬浮的玻璃条连续收拢成胶囊（�
     assert.ok(between(up.mid.w, up.start.w, up.end.w, 2), `恢复半路：${up.mid.w}`);
     assert.equal(up.mid.transform, 'none');
     assert.equal(up.end.state, 'bar');
-    assert.ok(Math.abs(up.end.w - (up.end.full - 32)) < 1, `恢复成悬浮的玻璃条：${up.end.w}/${up.end.full}`);
+    assert.ok(Math.abs(up.end.w - (up.end.full - 2 * gutter)) < 1, `恢复成悬浮的纸条：${up.end.w}/${up.end.full}`);
     // 再收起，点胶囊展开
     await scrollDown();
     await app.idle();
@@ -835,7 +836,8 @@ test('交互 9 顶栏：收到一半反向，从当前形状、当前速度接�
       await page.evaluate(() => new Promise((r) => requestAnimationFrame(r)));
     }
     await page.waitForSelector('[data-testid="ch"][data-state="bar"]');
-    await sleep(600);
+    // 纸本的整条离屏幕两边各 --gutter（22px），收起的幅度比以前小一点：多看一会儿，折返看得更清楚
+    await sleep(1000);
     const w = await page.evaluate(() => window.__w);
     await cdp.send('Animation.setPlaybackRate', { playbackRate: 1 });
     const steps = w.slice(1).map((v, i) => v - w[i]);
@@ -1082,16 +1084,25 @@ test('勾选框：底色从中心弹出、对勾描线；划掉的线从左往�
   }
 });
 
-test('小胶囊：选中时对勾的宽度展开、文字被平滑推开', async () => {
+test('小胶囊：选中是墨色字 + 墨色细线框（「杂志纸本」：没有实心色块、没有对勾），宽度不变、不跳', async () => {
   const app = await open();
   try {
     const { page } = app;
     const sel = tid('chip-1');
-    const read = new Function(`return document.querySelector('${sel} .chip__check').getBoundingClientRect().width;`);
-    const r = await threeShots(app, { name: 'chip-select', frame: '#demo-chips .pv-group', trigger: () => page.click(sel), selector: '.chip__check', progress: 0.2, read });
-    assert.ok(r.start < 0.5 && r.end > 10, `对勾宽度 ${r.start} → ${r.end}`);
-    assert.ok(between(r.mid, r.start, r.end, 1), `半路 ${r.mid}`);
+    const look = () => page.$eval(sel, (el) => {
+      const cs = getComputedStyle(el);
+      const ink = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim();
+      return { w: el.getBoundingClientRect().width, bg: cs.backgroundColor, shadow: cs.boxShadow, color: cs.color, check: Boolean(el.querySelector('.chip__check')), ink };
+    });
+    const before = await look();
+    await page.click(sel);
+    await waitForAnimationsDone(page, 3000);
+    const after = await look();
     assert.equal(await page.$eval(sel, (el) => el.getAttribute('aria-pressed')), 'true');
+    assert.equal(after.check, false, '没有对勾');
+    assert.match(after.bg, /rgba\(0, 0, 0, 0\)|transparent/, `选中也是透明底：${after.bg}`);
+    assert.notEqual(after.shadow, before.shadow, '选中后细线框变了（墨色）');
+    assert.ok(Math.abs(after.w - before.w) < 3, `选中前后宽度差不多（文字不被推开）：${before.w} → ${after.w}`);
     app.assertClean();
   } finally {
     await app.close();

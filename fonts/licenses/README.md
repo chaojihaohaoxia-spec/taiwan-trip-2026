@@ -1,4 +1,4 @@
-# static/fonts/ —— 网页字体（P2「杂志宋体」）
+# static/fonts/ —— 网页字体（「杂志纸本」的三种字：宋体、Instrument Serif、系统字体）
 
 全部自托管、全部 **SIL Open Font License 1.1**（可以免费商用、嵌入网页、子集化）。授权原文在 `licenses/`，随字体一起分发。
 这里的 `.woff2` 和 `fonts.json`、以及 `src/styles/fonts.css` 都是 `scripts/fonts/build-fonts.py` 生成的，**别手改**。
@@ -7,16 +7,15 @@
 
 | 字体（CSS font-family） | 版本 | 用在哪 | 文件 | 来源 |
 |---|---|---|---|---|
-| 思源宋体 `Noto Serif SC` 600 | 2.003 | 大标题、卡片标题、行程名、菜单 / 面板标题、大按钮（只在 ≥15px 用） | `noto-serif-sc-600-*.woff2`（54 片） | GitHub Releases：<https://github.com/notofonts/noto-cjk/releases/tag/Serif2.003>（`14_NotoSerifSC.zip` 里的 `SubsetOTF/SC/NotoSerifSC-SemiBold.otf`） |
-| `Instrument Serif` 400 正体 / 斜体 | 1.000 | 大号数字：航班时间、金额、天气、数量；倒计时用斜体 | `instrument-serif-400.woff2`、`instrument-serif-400-italic.woff2` | Google Fonts 官方仓库 <https://github.com/google/fonts/tree/main/ofl/instrumentserif>（`InstrumentSerif-Regular.ttf`、`-Italic.ttf`） |
-| `Geist` 可变字重 100–900 | 1.800 | 小号日期、计数、时间轴时间、标签里的拉丁字母和数字（配 tabular-nums） | `geist.woff2` | npm `geist@1.7.2`（Vercel 官方包）的 `dist/fonts/geist-sans/Geist-Variable.ttf` |
+| 思源宋体 `Noto Serif SC` 600 | 2.003 | 页面大标题、区块 / 卡片标题、行程名、D1–D4、预订名、面板标题（只在 ≥15px 用；按钮不用宋体） | `noto-serif-sc-600-*.woff2`（54 片） | GitHub Releases：<https://github.com/notofonts/noto-cjk/releases/tag/Serif2.003>（`14_NotoSerifSC.zip` 里的 `SubsetOTF/SC/NotoSerifSC-SemiBold.otf`） |
+| `Instrument Serif` 400 正体 / 斜体 | 1.000 | 只给几个主数字：倒计时（斜体）、航班起降、账本总额、入住 / 退房时刻 | `instrument-serif-400.woff2`、`instrument-serif-400-italic.woff2` | Google Fonts 官方仓库 <https://github.com/google/fonts/tree/main/ofl/instrumentserif>（`InstrumentSerif-Regular.ttf`、`-Italic.ttf`） |
 | `P2 Figure One` 正体 / 斜体 | —（思源宋体 Regular 2.003 的「1」和「₫」） | 只接管 U+0031、U+20AB：Instrument Serif 的「1」像小写 l、又没有越南盾符号「₫」（以前回退到思源宋体 600，在细的数字旁边特别黑），大号数字里换成思源宋体 Regular 的字形（`size-adjust: 92%` 和其他数字等高）。斜体是同样两个字按 Instrument Serif 斜体的角度（13°）斜切出来的，「1」再收窄到 400 单位宽（倒计时「11 天」不会两个 1 隔得很开） | `p2-figure-one.woff2`、`p2-figure-one-italic.woff2` | 同思源宋体（`NotoSerifSC-Regular.otf`；斜体由 `build-fonts.py` 的 `slanted_font()` 生成） |
 
-不用 Geist Mono（时间轴改用 Geist + `tabular-nums`）。正文、说明、用户输入用系统字体（苹方），不下载。
+正文、说明、按钮、标签、日期、小号数字、用户输入都用系统字体（苹方 / SF，自带等宽数字），不下载。以前的 Geist 已经去掉（三种字就够）。
 CSS 里怎么用见 `src/styles/README.md`「字体」：`--font-serif` / `--font-figure` / `--font-figure-italic` / `--font-label`。
 
-版权：思源宋体 © 2017-2024 Adobe；Instrument Serif © 2022 The Instrument Serif Project Authors；Geist © 2023 Vercel, in collaboration with basement.studio。
-三者的许可证里都没有保留字体名（Reserved Font Name），所以子集化后可以沿用原名。字体文件里保留了版权（name ID 0）和许可证说明（name ID 13 / 14）。
+版权：思源宋体 © 2017-2024 Adobe；Instrument Serif © 2022 The Instrument Serif Project Authors。
+两者的许可证里都没有保留字体名（Reserved Font Name），所以子集化后可以沿用原名。字体文件里保留了版权（name ID 0）和许可证说明（name ID 13 / 14）。
 
 ## 思源宋体为什么切成 54 片
 
@@ -52,7 +51,7 @@ CSS 里怎么用见 `src/styles/README.md`「字体」：`--font-serif` / `--fon
 
 - `src/styles/fonts.css` 用 `url("../../static/fonts/<文件>.woff2")` 引字体；`npm run build` / `npm run dev` 里 esbuild 把它们复制进
   `assets/<文件>-<内容哈希>.woff2`（`scripts/lib/bundle.mjs` 的 file loader），文件名带哈希，内容变了地址就变。
-- `index.html` 预加载 3 个文件（`fonts.json` 里 `preload: true` 的：Instrument Serif 正体、Geist、P2 Figure One 正体），
+- `index.html` 预加载 2 个文件（`fonts.json` 里 `preload: true` 的：Instrument Serif 正体、P2 Figure One 正体），
   打包后的文件名由 `scripts/fonts/preload.mjs` 算（和 esbuild 一致）。思源宋体的分片不预加载；斜体（Instrument Serif 斜体、P2 Figure One 斜体）
   只有倒计时这类少数地方用，也不预加载（登录页、行程列表、设置页用不到，以前白下载 16 KB），第一次用到时下载、Service Worker 缓存。
 - 全部 `font-display: swap`：字体没到之前先用系统字体显示，到了再换。
@@ -65,7 +64,7 @@ CSS 里怎么用见 `src/styles/README.md`「字体」：`--font-serif` / `--fon
 
 依赖：Python 3.9+、`pip3 install --user fonttools brotli`（fonttools 4.60 测过）。
 
-1. 把原始字体放在一个目录里（不进仓库）：`NotoSerifSC-SemiBold.otf`、`NotoSerifSC-Regular.otf`、`InstrumentSerif-Regular.ttf`、`InstrumentSerif-Italic.ttf`、`Geist-Variable.ttf`（下载地址见上表；脚本会在子目录里递归找）。
+1. 把原始字体放在一个目录里（不进仓库）：`NotoSerifSC-SemiBold.otf`、`NotoSerifSC-Regular.otf`、`InstrumentSerif-Regular.ttf`、`InstrumentSerif-Italic.ttf`（下载地址见上表；脚本会在子目录里递归找）。
 2. 在 `app/` 目录运行：
 
    ```bash

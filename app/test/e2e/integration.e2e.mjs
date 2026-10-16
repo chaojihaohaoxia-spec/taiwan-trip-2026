@@ -194,7 +194,8 @@ test('页面之间的跳转：概览 → 天 → 条目展开；搜索 → 条�
     // 概览「现在」大卡的标题行 → 那一天并展开那一条
     await page.waitForSelector(T('page-trip'));
     await page.waitForFunction(() => location.hash.startsWith('#/t/demo-island'), { timeout: 8000 });
-    const timelineRow = await page.waitForSelector('[data-testid="ov-timeline"] a[href*="?item="], [data-testid="ov-timeline"] [href*="item="]', { timeout: 8000 });
+    // 概览上不再有今天的时间轴缩略（「杂志纸本」：和那一天的页面重复），从「现在」大卡的标题行点进去
+    const timelineRow = await page.waitForSelector('[data-testid="ov-now-title"][href*="item="]', { timeout: 8000 });
     const target = await timelineRow.evaluate((el) => el.getAttribute('href'));
     const itemId = new URLSearchParams(target.split('?')[1]).get('item');
     await timelineRow.click();

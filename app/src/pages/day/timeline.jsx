@@ -2,7 +2,7 @@
 // pages/day/timeline.jsx：时间轴（SPEC §5.3）。
 //
 //   <Timeline …/>                主方案：每条一张原地展开的卡（ui/ExpandableCard + useAccordion，一次只开一张，标题行不跑），
-//                                左边一栏是时间（Geist 等宽数字），中间一条竖线和圆点；行程中的那一天有「现在」指示线、当前条目高亮
+//                                左边一栏是时间（系统字体等宽数字），中间一条竖线和圆点；行程中的那一天有「现在」指示线、当前条目高亮
 //   <AltList …/>                 当天通用的备选 / 雨天方案（没挂在哪条主方案下的），时间轴后面单独一组，同样的卡
 //   <TimelineItem …/>            一条：收起 = 时间 + 图标 + 标题 + 地点（怎么过去的一句话）+ 一个标签（进行中 / 已完成 / 待确认 / 有备选）；
 //                                展开 = 说明、怎么过去、费用估算、步行路线、链接、关联预订、相关贴士、相关待办、实际情况，
@@ -432,12 +432,12 @@ function PrimaryContent({ item, ctx, place, booking, transport, current, remaini
 // ---------------------------------------------------------------------
 
 /**
- * @param {{ item: object, ctx: object, alts?: object[], current?: boolean, progress?: number, remaining?: string|null,
+ * @param {{ item: object, ctx: object, alts?: object[], current?: boolean, remaining?: string|null,
  *           open: boolean, onOpenChange: (o: boolean) => void, altId?: string|null, onAltChange?: (id: string|null) => void,
  *           general?: boolean }} props
  *   general：当天通用的备选（时间轴后面那一组）
  */
-export function TimelineItem({ item, ctx, alts: rawAlts = [], current = false, progress = 0, remaining = null, nowClock = '', nowZone = null, open, onOpenChange, altId = null, onAltChange, general = false }) {
+export function TimelineItem({ item, ctx, alts: rawAlts = [], current = false, remaining = null, nowClock = '', nowZone = null, open, onOpenChange, altId = null, onAltChange, general = false }) {
   const { store, timeZone } = ctx;
   // 备选在前、雨天方案在后（同类按数据顺序）
   const alts = [...rawAlts].sort((a, b) => (a.variant === 'rain' ? 1 : 0) - (b.variant === 'rain' ? 1 : 0));
@@ -471,7 +471,6 @@ export function TimelineItem({ item, ctx, alts: rawAlts = [], current = false, p
           )}
         </span>
       </span>
-      {current && progress > 0 && <span class="tl__progress" style={{ '--tl-progress': progress }} aria-hidden="true" />}
     </>
   );
 
@@ -553,7 +552,6 @@ export function Timeline({ primary, alternatives, ctx, acc, now, altView, onAltC
         ctx={ctx}
         alts={alternatives.get(item.id) || []}
         current={current}
-        progress={current ? now.info.progress : 0}
         remaining={current ? remainingText(item, now.minutes, nextStart) : null}
         nowClock={current ? now.clock : ''}
         nowZone={current ? now.zone : null}

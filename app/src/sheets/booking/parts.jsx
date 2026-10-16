@@ -26,7 +26,6 @@ import { MoneyText } from '../../kit/MoneyText.jsx';
 import { useNow } from '../../kit/useNow.js';
 import { bookingFreeCancel, flightView, hotelView, priceView, contactChannels, isPast, hasStarted, titleSegments } from './model.js';
 
-const chipIcon = (name) => <Glyph name={name} size={13} stroke={2.1} />;
 
 /**
  * 预订标题：按「 · 」分段，每段不从中间断开（两行时在间隔号后面换行：「Coral Bay Resort · / 豪华大床房带阳台」）。
@@ -110,14 +109,14 @@ export function FreeCancelChip({ booking, tripTz, short = false, size = 'sm' }) 
   const info = bookingFreeCancel(booking, { at, tripTz });
   if (!info) return null;
   return (
-    <Badge tone={info.tone} size={size} icon={chipIcon(info.glyph)} data-deadline={info.state} title={`免费取消截止：${info.when}`}>
+    <Badge tone={info.tone} size={size} data-deadline={info.state} title={`免费取消截止：${info.when}`}>
       {short ? info.short : info.label}
     </Badge>
   );
 }
 
 /**
- * 一排状态芯片：预订状态、付款状态（还没订且未付款、已取消且未付款时不显示付款）、进行中 / 入住中 / 已结束、免费取消。
+ * 一行状态（「杂志纸本」：一行字，中间自动加「·」，不带图标）：预订状态、付款状态（还没订且未付款、已取消且未付款时不显示付款）、进行中 / 入住中 / 已结束、免费取消。
  * @param {{ booking: object, tripTz?: string, size?: 'sm'|'md', deadline?: boolean, pastChip?: boolean, class?: string }} props
  *   pastChip：结束了的标「已结束」（行程整个结束以后每张都结束了，就不用标）
  */
@@ -134,9 +133,9 @@ export function BookingChips({ booking: b, tripTz, size = 'sm', deadline = true,
     <span class={className ? `bk-chips ${className}` : 'bk-chips'} data-testid={`chips-${b.id}`}>
       <StatusChip kind="booking" value={b.status} size={size} />
       {showPayment && <StatusChip kind="payment" value={b.payment_status} size={size} />}
-      {now && <Badge tone="accent" variant="solid" size={size} icon={chipIcon(b.kind === 'hotel' ? 'bed' : 'sparkle')} data-now="">{b.kind === 'hotel' ? '入住中' : b.kind === 'flight' ? '飞行中' : '进行中'}</Badge>}
-      {past && pastChip && <Badge tone="neutral" size={size} icon={chipIcon('check')} data-past="">已结束</Badge>}
-      {stale && pastChip && <Badge tone="neutral" size={size} icon={chipIcon('clock')} data-stale="">时间已过</Badge>}
+      {now && <Badge tone="accent" variant="solid" size={size} data-now="">{b.kind === 'hotel' ? '入住中' : b.kind === 'flight' ? '飞行中' : '进行中'}</Badge>}
+      {past && pastChip && <Badge tone="neutral" size={size} data-past="">已结束</Badge>}
+      {stale && pastChip && <Badge tone="neutral" size={size} data-stale="">时间已过</Badge>}
       {deadline && <FreeCancelChip booking={b} tripTz={tripTz} size={size} />}
     </span>
   );

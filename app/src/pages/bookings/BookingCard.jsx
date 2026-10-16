@@ -70,7 +70,6 @@ export function BookingCard({ booking: b, tripTz, at, getPlace, contact, current
         data-testid={`booking-open-${b.id}`}
       />
       <div class="bk-card__head">
-        <KindIcon type="booking" kind={kind} tile="sm" tone={b.status === 'idea' ? 'neutral' : 'accent'} />
         <div class="bk-card__titles">
           <h3 class="bk-card__title" id={`bk-t-${b.id}`}><TitleSegs title={b.title} /></h3>
           {/* 平台 · 时间：时间那段不拆开（折行时整段换到下一行，不会把「周五」「13:15」单独甩下去） */}
@@ -80,7 +79,7 @@ export function BookingCard({ booking: b, tripTz, at, getPlace, contact, current
             {sub.when && <span class="bk-card__when">{sub.when}</span>}
           </p>
         </div>
-        <span class="bk-card__chev" aria-hidden="true"><Glyph name="chev-r" size={18} stroke={2.2} /></span>
+        <span class="bk-card__chev" aria-hidden="true"><Glyph name="chev-r" size={15} stroke={2.2} /></span>
       </div>
 
       {kind === 'flight' && (b.start_at || b.details?.from_iata) && (

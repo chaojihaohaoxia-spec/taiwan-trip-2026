@@ -59,14 +59,35 @@ test('主题色补间：OKLCH 短色相路径，中途不发灰（OKLab 直线�
   assert.equal(mixHexOklch(null, '#c2255c', 0.3), null, '不是 #RRGGBB：前半段取起点');
 });
 
-test('光场换色：--ease-field 是样稿的曲线，光场层用它；减弱动态效果时五个光斑都不漂（含带 :nth-child 的第 2、4 个）', () => {
+test('纸（页面背景）：纯色纸 + 很淡的纸纹，没有光斑、不漂；换行程时外壳部件的主题色补间仍用 --dur-field / --ease-field', () => {
   const t = loadTokens();
   assert.equal(t.light['--ease-field'], 'cubic-bezier(0.4, 0, 0.2, 1)');
   assert.equal(t.light['--dur-field'], '1100ms');
-  const field = read('src/styles/field.css');
-  assert.match(field, /transition: opacity var\(--dur-field\) var\(--ease-field\)/);
-  const reduced = field.slice(field.indexOf('@media (prefers-reduced-motion: reduce)'));
-  assert.match(reduced, /\.light-field--drift \.light-field__blob:nth-child\(n\)/);
+  const field = read('src/styles/field.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.match(field, /\.paper \{[^}]*background: var\(--color-canvas\)/);
+  assert.match(field, /\.paper::after \{[^}]*opacity: var\(--paper-grain-opacity\)/);
+  assert.doesNotMatch(field, /light-field|blob|animation|@keyframes/, '没有光斑、没有漂移动画');
+  assert.ok(Number(t.light['--paper-grain-opacity']) <= 0.05, '纸纹很淡');
+  const jsx = read('src/shell/Field.jsx');
+  assert.match(jsx, /class="paper shell-field"/);
+});
+
+test('行程小封面（CoverDot）：不用 emoji、不画渐变，主题色纯色底 + 行程名首字（跳过空白、emoji、标点）', () => {
+  const src = read('src/shell/CoverDot.jsx');
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  assert.doesNotMatch(code, /emoji|gradient/i, '组件里不读 cover.emoji、不画渐变');
+  // coverInitial 是纯函数：从源码里取出来直接跑
+  const fn = /export function coverInitial\(title\) \{[\s\S]*?\n\}/.exec(src)[0].replace('export ', '');
+  const coverInitial = new Function(`${fn}; return coverInitial;`)();
+  assert.equal(coverInitial('富国岛 · 重阳 3 晚'), '富');
+  assert.equal(coverInitial('  台湾 2026'), '台');
+  assert.equal(coverInitial('🏝️ 椰影岛'), '椰', 'emoji 不算字');
+  assert.equal(coverInitial('「三城」'), '三', '标点不算字');
+  assert.equal(coverInitial('phu quoc'), 'P');
+  assert.equal(coverInitial('🏮'), '');
+  assert.equal(coverInitial(null), '');
+  const css = read('src/shell/frame.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.match(css, /\.cover-dot__char \{[^}]*var\(--font-serif\)/, '首字是宋体');
 });
 
 // ---------------------------------------------------------------------

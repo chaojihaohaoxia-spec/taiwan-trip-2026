@@ -1,16 +1,23 @@
 /* =====================================================================
-   pages/trip/trip.css：行程概览（.ov）。样稿 P2-serif 的概览页：倒计时 + 航班的 .hero、待办、天气、四天安排（列表 / 网格）、
-   进行中的「现在 / 接下来」、回顾。只用 tokens.css 的变量；卡片本体是 kit/Card（.k-card），这里只排卡片里的内容。
+   pages/trip/trip.css：行程概览（.ov）。「杂志纸本」：倒计时 + 航班、待办、天气、四天目录（列表 / 网格）、
+   进行中的「现在 / 接下来」、回顾。内容直接排在纸上、细线分组（kit/Card），只有「现在」是一张细线框的纸片。
+   只用 tokens.css 的变量；这里只排块里的内容。
    类名前缀 ov-。
    ===================================================================== */
 
 .ov {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   max-width: var(--content-max);
   margin: 0 auto;
   padding: var(--space-2) var(--gutter) 0;
+}
+
+/* 第一块紧贴天数条下面那根线，不再画第二根（「现在」是纸片，不算） */
+.ov > .k-card:first-child:not(.ov-now) {
+  padding-top: 10px;
+  border-top: 0;
 }
 
 /* 加载完的那一下：卡片错落淡入（只在从骨架变成真内容时播；换页由外壳的动效负责） */
@@ -87,17 +94,16 @@
   color: var(--color-success-text);
 }
 
-/* 卡片里一行文字链接（预订详情 ›、去账本 ›） */
+/* 块里一行文字链接（预订详情 ›）：和纸上的其他内容对齐 */
 .ov-textlink {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  width: calc(100% + 20px);
+  width: 100%;
   min-height: var(--tap-min);
-  margin: 0 -10px;
-  padding: 0 10px;
-  border-radius: var(--radius-md);
+  margin: 0;
+  padding: 0;
   color: var(--color-accent-text);
   font: var(--type-label);
   font-size: var(--text-subhead);
@@ -106,7 +112,7 @@
   text-decoration: none;
 }
 
-/* 卡片标题区右边的小胶囊链接（相册 ›、全部地点 ›） */
+/* 块标题右边的文字链接（相册 ›、全部地点 ›）：海色字，没有底 */
 .ov-cardlink {
   position: relative;
   display: inline-flex;
@@ -114,9 +120,8 @@
   align-items: center;
   gap: 2px;
   min-height: 32px;
-  padding: 0 6px 0 12px;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent-soft);
+  padding: 0 2px 0 8px;
+  border-radius: var(--radius-sm);
   color: var(--color-accent-text);
   font: var(--type-label);
   font-size: var(--text-footnote);
@@ -131,7 +136,7 @@
   inset: -6px -4px;
 }
 
-/* ---------- 倒计时 + 航班（样稿 .hero） ---------- */
+/* ---------- 倒计时 + 航班 ---------- */
 .ov-hero__main {
   display: flex;
   flex-wrap: wrap;
@@ -147,16 +152,13 @@
   align-items: center;
 }
 
-/* Instrument Serif 斜体大数字（「1」由 P2 Figure One 的斜体顶替）；主题色渐变的字 */
+/* Instrument Serif 斜体大数字（「1」由 P2 Figure One 的斜体顶替）；纯色的海色字（没有渐变） */
 .ov-cd__num {
   grid-row: 1 / 3;
   font-size: var(--text-figure-hero);
   line-height: 0.82;
   padding: 0 0.1em 0 0.02em;
-  background: linear-gradient(165deg, var(--color-accent) 0%, var(--color-accent-text) 85%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-accent-text);
 }
 
 .ov-cd__num .roll__slot {
@@ -272,8 +274,7 @@ button.ov-fl {
   margin: var(--space-2) 0 2px;
   color: var(--color-text-2);
   font-size: var(--text-caption-1);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-label);
+  font-weight: var(--weight-medium);
 }
 
 .ov-todo {
@@ -301,15 +302,9 @@ button.ov-fl {
   margin: 0 -10px;
 }
 
+/* 截止：只标异常——没过期是灰字，过期才是砖红 */
 .ov-due {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
   color: var(--color-text-2);
-}
-
-.ov-due--warning {
-  color: var(--color-warning-text);
 }
 
 .ov-due--danger {
@@ -337,21 +332,15 @@ button.ov-fl {
 .ov-packing__line {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin: var(--space-3) 0 0;
-  font: var(--type-callout);
+  gap: 4px;
+  margin: 0;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
 }
 
 .ov-packing__num {
-  color: var(--color-accent-text);
-  font-size: var(--text-figure-3);
-  line-height: 1;
-}
-
-.ov-packing__pct {
-  margin-left: auto;
-  color: var(--color-text-2);
-  font-size: var(--text-footnote);
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
 }
 
 .ov-packing__owners {
@@ -371,11 +360,9 @@ button.ov-fl {
   grid-template-columns: 64px 28px minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-2);
-  width: calc(100% + 20px);
+  width: 100%;
   min-height: 46px;
-  margin: 0 -10px;
-  padding: 4px 10px;
-  border-radius: var(--radius-md);
+  padding: 4px 0;
   color: var(--color-text);
   text-decoration: none;
 }
@@ -393,15 +380,20 @@ button.ov-fl {
 .ov-wx__icon {
   display: grid;
   place-items: center;
-  color: var(--color-accent-2);
+  color: var(--color-text-2);
 }
 
+/* 天气、温度两列对齐（温度一列固定宽，几天的温度上下对得齐）；下雨概率另起一行 */
 .ov-wx__body {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
   align-items: baseline;
   gap: 2px 10px;
   min-width: 0;
+}
+
+.ov-wx__body > .ov-wx__note {
+  grid-column: 1 / -1;
 }
 
 .ov-wx__text {
@@ -410,7 +402,9 @@ button.ov-fl {
 
 .ov-wx__temp {
   font-size: var(--text-figure-5);
+  font-weight: var(--weight-medium);
   line-height: 1;
+  white-space: nowrap;
 }
 
 .ov-wx__rain {
@@ -419,10 +413,6 @@ button.ov-fl {
   gap: 2px;
   color: var(--color-text-2);
   font-size: var(--text-caption-1);
-}
-
-.ov-wx__rain--wet {
-  color: var(--color-info-text);
 }
 
 .ov-wx__note,
@@ -450,7 +440,7 @@ button.ov-fl {
 
 .ov-wx-today__icon {
   flex: none;
-  color: var(--color-accent-2);
+  color: var(--color-text-2);
 }
 
 .ov-wx-today__text {
@@ -461,7 +451,8 @@ button.ov-fl {
 }
 
 .ov-wx-today__temp {
-  font-size: var(--text-figure-2);
+  font-size: var(--text-title-2);
+  font-weight: var(--weight-medium);
   line-height: 1;
 }
 
@@ -470,49 +461,36 @@ button.ov-fl {
   font: var(--type-subhead);
 }
 
+/* 日出、日落、金色时刻：一行字（不是三个灰格） */
 .ov-sun {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 0;
 }
 
 .ov-sun__cell {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
   min-width: 0;
-  padding: 9px 12px;
-  border-radius: var(--radius-md);
-  background: var(--color-fill);
 }
 
 .ov-sun__cell i {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
   color: var(--color-text-2);
-  font-size: var(--text-caption-1);
+  font: var(--type-footnote);
   font-style: normal;
 }
 
-.ov-sun__cell i .glyph {
-  color: var(--color-accent-2);
-}
-
 .ov-sun__cell b {
-  font-size: var(--text-figure-5);
-  font-weight: var(--weight-regular);
-  line-height: 1.15;
+  font: var(--weight-medium) var(--text-subhead) / 1.3 var(--font-sans);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-/* 区间的结束钟点：小一号跟在后面（「17:59–18:07」在窄格子里放不下两个大数字） */
+/* 区间的结束钟点跟在后面（「17:59–18:07」） */
 .ov-sun__end {
-  display: block;
-  color: var(--color-text-2);
-  font-size: var(--text-caption-1);
-  font-weight: var(--weight-medium);
-  line-height: 1.2;
+  font: inherit;
 }
 
 .ov-wx-today__left {
@@ -526,22 +504,9 @@ button.ov-fl {
   font-weight: var(--weight-semibold);
 }
 
-.ov-wx-today__note {
-  margin: 0;
-  color: var(--color-text-2);
-  font: var(--type-footnote);
-  line-height: 1.6;
-}
-
-.ov-wx-today__status {
-  margin: 0;
-  color: var(--color-text-3);
-  font-size: var(--text-caption-1);
-}
-
-/* ---------- 每天概要卡（列表 / 网格，FLIP） ---------- */
+/* ---------- 每天概要（列表像书的目录：D1 宋体、细线分隔，没有卡片；网格是细线框的纸片。FLIP） ---------- */
 .ov-days__list.vs {
-  gap: 10px;
+  gap: 0;
 }
 
 .ov-days__list.vs--grid {
@@ -553,8 +518,7 @@ button.ov-fl {
   display: grid;
   width: 100%;
   min-width: 0;
-  padding: 14px;
-  border-radius: var(--radius-lg);
+  padding: 14px 0;
   color: var(--color-text);
   text-align: left;
   text-decoration: none;
@@ -571,6 +535,7 @@ button.ov-fl {
 }
 
 .ov-day[data-view="grid"] {
+  padding: 14px;
   grid-template-columns: minmax(0, 1fr) 36px;
   grid-template-rows: 48px minmax(0, 1fr) auto;
   grid-template-areas: "badge go" "text text" "stay stay";
@@ -578,77 +543,55 @@ button.ov-fl {
   min-height: 160px;
 }
 
+/* 列表：每行上面一根细线；网格：细线框的纸片 */
 .ov-day__bg {
   position: absolute;
   inset: 0;
   z-index: var(--z-below);
-  border-radius: var(--radius-lg);
-  background: var(--material-card);
-  box-shadow: var(--material-card-edge);
+  box-shadow: inset 0 1px 0 var(--color-separator);
   transform-origin: 0 0;
-  transition: box-shadow var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out);
 }
 
-.ov-day__bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
+.ov-day[data-view="grid"] .ov-day__bg {
+  border-radius: var(--radius-xl);
+  background: var(--material-card);
+  box-shadow: var(--material-card-edge);
 }
 
 .ov-day[data-pressed] .ov-day__bg {
-  box-shadow: var(--material-card-edge), inset 0 0 0 999px var(--color-fill);
+  background-color: var(--color-fill);
 }
 
-/* 徽章：D1 用宋体自带的拉丁字母；颜色 7 天一轮，和地图同一套 */
+/* 徽章：墨色的「D1」（宋体自带的拉丁字母）+ 灰色小字日期，像书的目录；今天用海色 */
 .ov-day__badge {
   position: relative;
   grid-area: badge;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 1px;
   width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
-  /* 白字落在深色那一端：左上角只留一点亮，45% 以后就是深色调（强光下白字 ≥ 4.5:1，视觉评审 P1-1） */
-  background: var(--ov-dc2);
-  background: linear-gradient(150deg, color-mix(in oklab, var(--ov-dc1) 45%, var(--ov-dc2)) 0%, var(--ov-dc2) 45%);
-  box-shadow: 0 8px 18px -10px var(--ov-dc2), var(--shadow-highlight);
-  color: var(--color-on-tile);
+  color: var(--color-text);
   line-height: 1.1;
 }
 
-/* 第几天的颜色和地图同一套（kit/day-tone.js / tokens --color-day-N-deep：青、蓝、珊瑚、紫、玫红、琥珀、绿） */
-.ov-day__badge--1 { --ov-dc1: var(--color-tile-teal-1); --ov-dc2: var(--color-day-1-deep); }
-.ov-day__badge--2 { --ov-dc1: var(--color-tile-blue-1); --ov-dc2: var(--color-day-2-deep); }
-.ov-day__badge--3 { --ov-dc1: var(--color-tile-coral-1); --ov-dc2: var(--color-day-3-deep); }
-.ov-day__badge--4 { --ov-dc1: var(--color-tile-violet-1); --ov-dc2: var(--color-day-4-deep); }
-.ov-day__badge--5 { --ov-dc1: var(--color-day-5-deep); --ov-dc2: var(--color-day-5-deep); }
-.ov-day__badge--6 { --ov-dc1: var(--color-tile-amber-1); --ov-dc2: var(--color-day-6-deep); }
-.ov-day__badge--7 { --ov-dc1: var(--color-day-7-deep); --ov-dc2: var(--color-day-7-deep); }
-
 .ov-day__badge b {
-  font-size: var(--text-callout);
+  font-family: var(--font-serif);
+  font-size: var(--text-title-2);
+  font-weight: var(--weight-serif);
 }
 
 .ov-day__badge i {
+  color: var(--color-text-3);
   font-size: var(--text-caption-2);
   font-style: normal;
-  font-weight: var(--weight-medium);
   white-space: nowrap;
 }
 
 .ov-day[data-today] .ov-day__badge {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  color: var(--color-accent-text);
 }
 
 .ov-day__text {
@@ -714,47 +657,9 @@ button.ov-fl {
   display: grid;
   place-items: center;
   justify-self: end;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
-}
-
-/* ---------- 备选池 ---------- */
-.ov-pool {
-  display: flex;
-  flex-direction: column;
-}
-
-.ov-pool__row[data-focus] .k-row {
-  background: var(--color-accent-soft);
-}
-
-.ov-pool__add {
-  position: relative;
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 4px;
-  min-height: 32px;
-  padding: 0 12px 0 10px;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
-  font: var(--type-label);
-  font-size: var(--text-footnote);
-  letter-spacing: var(--tracking-label);
-  cursor: pointer;
-  transition: var(--press-transition);
-}
-
-.ov-pool__add::after {
-  content: "";
-  position: absolute;
-  inset: -6px -4px;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
 }
 
 /* ---------- 今晚住哪 ---------- */
@@ -772,9 +677,8 @@ button.ov-fl {
 }
 
 .ov-stay__when {
-  color: var(--color-accent-text);
-  font-size: var(--text-footnote);
-  font-weight: var(--weight-semibold);
+  color: var(--color-text-2);
+  font: var(--type-subhead);
 }
 
 .ov-stay__addr {
@@ -798,7 +702,19 @@ button.ov-fl {
   font-weight: var(--weight-semibold);
 }
 
-/* ---------- 现在 / 接下来 ---------- */
+/* ---------- 现在 / 接下来：一张细线框的纸片（整页唯一的一张） ---------- */
+.ov-now.k-card {
+  /* 上边留得少一点：眉标自己的行高已经带着一点空 */
+  padding: 10px 20px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-card);
+}
+
+.ov-now .k-card__eyebrow {
+  color: var(--color-accent-text);
+}
+
 .ov-now .k-card__body,
 .ov-now__swap {
   display: flex;
@@ -837,7 +753,7 @@ button.ov-fl {
 
 .ov-now__head {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 34px;
+  grid-template-columns: minmax(0, 1fr) 20px;
   align-items: center;
   gap: var(--space-3);
   width: calc(100% + 20px);
@@ -859,8 +775,8 @@ button.ov-fl {
 .ov-now__title {
   display: -webkit-box;
   overflow: hidden;
-  font-size: var(--text-title-3);
-  line-height: var(--leading-title-3);
+  font-size: var(--text-title-2);
+  line-height: var(--leading-title-2);
   letter-spacing: var(--tracking-display);
   text-wrap: pretty;
   word-break: normal;
@@ -879,12 +795,9 @@ button.ov-fl {
 .ov-now__chev {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
 }
 
 .ov-now__desc {
@@ -917,6 +830,16 @@ button.ov-fl {
   flex: 1;
 }
 
+/* 「完成」是细线框的次要按钮（整屏唯一的实心海色留给底栏的 ＋）；打勾那一刻照常变成实色 */
+.ov-now__done:not([data-state="success"]) {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-accent-text);
+  --btn-image: none;
+  --btn-bg-hover: var(--color-fill);
+  --btn-bg-pressed: var(--color-fill-pressed);
+  --btn-ring: inset 0 0 0 1px var(--color-border-strong);
+}
+
 .ov-now__noplace {
   display: flex;
   flex-wrap: wrap;
@@ -929,25 +852,24 @@ button.ov-fl {
   margin: 0;
 }
 
+/* 「接下来」：细线下面的一行（不是凹进去的一格） */
 .ov-now__next {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-height: var(--tap-min);
-  padding: 6px 12px;
-  /* 圆角同心：卡片 26 − 缩进 18 = 8（视觉评审 P2-17） */
-  border-radius: var(--radius-xs);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
+  margin-top: var(--space-1);
+  padding: 12px 0 0;
+  border-top: 1px solid var(--color-separator);
   color: var(--color-text);
   text-decoration: none;
 }
 
 .ov-now__next-label {
   flex: none;
-  color: var(--color-accent-text);
+  color: var(--color-text-2);
   font-size: var(--text-caption-1);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
 }
 
 .ov-now__next-time {
@@ -974,149 +896,10 @@ button.ov-fl {
 
 .ov-now__next .glyph:last-child {
   flex: none;
-  color: var(--color-accent-text);
-}
-
-/* ---------- 今天的时间轴缩略 ---------- */
-.ov-tl {
-  display: flex;
-  flex-direction: column;
-}
-
-.ov-tl__row {
-  display: grid;
-  grid-template-columns: 56px 14px 30px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-  width: calc(100% + 20px);
-  min-height: 46px;
-  margin: 0 -10px;
-  padding: 2px 10px;
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  text-decoration: none;
-}
-
-.ov-tl__row[data-state="current"] {
-  background: var(--color-accent-soft);
-}
-
-.ov-tl__time {
-  display: flex;
-  flex-direction: column;
-  color: var(--color-text-2);
-  font-size: var(--text-footnote);
-  font-weight: var(--weight-medium);
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-/* 结束钟点：第二行、小一号（和每天页的时间栏一样） */
-.ov-tl__end {
-  font-size: var(--text-caption-2);
-  opacity: 0.8;
-}
-
-/* 只有模糊时间（「傍晚」）：可以折行 */
-.ov-tl__time--label {
-  white-space: normal;
-  font-family: var(--font-sans);
-  font-size: var(--text-caption-1);
-}
-
-/* 在别的时区发生的条目：小标签「香港」（和每天页的时间栏一样） */
-.ov-tl__zone {
-  display: inline-block;
-  width: fit-content;
-  margin: 2px 0 0;
-  padding: 0 4px;
-  border-radius: var(--radius-xs);
-  background: var(--color-fill);
-  color: var(--color-text-2);
-  font: var(--type-caption-2);
-  font-weight: var(--weight-semibold);
-  line-height: 1.35;
-}
-
-
-.ov-tl__row[data-state="current"] .ov-tl__time {
-  color: var(--color-accent-text);
-}
-
-.ov-tl__rail {
-  position: relative;
-  display: block;
-  align-self: stretch;
-  width: 14px;
-}
-
-.ov-tl__rail i {
-  position: absolute;
-  top: -2px;
-  bottom: -2px;
-  left: 6px;
-  width: 2px;
-  background: var(--color-rail);
-}
-
-.ov-tl__row:first-child .ov-tl__rail i,
-.ov-tl__more + .ov-tl__row .ov-tl__rail i {
-  top: 50%;
-}
-
-.ov-tl__row:last-child .ov-tl__rail i,
-.ov-tl__row:has(+ .ov-tl__more) .ov-tl__rail i {
-  bottom: 50%;
-}
-
-.ov-tl__row[data-state="current"] .ov-tl__rail i {
-  background: var(--color-accent);
-}
-
-.ov-tl__title {
-  overflow: hidden;
-  font: var(--type-callout);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ov-tl__row[data-state="current"] .ov-tl__title {
-  font-weight: var(--weight-semibold);
-}
-
-.ov-tl__title--dim {
-  color: var(--color-text-3);
-  text-decoration: line-through;
-  text-decoration-color: var(--color-text-3);
-}
-
-.ov-tl__place {
-  color: var(--color-text-2);
-  font-size: var(--text-footnote);
-}
-
-.ov-tl__mark {
-  color: var(--color-success-text);
-}
-
-.ov-tl__row[data-state="skipped"] .ov-tl__mark {
   color: var(--color-text-3);
 }
 
-.ov-tl__more {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(100% + 20px);
-  min-height: var(--tap-min);
-  margin: 0 -10px;
-  border-radius: var(--radius-md);
-  color: var(--color-accent-text);
-  font-size: var(--text-footnote);
-  text-decoration: none;
-}
-
-/* ---------- 今天花了 / 总花费 ---------- */
+/* ---------- 总花费（回顾） ---------- */
 .ov-spend {
   display: flex;
   flex-direction: column;
@@ -1127,11 +910,6 @@ button.ov-fl {
   display: flex;
   flex-direction: column;
   gap: 2px;
-}
-
-.ov-spend__hkd {
-  font-size: var(--text-figure-2);
-  line-height: 1.1;
 }
 
 .ov-spend__label {
@@ -1154,17 +932,9 @@ button.ov-fl {
   gap: 6px;
 }
 
-.ov-spend__count,
-.ov-spend__latest {
+.ov-spend__count {
   color: var(--color-text-2);
   font-size: var(--text-caption-1);
-}
-
-.ov-spend__latest {
-  overflow: hidden;
-  margin: 0;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .ov-bars {
@@ -1222,65 +992,77 @@ button.ov-fl {
   flex: none;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   max-width: 30%;
   font: var(--type-footnote);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   text-align: center;
 }
 
+/* 纸本：小墨点（没有光环），中间一根细线（不做渐变彩线） */
 .ov-route__city i {
-  width: 12px;
-  height: 12px;
+  width: 7px;
+  height: 7px;
   border-radius: var(--radius-round);
-  background: var(--color-accent);
-  box-shadow: 0 0 0 4px var(--color-accent-soft);
+  background: var(--color-text-2);
 }
 
 .ov-route__line {
   flex: 1;
-  height: 2px;
+  height: 1px;
   margin-bottom: 18px;
-  border-radius: 1px;
-  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2));
+  background: var(--color-border-strong);
 }
 
+/* 纸本：四个数排成一行字（数字 + 下面一行灰字，中间细竖线），不做带框的统计格 */
 .ov-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-  gap: var(--space-2);
-  margin-top: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-separator);
 }
 
-.ov-stat {
+.ov-stat,
+.ov-stat.material-raised,
+.ov-stat.material-inset {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-height: 64px;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 0 0 12px;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   color: var(--color-text);
   text-decoration: none;
   transition: var(--press-transition);
 }
 
+.ov-stat:first-child {
+  padding-left: 0;
+}
+
+.ov-stat + .ov-stat {
+  box-shadow: inset 1px 0 0 var(--color-separator);
+}
+
 .ov-stat b {
-  font-size: var(--text-figure-4);
-  font-weight: var(--weight-regular);
-  line-height: 1.1;
+  font-size: var(--text-title-3);
+  font-weight: var(--weight-medium);
+  line-height: 1.2;
 }
 
 .ov-stat span {
   color: var(--color-text-2);
   font: var(--type-caption-1);
+  white-space: nowrap;
 }
 
 .ov-stat__chev {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  color: var(--color-accent-text);
+  display: none;
 }
 
 .ov-settle + .ov-settle {

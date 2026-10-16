@@ -7,8 +7,8 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#dff1ed",
-  "theme_color": "#dff1ed",
+  "background_color": "#f4f1ea",
+  "theme_color": "#f4f1ea",
   "categories": [
     "travel",
     "lifestyle"

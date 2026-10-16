@@ -7,29 +7,29 @@
 //   ForecastCard    目的地天气预报（每天一行，useTripWeather；超出 16 天「出发前一周可看」）
 //   TodayWeatherCard 今天的天气和日出日落（进行中）
 //   DaysSection     每天概要卡（列表 ↔ 网格，FLIP），点进那一天
-//   PoolCard        备选池（没排进哪天的条目），「排进」某一天（小菜单），?item= 标出并滚到那一条
 //   StayCard        今晚住哪（酒店 + 导航 / 叫 Grab / 给司机看 / 打电话）
 //   FlightCard      回程航班（最后一天）
 //   OverviewSkeleton 加载中的骨架
 // =====================================================================
 
 import { Fragment } from 'preact';
-import { useEffect, useMemo, useRef } from 'preact/hooks';
+import { useMemo } from 'preact/hooks';
 import {
-  Card, SectionHeader, ListRow, KindIcon, Glyph, StatusChip, PlaceActions, kindGlyph, kindLabel, useNow, formatLeft,
+  Card, SectionHeader, ListRow, KindIcon, Glyph, StatusChip, PlaceActions, kindLabel, useNow, formatLeft,
 } from '../../kit/index.js';
 import { Button, Checkbox, RollingNumber, Skeleton, Reveal, ViewSwitch, ViewToggle, Badge } from '../../ui/index.js';
-import { Popover, MenuList, MenuItem, MenuSeparator, useOverlayTrigger, toast } from '../../overlay/index.js';
-import { href, navigate } from '../../router/index.js';
+import { toast } from '../../overlay/index.js';
+import { href } from '../../router/index.js';
 import { formatDate, formatDuration } from '../../lib/datetime.js';
+import { dayLabel } from '../../shell/format.js';
 import { useTripWeather, weatherStatus, uvLevel } from '../../lib/services/weather.js';
 import { haptic } from '../../lib/native.js';
-import { openBookingSheet, openTodoSheet, openItemSheet } from '../../sheets/index.js';
+import { openBookingSheet, openTodoSheet } from '../../sheets/index.js';
 import { weatherGlyph } from '../../kit/glyphs.js';
 import { useHeldRows, usePref } from './hooks.js';
 import {
-  dueInfo, dayCardModel, dayCountWord, packingSummary, weatherLine, sunInfo, sunsetLeft, weatherNote, scheduleTarget, stayInfo,
-  flightView, stayShortName, itemTimeText,
+  dueInfo, dayCardModel, dayCountWord, packingSummary, weatherLine, sunInfo, sunsetLeft, stayInfo,
+  flightView, stayShortName,
 } from './model.js';
 import { FlightBlock } from './Countdown.jsx';
 
@@ -45,7 +45,6 @@ const READ_ONLY_NOTE = '你是只读成员，不能勾选';
  */
 function TodoRow({ todo, done, collapsing, at, timeZone, zoneOf, here, canEdit, onToggle, onCollapsed }) {
   const due = todo.due_at ? dueInfo(todo.due_at, { at, timeZone, displayZone: zoneOf?.(todo.due_at), hereZone: here }) : null;
-  const glyph = due ? 'clock' : kindGlyph('todo', todo.list);
   const hint = due ? due.text : (todo.note ? String(todo.note).split(/[。\n]/)[0].trim() : TODO_LIST_LABEL[todo.list] || '待办');
   return (
     <div
@@ -65,10 +64,7 @@ function TodoRow({ todo, done, collapsing, at, timeZone, zoneOf, here, canEdit, 
           disabled={!canEdit}
           label={todo.title}
           description={(
-            <span class={`ov-due${due ? ` ov-due--${due.tone}` : ''}`} data-state={due?.state || undefined}>
-              <Glyph name={glyph} size={14} stroke={2} />
-              <span>{hint}</span>
-            </span>
+            <span class={`ov-due${due ? ` ov-due--${due.tone}` : ''}`} data-state={due?.state || undefined}>{hint}</span>
           )}
           onChange={(checked) => onToggle(todo, checked)}
         />
@@ -230,7 +226,6 @@ export function DeadlinesCard({ list, urgent, bookings, timeZone }) {
 export function PackingCard({ todos, nameOf, tripId }) {
   const s = packingSummary(todos, { nameOf });
   if (!s.total) return null;
-  const pct = Math.round(s.ratio * 100);
   return (
     <Card
       title="打包进度"
@@ -241,7 +236,8 @@ export function PackingCard({ todos, nameOf, tripId }) {
       testId="ov-packing"
       data-left={s.left}
     >
-      <div class="ov-bar" role="progressbar" aria-valuemin="0" aria-valuemax={s.total} aria-valuenow={s.done} aria-label="已打包">
+      {/* 纸本：同一个数不写四遍——标题旁「0 / 27」+ 下面一行字；进度条只留给读屏 */}
+      <div class="ov-bar visually-hidden" role="progressbar" aria-valuemin="0" aria-valuemax={s.total} aria-valuenow={s.done} aria-label="已打包">
         <span class="ov-bar__fill" style={{ '--ov-ratio': s.ratio }} />
       </div>
       <p class="ov-packing__line">
@@ -250,7 +246,6 @@ export function PackingCard({ todos, nameOf, tripId }) {
             还有 <RollingNumber class="ov-packing__num t-figure" value={s.left} data-testid="ov-packing-left" /> 件没打包
           </>
         ) : '全部打包好了'}
-        <span class="ov-packing__pct t-label">{pct}%</span>
       </p>
       {s.owners.length > 1 && (
         <p class="ov-packing__owners t-label">
@@ -280,7 +275,9 @@ function SunTime({ value, testId }) {
 function WeatherRow({ day, entry, tripId, timeZone, at }) {
   const w = weatherLine(entry?.weather);
   const link = href({ name: 'day', params: { tripId, date: day.date } });
-  const dateText = formatDate(day.date, { timeZone, year: 'never', relative: true, at });
+  // 日期统一写「16 周五」（和天数条一样；不混「明天 / 后天」，几行对得齐、不折行）
+  const l = dayLabel(day.date);
+  const dateText = l.day ? `${l.day} ${l.weekday}` : formatDate(day.date, { timeZone, year: 'never', relative: true, at });
   let body;
   if (entry?.status === 'too-far') body = <span class="ov-wx__note">{entry.note || '出发前一周可看'}</span>;
   else if (entry?.status === 'loading') body = <Skeleton variant="text" width="60%" />;
@@ -313,12 +310,11 @@ function WeatherRow({ day, entry, tripId, timeZone, at }) {
 export function ForecastCard({ tripId, trip, days, query }) {
   const at = useNow(60_000);
   const w = useTripWeather(query);
-  const status = weatherStatus(w, { now: at });
   const byDate = new Map((w?.days || []).map((d) => [d.date, d]));
   const hasPoint = Boolean(query?.days?.some((d) => d.lat !== null && d.lat !== undefined));
   const loading = Boolean(w) && w.status === 'loading';
   return (
-    <Card title="目的地天气" glyph="sun" meta={hasPoint ? status.text : null} testId="ov-weather" data-status={w?.status || 'none'}>
+    <Card title="目的地天气" testId="ov-weather" data-status={w?.status || 'none'}>
       {!hasPoint ? (
         <p class="ov-note">给酒店或分段填上坐标，就能看到那几天的预报。</p>
       ) : (
@@ -341,7 +337,6 @@ export function TodayWeatherCard({ tripId, day, query, nowMinutes }) {
   const entry = w?.days?.find((d) => d.date === day.date) || null;
   const line = weatherLine(entry?.weather);
   const sun = sunInfo(day, entry?.weather);
-  const note = weatherNote(day);
   const left = sunsetLeft(sun.sunset, nowMinutes);
   const status = weatherStatus(w);
   const sunsetSoon = left !== null && left > 0 && left <= 150;
@@ -369,19 +364,17 @@ export function TodayWeatherCard({ tripId, day, query, nowMinutes }) {
             )}
           </div>
         </div>
-        <div class="ov-sun">
-          <span class="ov-sun__cell"><i class="t-label"><Glyph name="sun" size={13} stroke={2} />日出</i><b class="t-figure">{sun.sunrise || '—'}</b></span>
-          <span class="ov-sun__cell"><i class="t-label"><Glyph name="sunset" size={13} stroke={2} />日落</i><b class="t-figure" data-testid="ov-sunset">{sun.sunset || '—'}</b></span>
-          <span class="ov-sun__cell"><i class="t-label"><Glyph name="sparkle" size={13} stroke={2} />{sun.golden ? '金色时刻' : '蓝调'}</i><SunTime value={sun.golden || sun.blue} testId="ov-sun-extra" /></span>
-        </div>
+        <p class="ov-sun">
+          <span class="ov-sun__cell"><i>日出</i><b class="t-figure">{sun.sunrise || '—'}</b></span>
+          <span class="ov-sun__cell"><i>日落</i><b class="t-figure" data-testid="ov-sunset">{sun.sunset || '—'}</b></span>
+          <span class="ov-sun__cell"><i>{sun.golden ? '金色时刻' : '蓝调'}</i><SunTime value={sun.golden || sun.blue} testId="ov-sun-extra" /></span>
+        </p>
         {left !== null && left > 0 && (
           <p class={`ov-wx-today__left${sunsetSoon ? ' ov-wx-today__left--soon' : ''}`} data-testid="ov-sunset-left">
             离日落还有 {left >= 60 ? `${Math.floor(left / 60)} 小时 ${left % 60} 分` : `${left} 分钟`}
           </p>
         )}
         {uv?.advice && line && <p class="ov-note">紫外线{uv.text}：{uv.advice}</p>}
-        {note && <p class="ov-wx-today__note">{note}</p>}
-        <p class="ov-wx-today__status t-label">{status.text}</p>
       </div>
     </Card>
   );
@@ -412,14 +405,15 @@ function DayCard({ m, tripId, view }) {
       </span>
       <span class="ov-day__text" data-flip-key={`${m.id}:text`} data-flip="text">
         <span class="ov-day__title t-serif">{m.title}</span>
-        <span class="ov-day__sub">{m.sub}{m.route ? ` · ${m.route}` : ''}</span>
+        {/* 纸本：只写路线一句话（节奏、几条安排读屏里有；页面上像目录，不堆统计） */}
+        <span class="ov-day__sub">{m.route || m.sub}</span>
       </span>
       {m.stay && (
         <span class="ov-day__stay" data-flip-key={`${m.id}:stay`} data-flip="text">
-          <Badge tone="neutral" size="sm" icon={<Glyph name={m.stay.glyph} size={12} stroke={2.1} />}>{m.stay.text}</Badge>
+          <Badge tone="neutral" size="sm">{m.stay.text}</Badge>
         </span>
       )}
-      <span class="ov-day__go" data-flip-key={`${m.id}:go`} data-flip="position" aria-hidden="true"><Glyph name="chev-r" size={18} stroke={2.2} /></span>
+      <span class="ov-day__go" data-flip-key={`${m.id}:go`} data-flip="position" aria-hidden="true"><Glyph name="chev-r" size={15} stroke={2.2} /></span>
     </a>
   );
 }
@@ -446,87 +440,6 @@ export function DaysSection({ store, tripId, trip, days, today, returnFlight, ti
       <SectionHeader title={title || `${dayCountWord(models.length)}安排`} count={models.length} action={<ViewToggle value={view} onChange={(v) => { haptic('selection'); setView(v); }} size="md" />} />
       <ViewSwitch view={view} items={models} label="每天安排" renderItem={(m, v) => <DayCard m={m} tripId={tripId} view={v} />} class="ov-days__list" />
     </section>
-  );
-}
-
-// ---------------------------------------------------------------------
-// 备选池
-// ---------------------------------------------------------------------
-
-function PoolRow({ item, place, canEdit, focus }) {
-  const trigger = useOverlayTrigger('pool-day', { arg: item.id, haspopup: 'menu' });
-  const ref = useRef(null);
-  useEffect(() => {
-    if (focus && ref.current) ref.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }, [focus]);
-  const time = itemTimeText(item);
-  return (
-    <div ref={ref} class="ov-pool__row" data-focus={focus ? '' : undefined} data-testid="ov-pool-row" data-item-id={item.id}>
-      <ListRow
-        leading={<KindIcon type="item" kind={item.kind} tile labelled />}
-        title={item.title}
-        subtitle={[place?.name, time].filter(Boolean).join(' · ') || null}
-        wrap
-        value={canEdit ? (
-          <button type="button" class="ov-pool__add" data-press="scale" data-testid="ov-pool-schedule" aria-label={`把「${item.title}」排进某一天`} {...trigger.props}>
-            <Glyph name="cal-plus" size={16} stroke={2} />
-            <span>排进</span>
-          </button>
-        ) : undefined}
-      />
-    </div>
-  );
-}
-
-/**
- * @param {{ store: object, tripId: string, pool: object[], days: object[], canEdit: boolean, focusId: string|null, timeZone: string }} props
- */
-export function PoolCard({ store, tripId, pool, days, canEdit, focusId, timeZone }) {
-  const places = store.tables.places.value;
-  const schedule = async (itemId, day, index) => {
-    const items = store.tables.items.value;
-    const dayItems = [...items.values()].filter((i) => i.day_id === day.id && !i.deleted_at);
-    try {
-      const r = store.update('items', itemId, scheduleTarget(day.id, dayItems));
-      await r.saved;
-      haptic('success');
-      toast.success(`已排进 D${index + 1} · ${day.title || formatDate(day.date, { timeZone, year: 'never' })}`, {
-        action: { label: '查看', onClick: () => navigate({ name: 'day', params: { tripId, date: day.date }, query: { item: itemId } }) },
-      });
-    } catch (e) {
-      toast.error(e?.message || '没有保存上');
-    }
-  };
-  return (
-    <>
-      {pool.length > 0 && (
-        <Card title="备选池" meta="还没排进哪天" glyph="sparkle" padding="sm" testId="ov-pool">
-          <div class="ov-pool">
-            {pool.map((it) => (
-              <PoolRow key={it.id} item={it} place={it.place_id ? places.get(it.place_id) : null} canEdit={canEdit} focus={focusId === it.id} />
-            ))}
-          </div>
-          {!canEdit && <p class="ov-note">只读成员不能把条目排进某一天</p>}
-        </Card>
-      )}
-      <Popover sheetId="pool-day" label="排进哪一天" width={260}>
-        {({ arg }) => (
-          <MenuList label="排进哪一天">
-            {days.map((d, i) => (
-              <MenuItem
-                key={d.id}
-                label={`D${i + 1} · ${d.title || '还没有标题'}`}
-                detail={formatDate(d.date, { timeZone, year: 'never' })}
-                onSelect={() => schedule(arg, d, i)}
-                testId={`ov-pool-day-${i + 1}`}
-              />
-            ))}
-            <MenuSeparator />
-            <MenuItem label="编辑这一条" icon={<Glyph name="pen" size={18} />} onSelect={() => openItemSheet(arg)} testId="ov-pool-edit" />
-          </MenuList>
-        )}
-      </Popover>
-    </>
   );
 }
 
@@ -597,7 +510,7 @@ export function FlightCard({ flight, trip, at = null, kind = 'back' }) {
     <Card
       eyebrow={kind === 'out' ? '去程航班' : '回程航班'}
       title={view.flightNo ? `${view.flightNo}${view.airline ? ` · ${view.airline}` : ''}` : flight.title}
-      action={<Badge tone={view.status.tone} icon={<Glyph name={view.status.glyph} size={13} stroke={2.1} />}>{view.status.label}</Badge>}
+      action={<Badge tone={view.status.tone}>{view.status.label}</Badge>}
       testId={kind === 'out' ? 'ov-out-flight' : 'ov-return-flight'}
     >
       {line && <p class="ov-fl-left" data-testid="ov-flight-left"><Glyph name="clock" size={15} stroke={2} /><span>{line}</span></p>}

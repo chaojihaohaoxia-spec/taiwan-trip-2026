@@ -5,7 +5,7 @@
 //     leading={<IconButton icon={IconArrowLeft} label="返回" onClick={() => back()} />}
 //     trailing={<IconButton icon={IconSearch} label="搜索" />} />
 //
-// 样子（A 液态玻璃）：整条状态是离屏幕两边 16px、浮在页面上的玻璃条（圆角 = 半高，带投影和高光细边）；
+// 样子（「杂志纸本」）：整条状态是离屏幕两边、浮在页面上的纸条（圆角 = 半高，细线框）；
 //   胶囊是顶部正中 44px 高的小玻璃胶囊。两种状态的几何都由 CSS 变量决定（CollapsingHeader.css 的 --ch-*），
 //   JS 量一个看不见的探针元素（.ch__probe，和整条状态的玻璃同样的位置、圆角）拿到像素值，动画按这两组数字插值。
 //

@@ -1,8 +1,9 @@
 // =====================================================================
 // pages/bookings/Summary.jsx：预订页顶部。
 //
-//   Summary  出发前 / 进行中：四格——还没订 N、待确认 N、到店付 N（金额按币种 + 折合港币）、最近的免费取消截止（倒计时）。
-//            前三格点了就只看那一类（再点一下取消，网址 ?only=），最后一格点了打开那个预订。是 0 的格子不能点，写一句「都订好了」。
+//   Summary  出发前 / 进行中（「杂志纸本」：一行字，不是格子）：「2 还没订 · 2 待确认 · 1 到店付（约 HK$…）」，
+//            是 0 的那类不写；每一类点了就只看那一类（再点一下取消，网址 ?only=）；三类都没有就写「都订好了」。
+//            有要盯的免费取消截止时下面再一行「免费取消还剩 … · 预订名 ›」，点了打开那个预订（快到期赭石、不到一天砖红）。
 //            已结束：一张回顾——一共几个预订、花了多少（按币种）、取消了几个。
 //   Today    行程进行中（按类型分组时）：今天用得上的预订（今天开始的、今晚住的酒店），点了打开详情。
 // =====================================================================
@@ -11,9 +12,10 @@ import { Glyph } from '../../kit/Glyph.jsx';
 import { KindIcon } from '../../kit/KindIcon.jsx';
 import { MoneyText } from '../../kit/MoneyText.jsx';
 import { formatDate } from '../../lib/datetime.js';
+import { formatAmount } from '../../lib/money.js';
 import { FILTERS, sumHkdNote, todayNote } from '../../sheets/booking/model.js';
 import { TitleSegs } from '../../sheets/booking/parts.jsx';
-import { tileSub } from './view.js';
+import { tileSub, shortTitle } from './view.js';
 
 /** 一串金额：一种币种 → MoneyText（括号标港币）；几种 → 一种一行 + 「合计约 HK$…」 */
 export function MoneyList({ sum, size = 'sm' }) {
@@ -29,77 +31,72 @@ export function MoneyList({ sum, size = 'sm' }) {
   );
 }
 
+/** 到店付一共多少：只写折合港币（「约 HK$…」），原币金额在预订卡和详情里；全是港币就直接写港币 */
+function PropertySum({ sum }) {
+  if (!sum?.list?.length) return null;
+  const allHome = sum.list.every((x) => x.currency === 'HKD');
+  const text = allHome
+    ? formatAmount(sum.list.reduce((n, x) => n + x.amount, 0), 'HKD')
+    : sum.hkd ? `约 ${formatAmount(sum.hkd, 'HKD')}${sum.partial ? ' 起' : ''}` : null;
+  if (!text) return null;
+  return <span class="bkp-sum__money" data-testid="tile-property-sum">（{text}）</span>;
+}
+
 /**
  * @param {{ summary: object, only: string|null, onFilter: (key: string|null) => void, onOpen: (id: string, e: Event) => void }} props
  */
 export function Summary({ summary: s, only, onFilter, onOpen }) {
-  const tile = (key, list, emptyText, extra) => {
+  const item = (key, list, extra) => {
     const n = list.length;
     const active = only === key;
-    const disabled = !n && !active;
+    if (!n && !active) return null;
     return (
       <button
+        key={key}
         type="button"
-        class={`bkp-tile bkp-tile--${key}`}
+        class={`bkp-sum__item bkp-sum__item--${key}`}
         aria-pressed={active ? 'true' : 'false'}
-        disabled={disabled}
         data-press="scale"
         data-testid={`tile-${key}`}
-        aria-label={`${FILTERS[key]} ${n} 个${active ? '（正在只看这一类，再点一下看全部）' : n ? '，点了只看这一类' : ''}`}
+        title={n ? tileSub(list) : undefined}
+        aria-label={`${FILTERS[key]} ${n} 个${active ? '（正在只看这一类，再点一下看全部）' : '，点了只看这一类'}`}
         onClick={() => onFilter(active ? null : key)}
       >
-        <span class="bkp-tile__top">
-          <span class="bkp-tile__label">{FILTERS[key]}</span>
-          {!disabled && <span class="bkp-tile__chev" aria-hidden="true"><Glyph name={active ? 'x' : 'chev-d'} size={13} stroke={2.4} /></span>}
-        </span>
-        <span class="bkp-tile__num">
-          <b>{n}</b>
-          <span>个</span>
-        </span>
-        {extra || <span class="bkp-tile__sub">{n ? tileSub(list) : emptyText}</span>}
+        <b class="bkp-sum__n">{n}</b> {FILTERS[key]}
+        {extra}
       </button>
     );
   };
+  const items = [
+    item('idea', s.idea),
+    item('pending', s.pending),
+    item('property', s.property, s.property.length ? <PropertySum sum={s.propertySum} /> : null),
+  ].filter(Boolean);
   const d = s.nextDeadline;
   return (
     <section class="bkp-sum" aria-label="预订一览" data-testid="bookings-summary">
-      <div class="bkp-sum__grid">
-        {tile('idea', s.idea, '都订好了')}
-        {tile('pending', s.pending, '没有要等的')}
-        {tile('property', s.property, '没有到店付的', s.property.length ? (
-          <span class="bkp-tile__sub bkp-tile__sub--money" data-testid="tile-property-sum"><MoneyList sum={s.propertySum} /></span>
-        ) : null)}
-        {d ? (
-          <button
-            type="button"
-            class={`bkp-tile bkp-tile--deadline bkp-tile--${d.info.state}`}
-            data-press="scale"
-            data-testid="tile-deadline"
-            data-deadline={d.info.state}
-            aria-haspopup="dialog"
-            data-overlay-trigger="booking"
-            data-overlay-arg={d.booking.id}
-            aria-label={`最近的免费取消截止：${d.booking.title}，${d.info.label}。点了看这个预订`}
-            onClick={(e) => onOpen(d.booking.id, e)}
-          >
-            <span class="bkp-tile__top">
-              <span class="bkp-tile__label">免费取消</span>
-              <span class="bkp-tile__chev" aria-hidden="true"><Glyph name="chev-r" size={13} stroke={2.4} /></span>
-            </span>
-            <span class="bkp-tile__num bkp-tile__num--time">
-              {String(d.info.left).split(/(\d+)/).filter(Boolean).map((part, i) => (/^\d+$/.test(part) ? <b key={i}>{part}</b> : <span key={i}>{part.trim()}</span>))}
-            </span>
-            <span class="bkp-tile__sub">{d.booking.title}</span>
-            <span class="bkp-tile__when">{d.info.when} 截止</span>
-          </button>
-        ) : (
-          <div class="bkp-tile bkp-tile--deadline bkp-tile--none" data-testid="tile-deadline-none">
-            <span class="bkp-tile__top"><span class="bkp-tile__label">免费取消</span></span>
-            <span class="bkp-tile__num bkp-tile__num--icon"><Glyph name="check-circle" size={26} /></span>
-            <span class="bkp-tile__sub">没有要盯的截止</span>
-          </div>
-        )}
-      </div>
+      <p class="bkp-sum__line">
+        {items.length ? items : <span class="bkp-sum__done" data-testid="tile-all-done">都订好了，没有要等的</span>}
+      </p>
+      {d && (
+        <button
+          type="button"
+          class={`bkp-sum__deadline bkp-sum__deadline--${d.info.state}`}
+          data-press="scale"
+          data-testid="tile-deadline"
+          data-deadline={d.info.state}
+          aria-haspopup="dialog"
+          data-overlay-trigger="booking"
+          data-overlay-arg={d.booking.id}
+          title={`${d.info.when} 截止`}
+          aria-label={`最近的免费取消截止：${d.booking.title}，${d.info.label}。点了看这个预订`}
+          onClick={(e) => onOpen(d.booking.id, e)}
+        >
+          <span>免费取消还剩 {d.info.left}</span>
+          <span class="bkp-sum__deadline-title">{shortTitle(d.booking.title)}</span>
+          <Glyph name="chev-r" size={14} stroke={2.2} />
+        </button>
+      )}
     </section>
   );
 }

@@ -173,7 +173,7 @@ test('跳转目标：条目 → 那一天并带 ?item=；备选池的条目 → 
   const all = flattenResults(searchTrip(b, '椰子', { limit: 10 }));
   const t = Object.fromEntries(all.map((r) => [r.id, r.target]));
   assert.deepEqual(t.i1, { name: 'day', params: { tripId: 't1', date: '2027-01-10' }, query: { item: 'i1' } });
-  assert.deepEqual(t.i2, { name: 'trip', params: { tripId: 't1' }, query: { item: 'i2' } });
+  assert.deepEqual(t.i2, { name: 'places', params: { tripId: 't1' }, query: { by: 'day' } }, '备选池的条目到地点页按天看（概览上不再有备选池）');
   assert.deepEqual(t.p1, { name: 'places', params: { tripId: 't1' }, query: {}, sheets: [{ id: 'place', arg: 'p1' }] });
   assert.deepEqual(t.b1, { name: 'bookings', params: { tripId: 't1' }, query: {}, sheets: [{ id: 'booking', arg: 'b1' }] });
   assert.deepEqual(t.c1, { name: 'contacts', params: { tripId: 't1' }, query: { contact: 'c1' } });

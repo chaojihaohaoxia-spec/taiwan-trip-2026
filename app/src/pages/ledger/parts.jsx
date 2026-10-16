@@ -54,7 +54,7 @@ export function SummaryCard({ ledger, trip, fx, names, myId, members, tripId }) 
         {currencies.map((c, i) => (
           <div key={c.currency} class="lg-total" data-currency={c.currency}>
             {/* 折合港币用记账时记下的那份（和下面的合计、每一行同一套数，10-14 现场走查 P2-4） */}
-            <MoneyText amount={c.total} currency={c.currency} size={i === 0 ? '2xl' : 'lg'} hkd="below" fx={snap} hkdValue={home === 'HKD' ? c.home : null} />
+            <MoneyText amount={c.total} currency={c.currency} size={i === 0 ? '2xl' : 'lg'} serif={i === 0} hkd="below" fx={snap} hkdValue={home === 'HKD' ? c.home : null} />
             <span class="lg-total__count">{currencies.length > 1 ? `${currencyName(c.currency)} · ` : ''}{c.count} 笔</span>
           </div>
         ))}
@@ -72,7 +72,7 @@ export function SummaryCard({ ledger, trip, fx, names, myId, members, tripId }) 
             const lines = currencies.filter((c) => (c.paid?.[p.id] || 0) > 0);
             const homePaid = ledger.home?.paid?.[p.id] || 0;
             return (
-              <div key={p.id} class="lg-person material-inset" data-testid={`${T('person')}-${p.id}`}>
+              <div key={p.id} class="lg-person" data-testid={`${T('person')}-${p.id}`}>
                 <PersonChip name={p.name} color={p.color || member?.color} you={p.id === myId} />
                 <span class="lg-person__paid">付了</span>
                 <MoneyText amount={homePaid} currency={home} size="lg" hkd="none" />
@@ -87,10 +87,7 @@ export function SummaryCard({ ledger, trip, fx, names, myId, members, tripId }) 
         </div>
       )}
       {note && (
-        <p class="lg-fx" data-tone={note.tone} data-testid={T('fx')}>
-          <Glyph name="swap" size={14} />
-          <span>{note.text}</span>
-        </p>
+        <p class="lg-fx" data-tone={note.tone} data-testid={T('fx')}>{note.text}</p>
       )}
       {mismatched.length > 0 && tripId && (
         <a class="lg-issue" href={href({ name: 'ledger', params: { tripId }, query: { expense: mismatched[0] } })} data-press="highlight" data-testid={T('split-issue')}>
@@ -191,7 +188,6 @@ export function SettleCard({ outstanding, settlement, names, canEdit, onSettle, 
             }}
             data-testid={T('settle-btn')}
           />
-          <p class="lg-settle__hint">给完钱点一下：记下此刻的结算，之后新记的账从零开始算</p>
         </div>
       )}
     </Card>
@@ -221,7 +217,6 @@ export function CategoryFilter({ counts, total, value, onChange, people = [], pa
           size="sm"
           selected={value === c}
           count={counts[c]}
-          icon={<Glyph name={categoryGlyph(c)} size={14} />}
           onToggle={() => onChange(value === c ? null : c)}
           data-testid={`${T('filter')}-${c}`}
         >
@@ -237,7 +232,6 @@ export function CategoryFilter({ counts, total, value, onChange, people = [], pa
               size="sm"
               selected={payer === p.id}
               count={payerCounts[p.id] || 0}
-              icon={<i class="lg-filter__dot" style={{ '--lg-dot': p.color || undefined }} aria-hidden="true" />}
               onToggle={() => onPayer(payer === p.id ? null : p.id)}
               data-testid={`${T('filter-payer')}-${p.id}`}
             >
@@ -250,8 +244,6 @@ export function CategoryFilter({ counts, total, value, onChange, people = [], pa
   );
 }
 
-const CAT_GLYPH = Object.freeze({ 餐饮: 'bowl', 交通: 'car', 住宿: 'bed', 购物: 'bag', 门票: 'ticket', 活动: 'flag', 其他: 'wallet' });
-const categoryGlyph = (c) => CAT_GLYPH[c] || 'wallet';
 
 // ---------------------------------------------------------------------
 // 流水

@@ -1,6 +1,6 @@
 /* =====================================================================
    pages/contacts/contacts.css：联系人（.ct）。大标题、顶栏、底栏由外壳画，这里只排内容。
-   搜索框、筛选芯片、「相关」小胶囊、小标、闪一下在 ../tips/common.css（两页共用）。
+   搜索框、筛选芯片、「相关」文字链接、小标、闪一下在 ../tips/common.css（两页共用）。
    颜色、圆角、阴影、字体、动效只用 tokens.css 的变量。
    ===================================================================== */
 
@@ -123,18 +123,19 @@
   margin-top: 5px;
 }
 
-/* 紧急：图标块是危险色浅底（打电话的圆钮是危险色实心） */
-.ct-card[data-cat="emergency"] .ct-x > .xcard__heading .xcard__leading {
-  background: var(--color-danger-soft);
+/* 紧急：只把组标题写成砖红（拨号圆钮和别的组一样是细线框，SPEC §11「只标异常」） */
+.ct-group[data-cat="emergency"] > .k-sec .k-sec__title {
   color: var(--color-danger-text);
 }
 
+/* 名字后面不留外边距：名字刚好能排在圆钮旁边时，一个 8px 的右外边距会让整行挤到圆钮下面（顶上空出一行，Sun World 那张）。
+   间距给后面的「今天」小字 */
 .ct-x__name {
-  margin-right: var(--space-2);
   overflow-wrap: anywhere;
 }
 
 .ct-x .pg-tags {
+  margin-left: var(--space-2);
   vertical-align: 1px;
 }
 
@@ -160,7 +161,7 @@
   overflow: clip;
   transition: max-height var(--spring-smooth-duration) var(--spring-smooth), opacity var(--dur-fast) var(--ease-out);
   color: var(--color-text);
-  /* 号码用 Geist 等宽数字（全站只剩订单号用系统等宽字，视觉评审 P2-18） */
+  /* 号码用系统字体的等宽数字（全站只剩订单号用系统等宽字，视觉评审 P2-18） */
   font: var(--weight-medium) var(--text-callout) / 1.35 var(--font-label);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
@@ -203,12 +204,12 @@
   opacity: 0;
 }
 
-/* ---------- 快捷圆钮：盖在标题行右边、箭头左边 ---------- */
+/* ---------- 快捷圆钮：盖在标题行右边、箭头左边。纸本：细线框的圆 + 海色图标（不做实心色块） ---------- */
 .ct-quick {
   position: absolute;
   top: 10px;
-  /* 标题行右内边距 10 + 箭头 34 + 间距 12 */
-  right: 56px;
+  /* 标题行右内边距 4 + 箭头 20 + 间距 12（ui/ExpandableCard.css 的纸本标题行） */
+  right: 36px;
   z-index: var(--z-raised);
   display: flex;
   gap: 6px;
@@ -221,51 +222,26 @@
   width: 44px;
   height: 44px;
   border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--color-border);
   color: var(--color-accent-text);
   transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
 }
 
 .ct-qbtn[data-pressed] {
-  background: var(--color-raised-pressed);
+  background: var(--color-fill-pressed);
 }
 
 @media (hover: hover) {
   .ct-qbtn:not([data-pressed]):hover {
-    background: var(--color-raised-hover);
+    background: var(--color-fill);
   }
 }
 
-.ct-qbtn--whatsapp {
-  color: var(--color-success-text);
-}
-
+/* WhatsApp / Zalo：次要灰图标（打电话是海色，一眼分得出先按哪个） */
+.ct-qbtn--whatsapp,
 .ct-qbtn--zalo {
-  color: var(--color-info-text);
-}
-
-.ct-qbtn--primary {
-  background: var(--material-accent);
-  box-shadow: var(--shadow-accent-sm);
-  color: var(--color-on-accent);
-}
-
-.ct-qbtn--primary[data-pressed] {
-  background: var(--color-accent-pressed);
-}
-
-@media (hover: hover) {
-  .ct-qbtn--primary:not([data-pressed]):hover {
-    background: var(--color-accent-hover);
-  }
-}
-
-.ct-qbtn--danger,
-.ct-qbtn--danger[data-pressed] {
-  background: var(--color-danger);
-  box-shadow: var(--shadow-1);
-  color: var(--color-on-danger);
+  color: var(--color-text-2);
 }
 
 /* ---------- 展开后的详情 ---------- */
@@ -273,7 +249,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-left: 52px;
 }
 
 .ct-nums,
@@ -326,20 +301,20 @@
   min-height: 58px;
   padding: 6px 4px;
   border-radius: var(--radius-md);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--color-border);
   color: var(--color-text);
   text-decoration: none;
   transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
 }
 
 .ct-act[data-pressed] {
-  background: var(--color-raised-pressed);
+  background: var(--color-fill-pressed);
 }
 
 @media (hover: hover) {
   .ct-act:not([data-pressed]):hover {
-    background: var(--color-raised-hover);
+    background: var(--color-fill);
   }
 }
 
@@ -349,12 +324,9 @@
   color: var(--color-accent-text);
 }
 
-.ct-act--whatsapp .ct-act__icon {
-  color: var(--color-success-text);
-}
-
+.ct-act--whatsapp .ct-act__icon,
 .ct-act--zalo .ct-act__icon {
-  color: var(--color-info-text);
+  color: var(--color-text-2);
 }
 
 .ct-act__label {
@@ -369,7 +341,7 @@
 
 .ct-act--primary {
   background: var(--material-accent);
-  box-shadow: var(--shadow-accent-sm);
+  box-shadow: none;
   color: var(--color-on-accent);
 }
 
@@ -387,16 +359,7 @@
   }
 }
 
-.ct-act--danger,
-.ct-act--danger[data-pressed] {
-  background: var(--color-danger);
-  box-shadow: var(--shadow-1);
-  color: var(--color-on-danger);
-}
-
-.ct-act--danger .ct-act__icon {
-  color: var(--color-on-danger);
-}
+/* 紧急类展开后的拨号：和别的组一样是实色海色（只有组标题是砖红） */
 
 .ct-hint {
   margin: -4px 0 0;
@@ -407,9 +370,7 @@
 
 .ct-note {
   margin: 0;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  background: var(--color-fill);
+  padding: 0;
   color: var(--color-text);
   font: var(--type-subhead);
   line-height: 1.55;
@@ -434,13 +395,6 @@
   content: "";
   position: absolute;
   inset: -12px -4px;
-}
-
-/* 窄屏：展开后的内容不再让出左边图标的位置（多留点宽给按钮） */
-@media (max-width: 380px) {
-  .ct-body {
-    padding-left: 0;
-  }
 }
 
 /* ---------- 添加 / 编辑入口 ---------- */

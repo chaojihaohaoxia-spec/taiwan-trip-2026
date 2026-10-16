@@ -1,1 +1,0 @@
-function i(e){let t=String(e||"").trim();if(!t)return{short:"",rest:""};let r=/\s*[·•｜|]\s*/.exec(t);return!r||r.index===0?{short:t,rest:""}:{short:t.slice(0,r.index).trim(),rest:t.slice(r.index+r[0].length).trim()}}function n(e){return i(e).rest}export{i as a,n as b};

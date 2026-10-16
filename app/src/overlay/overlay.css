@@ -3,7 +3,7 @@
    触发按钮上会变形的图标（加号 ↔ ×、三横线 ↔ ×、箭头上 ↔ 下）用 ui/MorphIcon，不在这里。
    只用 tokens.css 的变量；构建时自动进 overlay 层（盖过 ui 层，被 shell / pages 层覆盖）。
    动画大多由 JS（Web Animations）驱动，这里只写静止状态和少量 CSS 过渡。
-   A 皮肤：遮罩是带一点青灰的半透明 + 轻微虚化（--scrim-filter），弹层本身是真玻璃（各自的 CSS）；
+   「杂志纸本」：遮罩只是把页面压暗一点（--color-scrim，不虚化），弹层本身是不透明的纸（各自的 CSS）；
    关闭按钮是凸起的白圆；菜单行的图标在强调色浅底的小方块里，末尾的箭头在凸起的白圆里。
    ===================================================================== */
 
@@ -35,9 +35,6 @@
   position: absolute;
   inset: 0;
   background: var(--color-scrim);
-  /* 背后的页面轻轻虚化（样稿：弹层打开时整页像隔了一层磨砂） */
-  -webkit-backdrop-filter: var(--scrim-filter);
-  backdrop-filter: var(--scrim-filter);
   pointer-events: auto;
   /* 遮罩上的手势不滚动、不缩放页面 */
   touch-action: none;
@@ -96,7 +93,7 @@ html[data-ov-scroll-gutter] {
     color var(--dur-fast) var(--ease-out);
 }
 
-/* ---------- 关闭按钮（凸起的白圆 ×，样稿「记一笔」右上角） ---------- */
+/* ---------- 关闭按钮（纸片圆 × + 一根细线，「记一笔」右上角） ---------- */
 .ov-close {
   position: relative;
   flex: none;
@@ -153,11 +150,9 @@ html[data-ov-scroll-gutter] {
   flex: none;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-tile);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-2);
 }
 
 .ov-menu-item__text {
@@ -176,17 +171,14 @@ html[data-ov-scroll-gutter] {
   font: var(--type-caption-1);
 }
 
-/* 末尾的小箭头放在凸起的白圆里：一眼看得出能点 */
+/* 末尾一个灰色小箭头（没有底） */
 .ov-menu-item__chevron {
   flex: none;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
 }
 
 .ov-menu-item[data-tone="danger"] {
@@ -194,12 +186,10 @@ html[data-ov-scroll-gutter] {
 }
 
 .ov-menu-item[data-tone="danger"] .ov-menu-item__icon {
-  background: var(--color-danger-soft);
   color: var(--color-danger-text);
 }
 
 .ov-menu-item[aria-current="page"] {
-  background: var(--color-accent-soft);
   color: var(--color-accent-text);
 }
 

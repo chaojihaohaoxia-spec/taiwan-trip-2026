@@ -5,7 +5,7 @@
 | `main.jsx` | 入口：全局样式 → 开发模式加载 `preact/debug` → 主题 → 全站按压委托（`motion/press.js` 的 `delegatePress`）→ 渲染外壳 → `router.start()`；同时按需加载数据层并 `initData({ router })`（登录态、路由守卫）、接上撤销提示（`shell/undo-toast.js`）→ 第一页出来后淡出启动画面 → 注册 Service Worker |
 | `app.jsx` | 外壳：`<main id="main">`（RouterView，每页一个错误边界）+ 弹层宿主 `OverlayHost` + 更新提示 + 演示角标 |
 | `router/` | hash 路由（导航、历史、弹层参数 `?sheet=`、滚动恢复、过渡钩子、守卫） |
-| `styles/` | 设计变量 tokens.css + 全局基础 base.css；字体 fonts.css（生成的）、材质 materials.css、光场 field.css、字体角色 type.css |
+| `styles/` | 设计变量 tokens.css + 全局基础 base.css；字体 fonts.css（生成的）、材质 materials.css、纸（背景）field.css、字体角色 type.css |
 | `motion/` | 动效的物理和工具：弹簧、WAAPI 动画（可打断接力）、FLIP、共享元素形变（颜色和内容跟着形状走）、圆形扩散、按压（含回弹交接）、拖动和惯性、滚动锚定 |
 | `overlay/` | 弹层系统：底部面板、从按钮长出来的面板、全屏菜单、确认框、小菜单、Toast；弹层栈和网址联动 |
 | `ui/` | 基础组件和 10 个交互组件；`icons.js` / `icons-core.js` 图标入口 |

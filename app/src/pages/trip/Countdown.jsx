@@ -45,7 +45,7 @@ export function FlightBlock({ view, flight, trip, wide = false }) {
         openBookingSheet(flight.id, { trigger: e.currentTarget });
       }}
     >
-      <span class="ov-fl__times t-figure">
+      <span class="ov-fl__times t-figure-serif">
         <span class="ov-fl__time" data-testid="ov-flight-dep">{view.depTime}</span>
         <Glyph name="plane" size={16} stroke={2} class="ov-fl__plane" />
         <span class="ov-fl__time" data-testid="ov-flight-arr">
@@ -89,7 +89,7 @@ export function CountdownHero({ trip, flight, testId = 'ov-hero' }) {
 
   const status = view?.status;
   const action = status ? (
-    <Badge tone={status.tone} icon={<Glyph name={status.glyph} size={13} stroke={2.1} />} data-testid="ov-flight-status">{status.label}</Badge>
+    <Badge tone={status.tone} data-testid="ov-flight-status">{status.label}</Badge>
   ) : undefined;
 
   // 没有出发日期（阶段 undated）：没有可数的时刻；有日期但到点了（航班起飞 / 行程已开始、阶段还没切）：出发啦
@@ -121,7 +121,7 @@ export function CountdownHero({ trip, flight, testId = 'ov-hero' }) {
           <FlightBlock view={view} flight={flight} trip={trip} />
         ) : (
           <div class="ov-fl ov-fl--none" data-testid="ov-flight-none">
-            <span class="ov-fl__times t-figure">{trip?.start_date ? formatDate(trip.start_date, { timeZone: trip.timezone, year: 'never' }) : '——'}</span>
+            <span class="ov-fl__times t-figure-serif">{trip?.start_date ? formatDate(trip.start_date, { timeZone: trip.timezone, year: 'never' }) : '——'}</span>
             <span class="ov-fl__line t-label">{target?.kind === 'trip' ? '按出发那天零点算' : '还没定出发日期：在设置里填上'}</span>
             <span class="ov-fl__line">还没有去程航班的预订</span>
           </div>

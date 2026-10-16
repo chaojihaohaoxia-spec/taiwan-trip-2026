@@ -2,7 +2,7 @@
    ui/SubmitButton.css：提交按钮（.submit-btn，叠在 .btn 上）。
    四层内容（文字 / 「重试」/ 转圈 / 对勾）叠在同一个网格单元里，按 data-state 切换显隐：
    退场用短淡出，进场用弹簧放大，宽度始终等于最宽的那一层。
-   A 皮肤：平时是强调色渐变（.btn 的 primary），成功变成绿色渐变（--material-success），失败是红色实心。
+   「杂志纸本」：平时是实色海色（.btn 的 primary），成功变成实色的绿（--material-success），失败是砖红实心；都没有发光。
    ===================================================================== */
 
 .submit-btn {
@@ -33,8 +33,8 @@
   --btn-bg-pressed: var(--color-success);
   --btn-tint-hover: transparent;
   --btn-tint-pressed: transparent;
-  --btn-shadow: 0 10px 24px -10px color-mix(in srgb, var(--color-success) 50%, transparent);
-  --btn-ring: inset 0 1.5px 1px color-mix(in srgb, var(--color-glass-highlight) 45%, transparent);
+  --btn-shadow: 0 0 0 0 transparent;
+  --btn-ring: 0 0 0 0 transparent;
   cursor: default;
 }
 
@@ -46,7 +46,7 @@
   --btn-bg-pressed: color-mix(in srgb, var(--color-danger) 82%, var(--color-text));
   --btn-tint-hover: transparent;
   --btn-tint-pressed: transparent;
-  --btn-shadow: 0 10px 22px -10px color-mix(in srgb, var(--color-danger) 45%, transparent);
+  --btn-shadow: 0 0 0 0 transparent;
 }
 
 .submit-btn {

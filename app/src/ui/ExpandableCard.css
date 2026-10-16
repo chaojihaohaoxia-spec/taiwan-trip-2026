@@ -2,8 +2,8 @@
    ui/ExpandableCard.css：原地展开的卡片 / 列表行（.xcard）。
    展开：.xcard__body 的 grid-template-rows 0fr → 1fr（真实高度变化，下面的内容跟着平滑下移）。
    选择器一律用子代组合（>），嵌套的卡片互不影响。
-   A 皮肤（样稿的时间轴卡片）：卡片是磨砂白材质（--material-card，不开 backdrop-filter）+ 折射高光描边；
-   右边的箭头是凸起的白圆（强调色箭头）；标题 15px 半粗，副标题用标签字体（时间、距离的数字对齐）。
+   「杂志纸本」：card 样式不是一张卡，是直接排在纸上的一段，上面一根 1px 细线；标题行和正文都和页面左边对齐；
+   右边是一个灰色小箭头（没有底）；前导图标不显示（列表行不放图标）；标题 15px / 500，副标题等宽数字。
    ===================================================================== */
 
 .xcard {
@@ -13,39 +13,9 @@
 
 /* ---------- 卡片样式 ---------- */
 .xcard--card {
-  border-radius: var(--radius-lg);
-  background: var(--material-card);
-  box-shadow: var(--material-card-edge);
-  transition: var(--press-transition), box-shadow var(--dur-base) var(--ease-out);
-}
-
-/* 折射高光描边（左上亮、右下次亮的 1px 渐变边） */
-.xcard--card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: var(--z-raised);
-  padding: 1px;
-  border-radius: inherit;
-  background: var(--material-rim);
-  -webkit-mask: var(--mask-fill) content-box, var(--mask-fill);
-  -webkit-mask-composite: xor;
-  mask: var(--mask-fill) content-box exclude, var(--mask-fill);
-  pointer-events: none;
-}
-
-.xcard--card[data-open] {
-  box-shadow: var(--material-card-edge), var(--shadow-2);
-}
-
-/* 卡片里再放卡片：往下凹一层的浅灰，免得和外层糊在一起 */
-.xcard .xcard--card {
-  background: var(--color-surface-2);
-  box-shadow: none;
-}
-
-.xcard .xcard--card::before {
-  display: none;
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 var(--color-separator);
+  transition: var(--press-transition);
 }
 
 /* 按标题行：整张卡轻轻一缩（展开后卡片很高，缩得更少） */
@@ -94,6 +64,11 @@
   border-radius: 0;
 }
 
+/* 排在纸上的那一段：标题行和页面左边对齐（右边留一点给箭头） */
+.xcard--card > .xcard__heading > .xcard__header {
+  padding-inline: 0 4px;
+}
+
 .xcard--row > .xcard__heading > .xcard__header[data-pressed] {
   background-color: var(--color-fill-pressed);
 }
@@ -104,7 +79,7 @@
   }
 
   .xcard--card > .xcard__heading > .xcard__header:hover .xcard__chevron {
-    background: var(--color-raised-hover);
+    color: var(--color-text-2);
   }
 }
 
@@ -112,15 +87,9 @@
   outline-offset: -2px;
 }
 
+/* 前导图标：纸本不显示（列表行、时间轴收起时不放图标，字和留白就够了） */
 .xcard__leading {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-tile);
-  background: var(--color-fill);
-  color: var(--color-accent-text);
+  display: none;
 }
 
 .xcard__text {
@@ -133,7 +102,8 @@
 
 .xcard__title {
   font: var(--type-callout);
-  font-weight: var(--weight-semibold);
+  /* 纸本：行标题 500（600 一页几十处，像数据表；方案二「500 + 宋体」） */
+  font-weight: var(--weight-medium);
   line-height: 1.35;
   text-wrap: pretty;
   /* 列表里的条目标题常是中英越混排（「晚饭：Cơm Nhà（越南家常菜）」）：keep-all 会把整段甩到下一行、
@@ -157,27 +127,20 @@
   align-items: center;
 }
 
-/* 带底色的箭头：一眼看得出能点；展开时转半圈（ExpandableCard.jsx 的 JS 弹簧驱动；这里只写静止的角度） */
+/* 灰色小箭头（没有底）；展开时转半圈（ExpandableCard.jsx 的 JS 弹簧驱动；这里只写静止的角度） */
 .xcard__chevron {
   display: grid;
   flex: none;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-round);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-raised);
-  color: var(--color-accent-text);
-  transition: background-color var(--dur-fast) var(--ease-out);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
-/* 列表行（row）和嵌套卡片里：凸起的白圆放在浅底上不够显眼，换成强调色浅底 */
-.xcard--row > .xcard__heading > .xcard__header > .xcard__chevron,
-.xcard .xcard--card > .xcard__heading > .xcard__header > .xcard__chevron {
-  width: 30px;
-  height: 30px;
-  background: var(--color-accent-soft);
-  box-shadow: none;
+.xcard__chevron svg {
+  width: 15px;
+  height: 15px;
 }
 
 .xcard[data-open] > .xcard__heading > .xcard__header > .xcard__chevron {
@@ -222,6 +185,11 @@
 
 .xcard--row .xcard__content {
   padding-left: 14px;
+}
+
+/* 排在纸上的那一段：正文也和页面左边对齐 */
+.xcard--card > .xcard__body > .xcard__clip > .xcard__content {
+  padding-inline: 0;
 }
 
 /* 刚展开的 350ms 里详情区不接点击（误双击的第二下不会落到刚冒出来的按钮上；见 ExpandableCard.jsx 的 SETTLE_MS） */

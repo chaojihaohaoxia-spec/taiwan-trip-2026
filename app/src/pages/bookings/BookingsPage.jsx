@@ -2,7 +2,7 @@
 // pages/bookings/BookingsPage.jsx：预订（路由 bookings，#/t/:tripId/bookings；SPEC §5.6）。
 //
 // 外壳画大标题「预订」、返回、副标题（行程名）、搜索；这里从大标题下面开始：
-//   1. 顶部汇总（Summary.jsx）：还没订 / 待确认 / 到店付（按币种 + 折合港币）/ 最近的免费取消截止；前三格点了只看那一类（?only=）。
+//   1. 顶部汇总（Summary.jsx，一行字）：还没订 / 待确认 / 到店付（按币种 + 折合港币）+ 最近的免费取消截止；每一类点了只看那一类（?only=）。
 //      已结束的行程换成回顾（一共几个、花了多少）。
 //   2. 行程进行中、按类型分组时：「今天」一小张（今天开始的、今晚住的酒店）。
 //   3. 一行工具：数量 / 正在只看哪一类（可清除）+ 分组方式「按类型 · 按日期」（?by=，本机记住；进行中默认按日期）。
@@ -277,9 +277,7 @@ function GroupHead({ group: g, by }) {
 function PageSkeleton() {
   return (
     <div class="bkp-skel" aria-hidden="true">
-      <div class="bkp-skel__grid">
-        {[0, 1, 2, 3].map((i) => <div key={i} class="bkp-skel__tile material-card"><Skeleton variant="text" lines={3} /></div>)}
-      </div>
+      <div class="bkp-skel__grid"><Skeleton variant="text" width="70%" /></div>
       <Skeleton variant="text" width="40%" />
       <div class="bkp-skel__card material-card"><SkeletonCard /><Skeleton variant="rect" height={96} radius="lg" /></div>
       <div class="bkp-skel__card material-card"><SkeletonCard /></div>

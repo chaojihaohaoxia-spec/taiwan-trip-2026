@@ -1,15 +1,17 @@
 # styles/ —— 设计变量和全局基础样式
 
-皮肤已经定了：**A「液态玻璃 · 海岛光」+ P2「杂志宋体」**（样稿 `$S/design/fontpairs/P2-serif/`，截图 `shots/`；交互截图 `$S/design/A-glass/final/`）。
-本机打开 `#/dev/skin` 能看到样张、字体、材质、光场，`#/dev/tokens` 能看到每个变量的实际值和对比度。
+视觉方向：**「杂志纸本」**（SPEC §11，10-15 用户拍板，取代以前的「液态玻璃 · 海岛光」）——内容像印在纸上的旅行手帐，界面往后退：
+米白的纸（深色是深墨色的纸）、墨色的字、只用一种海水绿；内容直接排在纸上用 1px 细线分组，只有「现在」、预订卡、弹层是细线框的纸片；
+不用玻璃、不要光斑 / 渐变 / 发光；宋体做标题，系统字体做其余一切，Instrument Serif 只给几个主数字。
+依据：`$S/build/aesthetic/精修方案.md`（token 改动表、取舍）。本机打开 `#/dev/skin` 能看到样张、字体、材质，`#/dev/tokens` 能看到每个变量的实际值和对比度。
 
 | 文件 | 层 | 内容 |
 |---|---|---|
-| `tokens.css` | tokens | **设计变量**（唯一的取值来源）：颜色、材质、圆角、阴影、模糊、字体、字号阶梯、字距、间距、布局、层级、动效、光场。浅色 + 深色 |
+| `tokens.css` | tokens | **设计变量**（唯一的取值来源）：颜色、材质、圆角、阴影、模糊、字体、字号阶梯、字距、间距、布局、层级、动效、纸纹。浅色 + 深色 |
 | `base.css` | base | 全局基础：盒模型、底色、字体、`font-synthesis: none`、焦点环、输入框字号、`.tabular-nums`、`.visually-hidden`、启动画面。下面四个文件在这里 `@import`（同一层） |
 | `fonts.css` | base | 网页字体的 `@font-face`（**生成的**，`scripts/fonts/build-fonts.py`；文件和说明见 `static/fonts/README.md`） |
-| `materials.css` | base | 材质工具类：`.material-card`、`.material-glass`、`.material-glass-strong`、`.material-raised`、`.material-inset` |
-| `field.css` | base | 光场：`.light-field`（页面背景的主题色光斑 + 颗粒） |
+| `materials.css` | base | 材质工具类：`.material-card`（排在纸上的内容块）、`.material-glass` / `-strong`（浮层的纸 + 细线框）、`.material-raised`（纸片 + 细线）、`.material-inset`（表单里浅墨的底） |
+| `field.css` | base | 纸：`.paper`（页面背景：纯色 `--color-canvas` + 很淡的纸纹） |
 | `type.css` | base | 字体角色工具类：`.t-display`、`.t-title`、`.t-serif`、`.t-figure`、`.t-figure-italic`、`.t-label`、`.t-eyebrow` |
 
 **组件只通过变量取值**：以后再换皮只动变量（或在 `skins/` 下加一个只覆盖变量的文件，它会进 tokens 层）。
@@ -45,41 +47,27 @@ reset < tokens < base < vendor < motion < ui < overlay < shell < pages < dev
 
 后面的层永远盖过前面的层：页面可以覆盖组件，组件可以覆盖工具类和 leaflet 的默认样式。按需加载的页面的 CSS 也在首屏就位，不会闪。组件的 CSS 放在组件旁边，在组件文件里 `import './Button.css'` 即可。
 
-## 两种玻璃（性能：只给悬浮层开 backdrop-filter）
+## 材质：纸、纸片、浮层的纸（不用玻璃）
 
-| | 内容卡片 | 悬浮层（真玻璃） |
-|---|---|---|
-| 用在 | 概览卡片、时间轴卡片、列表 / 网格卡片、开发页区块……所有铺在光场上的内容 | 顶栏、底栏胶囊、悬浮加号、搜索框、底部面板、从按钮长出来的面板、全屏菜单、确认框、小菜单、Toast |
-| 背景 | `background: var(--material-card)` | `background: var(--material-glass-strong)`（顶栏）/ `var(--material-tabbar)`（底栏，最通透，见下）/ `var(--material-glass-dense)`（弹层，更不透明）/ `var(--material-glass)`（更通透） |
-| 模糊 | **不开**：卡片下面是平滑的光场，模糊了也看不出差别；iPhone 上几十个 backdrop-filter 会掉帧 | `-webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter);`（小圆按钮 `--glass-filter-sm`，全屏菜单 `--glass-filter-xl`）。**同一屏不超过 8 个** |
-| 边 | `box-shadow: var(--material-card-edge)`（顶部高光 + 底部暗边 + 细描边 + 内发光） | `box-shadow: var(--shadow-3 或 4), var(--shadow-glass-edge), var(--shadow-glass-glow)`（内侧柔光可选，大面积的面板加） |
-| 折射描边 | `::before` + `--material-rim`（见 materials.css） | 同左 |
-| 工具类 | `.material-card` | `.material-glass-strong`、`.material-glass` |
+| | 内容 | 纸片（少数几样） | 浮层 |
+|---|---|---|---|
+| 用在 | 概览、每天页、账本、清单……绝大多数内容 | 「现在」那一条、预订卡、网格里的每天卡 | 顶栏收起后、底栏、底部面板、从按钮长出来的面板、全屏菜单、确认框、小菜单、Toast |
+| 背景 | 没有：直接排在纸上（`.material-card` 只是 `position: relative`） | `background: var(--material-card)`（`--color-card`，比纸亮一点） | `var(--material-glass-strong)` / `var(--material-glass-dense)`（不透明的纸） |
+| 边 | 分组靠上面一根 1px `--color-separator` | `box-shadow: var(--material-card-edge)` 或 `border: 1px solid var(--color-border)` | `var(--shadow-glass-edge)`（1px 细线框）+ `--shadow-3` / `-4`（很浅的柔影） |
+| 模糊 | 不要 | 不要 | 不要（`--glass-filter: none`） |
 
-卡片里再分层：凸起的白块（次要按钮、小方块）`.material-raised`（`--color-raised` + `--shadow-raised`），往下凹的浅灰块（数字格、输入框底、统计块）`.material-inset`（`--color-fill`）。
-弹层后面的遮罩：`--color-scrim` + `--scrim-filter`（轻轻虚化背后的页面，overlay/ 已经用上）。
-工具类的折射描边占用 `::before`：元素自己要用 `::before` 时别加类，直接写 `background` 和 `box-shadow` 两行（少那圈描边，其他一样）。
+纸片里再分：次要按钮、小块用 `.material-raised`（`--color-raised` + `--shadow-raised` 一根细线）；表单里的选择框、小输入块用 `.material-inset`（`--color-fill`）。
+弹层后面的遮罩只压暗（`--color-scrim`），不虚化。以前的折射描边（`--material-rim`）、镜面光斑、内发光、底栏的透镜和字后面的晕都已经透明 / 删掉，变量名留着。
 
-## 光场（`.light-field`，给外壳的光场组件用）
+## 纸（`.paper`，外壳的 `shell/Field.jsx` 用）
 
 ```html
-<div class="light-field light-field--drift" aria-hidden="true">
-  <div class="light-field__layer accent-scope" style="--trip-accent:#0E8A8A; --trip-accent-2:#F2A65A">
-    <i class="light-field__blob"></i><i class="light-field__blob"></i><i class="light-field__blob"></i><i class="light-field__blob"></i><i class="light-field__blob"></i>
-  </div>
-  <div class="light-field__grain"></div>
-</div>
+<div class="paper" aria-hidden="true"></div>
 ```
 
-- `position: fixed` 铺满视口、`z-index: var(--z-below)`、不接收点击；`body` 是透明的（底色在 `<html>` 上），所以光场露得出来。整页只放一个。
-- 每一层 `.light-field__layer` = 一趟行程的配色：加 `accent-scope`、写那趟行程的 `cover.accent` / `cover.accent_2`；不写就跟随 `<html>` 上的 `--trip-accent`（`setTripAccent()`），再没有就是默认的海岛青绿 + 珊瑚。
-- **切换行程**：放两层，新的一层叠在上面、从 `opacity: 0` 淡到 1（`transition: opacity var(--dur-field) var(--ease-field)` 已经写好：挂上时加 `data-hidden`、下一帧去掉），
-  旧的一层**保持不透明**垫在下面、加 `data-paused`（暂停漂移，省 GPU），新层盖满后删掉。不要两层同时淡（旧的淡出、新的淡入）：中途都半透明，透出 `<html>` 的底色，整片发灰发白。
-  外壳的 `shell/Field.jsx` 就是这么做的；`#/dev/skin` 的「光场」一节有切换演示。减弱动态效果时五个光斑都不漂（带 `:nth-child` 的规则也盖住了）。
-- `.light-field--drift`：光斑 23–34 秒一个来回地漂（只动 transform，合成线程）；减弱动态效果时不动。
-- 变量：`--field-base`（底色渐变）、`--field-1`…`--field-5`（五个光斑：左上主题色、右上偏冷、左中浅、右下第二主题色浅、底部第二主题色）、`--field-blob-opacity`（浅 0.9 / 深 0.42）、`--field-grain`、`--field-grain-opacity`、`--field-menu-glow`（全屏菜单上的主题色光晕）。
-  都由主题色派生：所有浏览器认的近似（`color-mix` 和白混合）+ 支持相对颜色语法的浏览器（iOS 18 / Safari 18、Chrome 119 起）在 `@supports` 里换成 OKLCH 提亮的版本——默认配色和样稿富国岛的五个光斑每个通道差 ≤12（`skin.test.js` 核对）。
-- 状态栏 / PWA 的 `theme-color` 用 `--color-canvas`（光场最上面的薄荷色 / 深色的深青），是固定值，不跟行程换色。
+- `position: fixed` 铺满视口、`z-index: var(--z-below)`、不接收点击、`contain: strict`；底色 `--color-canvas`，`::after` 是纸纹（`--paper-grain`，正片叠底，`--paper-grain-opacity` 浅色 3.5%、深色 3%）。
+- `body` 是透明的（底色在 `<html>` 上），所以纸露得出来；整页只放一个。行程主题色不铺在背景上，只用在强调色上。
+- 状态栏 / PWA 的 `theme-color` 用 `--color-canvas`（浅色 `#f4f1ea`、深色 `#141413`）。
 
 ## 变量清单
 
@@ -87,145 +75,132 @@ reset < tokens < base < vendor < motion < ui < overlay < shell < pages < dev
 
 | 变量 | 用途 |
 |---|---|
-| `canvas` | 页面底色（光场下面那层；也是 theme-color、manifest 的颜色） |
-| `tile-{teal,coral,blue,amber,violet}-{1,2}` | ＋ 面板图标块的渐变（左上亮 `-1` → 右下深 `-2`，样稿 03 的 `.ft-ico`；浅色深色同一套），上面的图标用 `on-tile`（白）。分类色是为了“在面上 ≥3:1”调深的，拿来做渐变会发泥，所以单独一套 |
-| `surface` | 卡片的平均色（半透明白 / 半透明深灰；只要一个颜色的地方用，完整材质用 `--material-card`） |
-| `surface-2` / `surface-3` | 卡片里往下凹的一层 / 更深一层（半透明的墨色） |
-| `surface-raised` | 浮层面（配合 backdrop-filter；`--material-glass-dense` 用它） |
-| `card` / `card-2` | 卡片材质渐变的两端（左上 → 右下） |
-| `glass` / `glass-2`、`glass-strong` / `glass-strong-2` | 玻璃材质渐变的两端（普通 / 厚） |
-| `glass-lift` | 叠在 `glass-strong-2` 底色上把左上角提亮的那层（`--material-glass-lift`：底色要被 JS 插值的玻璃用，例如顶栏） |
-| `glass-border` / `glass-highlight` / `glass-shade` / `glass-glow` | 玻璃的细描边 / 顶部高光 / 底部暗边 / 内发光 |
-| `rim` / `rim-2` / `sheen` | 折射描边的左上 / 右下颜色、左上角的镜面光斑 |
-| `edge-tint` / `edge-tint-bottom` | 内容滑进顶栏、底栏下面时渐隐用的底色；底栏那头淡得多（浅色 25%、深色 30%：底栏的玻璃要看得见后面的内容，不能先被它洗白） |
-| `tabbar-*` | **底栏的液态玻璃**（照 iOS 26 Apple Music，比顶栏、弹层通透得多）：`tabbar-glass` / `-2` 上下两端的薄色（浅色 40% → 24% 白，深色 28% → 36%）、`tabbar-sheen` 内侧上半部的光泽、`tabbar-rim` 上沿亮边 / `tabbar-rim-shade` 下沿暗边、`tabbar-border` 细描边、`tabbar-lens` / `-2` 选中块（浅色 64% → 46% 白、深色 10% → 6%）、`tabbar-lens-clear` / `tabbar-lens-ring` 按住时浮起的透镜、`tabbar-ink` 没选中的字和图标、`tabbar-halo` 字和图标后面贴着字形的“活力”晕（浅色白晕、深色暗晕）/ `tabbar-halo-strong` 选中那格的晕、`tabbar-accent` 选中那格的强调色（在强调色派生那一节：浅色模式把 `accent-text` 的亮度再压到 `--tabbar-accent-lmax` 0.42）、`tabbar-shadow` 悬浮阴影。对比度是在真实渲染上实测的（`test/e2e/tabbar-liquid.e2e.mjs`：纯白、纯黑、彩色条纹、黑白格垫在滚动边缘层下面和上面、深色照片、光场上，平时和按住，浅色 / 深色的字都 ≥4.5:1、图标 ≥3:1） |
-| `thumb` | 控件滑块（分段控件的白色选中块、开关的圆钮）；深色是 12% 的白（滑块上的强调色小字——底栏选中的「行程」、分段条的「今天」——才 ≥4.5:1） |
-| `text` / `text-2` / `text-3` | 正文 / 次要说明（≥4.5:1）/ 占位、禁用、装饰（≥3:1，**不要用于正文**）。次要文字是半透明的墨色，放在玻璃上会带一点底下的颜色 |
+| `canvas` | 纸：页面底色（浅色 `#f4f1ea` 米白、深色 `#141413` 深墨；也是 theme-color、manifest 的颜色） |
+| `tile-{teal,coral,blue,amber,violet}-{1,2}` | 以前 ＋ 面板的五色图标块：纸本里是透明（面板是一列单色的行）。`on-tile` 是压在深色块上的纸色字（第几天的深色调上） |
+| `surface` | 纸片的颜色（`#fbf9f4`，比纸亮一点；只要一个颜色的地方用） |
+| `surface-2` / `surface-3` | 纸上往下凹一点的浅墨（几乎不用了） |
+| `surface-raised` | 浮层的纸（`--material-glass-dense` 用它） |
+| `card` / `card-2` | 纸片（「现在」、预订卡）；两端一样，没有渐变 |
+| `glass` / `glass-2`、`glass-strong` / `glass-strong-2` | 浮层的纸（不透明；名字沿用） |
+| `glass-lift` | 透明（以前玻璃左上角的提亮层） |
+| `glass-border` / `glass-highlight` / `glass-shade` / `glass-glow` | 浮层的细线框 / 以前的顶部高光、底部暗边、内发光（透明） |
+| `rim` / `rim-2` / `sheen` | 透明（以前的折射描边、镜面光斑） |
+| `edge-tint` / `edge-tint-bottom` | 内容滑进顶栏、底栏下面时渐隐到的纸色 |
+| `tabbar-*` | **底栏**（「杂志纸本」：不透明的纸片 + 细线框，选中只是海色的字）：`tabbar-glass` / `-2` 纸色、`tabbar-border` 细线框、`tabbar-ink` 没选中的字和图标（次要灰）、`tabbar-accent` 选中那格（= `accent-text`）、`tabbar-shadow` 很浅的悬浮阴影；`sheen` / `rim` / `rim-shade` / `lens` / `lens-2` / `lens-clear` / `lens-ring` / `halo` / `halo-strong` 是以前液态玻璃的光泽、折射边、选中块、透镜、晕，现在都透明。 |
+| `thumb` | 控件滑块（分段控件的选中块、开关的圆钮）：一张纸片 |
+| `text` / `text-2` / `text-3` | 墨：正文 `#1d1c1a`（纸上 15.1:1）/ 次要说明 `#5f5b54`（6.0:1）/ 占位、禁用、装饰 `#8a857c`（3.25:1，**不要用于正文**） |
 | `text-inverse` | 反色文字 |
 | `border` / `border-strong` / `separator` / `rail` | 描边 / 强描边 / 分隔线 / 轨道（开关底、时间轴竖线） |
 | `fill` / `fill-hover` / `fill-pressed` | 中性填充（往下凹）：输入框底、分段控件的轨道、标签、列表行按下 |
-| `raised` / `raised-hover` / `raised-pressed` | 凸起的白：次要按钮、图标按钮、筛选胶囊、卡片里的小方块（配 `--shadow-raised`） |
-| `accent` / `accent-hover` / `accent-pressed` | 强调色实心底（主按钮、选中态、进度） |
-| `accent-soft` | 强调色浅底（浅色强调按钮、高亮行） |
-| `accent-text` | 强调色文字和小图标（链接、可点的行标题；在玻璃、卡片上 ≥4.5:1） |
-| `on-accent` | 放在 accent 实心底上的文字（浅色白、深色深墨） |
-| `accent-2` | 第二主题色（光场的暖色、天气图标、路线终点） |
-| `accent-glow` | 实心强调色下面的柔光（`--shadow-accent` 用） |
-| `success` / `warning` / `danger` / `info`，各带 `-soft`、`-text`、`on-` | 状态色：实心底 / 浅底 / 文字 / 实心底上的文字。`info` 是蓝色（不再跟强调色）。组件的语气参数 `tone` 全站一套词：`neutral` / `accent` / `success` / `warning` / `danger` / `info`（`lib/notify.js` 的 `NOTICE_TONES`） |
+| `raised` / `raised-hover` / `raised-pressed` | 纸片：图标按钮、筛选、小块的底（配 `--shadow-raised` 一根细线） |
+| `accent` / `accent-hover` / `accent-pressed` | 一笔海水绿的实心底（主按钮、＋、选中的天）：墨一样深 |
+| `accent-soft` | 很浅的海色底（选中的行，少用） |
+| `accent-text` | 海色文字和小图标（链接、「现在」；纸上 ≥7:1） |
+| `on-accent` | 放在 accent 实心底上的文字（浅色纸色、深色深墨） |
+| `accent-2` | 第二主题色（沙色：天气图标、路线终点） |
+| `accent-glow` | 透明（以前实心强调色下面的柔光） |
+| `success` / `warning` / `danger` / `info`，各带 `-soft`、`-text`、`on-` | 状态色。**只标异常**：`success-text` / `info-text` 都是次要灰、`-soft` 透明；`danger` 砖红（过期、紧急、还没订）、`warning` 赭石（快到期、待确认），都只是字。组件的语气参数 `tone` 全站一套词：`neutral` / `accent` / `success` / `warning` / `danger` / `info`（`lib/notify.js` 的 `NOTICE_TONES`） |
 | `focus-ring` | 键盘焦点环 |
-| `scrim` | 弹层后面的遮罩（带一点青灰） |
+| `scrim` | 弹层后面的遮罩（只压暗一点） |
 | `skeleton` / `skeleton-shine` | 骨架屏 |
 | `rating-1` … `rating-5`、`on-rating` | 评级五档：5 夯 / 4 顶级 / 3 人上人 / 2 NPC / 1 拉完了（实心底配白字） |
-| `cat-1` … `cat-8` | 分类色（图表、记账分类、地图分段；和 surface 对比 ≥3:1） |
+| `cat-1` … `cat-8` | 分类色（图表、记账分类、头像；和 surface 对比 ≥3:1） |
+| `day-1` … `day-7`、`day-N-deep` | 第几天：一组低饱和的大地色（海绿、灰蓝、陶土、橄榄、灰紫、沙、苔绿），**只在地图上用**；页面上的 D1–D4 是墨色的字 |
 
 **行程主题色**（`trips.cover.accent` / `accent_2`）：整页换色 `setTripAccent('#0E8A8A', '#F2A65A')`（lib/theme.js，写 `<html>` 的 `--trip-accent` / `--trip-accent-2`；只传一个参数时第二主题色不动，`setTripAccent(null, null)` 恢复默认）——
 外壳（`shell/trip-state.js`）按当前行程统一调用，换行程时只写一次终值，页面不用自己调，**也不要逐帧往 `<html>` 写变量**（整页每一帧重算样式）。
 只给某个容器换色：`style="--trip-accent: #…; --trip-accent-2: #…"` 并加 `class="accent-scope"`（外壳换行程时的补间、换页幽灵冻结旧颜色都是这么做的）。
 
-- 当实心底：浅色压暗一点（白字清楚）、深色提亮（配深色字）。支持 OKLCH 的浏览器只调亮度（浅色 ≤0.55、深色 ≥0.78，色相不变），**任何主题色**的实心底上的字都 ≥4.5:1；
+- 当实心底：压暗、降饱和成“墨一样深”的颜色（深色模式提亮成灰青、配深墨色字）。支持 OKLCH 的浏览器把亮度夹住（浅色 ≤0.43、深色 0.70–0.76）、
+  彩度乘 `--accent-solid-c`（浅色 0.62、深色 0.5），色相不变：**任何主题色**的实心底上的字都 ≥4.5:1；富国岛的 `#0b7480` 压成 `#28585f`。
   老浏览器（iOS 17 及以前）只能按固定比例和黑 / 白混，太浅的主题色（金黄、浅青）达不到 4.5:1。
-- 强调色文字（`accent-text`）同理：OKLCH 时亮度夹在浅色 ≤0.48 / 深色 ≥0.9（深色以前是 0.84：选中块上的强调色小字只有 3.9–4.5:1——外壳评审）；老浏览器按比例混（深色 45% 主题色 + 55% 白）。
-- 默认（没设主题色）：浅色 `#0a7c75` / 深色 `#4fd8c9`（样稿富国岛手调的两套），第二主题色 `#e85d3f` / `#ff9576`。
+- 强调色文字（`accent-text`）同理：OKLCH 时亮度夹在浅色 ≤0.42 / 深色 0.80–0.86；老浏览器按比例混（深色 45% 主题色 + 55% 白）。
+- 默认（没设主题色）：浅色 `#1f5f5b` / 深色 `#8fb8b1`，第二主题色（沙色）`#8c7550` / `#b8a88a`。
 
-对比度（`npm test` 的 `skin.test.js` 逐点模拟 390×844 的光场，取最差的那个点；6 套配色：默认、样稿富国岛 / 台湾、演示椰影岛 / 三城、冷色，表里是 6 套里最低的）：
+对比度（`npm test` 的 `skin.test.js`：纸、纸片、浮层、选中块都是不透明的一个颜色，逐个算；7 套配色：默认、富国岛、样稿富国岛 / 台湾、演示椰影岛 / 三城、冷色，表里是最低的）：
 
-| | 正文 / 光场 | 次要 / 光场 | 正文 / 卡片 | 次要 / 卡片 | 强调字 / 卡片 | 实心强调色上的字 |
+| | 正文 | 次要 | 强调字 | 砖红 | 赭石 | 实心强调色上的字 |
 |---|---|---|---|---|---|---|
-| 浅色（iOS 18+ / Chrome 119+，OKLCH） | 8.59 | 5.08 | 12.87 | 6.36 | 4.70 | 4.60 |
-| 浅色（老浏览器，color-mix 近似） | 7.84 | 4.74 | 12.56 | 6.27 | 5.81（太浅的主题色例外，见上） | 5.06（默认色） |
-| 深色（OKLCH） | 8.08 | 5.80 | 10.32 | 7.27 | 8.29 | 6.03 |
-| 深色（老浏览器） | 6.40 | 4.79 | 9.59 | 6.82 | 7.05 | 7.25（默认色） |
-
-强调色文字在选中块（白色滑块叠在玻璃上、玻璃叠在光场上；保守起见也算滑块直接叠在光场最亮处）上：浅色 OKLCH 6.00 / 老浏览器 5.13；
-深色 OKLCH 4.70 / 老浏览器 3.62（iOS 17 及以前的已知限制：只能按比例和白混，再往白里混主题色就看不出来了；实测叠在玻璃上比这个保守估计高）。
+| 浅色（iOS 18+ / Chrome 119+，OKLCH） | 15.10 | 5.98 | 7.26 | 6.13 | 5.64 | 6.72 |
+| 浅色（老浏览器，color-mix 近似） | 15.10 | 5.98 | 4.72 | 6.13 | 5.64 | 6.72（默认色） |
+| 深色（OKLCH） | 13.98 | 6.47 | 8.79 | 7.45 | 8.56 | 4.79 |
+| 深色（老浏览器） | 13.98 | 6.47 | 11.15 | 7.45 | 8.56 | 默认色达标 |
 
 ### 材质（`--material-*`，`background` / `box-shadow` 的值）
 
 | 变量 | 是什么 |
 |---|---|
-| `--material-card` | 卡片：左上光斑 + `card → card-2` 渐变（不开 backdrop-filter） |
-| `--material-card-edge` | 卡片的边（box-shadow：顶部高光、底部暗边、细描边、内发光） |
-| `--material-glass` / `--material-glass-strong` | 玻璃（普通 / 厚）：光斑 + 渐变，配 `--glass-filter` |
-| `--material-glass-dense` | 弹层默认的玻璃（`surface-raised` 渐变，最不透明） |
-| `--material-glass-lift` | 只有高光那一半（底色另给，见 `glass-lift`） |
-| `--material-tabbar` / `--material-tabbar-rim` / `--material-tabbar-lens` / `--material-tabbar-lens-clear` | 底栏：薄玻璃 + 光泽 / 上亮下暗的 1px 折射边 / 选中块 / 按住时的透镜；配 `--tabbar-glass-filter`（`blur(14px) saturate(190%) brightness(1.08)`，深色 `saturate(180%) brightness(0.82)`）和 `--shadow-tabbar`、`--shadow-tabbar-edge`、`--shadow-tabbar-lens(-clear)` |
-| `--material-sheen` | 只有左上角的光斑 |
-| `--material-rim` | 折射描边的渐变（配 `::before` + mask） |
-| `--material-accent` | 强调色实心按钮的渐变（左上亮、右下暗）：悬浮加号、主按钮、提交按钮 |
-| `--material-success` | 成功色按钮的渐变（提交打勾那一刻） |
+| `--material-card` | 纸片：纯色 `--color-card`（没有光斑、没有渐变） |
+| `--material-card-edge` | 纸片的边：1px `--color-border` 细线 |
+| `--material-glass` / `--material-glass-strong` / `--material-glass-dense` | 浮层的纸（不透明的纯色；名字沿用） |
+| `--material-glass-lift` / `--material-sheen` / `--material-rim` | 透明（以前玻璃的提亮层、镜面光斑、折射描边） |
+| `--material-tabbar` | 底栏的纸片（纯色）；`--shadow-tabbar-edge` 细线框、`--shadow-tabbar` 很浅的悬浮阴影；透镜、折射边那几个是透明的 |
+| `--material-accent` | 实心海色（主按钮、＋、提交按钮）：纯色，没有渐变 |
+| `--material-success` | 提交打勾那一刻的实色绿 |
 | `--mask-fill` | mask 用的“整块不透明” |
 
 ### 圆角 `--radius-*`
 
-`xs` 8 · `sm` 12 · `md` 16 · `lg` 22 · `xl` 26 · `2xl` 32（悬浮面板、确认框）· `sheet` 38（底部面板，和屏幕圆角同心）· `pill` 999px · `round` 50% ·
-`tile` 32%（图标小方块，只用在正方形上：40 / 34 / 30px 见方时是 13 / 11 / 10px，和样稿一致）。
-样稿用法：内容卡片 26、时间轴 / 列表卡片 22、全屏菜单的菜单块 22（样稿 24）、卡片里的小方块 16–20、图标方块 `tile`、胶囊和圆按钮 pill。
-样稿里零散的 9 / 14 / 15 / 18 / 20 / 24 / 28 / 30px 都归到了最近的一级，不再单独写数字。
+`xs` 6 · `sm` 8（筛选、小键）· `md` 10（按钮、分段）· `lg` 12 · `xl` 14（纸片：「现在」、预订卡）· `2xl` 18（悬浮面板、确认框）· `sheet` 22（底部面板）· `pill` 999px（只给底栏、开关这类）· `round` 50% ·
+`tile` 8px（小方块、缩略图，只用在正方形上）。按钮是方一点的纸片，不是胶囊。
 
 ### 阴影 `--shadow-*`
 
-`1` 贴面 · `2` 卡片抬起（滑块、展开的卡片）· `3` 悬浮（顶栏、底栏、气泡、Toast）· `4` 弹层 · `pressed` 按下时 ·
-`btn` 浮在光场上的小圆按钮 · `thumb` 分段控件的白色滑块（外阴影 + 高光 + 细边）· `glass-edge` 玻璃的边（inset，叠在其他阴影后面）· `glass-glow` 玻璃内侧的柔光（顶栏、分段、底部面板、确认框，叠在 `glass-edge` 后面）·
-`raised` 凸起的白的边 · `highlight` 实心小色块顶上的一道细高光（头像、计数徽章、勾上的圆）· `bevel` 实心小按钮的立体感（高光 + 底部内暗：步进器收起时的加号）·
-`accent` 强调色实心按钮的柔光 + 高光 · `accent-sm` 小号强调色柔光（勾上的圆、标签页下划线、选中的小胶囊）（这两个在 `:root, .accent-scope` 里派生，跟着行程主题色变）。
-用 `box-shadow: inset 0 0 0 Npx <颜色变量>` 画细描边 / 圆环（复选框的圈、头像的白边）不算阴影，可以直接写。
-光场上的内容卡片几乎不投影，靠材质的高光和描边分层。
+纸上几乎不投影（分组靠 1px 细线）：`1` / `2` 透明 · `3` 悬浮（顶栏收起后、底栏、气泡、Toast：很浅的柔影）· `4` 弹层 · `pressed` / `btn` 透明 ·
+`thumb` 分段控件的选中块（一根深一点的细线框）· `glass-edge` 浮层的细线框（inset）· `raised` 纸片的细线 ·
+`glass-glow` / `highlight` / `bevel` / `accent` / `accent-sm` 都是透明（以前的内发光、高光、立体感、同色发光）。
+用 `box-shadow: inset 0 0 0 Npx <颜色变量>` 画细描边 / 圆环（复选框的圈、头像的边）不算阴影，可以直接写。
 
 ### 模糊
 
-`--blur-sm` 8 · `--blur-md` 20 · `--blur-lg` 28 · `--blur-xl` 40 · `--glass-saturate` 190% ·
-`--glass-filter`（`blur(28px) saturate(190%)`）· `--glass-filter-sm`（小圆按钮）· `--glass-filter-xl`（全屏菜单）· `--scrim-filter`（遮罩：`blur(6px) saturate(120%)`）。写的时候带前缀：
+不用玻璃：`--glass-filter` / `--glass-filter-sm` / `--glass-filter-xl` / `--tabbar-glass-filter` / `--scrim-filter` 都是 `none`（变量留着）；`--blur-*` 还在，给以后要模糊的特殊场景。
+组件里不要再写 `backdrop-filter`。
 
-```css
--webkit-backdrop-filter: var(--glass-filter);
-backdrop-filter: var(--glass-filter);
-```
-
-### 字体（P2「杂志宋体」，文件和授权见 `static/fonts/README.md`）
+### 字体（「杂志纸本」的三种字，文件和授权见 `static/fonts/README.md`）
 
 | 变量 | 字体 | 用在 | 规则 |
 |---|---|---|---|
-| `--font-serif`（= `--font-display`） | 思源宋体 Noto Serif SC 600 | 大标题、卡片标题、行程名、菜单 / 面板标题、大按钮、D1–D4 徽章 | 只在 **≥15px** 用（宋体横画细，隔着玻璃小字发虚）；只有 600 一个字重（`--weight-serif`）；中文标题字距 `--tracking-display` .04em / `--tracking-title` .03em；**不开 palt**；标题加 `word-break: keep-all`，只在标点、空格处折行 |
-| `--font-figure`（= `--font-rounded`） | Instrument Serif 400，「1」和越南盾符号「₫」换成 P2 Figure One | 大号数字：航班时间、金额、天气、数量（`--text-figure-*`） | 只有 400，分量靠字号补；D1 这种字母 + 数字别用它（会读成 Dl）。Instrument Serif 没有 ₫，以前回退到思源宋体 600，在细数字旁边特别黑 |
-| `--font-figure-italic` | Instrument Serif 400 斜体，「1」「₫」换成 P2 Figure One 的斜体 | 倒计时 | 斜体的 P2 Figure One 是思源宋体 Regular 的「1」「₫」按 Instrument Serif 斜体的角度（13°）斜切、收窄出来的：「1 天」「11 天」不会读成「l 天」「ll 天」。斜体不预加载（只有倒计时用），第一次用到时下载、Service Worker 缓存 |
-| `--font-label` | Geist（可变字重）+ 系统中文 | 小号日期、计数、时间轴时间、标签、小按钮、分段（`--type-label`、`--type-eyebrow`） | 配 `font-variant-numeric: tabular-nums`；不用 Geist Mono |
-| `--font-sans` | 系统字体（苹方优先） | 正文、说明、用户输入 | 不下载 |
-| `--font-mono` | 系统等宽 | 订单号、代码 | 不下载 |
+| `--font-serif`（= `--font-display`） | 思源宋体 Noto Serif SC 600 | 页面大标题、区块 / 卡片标题、行程名、D1–D4、预订名、面板标题、＋ 面板和「更多」菜单的名字 | 只在 **≥15px** 用；只有 600 一个字重（`--weight-serif`）；字距 `--tracking-display` / `--tracking-title` 都是 .01em；**不开 palt**；标题加 `word-break: keep-all`，只在标点、空格处折行；**按钮不用宋体** |
+| `--font-figure`（= `--font-rounded`） | Instrument Serif 400，「1」和越南盾符号「₫」换成 P2 Figure One | **只给几个主数字**：航班起降、账本总额（`MoneyText serif`）、入住 / 退房时刻（`.t-figure-serif`） | 只有 400，分量靠字号补；D1 这种字母 + 数字别用它（会读成 Dl）。Instrument Serif 没有 ₫，所以「₫」也由 P2 Figure One 接管 |
+| `--font-figure-italic` | Instrument Serif 400 斜体，「1」「₫」换成 P2 Figure One 的斜体 | 倒计时 | 斜体的 P2 Figure One 是思源宋体 Regular 的「1」「₫」按 Instrument Serif 斜体的角度（13°）斜切、收窄出来的：「1 天」不会读成「l 天」。斜体不预加载，第一次用到时下载、Service Worker 缓存 |
+| `--font-label` | 系统字体（= `--font-sans`） | 小号日期、计数、时间轴时间、标签、小按钮、分段（`--type-label`、`--type-eyebrow`） | 配 `font-variant-numeric: tabular-nums`（SF 自带等宽数字）。以前是 Geist，已经去掉 |
+| `--font-sans` | 系统字体（苹方优先） | 正文、说明、按钮、数字（`.t-figure`）、用户输入 | 不下载 |
+| `--font-mono` | 系统等宽 | 代码（订单号也改用系统字体） | 不下载 |
 
 全站 `font-synthesis: none`（base.css）：缺的字重用最接近的那个，不让浏览器描粗、做假斜体。
 字体工具类见 `type.css`；组件里的写法例：`font: var(--type-title-2); letter-spacing: var(--tracking-display);`。
 
 ### 字号阶梯
 
-参照样稿：标题放大、列表文字收紧一号；行高按中文放宽。`--text-<级>`（字号）、`--leading-<级>`（行高）、`--type-<级>`（`font` 简写，含字重和字体）。
+行高按中文放宽。`--text-<级>`（字号）、`--leading-<级>`（行高）、`--type-<级>`（`font` 简写，含字重和字体）。
 
 | 级 | 字号 / 行高 | 字体 | 样稿里的例子 |
 |---|---|---|---|
-| `large-title` | 40 / 46 | 宋体 600 | 页面大标题「富国岛」、全屏菜单「更多」 |
-| `title-1` | 28 / 36 | 宋体 600 | |
-| `title-2` | 21 / 29 | 宋体 600 | 区块标题、面板标题「记一笔」 |
-| `title-3` | 18 / 26 | 宋体 600 | 卡片标题「出发前待办」 |
-| `title-4` | 17（只有字号，行高跟着用处走） | 宋体 600 | 大按钮「记下这笔」、全屏菜单项、顶栏收起后的标题、天数分段的 D1 |
+| `large-title` | 32 / 38 | 宋体 600 | 页面大标题「富国岛」、全屏菜单「更多」 |
+| `title-1` | 26 / 34 | 宋体 600 | 每天的标题 |
+| `title-2` | 21 / 28 | 宋体 600 | 区块标题「出发前待办」、面板标题「记一笔」、「现在」那一条 |
+| `title-3` | 18 / 26 | 宋体 600 | 预订名、天数条的 D1、＋ 面板的名字 |
+| `title-4` | 17（只有字号，行高跟着用处走） | —— | 大按钮「记下这笔」（系统字体 600）、顶栏收起后的标题（宋体） |
 | `headline` | 16 / 22 | 系统 600 | 列表项标题 |
 | `body` | 16 / 25 | 系统 | 正文 |
 | `callout` | 15 / 22 | 系统 | 待办、时间轴条目 |
 | `subhead` | 14 / 20 | 系统 | 按钮、说明 |
 | `footnote` | 13 / 19 | 系统 | 次要说明 |
 | `caption-1` / `caption-2` | 12 / 17、11 / 15 | 系统 | 副标题、底栏标签 |
-| `label` | 14 / 1.2 | Geist + 系统 600 | 小按钮、分段、胶囊 |
-| `eyebrow` | 12 / 17 | Geist + 系统 600 | 眉标（「距离出发还有」，字距 `--tracking-eyebrow` .12em） |
+| `label` | 14 / 1.2 | 系统 500 | 小按钮、分段、筛选 |
+| `eyebrow` | 12 / 17 | 系统 500 | 眉标（「距离起飞还有」，装饰灰，字距 `--tracking-eyebrow` .04em） |
 
-大号数字：`--text-figure-hero` 84（倒计时）· `-1` 48（金额输入）· `-2` 40（结算金额）· `-3` 27（航班时间）· `-4` 22（数量）· `-5` 19（日出日落、小号数量）。
+大号数字的字号：`--text-figure-hero` 84（倒计时）· `-1` 48（金额输入）· `-2` 40（账本总额、记一笔）· `-3` 27（航班时间）· `-4` 22 · `-5` 19。除了倒计时、航班、账本总额、入住退房，都用系统字体。
 样稿里 12.5 / 13.5 / 14.5 / 16.5px 这种半号都归到了最近的一级（组件里不写数字字号；唯一的例外是隐藏输入框的 16px，防止 iOS 放大）。
 
-字距：`--tracking-display` .04em（宋体标题）· `--tracking-title` .03em（宋体名字）· `--tracking-tight`（旧名 = display：A 皮肤的大标题是宋体，放开而不是收紧）· `normal` 0 · `wide` .04em · `label` .03em · `tab` .08em（底栏）· `eyebrow` .12em · `button` .08em（宋体整行按钮）· `button-lg` .14em（宋体大按钮）· `figure` -.005em。
+字距（都不放宽：放宽的字距像请柬、像数据面板）：`--tracking-display` / `--tracking-title` .01em（宋体）· `--tracking-tight`（旧名 = display）· `normal` 0 · `wide` .02em · `label` 0 · `tab` 0（底栏）· `eyebrow` .04em · `button` / `button-lg` 0 · `figure` 0。
 数字等宽：`font-variant-numeric: tabular-nums`（或 class `tabular-nums` / `t-label`）。输入框字号不能小于 16px（否则 iOS 聚焦时放大页面），base.css 已处理。
 
 ### 间距与布局
 
 - `--space-0…10`：0 · 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64（4pt 网格）。
-- `--gutter` 16px（页面左右留白）· `--content-max` 720px · `--content-max-wide` 1120px · `--tap-min` 44px。
-- 常驻框架（浮在光场上的玻璃胶囊，离屏幕边 16px）：`--topbar-bar-h` 60（顶栏胶囊高）+ `--topbar-inset` 10（离顶）= `--topbar-h` 70；`--tabbar-bar-h` 70（底栏胶囊高）+ `--tabbar-inset` 14（离底）= `--tabbar-h` 84。
+- `--gutter` 22px（页面左右留白：内容直接排在纸上，留白就是页边）· `--content-max` 720px · `--content-max-wide` 1120px · `--tap-min` 44px。
+- 常驻框架（顶栏收起后、底栏是浮在纸上的纸片，离屏幕边 `--gutter`）：`--topbar-bar-h` 60（顶栏胶囊高）+ `--topbar-inset` 10（离顶）= `--topbar-h` 70；`--tabbar-bar-h` 70（底栏胶囊高）+ `--tabbar-inset` 14（离底）= `--tabbar-h` 84。
   `--topbar-h` / `--tabbar-h` 是**给内容留的高度**（不含安全区）：内容的上下内边距、`scroll-padding`、Toast 的位置都按它算。
 - 安全区：`--safe-top` / `--safe-right` / `--safe-bottom` / `--safe-left`（`env(safe-area-inset-*)`，index.html 已开 `viewport-fit=cover`）。顶栏加 `padding-top: var(--safe-top)`，底栏加 `padding-bottom: var(--safe-bottom)`；body 已经让开了横屏两侧。
 - 断点（媒体查询里不能用变量，约定写死）：手机优先；`min-width: 768px` 平板；`min-width: 1024px` 桌面。悬停效果一律包在 `@media (hover: hover)` 里；会改底色的悬停写 `:hover:not([data-pressed])`，让按下态优先。
@@ -234,7 +209,7 @@ backdrop-filter: var(--glass-filter);
 
 | 变量 | 值 | 给谁 |
 |---|---|---|
-| `--z-below` | -1 | 衬底装饰（光场） |
+| `--z-below` | -1 | 衬底（纸） |
 | `--z-base` | 0 | 普通内容 |
 | `--z-raised` | 1 | 内容里抬起的元素 |
 | `--z-sticky` | 100 | 内容里的吸顶（日期条等） |
@@ -256,12 +231,11 @@ backdrop-filter: var(--glass-filter);
 | 变量 | 值 | 用途 |
 |---|---|---|
 | `--dur-instant` / `fast` / `base` / `slow` / `slower` | 90 / 160 / 240 / 360 / 520ms | 普通过渡（颜色、透明度） |
-| `--dur-field` | 1100ms | 光场换色（切换行程时新层在旧层上淡入）；外壳的主题色补间用同一个时长 |
-| `--ease-field` | `cubic-bezier(0.4, 0, 0.2, 1)` | 光场换色的曲线（样稿 07-ui.js 的 Field.show）；外壳的主题色补间用同一条 |
-| `--dur-drift` | 28s | 光场光斑漂一个来回（每个光斑乘不同倍数：0.82–1.2 倍，负延迟错开；减弱动态效果时不漂） |
+| `--dur-field` | 1100ms | 换行程时外壳部件（底栏的 ＋、选中的 tab……）的主题色补间时长（`shell/trip-state.js`） |
+| `--ease-field` | `cubic-bezier(0.4, 0, 0.2, 1)` | 同上的曲线 |
 | `--ease-standard` / `out` / `in` / `in-out` | 贝塞尔 | 普通缓动；离场用 `in`，入场用 `out` |
-| `--press-scale` / `--press-duration` | 0.96 / 90ms | 按下：缩到 0.96，用 `--ease-out` |
-| `--press-transition` | `scale` 的弹簧回弹 | 按压的过渡（`motion/press.css` 用；按下时自动换成短缓出）。组件自己还有过渡时写在它后面 |
+| `--press-scale` / `--press-duration` | 0.98 / 90ms | 按下：缩到 0.98（更安静），用 `--ease-out` |
+| `--press-transition` | `scale` 的 smooth 弹簧（不过冲） | 按压的过渡（`motion/press.css` 用；按下时自动换成短缓出）。组件自己还有过渡时写在它后面 |
 | `--spring-snappy` + `--spring-snappy-duration` | linear() / 460ms | 干脆：按钮回弹、指示条、步进器数字（感知 320ms，过冲 0.6%） |
 | `--spring-bouncy` + `--spring-bouncy-duration` | linear() / 740ms | 弹跳：长出来的面板、加号转 ×、松手回弹（感知 450ms，过冲 4.6%） |
 | `--spring-smooth` + `--spring-smooth-duration` | linear() / 620ms | 顺滑：展开、FLIP 重排、顶栏收起（感知 420ms，不过冲） |
@@ -283,4 +257,5 @@ backdrop-filter: var(--glass-filter);
 ## 深浅色
 
 跟随系统；用户在设置里强制时 `<html data-theme="light|dark">`（`lib/theme.js` 的 `setThemePreference()`）。index.html 有一段内联脚本在首帧前读偏好，强制深色的人不会先闪一下白。
-深色照样稿 `11-深色模式.png`：深青到深酒红的光场、光斑压暗到 0.42、玻璃是半透明深灰、强调色提亮成青绿 `#4fd8c9`（实心底上配深墨色字）。
+深色是深墨色的纸 `#141413`（不偏青也不偏棕）、纸片 `#1c1c1a`、墨 `#ece8e1` / `#a39f97` / `#77736c`；海色降成灰青 `#8fb8b1`、不发光（实心底上配深墨色字）；
+砖红 `#e09a8c`、赭石 `#d9b26a`。
