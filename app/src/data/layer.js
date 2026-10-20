@@ -42,6 +42,10 @@ import { DataError, toDataError } from './errors.js';
 import { keyColumns, normalizeIncomingRow } from './tables.js';
 import { fxRates as defaultFx } from './fx.js';
 import { newId, deepEqual } from './util.js';
+import { local } from '../lib/storage.js';
+
+/** 退出登录时一起清掉的本机内容（翻译页翻过的、收藏的句子、称呼：可能有酒店地址这类内容，共用设备时不留，代码评审 P3） */
+const LOCAL_ON_SIGN_OUT = Object.freeze(['translate:recent', 'translate:star', 'translate:honor']);
 
 /** 撞了这些唯一约束时，改写到已有的那一行（每人每天一篇日记、每人每个地点一条评级） */
 const REBASE_UNIQUE = Object.freeze({
@@ -295,6 +299,7 @@ export function createDataLayer(o) {
 
   async function clearLocal() {
     await clearTripCaches(kv);
+    for (const k of LOCAL_ON_SIGN_OUT) local.remove(k);
   }
 
   const auth = createAuth({ backend, outbox, onUserChange, clearLocal, storedUser: o.storedUser || null, timers });

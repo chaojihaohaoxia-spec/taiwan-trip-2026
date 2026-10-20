@@ -25,7 +25,7 @@ export { useOverlayTrigger, useSheetClaim, useOverlay, useOpenedGate, DISCARD_TE
 
 // 命令式
 export { confirm, alert } from './dialogs.js';
-export { toast, dismissToast, dismissAllToasts, toasts } from './toast.js';
+export { toast, dismissToast, dismissToastKey, dismissAllToasts, toasts } from './toast.js';
 
 // 工具
 export { primeKeyboard, hadUserInput } from './focus.js';

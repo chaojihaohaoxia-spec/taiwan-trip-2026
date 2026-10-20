@@ -63,3 +63,9 @@
 
 - 单元：`test/unit/page-tips.test.js`（贴士和联系人的纯逻辑 + 演示数据跑一遍）。
 - e2e：`test/e2e/page-tips.e2e.mjs`（展开半路图、场景 FLIP 半路图、给对方看半路图、搜索、复制进剪贴板、WhatsApp 预填、`?tip=`、各宽度和深色、空、出错、骨架）。
+
+## 紧急电话（10-19）
+
+置顶组最上面：「紧急电话」那条贴士正文第一行的「报警 113，急救 115，火警 114」拆成三个大号数字并排（Instrument Serif），下面一行小字，整格点了直接拨（`tel:`）。
+拆不出两个以上就不显示，正文照常（`emergency.js`、`EmergencyNumbers.jsx`；单元测试 `test/unit/page-visual.test.js`）。
+

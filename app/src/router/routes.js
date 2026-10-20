@@ -55,6 +55,8 @@ export const routes = Object.freeze([
   { name: 'places', path: '/t/:tripId/places', meta: { title: '地点与评级', auth: true, section: 'trip', parent: trip } },
   { name: 'tips', path: '/t/:tripId/tips', meta: { title: '贴士与常用语', auth: true, section: 'trip', parent: trip } },
   { name: 'contacts', path: '/t/:tripId/contacts', meta: { title: '联系人', auth: true, section: 'trip', parent: trip } },
+  // 翻译（只在越南这类外语行程里有入口：「更多」菜单第一行；lib/translate/text.js 的 translateLang）
+  { name: 'translate', path: '/t/:tripId/translate', meta: { title: '翻译', auth: true, section: 'trip', parent: trip } },
   { name: 'settings', path: '/settings', meta: { title: '设置', auth: true, parent: trips } },
   { name: 'join', path: '/join/:code', meta: { title: '加入行程', auth: false, parent: trips } },
   { name: 'login', path: '/login', meta: { title: '登录', auth: false } },

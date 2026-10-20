@@ -177,7 +177,8 @@ export function nowLineIndex(primary, info) {
 }
 
 /**
- * 收起时标题下面那一行小字：怎么过去的一句话 + 地点名；都没有就写种类。
+ * 收起时标题下面那一行小字：怎么过去的一句话 + 地点名；都没有就写备注第一行；连备注也没有就空着
+ * （以前写种类「其他」「吃饭」——左边已经有种类图标，再写一遍是噪音，加条目评审 6）。
  * @param {object} item
  * @param {object|null} place
  * @param {{ summary?: string }|null} transport transportView 的结果
@@ -190,7 +191,10 @@ export function collapsedSubtitle(item, place, transport, fuzzy = null) {
   const name = place?.name || null;
   if (name) parts.push(name);
   if (parts.length === (fuzzy ? 1 : 0) && item?.time_label && item?.start_time) parts.push(item.time_label);
-  if (parts.length === (fuzzy ? 1 : 0)) parts.push(kindLabel('item', item?.kind));
+  if (parts.length === (fuzzy ? 1 : 0)) {
+    const note = firstLine(item?.description);
+    if (note) parts.push(note.length > 40 ? `${note.slice(0, 39)}…` : note);
+  }
   return parts.join(' · ');
 }
 

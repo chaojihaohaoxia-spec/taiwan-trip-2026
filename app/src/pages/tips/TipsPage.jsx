@@ -24,6 +24,7 @@ import { SectionHeader } from '../../kit/SectionHeader.jsx';
 import { Glyph } from '../../kit/Glyph.jsx';
 import { PageEmptyState, ErrorState } from '../../kit/States.jsx';
 import { haptic } from '../../lib/native.js';
+import { translateLang } from '../../lib/translate/text.js';
 import {
   pageState, useSkeletonHold, useUrlText, PageSearch, FilterChips, MissingTrip, onMarkdownLink, useFocusOnce,
 } from './common.jsx';
@@ -95,6 +96,8 @@ function Tips({ store, route }) {
   const phase = store.view.phase.value?.phase;
   const todayDayId = phase === 'ongoing' ? store.view.today.value?.day?.id || null : null;
   const speech = useSpeech();
+  // 越南这类外语行程：「常用语」标题右边「去翻译」（常用语里没有的，到翻译页现翻）
+  const canTranslate = Boolean(translateLang(store.trip.value));
 
   const kind = normalizeFilter(route.query.kind);
   const [query, setQueryText] = useUrlText(route, 'q');
@@ -215,6 +218,7 @@ function Tips({ store, route }) {
             title={g.label}
             count={g.rows.length}
             meta={groupMeta(g.kind, speech)}
+            action={g.kind === 'phrase' && canTranslate ? { label: '去翻译', to: { name: 'translate', params: { tripId } }, testId: 'tips-translate' } : undefined}
           />
           {g.kind === 'phrase' ? (
             <PhraseSection rows={g.rows} ctx={ctx} route={route} searching={searching} />

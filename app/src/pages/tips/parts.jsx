@@ -13,6 +13,8 @@
 
 import { useRef, useState } from 'preact/hooks';
 import { ExpandableCard } from '../../ui/ExpandableCard.jsx';
+import { EmergencyNumbers, sosTip } from './EmergencyNumbers.jsx';
+import { emergencyRest } from './emergency.js';
 import { MorphIcon } from '../../ui/MorphIcon.jsx';
 import { Glyph } from '../../kit/Glyph.jsx';
 import { kindGlyph } from '../../kit/kinds.js';
@@ -230,14 +232,17 @@ export function TipCard({ tip, hit, ctx, acc, variant = 'card', pinnedTag = fals
 
 /** 置顶：最上面一组（纸本：和别的组一样排在纸上，不做暖色底和图钉圆），一行一条（行内展开） */
 export function PinnedCard({ rows, ctx, acc }) {
+  // 拆成大号数字的那条「紧急电话」：正文里那一行号码不再重复
+  const sos = sosTip(rows.map((r) => r.tip));
   return (
     <section class="tp-pinned" aria-labelledby="tp-pinned-title" data-testid="tips-pinned">
       <header class="tp-pinned__head">
         <h2 class="tp-pinned__title" id="tp-pinned-title">置顶<span class="tp-pinned__count">{rows.length}</span></h2>
       </header>
+      <EmergencyNumbers tips={rows.map((r) => r.tip)} />
       <div class="tp-pinned__list">
         {rows.map(({ tip, hit }) => (
-          <TipCard key={tip.id} tip={tip} hit={hit} ctx={ctx} acc={acc} variant="row" />
+          <TipCard key={tip.id} tip={tip === sos ? { ...tip, body: emergencyRest(tip.body) } : tip} hit={hit} ctx={ctx} acc={acc} variant="row" />
         ))}
       </div>
     </section>

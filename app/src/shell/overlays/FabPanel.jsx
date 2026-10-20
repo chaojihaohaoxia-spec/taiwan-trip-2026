@@ -9,12 +9,12 @@
 //   记一笔     expense   openExpenseSheet({ date })            （进行中：放第一个、最大，副标题是今天记了几笔）
 //   拍照打卡   journal   瓷砖上叠透明的 <input type=file capture>：点了直接开相机，拍完 checkInWith(files, { date })（sheets/journal/capture.js）
 //   写日记     journal   openJournalSheet({ date, mode: 'text' })
-//   加条目     item      openItemSheet({ date })
+//   加一项     item      openItemSheet({ date })              （进行中：和「记一笔」并排放第一行，几点默认现在、做完了默认打开）
 //   加待办     todo      openTodoSheet({ list: 'todo' })
-// 只读成员：记一笔 / 加条目 / 加待办变淡、不能点，副标题写原因（view-rules.js 的 fabActions）。
+// 只读成员：记一笔 / 加一项 / 加待办变淡、不能点，副标题写原因（view-rules.js 的 fabActions）。
 // date：在某一天的页面上就是那天；行程进行中是今天；否则不预填。
 // 外观（「杂志纸本」）：像酒店房间手册的目录——一列单色的行，线条图标 + 宋体名字 + 一行灰字说明，行间细线。
-// 顺序按阶段：进行中「记一笔」放第一行、大一号；出发前先「加条目」「加待办」；回顾先「写日记」。
+// 顺序按阶段：进行中「记一笔」「加一项」并排放第一行（两块一样大）；出发前先「加一项」「加待办」；回顾先「写日记」。
 //
 // 衔接：点了以后面板先原路收回到 ＋（--spring-smooth），同时目标面板从底部滑上来——两段动画同时进行，
 // 中间没有空白帧（e2e 截半路图核对）；历史里只留目标面板一条（返回手势直接回到页面）。
@@ -56,7 +56,7 @@ export default function FabPanel() {
     const r = route.peek();
     const date = prefillDate(r, info);
     // iOS：要弹键盘的面板，必须在点击回调里同步把键盘叫出来
-    if (id === 'expense' || id === 'todo') primeKeyboard();
+    if (id === 'expense' || id === 'todo' || id === 'item') primeKeyboard();
     const open = {
       expense: () => openExpenseSheet(date ? { date } : undefined),
       photo: () => openJournalSheet({ date, mode: 'photo' }),
@@ -82,46 +82,57 @@ export default function FabPanel() {
   return (
     <AnchoredPanel sheetId="fab" placement="above" align="center" width={520} gap={GAP} title="快速添加" class="fab-panel" testId="fab-panel" tintOnEnter={false} tintOnExit={false}>
       <div class="fab-grid" data-phase={phase}>
-        {actions.map((a) => {
-          const inner = (
-            <>
-              <span class="fab-tile__ico" aria-hidden="true"><Glyph name={a.glyph} size={24} /></span>
-              <span class="fab-tile__text" aria-hidden={a.id === 'photo' ? 'true' : undefined}>
-                <b>{a.title}</b>
-                <i>{a.hint}</i>
-              </span>
-            </>
-          );
-          const common = {
-            class: a.id === 'photo' ? 'fab-tile fab-tile--file' : 'fab-tile',
-            'data-hero': a.hero ? '' : undefined,
-            'data-disabled': a.disabled ? '' : undefined,
-            'data-press': a.disabled ? undefined : 'scale',
-            'data-testid': `fab-${a.id}`,
-          };
-          if (a.id === 'photo') {
-            return (
-              <span key={a.id} {...common}>
-                {inner}
-                <input
-                  class="fab-tile__file"
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  aria-label={`${a.title}：${a.hint}`}
-                  data-testid="fab-photo-input"
-                  onChange={onPhotos}
-                />
-              </span>
-            );
-          }
-          return (
-            <button key={a.id} type="button" {...common} disabled={a.disabled} aria-label={a.disabled ? `${a.title}：${a.hint}` : undefined} onClick={() => run(a.id)}>
-              {inner}
-            </button>
-          );
-        })}
+        {groupPairs(actions).map((g) => (g.pair ? (
+          <div key="pair" class="fab-pair">{g.pair.map(tile)}</div>
+        ) : tile(g.one)))}
       </div>
     </AnchoredPanel>
   );
+
+  function tile(a) {
+    const inner = (
+      <>
+        <span class="fab-tile__ico" aria-hidden="true"><Glyph name={a.glyph} size={24} /></span>
+        <span class="fab-tile__text" aria-hidden={a.id === 'photo' ? 'true' : undefined}>
+          <b>{a.title}</b>
+          <i>{a.hint}</i>
+        </span>
+      </>
+    );
+    const common = {
+      class: a.id === 'photo' ? 'fab-tile fab-tile--file' : 'fab-tile',
+      'data-hero': a.hero ? '' : undefined,
+      'data-disabled': a.disabled ? '' : undefined,
+      'data-press': a.disabled ? undefined : 'scale',
+      'data-testid': `fab-${a.id}`,
+    };
+    if (a.id === 'photo') {
+      return (
+        <span key={a.id} {...common}>
+          {inner}
+          <input
+            class="fab-tile__file"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            aria-label={`${a.title}：${a.hint}`}
+            data-testid="fab-photo-input"
+            onChange={onPhotos}
+          />
+        </span>
+      );
+    }
+    return (
+      <button key={a.id} type="button" {...common} disabled={a.disabled} aria-label={a.disabled ? `${a.title}：${a.hint}` : undefined} onClick={() => run(a.id)}>
+        {inner}
+      </button>
+    );
+  }
+}
+
+/** 并排的两个（pair）合成一组，其余一个一行 */
+function groupPairs(actions) {
+  const pair = actions.filter((a) => a.pair);
+  const rest = actions.filter((a) => !a.pair);
+  return pair.length === 2 ? [{ pair }, ...rest.map((one) => ({ one }))] : actions.map((one) => ({ one }));
 }

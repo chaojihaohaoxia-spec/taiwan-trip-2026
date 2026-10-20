@@ -224,8 +224,11 @@ test('出发前：入口记到第一天；已结束（三城 9 天）：统计�
     await empty.page.waitForSelector(`${T('page-journal')}:not([aria-busy="true"])`);
     await empty.idle();
     assert.equal(await count(empty.page, '[data-testid^="journal-day-"]'), 2);
-    assert.equal(await count(empty.page, `${T('journal-entry-empty')}[data-mine="true"]`), 2);
-    assert.match(await text(empty.page, T('journal-stats')), /还没有日记/);
+    // 一篇都没有：空状态只说一次（不再每天重复「还没写 / Cathy 还没写」），下面一行一天的目录，点了写那天
+    assert.match(await text(empty.page, T('journal-blank')), /这趟还没有日记/);
+    assert.equal(await count(empty.page, T('journal-entry-empty')), 0);
+    assert.equal(await count(empty.page, '.jn-index__btn'), 2);
+    assert.equal(await empty.page.$(T('journal-stats')), null, '统计那行不再重复「还没有日记」');
     await empty.shot('empty-days');
     await empty.go('#/t/demo-empty/journal?view=album');
     await empty.page.waitForSelector(T('journal-empty-photos'));

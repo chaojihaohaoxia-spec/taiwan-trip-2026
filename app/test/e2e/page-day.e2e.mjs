@@ -357,7 +357,7 @@ test('动作行：导航 / 叫 Grab 的链接和 lib/ 一致（步行到的条�
     await page.waitForFunction((id) => location.hash.endsWith(`sheet=item:${id}`), {}, DIVE.id);
     await page.waitForSelector(T('item-form'));
     assert.equal(await page.$eval(T('item-title'), (el) => el.value), DIVE.title);
-    assert.equal(await page.$eval(`${T('sheet-item')} .ov-sheet__title`, (el) => el.textContent), '编辑条目');
+    assert.equal(await page.$eval(`${T('sheet-item')} .ov-sheet__title`, (el) => el.textContent), '改一项');
     app.assertClean();
   } finally {
     await app.close();
@@ -575,7 +575,7 @@ test('空状态：山雾镇的一天没有条目 → 空状态和「加第一条
     await tap(page, T('day-empty-add'));
     await page.waitForFunction(() => location.hash.includes('sheet=item:d.2027-04-03'));
     await page.waitForSelector(T('item-form'));
-    assert.equal(await page.$eval(T('item-day'), (el) => el.selectedOptions[0].textContent), 'D1 · 4月3日 周六');
+    assert.equal(await page.$eval(T('item-day'), (el) => el.querySelector('[aria-checked="true"]').getAttribute('aria-label')), 'D1 · 4月3日 周六');
     await closeSheet(page);
 
     await app.go('#/t/demo-cities/day/2026-03-15');
@@ -595,17 +595,19 @@ test('空状态：山雾镇的一天没有条目 → 空状态和「加第一条
   }
 });
 
-test('条目弹层：加一条（标题、钟点、种类、选地点）→ 提交转圈打勾 → 按钟点插进时间轴；编辑标题；删除 → 撤销回来', async () => {
+test('条目弹层：加一项（标题、钟点、种类、选地点）→ 提交转圈打勾 → 按钟点插进时间轴；编辑标题；删除 → 撤销回来', async () => {
   const app = await openDay(D2);
   const { page } = app;
   try {
-    await tap(page, T('day-add'));
+    await tap(page, T('tl-add'));
     await page.waitForFunction(() => location.hash.includes('sheet=item:'));
     await page.waitForSelector(T('item-form'));
-    assert.equal(await page.$eval(`${T('sheet-item')} .ov-sheet__title`, (el) => el.textContent), '加条目');
-    assert.equal(await page.$eval(T('item-day'), (el) => el.selectedOptions[0].textContent), 'D2 · 1月11日 周一 · 浮潜 + 西线环岛');
+    assert.equal(await page.$eval(`${T('sheet-item')} .ov-sheet__title`, (el) => el.textContent), '加一项');
+    assert.equal(await page.$eval(T('item-day'), (el) => el.querySelector('[aria-checked="true"]').textContent), '今天');
     await page.type(T('item-title'), '码头看渔船');
     await page.$eval(T('item-start'), (el) => { el.value = '09:40'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+    await tap(page, T('item-more'));
+    await page.waitForSelector(T('item-kinds'));
     await tap(page, `${T('item-kinds')} [data-kind="sight"]`);
     // 选地点：搜不带声调的越南语也行
     await tap(page, T('item-place-toggle'));
@@ -622,6 +624,7 @@ test('条目弹层：加一条（标题、钟点、种类、选地点）→ 提�
     await page.waitForSelector(T('item-place-new'));
     await tap(page, T('item-place-new'));
     assert.equal(await page.$eval('.item-place__name', (el) => el.textContent), '码头边的椰子摊（新地点）');
+    assert.equal(await page.$eval(`${T('item-kinds')} [aria-checked="true"]`, (el) => el.dataset.kind), 'sight', '人选过的类型不跟着地点变');
     await page.screenshot({ path: path.join(SHOTS, 'item-form.png'), captureBeyondViewport: false });
     await page.click(T('item-submit'));
     await sleep(160);
@@ -682,6 +685,7 @@ test('条目弹层：备选挂到某条主方案下、放进备选池；只填�
   try {
     await app.go(`#/t/demo-island/day/${D2}?sheet=item:d.${D2}~r.${DIVE.id}~v.rain`);
     await page.waitForSelector(T('item-form'));
+    await page.waitForSelector(T('item-more-body'));   // 网址带了方案：更多设置自己展开
     assert.equal(await page.$eval(`${T('item-field-variant')} .seg__item[aria-checked="true"]`, (el) => el.textContent.trim()), '雨天方案');
     assert.equal(await page.$eval(T('item-parent'), (el) => el.value), DIVE.id);
     await page.type(T('item-title'), '下雨就去泡温泉');
@@ -693,7 +697,7 @@ test('条目弹层：备选挂到某条主方案下、放进备选池；只填�
     // 备选池 + 校验
     await app.go(`#/t/demo-island/day/${D2}?sheet=item`);
     await page.waitForSelector(T('item-form'));
-    await page.select(T('item-day'), 'pool');
+    await page.click(T('item-day-pool'));
     await page.$eval(T('item-start'), (el) => { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); });
     await page.click(T('item-submit'));
     await page.waitForSelector(T('item-error'));

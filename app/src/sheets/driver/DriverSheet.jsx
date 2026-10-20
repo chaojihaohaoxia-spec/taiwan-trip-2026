@@ -41,6 +41,9 @@ import { openExternal, haptic } from '../../lib/native.js';
 import { Glyph } from '../../kit/Glyph.jsx';
 import { telHref } from '../../kit/place-actions.js';
 import { useSheetTrip, findRow } from '../hooks.js';
+import { translationCard } from './translation.js';
+import { useSpeech } from '../../pages/tips/speech.js';
+import { tipLang } from '../../pages/tips/model.js';
 
 /** 名字的字号范围（px）；地址 = 名字 × ADDRESS_RATIO，但不小于 ADDRESS_MIN。
  *  上限在手机上是 72；屏幕更宽（平板、桌面）时按宽度放大，最大 NAME_MAX_WIDE */
@@ -70,7 +73,7 @@ export function driverContent(found, store) {
   if (table === 'tips') {
     const local = (row.local_text || '').trim();
     if (!local) return { kind: 'tip', primary: row.title, address: null, secondary: null, phone: null, copy: row.title, badge: '给对方看' };
-    return { kind: 'tip', primary: local, address: null, secondary: row.title, phone: null, copy: local, badge: '给对方看', lang: row.local_lang || undefined };
+    return { kind: 'tip', primary: local, address: null, secondary: row.title, phone: null, copy: local, badge: '给对方看', lang: row.local_lang || tipLang(row) || undefined };
   }
   let place = table === 'places' ? row : null;
   if (!place && row.place_id) place = store?.tables?.places?.value?.get(row.place_id) || null;
@@ -124,10 +127,13 @@ function DriverLayer({ ov }) {
   const titleId = useMemo(() => uid('drv-title'), []);
   const [scrollable, setScrollable] = useState(false);
   const { copy, copied } = useCopy();
+  const speech = useSpeech();
 
   const { store, pending } = useSheetTrip();
-  const found = findRow(store, ov.arg);
-  const content = driverContent(found, store);
+  // tr.<id>：翻译页的一句（存在这台手机里，不在行程数据里）
+  const tr = translationCard(ov.arg);
+  const found = tr ? null : findRow(store, ov.arg);
+  const content = tr || driverContent(found, store);
   const loading = !content && pending;
 
   // ---------- 字号自动适配 ----------
@@ -341,6 +347,9 @@ function DriverLayer({ ov }) {
   };
 
   const tel = content?.phone ? telHref(content.phone) : null;
+  // 当地语的一句（常用语、翻译）：这台设备有这种语言的声音就能「读出来」（评审 8：全屏这一页最需要读）
+  const say = content?.kind === 'tip' && content.lang && content.copy && speech.can(content.lang) ? content.copy : null;
+  const btnCount = 1 + (tel ? 1 : 0) + (say ? 1 : 0);
 
   return (
     <OverlayContext.Provider value={ctx}>
@@ -396,17 +405,33 @@ function DriverLayer({ ov }) {
 
           <div class="drv__bottom">
             {content && (
-              <div class={`drv__actions${tel ? ' drv__actions--two' : ''}`}>
+              <div class={`drv__actions${btnCount > 1 ? ' drv__actions--two' : ''}`}>
                 <button
                   type="button"
                   class="drv__btn"
                   data-press="scale"
                   data-testid="driver-copy"
-                  onClick={() => copy(content.copy, { label: content.kind === 'tip' ? '原文' : '地址' }).then((r) => r.ok && haptic('success'))}
+                  onClick={() => copy(content.copy, { label: content.copyLabel || (content.kind === 'tip' ? '原文' : '地址') }).then((r) => r.ok && haptic('success'))}
                 >
                   <Glyph name={copied ? 'check' : 'copy'} size={20} stroke={copied ? 2.4 : 1.9} />
                   <span>{copied ? '已复制' : '复制'}</span>
                 </button>
+                {say && (
+                  <button
+                    type="button"
+                    class="drv__btn"
+                    data-press="scale"
+                    aria-pressed={speech.speaking === say ? 'true' : 'false'}
+                    onClick={() => {
+                      haptic('light');
+                      speech.speak(say, content.lang);
+                    }}
+                    data-testid="driver-speak"
+                  >
+                    <Glyph name="speaker" size={20} />
+                    <span>{speech.speaking === say ? '停' : '读出来'}</span>
+                  </button>
+                )}
                 {tel && (
                   <a
                     class="drv__btn"

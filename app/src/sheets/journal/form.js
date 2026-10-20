@@ -3,7 +3,8 @@
 //
 //   MOODS / moodOptions(current)            心情一排 emoji（带中文名）；日记里已有、不在列表里的心情放最前面
 //   defaultJournalDay({ days, phase, todayDate, mine })   没指定哪天时写哪天
-//   formFromEntry(entry) / applyDraft(form, draft, entry)  表单初值：已有的日记 + 本机草稿
+//   formFromEntry(entry) / applyDraft(base, draft)   表单初值：已有的日记 + 本机草稿（草稿之后别处加进日记的照片不会被冲掉）
+//   carryNewPhotos(photos, oldBase, newBase)        面板开着时日记被别处改了（补照片）：新加进来的照片并进正在改的表单
 //   formPatch(form, entry)                  要保存的字段（只留改了的）；formIsEmpty / formIsDirty
 //   uploadStateOf(path, outbox)             一张新照片现在的上传状态（写队列里还有没有、是不是正在发、失败了没有）
 //   uploadSummary(photos, states)           「已上传 2/3」
@@ -103,12 +104,35 @@ export function formFromEntry(entry) {
  */
 export function applyDraft(base, draft) {
   if (!draft) return { form: base, restored: false };
+  let photos = base.photos;
+  if (Array.isArray(draft.photos)) {
+    photos = draft.photos.filter((p) => p?.path).map(cleanPhoto);
+    // 日记里现在有、草稿里没有的照片：写草稿以后才加进来的（「补照片」、另一台设备）→ 留着，不能被草稿冲掉
+    // （冲掉以后一保存，这些照片会从日记里去掉、文件也被删，代码评审 P1）。
+    // 草稿记了当时有哪些（basePaths）：当时就有、草稿里删掉了的，是人自己删的，照删；没记（旧草稿）的一律留着。
+    const known = new Set([...(Array.isArray(draft.basePaths) ? draft.basePaths : []), ...photos.map((p) => p.path)]);
+    const arrived = base.photos.filter((p) => !known.has(p.path));
+    if (arrived.length) photos = [...photos, ...arrived];
+  }
   const form = {
     mood: typeof draft.mood === 'string' ? draft.mood : base.mood,
     body: typeof draft.body === 'string' ? draft.body : base.body,
-    photos: Array.isArray(draft.photos) ? draft.photos.filter((p) => p?.path).map(cleanPhoto) : base.photos,
+    photos,
   };
   return { form, restored: formIsDirty(form, base) };
+}
+
+/**
+ * 面板开着、表单改过时，日记被别处改了（「补照片」放进来几张）：新底稿里多出来的照片并进表单（排在后面），
+ * 人在表单里删掉的（旧底稿里有、表单里没有）不加回来。
+ * @param {object[]} photos 表单里现在的照片
+ * @param {object[]} oldBase 之前的底稿照片
+ * @param {object[]} newBase 新的底稿照片
+ */
+export function carryNewPhotos(photos = [], oldBase = [], newBase = []) {
+  const known = new Set([...oldBase, ...photos].map((p) => p?.path));
+  const arrived = newBase.filter((p) => p?.path && !known.has(p.path));
+  return arrived.length ? [...photos, ...arrived] : photos;
 }
 
 const samePhotos = (a, b) => a.length === b.length && a.every((p, i) => {

@@ -6,6 +6,7 @@
 //   展开：成员（头像、名字、「我」、邮箱、角色芯片：创建者 / 可编辑 / 只读）
 //         创建者：「邀请成员」（打开 invite 弹层，网址带 ?trip=<id>）；每位成员右边「⋯」小菜单：改成可编辑 / 改成只读 / 移出行程（先确认）
 //         不是创建者：说明「只有创建者可以邀请」；自己那一行「退出这趟行程」（先确认）
+//         能编辑的成员：「封面和主题色」（sheets/cover，网址带 ?trip=<id>）
 // 成员数据在展开时才读（useTrip：卡片收起、离开设置页 15 秒后自动退订）。改角色、移出走数据层（写队列，离线也行）。
 // =====================================================================
 
@@ -94,6 +95,12 @@ function TripMembers({ entry }) {
     navigate({ name: 'settings', query: { ...(r?.query || {}), trip: entry.id }, sheets: [{ id: 'invite' }] }, { scroll: 'keep' });
     e?.currentTarget?.blur?.();
   };
+  // 封面和主题色（sheets/cover）：设置页不在行程里，网址带 ?trip=<id>
+  const openCover = (e) => {
+    const r = route.peek();
+    navigate({ name: 'settings', query: { ...(r?.query || {}), trip: entry.id }, sheets: [{ id: 'cover' }] }, { scroll: 'keep' });
+    e?.currentTarget?.blur?.();
+  };
   const leave = async () => {
     const ok = await confirm({
       title: `退出「${entry.trip.title}」？`,
@@ -142,6 +149,11 @@ function TripMembers({ entry }) {
             <Button variant="danger-soft" size="sm" onClick={leave} data-testid={`settings-leave-${entry.id}`}>退出这趟行程</Button>
           )}
         </div>
+      )}
+      {store.view.canEdit.value && (
+        <Button variant="secondary" block leading={<Glyph name="photo" size={18} />} onClick={openCover} data-testid={`settings-cover-${entry.id}`}>
+          封面和颜色
+        </Button>
       )}
     </div>
   );

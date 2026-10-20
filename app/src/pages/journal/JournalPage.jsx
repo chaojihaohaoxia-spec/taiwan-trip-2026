@@ -27,7 +27,7 @@ import { Chip } from '../../ui/Chip.jsx';
 import { Button } from '../../ui/Button.jsx';
 import { Skeleton, Reveal } from '../../ui/Skeleton.jsx';
 import { Card, SectionHeader, PageEmptyState, ErrorState, Glyph, DayBadge } from '../../kit/index.js';
-import { openJournalSheet, openPhotoViewer } from '../../sheets/index.js';
+import { openJournalSheet, openPhotoViewer, importPhotosWith } from '../../sheets/index.js';
 import { PhotoInput } from '../../sheets/journal/PhotoInput.jsx';
 import { checkInWith } from '../../sheets/journal/capture.js';
 import { draftDays, draftVersion } from '../../sheets/journal/draft.js';
@@ -144,17 +144,50 @@ export default function JournalPage({ route }) {
     : `${days.length} 天 · 还没有日记`;
 
   // ---------- 按天 ----------
-  const daysView = (
-    <div class="jn__days" data-testid="journal-days-view">
-      {target && (
-        <div class="jn__actions" data-testid="journal-actions">
-          <PhotoInput camera onFiles={(files) => checkInWith(files, { date: target.date })} block testId="journal-action-camera">拍照打卡</PhotoInput>
-          <Button variant="secondary" block leading={<Glyph name="pen" size={20} />} onClick={(e) => openWrite(target.date, e)} data-testid="journal-action-write">写日记</Button>
-          <p class="jn__actions-hint t-label">
-            记到 D{days.indexOf(target) + 1} · {formatDate(target.date, { timeZone, relative: true })}
-          </p>
-        </div>
+  // 结束以后「拍照打卡」用不上了：换成「补照片」（从相册挑一批，按拍摄日期分到每天，sheets/photo-import）
+  const ended = phase === 'ended';
+  const blank = stats.entries === 0;
+  const targetText = target ? `D${days.indexOf(target) + 1} · ${formatDate(target.date, { timeZone, relative: true })}` : '';
+  const actions = target && (
+    <div class="jn__actions" data-testid="journal-actions">
+      {ended ? (
+        <PhotoInput multiple variant={blank ? 'primary' : 'secondary'} block onFiles={(files) => importPhotosWith(files)} testId="journal-action-import">补照片</PhotoInput>
+      ) : (
+        <PhotoInput camera onFiles={(files) => checkInWith(files, { date: target.date })} block testId="journal-action-camera">拍照打卡</PhotoInput>
       )}
+      <Button variant="secondary" block leading={<Glyph name="pen" size={20} />} onClick={(e) => openWrite(target.date, e)} data-testid="journal-action-write">写日记</Button>
+      {!blank && <p class="jn__actions-hint t-label">{ended ? `写日记记到 ${targetText}` : `记到 ${targetText}`}</p>}
+    </div>
+  );
+  const daysView = blank ? (
+    // 一篇都没有：空状态只说一次，下面是一行一天的目录（不再每天重复「还没写 / Cathy 还没写」）
+    <div class="jn__days jn__days--blank" data-testid="journal-days-view">
+      <div class="jn-blank" data-testid="journal-blank">
+        <p class="jn-blank__lead">这趟还没有日记</p>
+        <p class="jn-blank__text">{ended ? '挑一批照片，按拍摄日期自动分到每天；想写几句，点哪天都行。' : '拍张照、写两句，每天各一篇。点哪天都能写。'}</p>
+      </div>
+      {actions}
+      <ol class="jn-index" aria-label="每天">
+        {sections.map((s) => {
+          const mine = s.entries.find((e) => e.mine);
+          return (
+            <li key={s.day.id} id={`jn-day-${s.day.date}`} class="jn-index__row" data-today={s.isToday ? '' : undefined} data-testid={`journal-day-${s.day.date}`}>
+              <button type="button" class="jn-index__btn" data-press="highlight" onClick={(ev) => openWrite(s.day.date, ev)}>
+                <DayBadge n={s.number} size="md" today={s.isToday} class="jn-index__badge" />
+                <span class="jn-index__text">
+                  <b>{s.day.title || formatDate(s.day.date, { timeZone })}</b>
+                  <span class="t-label">{formatDate(s.day.date, { timeZone, relative: true })}</span>
+                </span>
+                <span class="jn-index__go t-label">{mine?.draft ? '继续写' : '写一篇'}<Glyph name="chev-r" size={14} stroke={2.2} /></span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  ) : (
+    <div class="jn__days" data-testid="journal-days-view">
+      {actions}
 
       {sections.map((s) => {
         // 标题是那天的标题，没有就用日期；小字写相对的日子（昨天 / 明天）——今天用日期 + 「今天」标签
@@ -229,7 +262,10 @@ export default function JournalPage({ route }) {
       {photoList.length === 0 ? (
         <PageEmptyState
           preset="photos"
-          action={target ? <PhotoInput camera onFiles={(files) => checkInWith(files, { date: target.date })} variant="primary" testId="journal-album-camera">拍照打卡</PhotoInput> : null}
+          description={ended ? '从相册挑一批这趟拍的照片，按拍摄日期自动分到每天。' : undefined}
+          action={ended ? (
+            <PhotoInput multiple onFiles={(files) => importPhotosWith(files)} variant="primary" testId="journal-album-import">从相册挑照片</PhotoInput>
+          ) : target ? <PhotoInput camera onFiles={(files) => checkInWith(files, { date: target.date })} variant="primary" testId="journal-album-camera">拍照打卡</PhotoInput> : null}
           data-testid="journal-empty-photos"
         />
       ) : (
@@ -297,7 +333,7 @@ export default function JournalPage({ route }) {
           <>
             <div class="jn__top">
               <SegmentedControl label="日记视图" value={view} onChange={setView} options={VIEWS} class="seg--glass" data-testid="journal-view" />
-              <p class="jn__stats t-label" data-testid="journal-stats">{statsText}</p>
+              {!(blank && view === 'days') && <p class="jn__stats t-label" data-testid="journal-stats">{statsText}</p>}
             </div>
             {view === 'days' ? daysView : albumView}
           </>

@@ -7,7 +7,7 @@ import {
   VIEWS, parseView, parseLayout, tripState, daySections, journalStats, albumGroups, authorOptions, scrollTarget, actionDay, entryTime,
 } from '../../src/pages/journal/model.js';
 import {
-  MOODS, moodLabel, moodOptions, MOOD_MAX, defaultJournalDay, cleanPhoto, formFromEntry, applyDraft, formIsDirty, formIsEmpty, formPatch,
+  MOODS, moodLabel, moodOptions, MOOD_MAX, defaultJournalDay, cleanPhoto, formFromEntry, applyDraft, carryNewPhotos, formIsDirty, formIsEmpty, formPatch,
   uploadStateOf, uploadSummary, UPLOAD_LABELS, charCount, tripReady,
 } from '../../src/sheets/journal/form.js';
 import { stashPhotos, takeStashedPhotos, hasStashedPhotos } from '../../src/sheets/journal/capture.js';
@@ -409,4 +409,29 @@ test('矩形换算：此刻在屏幕上的矩形 ↔ 照片框的 fly 数值；�
   assert.equal(rectVisible({ left: 400, top: 0, width: 10, height: 10 }, V), false);
   assert.equal(rectVisible({ left: 0, top: -20, width: 10, height: 10 }, V), false);
   assert.equal(rectVisible(null, V), false);
+});
+
+test('草稿冲不掉「补照片」放进来的照片：草稿之后加进日记的留着；草稿里人自己删的照删；旧草稿（没记底稿）一律留着', () => {
+  const base = { mood: '', body: '第一天', photos: [{ path: 'p1' }, { path: 'p2' }, { path: 'imp1' }, { path: 'imp2' }] };
+  // 写草稿时日记里有 p1、p2；草稿删了 p2、正文改了；之后补照片放进 imp1、imp2
+  const draft = { body: '第一天，补两句', photos: [{ path: 'p1' }], basePaths: ['p1', 'p2'] };
+  const r = applyDraft(base, draft);
+  assert.deepEqual(r.form.photos.map((p) => p.path), ['p1', 'imp1', 'imp2']);
+  assert.equal(r.form.body, '第一天，补两句');
+  assert.equal(r.restored, true);
+  // 旧草稿：没有 basePaths → 日记里有、草稿里没有的都留着
+  const old = applyDraft(base, { body: 'x', photos: [{ path: 'p1' }] });
+  assert.deepEqual(old.form.photos.map((p) => p.path), ['p1', 'p2', 'imp1', 'imp2']);
+  // 保存时不会把补进来的照片当成「从日记里去掉的」
+  const patch = formPatch(r.form, { mood: null, body: '第一天', photos: base.photos });
+  const kept = new Set(patch.photos.map((p) => p.path));
+  assert.ok(kept.has('imp1') && kept.has('imp2'));
+});
+
+test('面板开着时日记被补了照片：新照片并进正在改的表单；人刚删掉的不加回来', () => {
+  const oldBase = [{ path: 'a' }, { path: 'b' }];
+  const newBase = [{ path: 'a' }, { path: 'b' }, { path: 'n1' }];
+  assert.deepEqual(carryNewPhotos([{ path: 'a' }], oldBase, newBase).map((p) => p.path), ['a', 'n1'], 'b 是人删的，不回来');
+  const same = [{ path: 'a' }];
+  assert.equal(carryNewPhotos(same, oldBase, oldBase), same, '没有新的：原样返回');
 });

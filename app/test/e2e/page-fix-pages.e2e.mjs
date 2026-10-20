@@ -300,9 +300,9 @@ test('每天页加条目：面板收回以后新的一条才进时间轴，淡�
   const app = await open(`#/t/demo-island/day/${D2.date}`, { now: UPCOMING });
   const { page } = app;
   try {
-    await page.waitForSelector(T('day-add'), { timeout: 15000 });
-    await page.$eval(T('day-add'), (el) => el.scrollIntoView({ block: 'center' }));
-    await page.click(T('day-add'));
+    await page.waitForSelector(T('tl-add'), { timeout: 15000 });
+    await page.$eval(T('tl-add'), (el) => el.scrollIntoView({ block: 'center' }));
+    await page.click(T('tl-add'));
     await page.waitForSelector(T('item-title'), { timeout: 8000 });
     await app.idle();
     await page.$eval(T('item-title'), (el) => el.focus());

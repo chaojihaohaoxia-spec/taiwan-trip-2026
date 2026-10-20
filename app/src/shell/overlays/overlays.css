@@ -270,7 +270,7 @@
   line-height: 1.35;
 }
 
-/* 只读成员：记一笔 / 加条目 / 加待办变淡、不能点（副标题写原因） */
+/* 只读成员：记一笔 / 加一项 / 加待办变淡、不能点（副标题写原因） */
 .fab-tile[data-disabled] {
   cursor: not-allowed;
 }
@@ -294,6 +294,29 @@
 
 .fab-tile[data-hero] b {
   font-size: var(--text-title-2);
+}
+
+/* 进行中：「记一笔」「加一项」并排放第一行（两块一样大，中间一根竖细线） */
+.fab-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.fab-pair > .fab-tile {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 96px;
+  padding: 14px 4px 12px;
+}
+
+.fab-pair > .fab-tile + .fab-tile {
+  padding-left: 16px;
+  box-shadow: inset 1px 0 0 var(--color-separator);
+}
+
+.fab-pair + .fab-tile {
+  box-shadow: inset 0 1px 0 var(--color-separator);
 }
 
 /* ---------- 「更多」全屏菜单 ---------- */

@@ -119,10 +119,11 @@ export default function DayPage({ route }) {
     }
   }, [store, plan, acc.setOpenId]);
 
+  // 加一项（时间轴末尾「＋ 加一项」、「现在」线上的 ＋、标题旁的「加一项」、空状态）：只预填哪天，
+  // 几点 / 做完了 / 排在哪由面板按「今天、现在」给默认值（sheets/item/form-model.js）
   const onAdd = useCallback((e) => {
-    const last = plan.primary[plan.primary.length - 1];
-    openItemSheet({ date, after: last?.id }, { keyboard: true, trigger: e?.currentTarget });
-  }, [date, plan.primary]);
+    openItemSheet({ date }, { keyboard: true, trigger: e?.currentTarget });
+  }, [date]);
 
   // ---- ?item=：展开并滚到那一条（同一条历史记录只滚一次：返回 / 刷新回来由路由恢复位置） ----
   useEffect(() => {
@@ -231,7 +232,7 @@ export default function DayPage({ route }) {
 
   return (
     <div class="day" data-testid="page-day" data-phase={phase} data-today={now.info.visible ? '' : undefined} ref={rootRef}>
-      <DayHead day={day} trip={trip} dayNumber={dayNumber} timeZone={timeZone} at={now.at} weather={weather} stay={stay} />
+      <DayHead day={day} trip={trip} dayNumber={dayNumber} timeZone={timeZone} at={now.at} weather={weather} stay={stay} store={store} />
       <RoutePlanCard plan={day.route_plan} getPlace={getPlace} />
       <DecisionsCard decisions={day.decisions} />
       <RemindersCard tips={dayTips} todos={dayTodos} tripId={tripId} store={store} canEdit={canEdit} timeZone={timeZone} />
@@ -246,11 +247,6 @@ export default function DayPage({ route }) {
         <>
           <Timeline primary={primary} alternatives={plan.alternatives} ctx={ctx} acc={acc} now={now} altView={altView} onAltChange={onAltChange} onAdd={onAdd} />
           <AltList general={plan.general} ctx={ctx} acc={acc} />
-          {canEdit && plan.primary.length > 0 && (
-            <div class="day-add">
-              <Button variant="secondary" size="lg" block leading={() => <Glyph name="cal-plus" size={22} />} onClick={onAdd} data-testid="day-add">往这一天加条目</Button>
-            </div>
-          )}
         </>
       )}
       <SwipeHint hint={hint} />

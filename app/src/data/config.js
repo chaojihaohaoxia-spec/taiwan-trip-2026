@@ -28,3 +28,10 @@ export const ALLOWED_MIME = Object.freeze(['image/jpeg', 'image/png', 'image/web
 /** 普通请求、上传的超时（毫秒）：海岛上网络时有时无，请求挂住不如尽快失败、交给写队列重试 */
 export const REQUEST_TIMEOUT_MS = 20_000;
 export const UPLOAD_TIMEOUT_MS = 90_000;
+
+/**
+ * 翻译接口（云开发 HTTP 访问服务上的云函数 translate-web，和小程序同一份提示词、同一个 hy3）。
+ * 不是密钥：没有行程成员的登录 token 什么都做不了；只认网站和本机的 Origin。
+ * 空字符串 = 还没接上（翻译页照样能看收藏和最近翻过的）。scripts/lib/csp.mjs 读它放行 connect-src。
+ */
+export const TRANSLATE_URL = 'https://cloudbase-d2gybhdqr1058f4c5-1499510839.ap-shanghai.app.tcloudbase.com/translate-web';

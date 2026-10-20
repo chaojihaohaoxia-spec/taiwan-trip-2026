@@ -2,7 +2,7 @@
 // shell/view-rules.js：外壳界面上的几条“算什么就显示什么”的规则（纯函数，Node 里能直接测）。
 //
 //   dayStripCells({ tripId, dates, phase, today })    天数分段条的格子（DayStrip.jsx）
-//   fabActions({ phase, localCurrency, todayCount })  ＋ 面板的五个动作和顺序（overlays/FabPanel.jsx）
+//   fabActions({ phase, localCurrency, todayCount })  ＋ 面板的五个动作和顺序（overlays/FabPanel.jsx；进行中前两个 pair = 并排）
 //   menuStatuses({ bookings, todos, journal, … })     「更多」菜单每块瓷砖的实时状态（overlays/MoreMenu.jsx）
 //   syncBanner(syncStatus)                            同步状态条显示什么（SyncBar.jsx）
 //   switchTarget(route, tripId)                       换行程以后去哪（overlays/SwitcherPanel.jsx）
@@ -34,7 +34,7 @@ export function dayStripCells({ tripId, dates = [], phase = 'upcoming', today = 
 
 /**
  * 五个动作（纯数据；order 按阶段排）。
- * canEdit = false（只读成员）：记一笔 / 加条目 / 加待办变淡、不能点，副标题换成原因；拍照打卡、写日记照常
+ * canEdit = false（只读成员）：记一笔 / 加一项 / 加待办变淡、不能点，副标题换成原因；拍照打卡、写日记照常
  * （日记和评级是自己的，只读成员也能写）——不让人点进去才发现整张表单是灰的（视觉评审 P1-4、代码评审 P2-2）。
  * 能用的排前面，用不了的排最后。
  */
@@ -43,29 +43,32 @@ export function fabActions({ phase, localCurrency, todayCount = 0, canEdit = tru
   const all = {
     expense: {
       id: 'expense', glyph: 'wallet', title: '记一笔',
-      // 进行中的副标题短一点（375 宽一行放得下）：「今天已记 5 笔 · 自动折合港币」
+      // 进行中和「加一项」并排、只有半宽：副标题一行放得下（「今天已记 5 笔」「越南盾自动折合港币」）
       hint: phase === 'ongoing'
-        ? (todayCount ? `今天已记 ${todayCount} 笔${cur ? ' · 自动折合港币' : ''}` : cur ? `${cur}自动折合港币` : '谁付的、怎么分都记上')
+        ? (todayCount ? `今天已记 ${todayCount} 笔` : cur ? `${cur}自动折合港币` : '谁付的、怎么分')
         : cur ? `${cur}自动折合港币` : '谁付的、怎么分都记上',
     },
     photo: { id: 'photo', glyph: 'camera', title: '拍照打卡', hint: '照片自动归到当天' },
     journal: { id: 'journal', glyph: 'pen', title: '写日记', hint: phase === 'ended' ? '趁还记得，补上那天的事' : '今天的小事和心情' },
-    item: { id: 'item', glyph: 'cal-plus', title: '加条目', hint: '插进某一天的时间轴' },
+    item: { id: 'item', glyph: 'cal-plus', title: '加一项', hint: phase === 'ongoing' ? '按现在的时间插进去' : '插进某一天的时间轴' },
     todo: { id: 'todo', glyph: 'checklist', title: '加待办', hint: phase === 'ongoing' ? '提醒自己别忘了' : '出发前要办的事' },
   };
   const READ_ONLY = { expense: '只读成员不能记账', item: '只读成员不能改行程', todo: '只读成员不能加待办' };
+  // 进行中：「记一笔」「加一项」并排放第一行（两块一样大，pair），＋ 一下就到（10-19 加条目改版）
   let order = phase === 'ongoing'
-    ? ['expense', 'photo', 'journal', 'item', 'todo']
+    ? ['expense', 'item', 'photo', 'journal', 'todo']
     : phase === 'ended'
       ? ['journal', 'photo', 'expense', 'item', 'todo']
       : ['item', 'todo', 'expense', 'journal', 'photo'];
   if (!canEdit) order = [...order.filter((k) => !READ_ONLY[k]), ...order.filter((k) => READ_ONLY[k])];
   return order.map((k, i) => {
     const disabled = !canEdit && Boolean(READ_ONLY[k]);
+    const pair = canEdit && phase === 'ongoing' && i < 2;
     return {
       ...all[k],
       ...(disabled ? { hint: READ_ONLY[k], disabled: true } : {}),
-      hero: canEdit && phase === 'ongoing' && i === 0,
+      hero: pair,
+      pair,
     };
   });
 }

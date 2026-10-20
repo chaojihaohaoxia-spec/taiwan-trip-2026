@@ -6,8 +6,8 @@
 //   1. 把结果整理成上传要的形状：{ blob, type, width, height, size, originalSize, converted, takenAt }
 //      takenAt 是带偏移的时间戳（可直接写进 photos[].taken_at），读不到为 null；
 //   2. 已经很小的 JPEG（没有任何 EXIF、不用缩小、原图比重新编码的还小）直接用原图；
-//   3. HEIC“能转则转”：浏览器解不开 HEIC（多数桌面 Chrome）时不报错，原样上传 HEIC
-//      （存储桶允许 image/heic；两个人的 iPhone Safari 都能显示），并标 converted: false。
+//   3. HEIC 浏览器解不开（多数桌面 Chrome）时**不再原样上传**：原图带 GPS 等元数据，和「去掉位置」的说法不符
+//      （补照片一次几十张，碰上的机会更多，10-19 代码评审）——给一句中文：用手机或 Safari 传。iPhone / Mac 的 Safari 都解得开。
 // =====================================================================
 
 import { compressImage as libCompress, extensionFor, isHeicLike } from '../lib/image.js';
@@ -45,7 +45,7 @@ export async function prepareImage(file, { timeZone, compress = libCompress } = 
     r = await compress(file, { timeZone });
   } catch (error) {
     if (isHeic(file)) {
-      return { blob: file, type: mimeOf(file).startsWith('image/hei') ? mimeOf(file) : 'image/heic', width: null, height: null, size: file.size, originalSize: file.size, converted: false, reason: 'heic-unsupported', takenAt: null };
+      throw new DataError('这张是 HEIC，这个浏览器转不了：用手机或 Safari 传', { kind: 'validation', cause: error });
     }
     throw new DataError(error?.message || '这张图片打不开', { kind: 'validation', cause: error });
   }

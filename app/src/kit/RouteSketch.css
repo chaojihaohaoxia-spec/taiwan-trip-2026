@@ -1,0 +1,96 @@
+/* =====================================================================
+   kit/RouteSketch.css：路线速写（.rsk）。像手帐上用笔描的路线：一天一条线，圆角拐弯、圆头；
+   颜色是第几天的大地色往墨色压一点（不鲜艳、不像技术图）；没有底图、没有阴影、没有端点圈。
+   ===================================================================== */
+.rsk {
+  position: relative;
+  width: 100%;
+  margin: 0;
+}
+
+.rsk svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.rsk__day {
+  /* 组件里用 style 给每天的颜色、第几笔（这里是默认值） */
+  --rsk-c: var(--color-text-2);
+  --rsk-i: 0;
+}
+
+.rsk__day path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--rsk-c) 78%, var(--color-text));
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 别的天（只在要背景时画）：一根很淡的细线 */
+.rsk__day[data-dim] path {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+
+.rsk__label {
+  position: absolute;
+  max-width: 46%;
+  overflow: hidden;
+  color: var(--color-text-2);
+  font: var(--type-caption-1);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 3px var(--color-canvas), 0 0 6px var(--color-canvas);
+  transform: translate(7px, -50%);
+  pointer-events: none;
+}
+
+.rsk__label[data-side="end"] {
+  transform: translate(calc(-100% - 7px), -50%);
+}
+
+.rsk--compact .rsk__day path {
+  stroke-width: 2;
+}
+
+/* 第一次出现：一天一笔画出来（概览的回顾） */
+@keyframes rsk-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes rsk-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.rsk[data-animate] .rsk__day path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: rsk-draw 900ms var(--ease-in-out) forwards;
+  animation-delay: calc(var(--rsk-i, 0) * 220ms + 120ms);
+}
+
+.rsk[data-animate] .rsk__label {
+  animation: rsk-fade var(--dur-slower) var(--ease-out) both;
+  animation-delay: 300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rsk[data-animate] .rsk__day path {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+
+  .rsk[data-animate] .rsk__label {
+    animation-duration: var(--dur-fast);
+    animation-delay: 0ms;
+  }
+}

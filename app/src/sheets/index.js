@@ -22,6 +22,10 @@
 //   openPhotoViewer({ entryId, index }) / openPhotoViewer({ reviewId, index })   大图浏览
 //   openTripNewSheet()                                       新建行程
 //   openInviteSheet({ role })                                邀请成员
+//   openConverse()                                           翻译的对话模式（pages/translate 的「对话」）
+//   openDriverCard('tr.<翻译的 id>')                          给对方看一句翻译（最近翻过 / 收藏里的那条，见 lib/translate/store.js）
+//   openCoverSheet()                                         封面和主题色（行程 id 从网址读；设置页打开时带 ?trip=<id>）
+//   openPhotoImport() / importPhotosWith(files)              补照片：按拍摄日期分到每天的日记（页面上先选好照片再开，见 photo-import/task.js）
 //
 // 第二个参数都是 openOverlay 的选项：{ keyboard: true }（表单类弹层：iOS 先叫出键盘，必须在点击回调里同步调用）、
 // { replace: true }（换掉当前那一层，不压历史）、{ trigger: 按钮元素 }（“从这个按钮长出来 / 关闭后焦点回到它”）。
@@ -50,6 +54,9 @@ export const SHEETS = Object.freeze({
   photo: { kind: 'menu', title: '看大图', owner: '日记页', load: () => import('./photo/PhotoSheet.jsx') },
   'trip-new': { kind: 'sheet', title: '新建行程', owner: '行程列表页', load: () => import('./trip-new/TripNewSheet.jsx') },
   invite: { kind: 'sheet', title: '邀请成员', owner: '设置页', load: () => import('./invite/InviteSheet.jsx') },
+  converse: { kind: 'menu', title: '对话', owner: '翻译页', load: () => import('./converse/ConverseSheet.jsx') },
+  cover: { kind: 'sheet', title: '封面和颜色', owner: '概览', load: () => import('./cover/CoverSheet.jsx') },
+  'photo-import': { kind: 'sheet', title: '补照片', owner: '日记页', load: () => import('./photo-import/PhotoImportSheet.jsx') },
 });
 
 /** 所有登记的弹层 id */
@@ -144,8 +151,36 @@ export function openTripNewSheet(opts) {
   return open('trip-new', null, opts);
 }
 
+/** 翻译的对话模式（全屏上下分屏，上半屏朝着对方；行程 id 从网址读） */
+export function openConverse(opts) {
+  return open('converse', null, opts);
+}
+
 /** 邀请成员（行程 id 从网址读：在行程内页面打开；设置页打开时网址带 ?trip=<id>） */
 export function openInviteSheet(x, opts) {
   const f = x || {};
   return open('invite', encodeSheetArg({ role: f.role }, ['role']), opts);
+}
+
+/** 封面和主题色（行程 id 从网址读） */
+export function openCoverSheet(opts) {
+  return open('cover', null, opts);
+}
+
+/** 补照片（空白：面板里再从相册挑） */
+export function openPhotoImport(opts) {
+  return open('photo-import', null, opts);
+}
+
+/**
+ * 页面上选好的照片 → 补照片面板（PhotoInput 的 onFiles 直接给它）。
+ * 中转站在 photo-import/task.js（按需引，弹层本身的代码不进首屏包）。
+ * @param {File[]} files
+ */
+export function importPhotosWith(files, opts) {
+  if (!files?.length) return Promise.resolve();
+  return import('./photo-import/task.js').then((m) => {
+    m.stashImport(files);
+    return open('photo-import', null, opts);
+  });
 }

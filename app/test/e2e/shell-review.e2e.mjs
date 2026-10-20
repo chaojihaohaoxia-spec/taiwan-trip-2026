@@ -613,7 +613,7 @@ test('「更多」按钮的字跟着图标换：刚点下时「关闭」还没�
 // 「更多」一屏放下（视觉 P1-6）、演示角标不挡东西（三份评审）、深色强调色（视觉 P1-3）
 // ---------------------------------------------------------------------
 
-test('「更多」菜单（390×844）：一列八行的目录（「杂志纸本」）、外观和签名一屏放下，签名在底栏上面', async () => {
+test('「更多」菜单（390×844）：一列的目录（「杂志纸本」；越南行程九行，多一行翻译）、外观和签名一屏放下，签名在底栏上面', async () => {
   for (const colorScheme of ['light', 'dark']) {
     const app = await open({ hash: '#/t/demo-island?sheet=menu', colorScheme });
     try {
@@ -632,8 +632,8 @@ test('「更多」菜单（390×844）：一列八行的目录（「杂志纸本
           scroll: document.querySelector('.ov-fsmenu__scroll').scrollTop,
         };
       });
-      assert.equal(r.tiles, 8);
-      assert.equal(r.rows, 8, '一列八行（像书的目录）');
+      assert.equal(r.tiles, 9);
+      assert.equal(r.rows, 9, '一列九行（像书的目录；椰影岛是越南，第一行是翻译）');
       assert.ok(r.sign <= r.tabbar - 8, `签名底边 ${r.sign} 在底栏上沿 ${r.tabbar} 上面`);
       assert.equal(r.scroll, 0);
       await page.screenshot({ path: path.join(SHOTS, `menu-${colorScheme}.png`) });

@@ -10,15 +10,17 @@
 // =====================================================================
 
 import { createHash } from 'node:crypto';
-import { SUPABASE_URL } from '../../src/data/config.js';
+import { SUPABASE_URL, TRANSLATE_URL } from '../../src/data/config.js';
 
 /** Supabase 项目域名（和前端 data/config.js 同一个来源） */
 export const SUPABASE_HOST = new URL(SUPABASE_URL).host;
+/** 翻译接口的来源（没配就没有） */
+export const TRANSLATE_ORIGIN = TRANSLATE_URL ? new URL(TRANSLATE_URL).origin : null;
 
 /** 各类外部来源（不带结尾斜杠） */
 export const CSP_SOURCES = {
-  /** fetch / XHR / WebSocket：Supabase 接口和实时推送；汇率（lib/services/fx.js）、天气（lib/services/weather.js） */
-  connect: [`https://${SUPABASE_HOST}`, `wss://${SUPABASE_HOST}`, 'https://open.er-api.com', 'https://api.open-meteo.com'],
+  /** fetch / XHR / WebSocket：Supabase 接口和实时推送；汇率（lib/services/fx.js）、天气（lib/services/weather.js）；翻译（data/translate.js） */
+  connect: [`https://${SUPABASE_HOST}`, `wss://${SUPABASE_HOST}`, 'https://open.er-api.com', 'https://api.open-meteo.com', ...(TRANSLATE_ORIGIN ? [TRANSLATE_ORIGIN] : [])],
   /** 图片：Supabase 存储的签名链接；地图瓦片（lib/map/TripMap.jsx：有 key 用 CARTO 底图，没有用 OSM 官方底图） */
   img: [`https://${SUPABASE_HOST}`, 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://*.basemaps.cartocdn.com', 'https://basemaps.cartocdn.com'],
   /** 音视频（以后日记里可能有视频） */

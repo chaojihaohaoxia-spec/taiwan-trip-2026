@@ -7,7 +7,8 @@
 | 文件 | 内容 |
 |---|---|
 | `DayPage.jsx` | 页面：接数据（`hooks.js`）、手风琴（`ui/useAccordion`）、`?item=` 展开并滚到那一条、行程中自动滚到当前条目附近、左右滑动换天（`swipe.js`）、备选换主方案（`model.js` 的 `promotePlan` + Toast 撤销）、加载 / 出错 / 找不到行程 / 日期不在行程里的状态 |
-| `parts.jsx` | 时间轴以外的几块：`DayHead`（眉标、宋体标题（不放 `day.icon` 的 emoji）、概要、一行事实「天气 · 日落 · 规划状态」、一行海色链接「住 … ›」；节奏、条数不上屏，数据里的天气提示不上屏）、`RoutePlanCard`（`days.route_plan`，docs B5.3；指标值短（≤ 7 个汉字宽、不多于 4 个）时是 Instrument Serif 大数字的格子，真实行程那种长值「约 2 小时 50 分」「12–20 万越南盾（约 HK$…）」改成一行一个、左标签右值，`model.js` 的 `metricsLayout`）、`DecisionsCard`（`days.decisions`，收着的 ExpandableCard）、`RemindersCard`（这一天自己的贴士 + 待办，待办能直接勾）、`BookingBlock`（关联预订：状态 / 付款 / 免费取消倒计时 / 订单号点一下复制）、`DaySkeleton`、`DayEmpty` |
+| `DayVisual.jsx` / `day-visual.css` / `visual.js` | 页头里「有质感」的几样：`DayMast`（大号日期「18」+「10月 · 周日」「第 3 天 · 今天」；右边原来的路线速写 10-20 拿掉了，像画坏的线；完整的「D3 · 10月18日 周日」留在 `.day-head__eyebrow` 给读屏）、`DayPhotos`（那天日记里的照片三张并排，多的「+N」，点开看大图从这张放大）、`DayQuote`（那天先写的那篇日记的第一句，宋体，上下各一根短线，「— Cathy」）；没有照片、没有日记就不渲染（不拿标题硬凑）。纯逻辑 `visual.js`（`test/unit/page-visual.test.js`） |
+| `parts.jsx` | 时间轴以外的几块：`DayHead`（大号日期 + 路线速写、宋体标题（不放 `day.icon` 的 emoji）、概要、一行事实「天气 · 日落 · 规划状态」、一行海色链接「住 … ›」；节奏、条数不上屏，数据里的天气提示不上屏）、`RoutePlanCard`（`days.route_plan`，docs B5.3；指标值短（≤ 7 个汉字宽、不多于 4 个）时是 Instrument Serif 大数字的格子，真实行程那种长值「约 2 小时 50 分」「12–20 万越南盾（约 HK$…）」改成一行一个、左标签右值，`model.js` 的 `metricsLayout`）、`DecisionsCard`（`days.decisions`，收着的 ExpandableCard）、`RemindersCard`（这一天自己的贴士 + 待办，待办能直接勾）、`BookingBlock`（关联预订：状态 / 付款 / 免费取消倒计时 / 订单号点一下复制）、`DaySkeleton`、`DayEmpty` |
 | `timeline.jsx` | `Timeline`（主方案 + 「现在」；`ui/FlipGroup` 包着：加了 / 换了条目其余的平滑让位）、`AltList`（当天通用备选）、`TimelineItem`（一条：收起 / 展开）、展开后的各块：**动作行在最前面**（导航 / 叫 Grab / 给司机看 / 记一笔，一排四个；「复制地址」在地址那一行：点地址就复制），然后说明 Markdown（里面的电话能点）、怎么过去、费用估算、地址、步行路线、链接、关联预订、相关贴士、相关待办、实际情况，最后打卡 / 写日记 / 评级 / 编辑和标记完成 / 跳过的小表单；挂在主方案下的备选切换 |
 | `model.js` | **纯逻辑**（单元测试 `test/unit/page-day.test.js`、`page-fix-pages.test.js`）：时间栏（`itemClock` 转出 `kit/item-clock.js`，概览共用；含别的时区 `extra.local_time` 和航班两头的时区）、贴士第一行（`firstLine`：先去掉 Markdown）、待办那行小字（`todoHint`：截止 + 备注）、“现在”在哪（`nowOnTimeline` / `nowLineIndex`）、怎么过去 / 费用 / 路线卡 / 步行路线的显示数据、关联贴士和待办、收起时的副标题和标签、排序值（`sortKeyForTime` / `sortKeyAfter` / `inTimeOrder`）、备选换主方案要改哪些行（`promotePlan`）、左右滑动的判定 |
 | `hooks.js` | `useDayData(route)`（useTrip + 这一天的派生：主方案 / 备选、住处、时区、权限、阶段、状态）、`useDayWeather`（`lib/services/weather.js`，当晚住处的坐标）、`useNowOnDay`（每分钟刷新的“现在”；钟点按人此刻所在的时区写，`store.presenceZone`，和行程时区不同时带 `zone`「香港」） |
@@ -51,7 +52,8 @@
 
 - 展开以后 350ms 里详情区不接点击（`ui/ExpandableCard` 的 `data-settling`），点按也不打断“标题行不跑”（`motion/anchor.js` 只在滚轮 / 手指拖动 / 翻页键时停）：
   上一张开着时误双击下一张，第二下不会点进刚冒出来的动作行打开 Grab。
-- 加条目：面板开着时新的一条先不进时间轴（`sheets/item/saved.js` 的 `lastSavedItem`），面板开始收回就放进来——下面的条目 FLIP 下移、新的一条淡入 + 强调色描边亮一下，
+- 加一项（10-19 改版）：入口在拇指区——时间轴最后一行「＋ 加一项」（列表里的一行，竖线接到一个小加号；去掉了备选下面那个大按钮）、「现在」线右端的 ＋（44×44，打开每天页本来就滚到这里）、标题旁的「加一项」；都只预填哪天，几点 / 做完了 / 排在哪由面板按「今天、现在」给（`sheets/item/README.md`）。没关联地点的提醒只给本来该有地点的种类（吃饭、景点、住宿、交通……；`form-model.js` 的 `needsPlace`），后面一个「补个地点」直接打开改一项。
+- 加一项：面板开着时新的一条先不进时间轴（`sheets/item/saved.js` 的 `lastSavedItem`），面板开始收回就放进来——下面的条目 FLIP 下移、新的一条淡入 + 强调色描边亮一下，
   不在屏幕上就滚过去。提示「已加到今天 / D3 的时间轴」按那一天是不是今天写。
 - 左右滑的提示用 `overlay` 的 `Portal` 挂到 body 下，贴着视口边缘、只放在页面让开的空隙里（`--day-gap`），不再跟着内容平移压在卡片上。
 - 收起时的种类图标块 32px（以前 40），标题多一点宽度。

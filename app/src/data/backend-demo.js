@@ -629,6 +629,10 @@ export async function createDemoBackend(o) {
     async setSessionFromUrl() {
       throw new DataError('演示模式不支持登录链接', { kind: 'validation' });
     },
+    /** 给翻译接口用的 token：演示模式是个假的（演示翻译不连网；e2e 用它测真接口的请求格式） */
+    async accessToken() {
+      return currentUserId ? `demo.${currentUserId}` : null;
+    },
   };
 
   const visibleRows = (table, tripId) => T(table).filter((r) => tripOf(table, r) === tripId).map(clone);

@@ -11,7 +11,7 @@
 //   卡片顺序   upcomingOrder / ongoingOrder（“这一刻最需要什么”排在前面）
 //   进行中     nowModel / timelineWindow / spendSummary / stayInfo / sunInfo / weatherNote / minutesUntil
 //   每天概要   dayRouteLine / paceLabel / stayShortName / dayCountWord / dayColorIndex
-//   回顾       recapStats / settlementLines / topRatedPlaces / journalExcerpts / dayPhotos / segmentRoute
+//   回顾       recapStats / recapTiles / settlementLines / topRatedPlaces / journalExcerpts / dayPhotos / segmentRoute
 //   备选池     scheduleTarget
 //   其他       tomorrowOf / dayCardModel / packingSummary / freeCancelDeadlines / weatherLine / sunsetLeft / isReturnDay
 // =====================================================================
@@ -550,6 +550,23 @@ export function recapStats({ days = [], items = [], expenses = [], journal = [],
     journal: toList(journal).filter((j) => String(j.body || '').trim() || (j.photos || []).length).length,
     photos,
   };
+}
+
+/**
+ * 回顾的几个数：是 0 的不占位置（一排 0 很空）；最多 4 个，按「去过的地方 → 完成的安排 → 日记 → 照片 → 记账」。
+ * @param {ReturnType<typeof recapStats>} stats
+ * @param {string} tripId
+ * @returns {Array<{ key, value, label, to }>}
+ */
+export function recapTiles(stats, tripId) {
+  const all = [
+    { key: 'places', value: stats.places, label: stats.placesPlanned ? '安排的地方' : '去过的地方', to: { name: 'places', params: { tripId } } },
+    { key: 'done', value: stats.done, label: '完成的安排', to: null },
+    { key: 'journal', value: stats.journal, label: '篇日记', to: { name: 'journal', params: { tripId } } },
+    { key: 'photos', value: stats.photos, label: '张照片', to: { name: 'journal', params: { tripId }, query: { tab: 'photos' } } },
+    { key: 'expenses', value: stats.expenses, label: '笔账', to: { name: 'ledger', params: { tripId } } },
+  ];
+  return all.filter((t) => Number(t.value) > 0).slice(0, 4);
 }
 
 /**

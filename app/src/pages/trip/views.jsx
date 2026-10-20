@@ -7,7 +7,7 @@
 //   <OngoingView …>   进行中（「杂志纸本」：一屏一个主角，约 2.4 屏）：现在 / 接下来 →（最后一天：回程航班）→ 今晚住哪
 //                     → 天气一行 → 今天的待办 → 免费取消截止 → 明天。今天的时间轴缩略、今天花了、备选池、每天安排都不渲染
 //                     （和那一天的页面、账本、地点页、天数条重复）。
-//   <EndedView …>     结束后：回顾 → 总花费 → 结算 → 每天一张照片 → 评级最高 → 日记摘录 → 每天概要
+//   <EndedView …>     结束后：（封面照片）→ 回顾（路线速写）→（还没有照片：补照片）→ 总花费 → 结算 → 每天一张照片 → 评级最高 → 日记摘录 → 每天概要
 //
 // 每个 View 返回的是一串“直接子元素”（Fragment）：外壳的换页动效按页面根元素的直接子元素错落入场，这里不能再包一层。
 // =====================================================================
@@ -18,11 +18,14 @@ import {
   TodoCard, DeadlinesCard, PackingCard, ForecastCard, TodayWeatherCard, DaysSection, StayCard, FlightCard,
 } from './cards-shared.jsx';
 import { NowCard, TomorrowCard } from './cards-ongoing.jsx';
-import { RecapHero, SpendTotalCard, SettlementCard, PhotosCard, TopPlacesCard, JournalCard, RecapEmpty } from './cards-ended.jsx';
+import {
+  RecapHero, SpendTotalCard, SettlementCard, PhotosCard, TopPlacesCard, JournalCard, CoverPhoto, PhotoNudgeCard,
+} from './cards-ended.jsx';
 import {
   outboundFlight, returnFlight, pendingTodos, todayTodoGroups, dueInfo, upcomingOrder, ongoingOrder, nowModel,
   freeCancelDeadlines, packingSummary, sunInfo, sunsetLeft, tomorrowOf, isReturnDay, recapStats,
 } from './model.js';
+
 
 const HOURS_3 = 3 * 60 * 60_000;
 
@@ -162,14 +165,18 @@ export function EndedView({ store, tripId, trip, at }) {
   const ledger = c.v.ledger.value;
   const stats = recapStats({ days: c.days, items, expenses: c.v.expenses.value, journal: entries, reviews });
   const nothing = !ledger.count && !stats.journal && !stats.photos && !reviews.length;
+  const hasCover = Boolean(trip.cover?.image_path);
   return (
     <>
+      {hasCover && <CoverPhoto key="cover" trip={trip} canEdit={c.canEdit} />}
       <RecapHero key="recap" tripId={tripId} trip={trip} countdown={c.countdown} segments={c.v.segments.value} stats={stats} />
-      {nothing ? <RecapEmpty key="empty" tripId={tripId} /> : (
+      {!stats.photos && <PhotoNudgeCard key="nudge" canEdit={c.canEdit} hasCover={hasCover} />}
+      {/* 什么记录都没有：上面的「补照片」就是下一步，不再另放一块「还没留下记录」 */}
+      {nothing ? null : (
         <>
           <SpendTotalCard key="total" tripId={tripId} ledger={ledger} fx={fx} />
           <SettlementCard key="settle" tripId={tripId} ledger={ledger} />
-          <PhotosCard key="photos" tripId={tripId} days={c.days} journalByDay={c.v.journalByDay.value} />
+          <PhotosCard key="photos" tripId={tripId} days={c.days} journalByDay={c.v.journalByDay.value} coverHint={c.canEdit && !hasCover} />
           <TopPlacesCard key="top" tripId={tripId} reviews={reviews} places={c.places} members={store.view.members.value} />
           <JournalCard key="journal" tripId={tripId} entries={entries} days={c.days} nameOf={c.nameOf} timeZone={c.tz} />
         </>

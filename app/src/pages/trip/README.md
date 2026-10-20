@@ -10,7 +10,7 @@
 | `Countdown.jsx` | `CountdownHero`（Instrument Serif 斜体大数字 `RollingNumber` + 登机牌式航班块）、`FlightBlock`（回程航班卡也用它） |
 | `cards-shared.jsx` | 出发前、进行中共用：`TodoCard`、`DeadlinesCard`、`PackingCard`、`ForecastCard`、`TodayWeatherCard`、`DaysSection`、`PoolCard`、`StayCard`、`FlightCard`、`OverviewSkeleton` |
 | `cards-ongoing.jsx` | `NowCard`（现在 / 接下来）、`TimelineCard`、`SpendCard`、`TomorrowCard` |
-| `cards-ended.jsx` | `RecapHero`、`SpendTotalCard`、`SettlementCard`、`PhotosCard`、`TopPlacesCard`、`JournalCard`、`RecapEmpty` |
+| `cards-ended.jsx` | `CoverPhoto`（封面照片，有才显示）、`RecapHero`（路线是一行字「雾港 —— 茶山 —— 南湾」）、`PhotoNudgeCard`（还没有照片：补照片）、`SpendTotalCard`、`SettlementCard`、`PhotosCard`（还没有封面：「挑一张当这趟的封面」）、`TopPlacesCard`、`JournalCard` |
 | `model.js` | **纯逻辑**（Node 里直接测：`test/unit/page-overview.test.js`）：航班、倒计时、待办急缓、卡片顺序、现在 / 接下来、时间轴缩略、今天花了、今晚住哪、日出日落、每天概要卡、打包、免费取消、回顾、备选池排进某天 |
 | `hooks.js` | `useOverviewTrip`（行程 + 页面状态）、`useEnterStagger`（从骨架变真内容那一下错落入场）、`useHeldRows`（勾掉的待办留在原位再收起）、`usePref`（本机偏好：列表 / 网格） |
 | `trip.css` | 样式（类名前缀 `ov-`，只用 tokens.css 变量） |
@@ -47,7 +47,13 @@ D1–D4 是墨色的宋体字（像书的目录）；倒计时是纯色的海色
   数据里的天气提示（`weather_note`，写着预报模型名）和“更新时间”不上屏（说明书式的句子不上屏）。
 - 回顾的总花费：每个币种后面的「约 HK$…」用记账时记下的折合（`MoneyText hkdValue`），和合计同一套数，不再一处按参考汇率、一处按记账汇率。
 
-**结束后**：回顾大卡（几天几晚、日期、「周五出发，周一回」、「回顾模式 · 行程名「·」后那段」（`tripTitleRest`，不用整句的 `trips.subtitle`）、分段路线、去过的地方 / 完成 / 日记 / 照片）→ 总花费（折合港币 + 按币种 + 分类前三）→ 结算（`settlementLines`：按币种分别结、不换汇）→ 每天一张照片（横向一排，点开 `photo` 弹层）→ 评级最高（两人平均 ≥ 4，点开 `place` 弹层）→ 日记摘录 → 每天回顾。什么记录都没有时显示 `RecapEmpty`。
+**结束后**：回顾大卡（几天几晚、日期、「周五出发，周一回」、「回顾模式 · 行程名「·」后那段」（`tripTitleRest`，不用整句的 `trips.subtitle`）、分段路线、去过的地方 / 完成 / 日记 / 照片）→ 总花费（折合港币 + 按币种 + 分类前三）→ 结算（`settlementLines`：按币种分别结、不换汇）→ 每天一张照片（横向一排，点开 `photo` 弹层）→ 评级最高（两人平均 ≥ 4，点开 `place` 弹层）→ 日记摘录 → 每天回顾。什么记录都没有时只有回顾大卡和「补照片」。
+
+10-19「页面不单调」（富国岛回来的反馈；规矩：一屏最多一个「大」东西，图只用自己的内容，没有就不显示）：
+- **封面照片**（`trips.cover.image_path`）：回顾最上面左右出血的 3:2，整页唯一的一张大图；能编辑的人下面一行「换封面」（`sheets/cover`）。
+- 路线照旧是「雾港 —— 茶山 —— 南湾」一行字。10-19 试过路线速写（`kit/RouteSketch`），10-20 拿掉：直线连地点，画出来是几笔小划痕或一团折线（体验评审）。
+- **回顾的数字**（`recapTiles`）：是 0 的不占位置，最多 4 个（地方 → 完成 → 日记 → 照片 → 记账）；全是 0 就整行不显示。
+- **补照片**（`PhotoNudgeCard`，还没有照片时紧跟回顾）：「从相册挑照片」是真正的多选 file input，选完打开 `photo-import` 面板；还没有封面时顺手「换封面和主题色」。
 
 ## 状态
 

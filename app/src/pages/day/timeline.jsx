@@ -26,6 +26,7 @@ import { openExternal, haptic } from '../../lib/native.js';
 import { formatTime } from '../../lib/datetime.js';
 import { href } from '../../router/index.js';
 import { openItemSheet, openExpenseSheet, openJournalSheet, openReviewSheet } from '../../sheets/index.js';
+import { needsPlace } from '../../sheets/item/form-model.js';
 import { BookingBlock } from './parts.jsx';
 import {
   VARIANT_LABELS, itemClock, itemSpan, transportView, rideHint, costView, walkRouteView, linksFor, tipsForItem, todosForItem,
@@ -378,9 +379,16 @@ function PrimaryContent({ item, ctx, place, booking, transport, current, remaini
           readOnly={!canEdit}
           testId={`item-actions-${item.id}`}
         />
-      ) : (
-        <p class="tl-note" data-testid="tl-no-place"><Glyph name="info" size={14} /><span>这一条没有关联地点，导航、叫车、给司机看用不了{canEdit ? '——点「编辑」选一个地点' : ''}。</span></p>
-      )}
+      ) : needsPlace(item.kind) ? (
+        // 只有本来该有地点的（吃饭、景点、住宿、交通……）才提醒；取钱、买水这种「其他」不提醒（10-19 加条目改版）
+        <p class="tl-note" data-testid="tl-no-place">
+          <Glyph name="info" size={14} />
+          <span>
+            没有关联地点，导航、叫车用不了
+            {canEdit && <>{' · '}<button type="button" class="tl-note__link" onClick={(e) => openItemSheet(item.id, { trigger: e.currentTarget })} data-press="scale" data-testid={`tl-add-place-${item.id}`}>补个地点</button></>}
+          </span>
+        </p>
+      ) : null}
       {item.description && <Markdown text={item.description} class="tl-desc" data-testid="tl-desc" phones onClick={onMarkdownLink} />}
       <TransportBlock t={transport} />
       <div class="tl-infos">
@@ -487,7 +495,8 @@ export function TimelineItem({ item, ctx, alts: rawAlts = [], current = false, r
       data-flip={general ? undefined : 'position'}
     >
       <TimeCell clock={clock} dim={dim} nowClock={current ? nowClock : ''} nowZone={current ? nowZone : null} />
-      <div class="tl__rail" aria-hidden="true"><span class="tl__dot" /></div>
+      {/* 做完了：圆点换成一个小对勾（不划掉标题——刚记下的事被划掉像删了，评审） */}
+      <div class="tl__rail" aria-hidden="true"><span class="tl__dot">{item.status === 'done' && !general && <Glyph name="check" size={8} stroke={3.2} />}</span></div>
       <ExpandableCard
         class="tl__card"
         summary={summary}
@@ -520,13 +529,31 @@ export function TimelineItem({ item, ctx, alts: rawAlts = [], current = false, r
   );
 }
 
-/** 「现在」指示线 */
-function NowLine({ clock, zone = null }) {
+/** 「现在」指示线；能改的人线的右端有一个「＋」：按现在的时间加一项（打开每天页本来就滚到这里，拇指够得到） */
+function NowLine({ clock, zone = null, onAdd }) {
   return (
-    <li class="tl__now" data-testid="tl-now" aria-label={`现在 ${zone ? `${zone}时间 ` : ''}${clock}`}>
+    <li class="tl__now" data-testid="tl-now" aria-label={`现在 ${zone ? `${zone}时间 ` : ''}${clock}`} data-addable={onAdd ? '' : undefined}>
       <div class="tl__time tl__time--now" aria-hidden="true"><b class="t-label">{clock}</b></div>
       <div class="tl__rail" aria-hidden="true"><span class="tl__now-dot" /></div>
       <div class="tl__now-line" aria-hidden="true"><span>现在{zone && <em class="tl__now-zone" data-testid="tl-now-zone"> · {zone}时间</em>}</span></div>
+      {onAdd && (
+        <button type="button" class="tl__now-add" onClick={onAdd} aria-label="在现在加一项" data-press="scale" data-testid="tl-now-add">
+          <Glyph name="plus" size={16} stroke={2.2} />
+        </button>
+      )}
+    </li>
+  );
+}
+
+/** 时间轴最后一行：「＋ 加一项」（就在列表里，跟在最后一条后面） */
+function AddRow({ onAdd }) {
+  return (
+    <li class="tl__add" data-flip-key="tl-add" data-flip="position">
+      <div class="tl__time" aria-hidden="true" />
+      <div class="tl__rail" aria-hidden="true"><span class="tl__add-dot"><Glyph name="plus" size={10} stroke={2.6} /></span></div>
+      <button type="button" class="tl__add-btn" onClick={onAdd} data-press="highlight" data-testid="tl-add">
+        <span>加一项</span>
+      </button>
     </li>
   );
 }
@@ -540,9 +567,10 @@ export function Timeline({ primary, alternatives, ctx, acc, now, altView, onAltC
   const lineAt = now.lineIndex;
   const rows = [];
   const hasCurrent = Boolean(now.info.currentId);
+  const add = ctx.canEdit && onAdd ? onAdd : null;
   primary.forEach((item, i) => {
     // 有进行中的条目时「现在」画在它的卡片旁边（按进度的位置）；没有就画在两条之间
-    if (lineAt === i && !hasCurrent) rows.push(<NowLine key="now" clock={now.clock} zone={now.zone} />);
+    if (lineAt === i && !hasCurrent) rows.push(<NowLine key="now" clock={now.clock} zone={now.zone} onAdd={add} />);
     const current = now.info.currentId === item.id;
     const nextStart = current ? itemSpan(primary[i + 1])?.start ?? null : null;
     rows.push(
@@ -561,8 +589,9 @@ export function Timeline({ primary, alternatives, ctx, acc, now, altView, onAltC
       />,
     );
   });
-  if (lineAt === primary.length && !hasCurrent) rows.push(<NowLine key="now" clock={now.clock} zone={now.zone} />);
-  const action = ctx.canEdit && onAdd ? { label: '加条目', glyph: 'plus', onClick: onAdd } : undefined;
+  if (lineAt === primary.length && !hasCurrent) rows.push(<NowLine key="now" clock={now.clock} zone={now.zone} onAdd={add} />);
+  if (add) rows.push(<AddRow key="add" onAdd={add} />);
+  const action = add ? { label: '加一项', glyph: 'plus', onClick: add } : undefined;
   return (
     <section class="tl-section" aria-label="时间轴" data-testid="day-timeline">
       <SectionHeader title="时间轴" count={primary.length} action={action} />

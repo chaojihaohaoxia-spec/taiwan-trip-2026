@@ -4,6 +4,7 @@
 // 从底栏「更多」按钮圆形扩散铺满全屏（overlay/FullscreenMenu）；底栏浮在菜单上面，「更多」变成「关闭」（三横线转 ×）。
 //   - 上面：眉标（● 行程名）+ 宋体大标题「更多」；
 //   - 目录（「杂志纸本」：像书的目录，一列八行、细线分隔）：预订、清单、日记相册、地点与评级、贴士与常用语、联系人、全部行程、设置；
+//     越南这类外语行程最前面多一行「翻译」（lib/translate/text.js 的 translateLang；台湾那趟没有）；
 //     每行左边是宋体名字，右边一行灰字实时状态（「2 个待确认」「打包 18/30」「3 篇日记 · 8 张照片」……，数据层现算）；
 //     「全部行程」行尾叠着各趟行程的小封面；当前所在的页面名字是海色；
 //     390×844 一屏放得下全部目录、外观和签名（不被底栏挡住）；
@@ -21,6 +22,8 @@ import { SegmentedControl } from '../../ui/SegmentedControl.jsx';
 import { CoverDot } from '../CoverDot.jsx';
 import { tripInfo, tripStore } from '../trip-state.js';
 import { menuStatuses } from '../view-rules.js';
+import { translateLang } from '../../lib/translate/text.js';
+import { local } from '../../lib/storage.js';
 
 const THEME_OPTIONS = [
   { value: 'system', label: '自动' },
@@ -78,6 +81,10 @@ export default function MoreMenu() {
   const sync = syncStatus.value;
   const settingsText = sync && sync.state !== 'synced' ? sync.message : '外观、成员和邀请';
   const eyebrow = info?.trip?.title || '热爱生活7885';
+  // 翻译：只在越南这类外语行程里有，排第一行（在当地最常用）
+  const translate = tripId && translateLang(store?.trip?.value || info?.trip);
+  const starList = translate ? local.getJSON('translate:star', []) : null;
+  const starredN = Array.isArray(starList) ? starList.length : 0;
 
   return (
     <FullscreenMenu
@@ -105,6 +112,15 @@ export default function MoreMenu() {
       )}
     >
       <nav class="more-grid" aria-label="更多页面">
+        {translate && (
+          <Tile
+            to={{ name: 'translate', params: { tripId } }}
+            title="翻译"
+            detail={starredN ? `收藏了 ${starredN} 句 · 没网也能看` : '中文 ⇄ 越南语，带英语'}
+            current={r?.name === 'translate'}
+            testId="more-translate"
+          />
+        )}
         {tripId && TILES.map((t) => (
           <Tile
             key={t.name}

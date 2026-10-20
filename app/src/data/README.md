@@ -45,7 +45,7 @@ store.addExpense({ amount: 150000, description: '打车', category: '交通' });
 | `cache.js` | IndexedDB 缓存：`trip:<id>`、`trips`（记着是谁的，换账号读不到） |
 | `kv.js` | IndexedDB 键值（idb-keyval）。出错先重新打开数据库再试一次；读失败抛 `StorageUnavailableError`（不当成“没有”）；写失败的值先留在内存、下次成功时补写，`status` 信号 `ok` / `degraded`；整个用不了（隐私模式等）才退回纯内存 |
 | `files.js` | 上传（压缩 + 进写队列，离线也行，传完前本机预览）、签名链接（批量、缓存到过期前 5 分钟） |
-| `image.js` | 上传前的照片处理（调 `lib/image.js` 压缩；HEIC 能转则转，转不了原样上传） |
+| `image.js` | 上传前的照片处理（调 `lib/image.js` 压缩；HEIC 能转则转，转不了报一句中文、不把带 GPS 的原图传上去） |
 | `ordering.js` | 拖拽排序的新排序值（中间值；整数没空隙时整列重新编号） |
 | `errors.js` | `DataError`（中文 message、kind、retryable）和各类错误的翻译：网络、超时（20 秒没回应 = 网络问题，可重试）、本机存储（`kind: 'storage'`，可重试）、权限、冲突…… |
 | `util.js` | uuid、时间戳 / 钟点 / 日期规范、按值比较、只留改动字段 |
@@ -58,6 +58,7 @@ store.addExpense({ amount: 150000, description: '打车', category: '交通' });
 | `session.js` | 读本机存着的会话（`readStoredUser`，不用加载 supabase-js）、后台用户 → `{ id, email, displayName }`：恢复登录失败时先按离线登录用 |
 | `supabase.js` | Supabase 客户端单例（懒加载，PKCE，请求超时） |
 | `demo.js` | 演示数据入口（`loadDemoDb()`、`demoPhotoUrl()`） |
+| `translate.js` | 翻译接口的实例 `translator`（token 用后台的 `auth.accessToken()`）和本机存的句子 `phrases`。**不进 index.js**（只有翻译页、对话模式用，免得每一页都下载）：页面直接 `import '../../data/translate.js'` |
 
 ## 接入（已接好）
 

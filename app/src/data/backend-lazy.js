@@ -7,7 +7,7 @@
 // =====================================================================
 
 const METHODS = ['fetchTripBundle', 'fetchMyTrips', 'fetchInvites', 'fetchRow', 'insert', 'update', 'remove', 'rpc', 'upload', 'signedUrls', 'removeFiles'];
-const AUTH_METHODS = ['init', 'signInWithPassword', 'signUp', 'sendOtp', 'verifyOtp', 'resendSignup', 'updatePassword', 'signOut', 'refresh', 'setSessionFromUrl'];
+const AUTH_METHODS = ['init', 'signInWithPassword', 'signUp', 'sendOtp', 'verifyOtp', 'resendSignup', 'updatePassword', 'signOut', 'refresh', 'setSessionFromUrl', 'accessToken'];
 
 /**
  * @param {() => Promise<object>} load  返回真正的后台

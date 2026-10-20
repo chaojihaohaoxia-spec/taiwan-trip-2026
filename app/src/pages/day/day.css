@@ -281,7 +281,8 @@
 }
 
 .tl__item,
-.tl__now {
+.tl__now,
+.tl__add {
   --tl-time-w: 52px;
   --tl-rail-w: 20px;
   position: relative;
@@ -438,11 +439,28 @@
   color: var(--color-accent-text);
 }
 
-/* 完成 / 跳过：标题淡一点、划掉；右边的标签照旧看得清 */
+/* 完成 / 跳过：标题淡一点；只有跳过的划掉（做完了的不划：刚记下的「取了钱」被划掉，看着像删了）。右边的标签照旧看得清 */
 .tl__item--dim > .tl__card .xcard__title {
   color: var(--color-text-2);
+}
+
+.tl__item[data-status="skipped"] > .tl__card .xcard__title {
   text-decoration: line-through;
   text-decoration-color: var(--color-text-3);
+}
+
+/* 做完了：竖线上的圆点换成实心小圆 + 反白对勾 */
+.tl__item[data-status="done"]:not(.tl__item--general) .tl__dot {
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  margin: -2px 0 0 -2px;
+  color: var(--color-canvas);
+}
+
+.tl__item[data-status="done"]:not(.tl__item--general) .tl__dot > .glyph {
+  display: block;
 }
 
 /* 标题行离竖线一点距离（当前条目左边那道海色线和字之间） */
@@ -612,6 +630,85 @@
   flex: 1;
   height: 1px;
   background: var(--color-accent);
+}
+
+/* 线的右端一个细细的「＋」：按现在的时间加一项（视觉 16px，点按区 44×44） */
+.tl__now[data-addable] {
+  grid-template-columns: var(--tl-time-w) var(--tl-rail-w) minmax(0, 1fr) 36px;
+}
+
+.tl__now-add {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -12px -4px -12px -4px;
+  border-radius: var(--radius-round);
+  color: var(--color-accent-text);
+  transition: var(--press-transition);
+}
+
+/* 时间轴最后一行「＋ 加一项」：和条目同一套栏位，竖线接到一个小加号 */
+.tl__add {
+  align-items: center;
+  padding-bottom: 0;
+}
+
+.tl__add .tl__time {
+  padding: 0;
+}
+
+.tl__add-dot {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-round);
+  background: var(--color-canvas);
+  box-shadow: inset 0 0 0 1px var(--color-text-3);
+  color: var(--color-text-2);
+  translate: 0 -50%;
+}
+
+.tl__add-btn {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 8px;
+  margin-left: -8px;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 1px 0 var(--color-separator);
+  color: var(--color-accent-text);
+  font: var(--type-callout);
+  font-weight: var(--weight-medium);
+  text-align: left;
+  transition: var(--press-transition), background-color var(--dur-fast) var(--ease-out);
+}
+
+.tl__add-btn[data-pressed] {
+  background: var(--color-fill);
+}
+
+/* 没有关联地点的提醒里「补个地点」 */
+.tl-note__link {
+  position: relative;
+  min-height: 0;
+  padding: 0;
+  color: var(--color-accent-text);
+  font: inherit;
+  font-weight: var(--weight-medium);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.tl-note__link::after {
+  content: "";
+  position: absolute;
+  inset: -12px -8px;
 }
 
 /* ---------- 展开后的内容 ---------- */
@@ -1171,10 +1268,6 @@
   border-radius: var(--radius-lg);
 }
 
-.day-add {
-  margin-top: 6px;
-}
-
 /* ---------- 左右滑动的提示 ---------- */
 .day-swipe-hint {
   --day-swipe: 0;
@@ -1236,7 +1329,8 @@
 /* ---------- 宽屏 ---------- */
 @media (min-width: 768px) {
   .tl__item,
-  .tl__now {
+  .tl__now,
+  .tl__add {
     --tl-time-w: 72px;
     --tl-rail-w: 24px;
   }
@@ -1250,6 +1344,10 @@
   }
 
   .tl__now-dot {
+    left: 5px;
+  }
+
+  .tl__add-dot {
     left: 5px;
   }
 

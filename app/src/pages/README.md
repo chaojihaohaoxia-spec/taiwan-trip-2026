@@ -28,6 +28,7 @@
 | `places` | 地点与评级（按类型 / 按天 / 想去 / 评级、搜索、去过还没评、备选池排进某天） | `q`、`view`、`kind`、`mode` |
 | `tips` | 贴士与常用语（置顶防坑、分组、消息模板直接发送、常用语「给对方看」） | `kind`、`scene`、`q`、`tip` |
 | `contacts` | 联系人（紧急在最上面、一键打电话 / WhatsApp / Zalo、添加 / 编辑） | `cat`、`q`、`contact` |
+| `translate` | 翻译（只在越南这类外语行程有入口：「更多」第一行；边打边翻、收藏、最近翻过、给对方看、对话模式；见 `translate/README.md`） | |
 | `settings` | 账号、成员和邀请、外观、这台设备、关于、旧版本机记录导入 | `trip` |
 | `join` / `login` | 加入行程（加入前先看一眼邀请：`data.rpc.peekInvite`）/ 登录（密码和邮箱验证码，记住上次用的方式） | `next` |
 

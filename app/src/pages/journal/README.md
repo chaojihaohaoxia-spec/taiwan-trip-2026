@@ -10,6 +10,11 @@
 | `model.js` | 纯逻辑（`test/unit/page-journal.test.js`）：视图 / 布局的查询参数（`parseView(view, tab)`：`?view=album`，概览页链接过来的 `?tab=photos` 也认）、`tripState`、`daySections`、`journalStats`、`albumGroups`、`authorOptions`、`scrollTarget`、`actionDay`、`entryTime`（同一天只写钟点，隔天补写的带日子） |
 | `journal.css` | 样式（`.jn`、`.jn-day`、`.jn-entry`、`.jn-text`、`.jn-strip`、`.jn-thumb`、`.jn-pc`），只用 tokens.css 的变量 |
 
+## 10-19「页面不单调」
+
+- **一篇都没有**：空状态只说一次（「这趟还没有日记」+ 一句说明），下面是一行一天的目录（`jn-index`：D1 · 标题 · 日期 · 「写一篇 ›」），不再每天重复「还没写 / Cathy 还没写」；统计那行不重复说。
+- **结束以后**：「拍照打卡」换成「补照片」（多选 file input → `sheets/photo-import`，按拍摄日期分到每天）；相册空状态的按钮也是「从相册挑照片」。
+
 ## 页面结构
 
 ```

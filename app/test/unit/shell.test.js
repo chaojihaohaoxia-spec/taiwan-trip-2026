@@ -82,7 +82,7 @@ test('阶段小标签：N 天后出发 / 明天出发 / 进行中 · 第 N 天 /
 test('每个路由都有外框种类：行程 tab / 二级页面 / 行程列表 / 设置，其余什么都不画', () => {
   const kinds = {
     trip: 'tab', day: 'tab', map: 'tab', ledger: 'tab',
-    bookings: 'section', lists: 'section', journal: 'section', places: 'section', tips: 'section', contacts: 'section',
+    bookings: 'section', lists: 'section', journal: 'section', places: 'section', tips: 'section', contacts: 'section', translate: 'section',
     trips: 'root', settings: 'settings',
     launch: 'bare', join: 'bare', login: 'bare', dev: 'bare', 'dev-page': 'bare',
   };
@@ -274,15 +274,20 @@ test('天数分段条：概览格随阶段写出发前 / 进行中 / 回顾，�
   assert.equal(dayStripCells({ tripId: 'x', dates: [], phase: 'ended' })[0].top, '回顾');
 });
 
-test('＋ 面板：进行中「记一笔」最前、最大（今天记了几笔）；出发前先加条目、加待办；回顾先写日记；单色列表（没有色块的颜色）', () => {
+test('＋ 面板：进行中「记一笔」「加一项」并排放第一行（今天记了几笔）；出发前先加一项、加待办；回顾先写日记；单色列表（没有色块的颜色）', () => {
   const on = fabActions({ phase: 'ongoing', localCurrency: 'VND', todayCount: 3 });
-  assert.deepEqual(on.map((a) => a.id), ['expense', 'photo', 'journal', 'item', 'todo']);
+  assert.deepEqual(on.map((a) => a.id), ['expense', 'item', 'photo', 'journal', 'todo']);
+  assert.deepEqual(on.map((a) => Boolean(a.pair)), [true, true, false, false, false], '前两个并排');
   assert.equal(on[0].hero, true);
-  assert.equal(on[0].hint, '今天已记 3 笔 · 自动折合港币');
+  assert.equal(on[0].hint, '今天已记 3 笔', '半宽：一行放得下');
+  assert.equal(fabActions({ phase: 'ongoing', localCurrency: 'VND' })[0].hint, '越南盾自动折合港币');
+  assert.equal(on[1].title, '加一项');
+  assert.equal(on[1].hint, '按现在的时间插进去');
   assert.ok(on.every((a) => !('tone' in a) && !('wide' in a)), '一列单色的行：不再有图标块的颜色、不再有占整行的瓷砖');
   const pre = fabActions({ phase: 'upcoming', localCurrency: 'VND' });
   assert.deepEqual(pre.map((a) => a.id), ['item', 'todo', 'expense', 'journal', 'photo']);
   assert.ok(pre.every((a) => !a.hero));
+  assert.ok(pre.every((a) => !a.pair), '出发前一个一行');
   assert.equal(pre.find((a) => a.id === 'expense').hint, '越南盾自动折合港币');
   assert.equal(fabActions({ phase: 'ended', localCurrency: 'HKD' })[0].id, 'journal');
   assert.equal(fabActions({ phase: 'ended', localCurrency: 'HKD' }).find((a) => a.id === 'expense').hint, '谁付的、怎么分都记上');
@@ -292,6 +297,7 @@ test('＋ 面板：只读成员的记一笔 / 加条目 / 加待办变淡、写�
   const ro = fabActions({ phase: 'ongoing', localCurrency: 'VND', todayCount: 3, canEdit: false });
   assert.deepEqual(ro.map((a) => a.id), ['photo', 'journal', 'expense', 'item', 'todo']);
   assert.ok(ro.every((a) => !a.hero));
+  assert.ok(ro.every((a) => !a.pair), '只读成员不并排');
   assert.deepEqual(ro.filter((a) => a.disabled).map((a) => a.id), ['expense', 'item', 'todo']);
   assert.equal(ro.find((a) => a.id === 'expense').hint, '只读成员不能记账');
   assert.equal(ro.find((a) => a.id === 'item').hint, '只读成员不能改行程');

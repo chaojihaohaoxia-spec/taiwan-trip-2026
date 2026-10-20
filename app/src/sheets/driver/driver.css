@@ -158,7 +158,10 @@
 }
 
 .drv__actions--two {
-  grid-template-columns: 1fr 1fr;
+  /* 两三个按钮一排平分（复制 / 读出来 / 打电话） */
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  grid-template-columns: none;
 }
 
 .drv__btn {

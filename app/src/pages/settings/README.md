@@ -8,7 +8,7 @@
 |---|---|---|
 | 账号 | 头像、名字（宋体）、邮箱；离线时说明「先用这台设备上存着的登录」；「退出登录」 | `authState`；`account.js` 的 `signOutFlow`：离线且有排队的改动先问；在线交给 `data.auth.signOut()` 先发完，发不出去（`unsynced`）再问 |
 | 旧版本机记录 | 这台设备上有旧版的键才出现（`LegacyImport.jsx`，见下） | `legacy-import.js` |
-| 成员和邀请 | 每趟行程一张可以原地展开的卡（`ui/ExpandableCard` + `useAccordion`，一次只开一张），默认展开当前行程（`shell/trip-state.js` 的 `lastTripId()`，没有就第一趟）。展开：成员（头像、名字、「我」、邮箱、角色芯片 创建者 / 可编辑 / 只读）。创建者：「邀请成员」（`invite` 弹层，网址带 `?trip=<id>`）、每位成员「⋯」小菜单（`Popover`，`member-menu`）：改成可编辑 / 改成只读 / 移出行程（先确认）。不是创建者：说明只有创建者能邀请 +「退出这趟行程」（先确认） | `useMyTrips`；展开时才 `useTrip(id)` 读成员；`store.setMemberRole` / `store.removeMember` |
+| 成员和邀请 | 每趟行程一张可以原地展开的卡（`ui/ExpandableCard` + `useAccordion`，一次只开一张），默认展开当前行程（`shell/trip-state.js` 的 `lastTripId()`，没有就第一趟）。展开：成员（头像、名字、「我」、邮箱、角色芯片 创建者 / 可编辑 / 只读）。创建者：「邀请成员」（`invite` 弹层，网址带 `?trip=<id>`）、每位成员「⋯」小菜单（`Popover`，`member-menu`）：改成可编辑 / 改成只读 / 移出行程（先确认）。不是创建者：说明只有创建者能邀请 +「退出这趟行程」（先确认）。能编辑的成员：「封面和主题色」（`cover` 弹层，网址带 `?trip=<id>`） | `useMyTrips`；展开时才 `useTrip(id)` 读成员；`store.setMemberRole` / `store.removeMember` |
 | 外观 | 自动 / 浅色 / 深色（`SegmentedControl`，指示块弹簧跟随） | `lib/theme.js` |
 | 这台设备 | 同步（状态点 + `syncStatus.message`；能重试时「立即重试」，有失败的改动时「放弃这条改动」先确认）、网络、本机存储（`syncStatus.storage` / `storageWarning`）、本机占用（`navigator.storage.estimate`）、长期保存（`persisted` / 「申请开启」→ `persist()`） | `syncStatus`、`online`、`data.retrySync` / `data.discardFailed` |
 | 关于 | 版本（`2.0.0 · 构建号`）、离线可用（SW 有没有接管）、「检查更新」（`lib/pwa.js` 的 `checkForUpdate`；有新版本 →「有新版本 · 立即更新」`applyUpdate`；没有 SW 时说明刷新就是最新版）、字体授权（三个 OFL 文件，`lib/native.js` 的 `openExternal(…, { newTab: true })` 打开随站部署的 `fonts/licenses/*.txt`） | `appVersion()`、`swControlled`、`updateReady` |

@@ -19,6 +19,7 @@ import { SearchExpand } from '../ui/SearchExpand.jsx';
 import { IconButton } from '../ui/IconButton.jsx';
 import { prefersReducedMotion } from '../lib/media.js';
 import { haptic } from '../lib/native.js';
+import { FULL_TABBAR_PAGES } from './rules.js';
 import { chromeKind, defaultChrome, mergeChrome, declaredChrome, activeTab, hasTabBar, dayStripIndex, topbarState, syncSpace } from './chrome.js';
 import { tripInfo, currentTripId, loadData, ensureTripsLoaded } from './trip-state.js';
 import { createTopbarIntent, createTabbarIntent } from './scroll-state.js';
@@ -300,7 +301,7 @@ export function ChromeBottom() {
         lifted={lifted}
         inert={(overlayOpen && !lifted) || searchOpen}
         routeName={r?.name}
-        compact={tabbarCompact.value}
+        compact={tabbarCompact.value && !FULL_TABBAR_PAGES.includes(r?.name)}
       />
       {SearchLayer && <SearchLayer />}
     </>

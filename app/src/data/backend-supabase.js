@@ -149,6 +149,27 @@ export function createSupabaseBackend(o = {}) {
     async refresh() {
       await authCall((a) => a.refreshSession());
     },
+    /**
+     * 当前会话的 access token（翻译接口用，data/translate.js）：getSession 会在快过期时自动换新；
+     * refresh = true（接口说 token 不认了）先强制换一次。没登录 / 换不成返回 null。不打印、不存别处。
+     */
+    async accessToken({ refresh = false } = {}) {
+      const client = await getClient();
+      if (refresh) {
+        try {
+          const r = await client.auth.refreshSession();
+          if (r?.data?.session?.access_token) return r.data.session.access_token;
+        } catch {
+          /* 换不成就用现有的 */
+        }
+      }
+      try {
+        const r = await client.auth.getSession();
+        return r?.data?.session?.access_token || null;
+      } catch {
+        return null;
+      }
+    },
     /** 登录回调网址（#access_token=…&refresh_token=…）里的令牌 → 会话 */
     async setSessionFromUrl({ access_token, refresh_token }) {
       const data = await authCall((a) => a.setSession({ access_token, refresh_token }));

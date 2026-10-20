@@ -70,7 +70,7 @@ test('只有模糊时间：4 个字以内写在时间栏；更长的放进副标
   assert.deepEqual([long.main, long.fuzzy, long.label], ['', '取完行李后', true]);
   assert.equal(itemTimeText({ time_label: '取完行李后' }), '取完行李后');
   assert.equal(collapsedSubtitle({ kind: 'food' }, { name: '粉店' }, null, '取完行李后'), '取完行李后 · 粉店');
-  assert.equal(collapsedSubtitle({ kind: 'food' }, null, null, '取完行李后'), '取完行李后 · 吃饭');
+  assert.equal(collapsedSubtitle({ kind: 'food' }, null, null, '取完行李后'), '取完行李后');
 });
 
 // ---------------------------------------------------------------------

@@ -82,6 +82,91 @@
   text-align: center;
 }
 
+/* ---------- 一篇都没有：空状态只说一次 + 一行一天的目录 ---------- */
+.jn-blank {
+  padding: var(--space-4) 0 0;
+  text-align: center;
+}
+
+.jn-blank__lead {
+  margin: 0;
+  font: var(--type-title-2);
+  letter-spacing: var(--tracking-display);
+}
+
+.jn-blank__text {
+  max-width: 30em;
+  margin: var(--space-2) auto 0;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.jn-index {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-separator);
+}
+
+.jn-index__row {
+  border-bottom: 1px solid var(--color-separator);
+  scroll-margin-top: calc(var(--topbar-h) + var(--space-3));
+}
+
+.jn-index__btn {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.jn-index__btn[data-pressed] {
+  background: var(--color-fill-pressed);
+}
+
+.jn-index__badge {
+  justify-self: start;
+}
+
+.jn-index__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.jn-index__text b {
+  overflow: hidden;
+  font: var(--type-callout);
+  font-weight: var(--weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jn-index__text span {
+  color: var(--color-text-2);
+  font-size: var(--text-caption-1);
+}
+
+.jn-index__go {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-accent-text);
+  font-size: var(--text-footnote);
+}
+
 .jn-day {
   /* 滚到这一天时留出顶栏胶囊的高度 */
   scroll-margin-top: calc(var(--topbar-h) + var(--space-3));

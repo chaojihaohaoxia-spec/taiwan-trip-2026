@@ -207,7 +207,7 @@ test('排序值：中间值；整数没有空隙时整列重新编号', () => {
   assert.equal(nextSortValue([]), 10);
 });
 
-test('照片：压缩结果整理成上传要的形状（含拍摄时间）；HEIC 解不开就原样上传；其他图片打不开给中文错误', async () => {
+test('照片：压缩结果整理成上传要的形状（含拍摄时间）；HEIC 解不开不原样上传（原图带 GPS）；其他图片打不开给中文错误', async () => {
   const jpeg = new Blob(['x'.repeat(10)], { type: 'image/jpeg' });
   const r = await prepareImage({ type: 'image/png', name: 'a.png', size: 5000 }, {
     compress: async () => ({ blob: jpeg, type: 'image/jpeg', width: 2048, height: 1536, bytesBefore: 5000, bytesAfter: 10, takenAt: { iso: '2027-01-10T18:30:00+07:00' } }),
@@ -221,8 +221,11 @@ test('照片：压缩结果整理成上传要的形状（含拍摄时间）；HE
   const gif = await prepareImage({ type: 'image/gif', size: 3 }, { compress: async (f) => ({ blob: f, type: 'image/gif', width: 0, height: 0, bytesBefore: 3, bytesAfter: 3, skipped: 'gif', takenAt: null }) });
   assert.deepEqual([gif.converted, gif.reason, gif.width], [false, 'gif', null]);
   const heic = { type: '', name: 'IMG_0001.HEIC', size: 9 };
-  const h = await prepareImage(heic, { compress: async () => { throw Object.assign(new Error('打不开'), { code: 'decode-failed' }); } });
-  assert.deepEqual([h.blob, h.type, h.converted, h.reason], [heic, 'image/heic', false, 'heic-unsupported']);
+  await assert.rejects(
+    prepareImage(heic, { compress: async () => { throw Object.assign(new Error('打不开'), { code: 'decode-failed' }); } }),
+    (e) => e instanceof DataError && /HEIC/.test(e.message),
+    'HEIC 解不开：报错，不把带 GPS 的原图传上去',
+  );
   await assert.rejects(prepareImage({ type: 'image/png', size: 1 }, { compress: async () => { throw new Error('这张图片打不开，可能已损坏'); } }), (e) => e instanceof DataError && /打不开/.test(e.message));
   assert.equal(isHeic({ type: '', name: 'IMG_0001.HEIC' }), true);
   assert.equal(mimeOf({ type: '', name: 'a.jpeg' }), 'image/jpeg');

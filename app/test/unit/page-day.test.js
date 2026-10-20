@@ -12,7 +12,8 @@ import {
 } from '../../src/pages/day/model.js';
 import {
   POOL, KIND_OPTIONS, TIME_LABEL_PRESETS, initialForm, validateForm, toRow, formPatch, resolveSortKey, dayOptions, parentOptions,
-  filterPlaces, sameForm,
+  filterPlaces, sameForm, defaultDayId, autoDone, nowAnchor, kindForPlace, needsPlace, moreSummary, dayChips, dayPlaceIds,
+  ITEM_KIND_OF_PLACE, STATUS_OPTIONS, SOON_MIN, actualTimeFor, shortTitle,
 } from '../../src/sheets/item/form-model.js';
 import { ENUMS } from '../../src/data/schema.js';
 import { dayPlan } from '../../src/data/selectors.js';
@@ -285,7 +286,8 @@ test('收起时的副标题和右边的标签：怎么过去 + 地点；进行�
   const place = { name: '清晨粉店' };
   const t = transportView({ options: [{ mode: 'walk', duration_min: 8 }] });
   assert.equal(collapsedSubtitle(item({ kind: 'food' }), place, t), '步行 约 8 分钟 · 清晨粉店');
-  assert.equal(collapsedSubtitle(item({ kind: 'food' }), null, null), '吃饭');
+  assert.equal(collapsedSubtitle(item({ kind: 'food' }), null, null), '', '没地点、没备注：空着（左边已经有种类图标）');
+  assert.equal(collapsedSubtitle(item({ kind: 'other', description: '**ATM** 在 7-11 里面\n第二行' }), null, null), 'ATM 在 7-11 里面', '没地点：写备注第一行');
   assert.equal(collapsedSubtitle(item({ kind: 'food', time_label: '上午', start_time: '09:00' }), null, null), '上午');
   assert.deepEqual(collapsedMeta(item({}), { current: true }), { kind: 'current', label: '进行中', tone: 'accent' });
   assert.equal(collapsedMeta(item({ status: 'done' }), { current: false, altCount: 2 }).label, '已完成');
@@ -488,4 +490,116 @@ test('表单：哪天 / 挂在哪条主方案下的选项；搜地点（越南�
   assert.equal(filterPlaces(places, '').length, 3);
   assert.equal(filterPlaces(places, '', 2).length, 2);
   assert.deepEqual(filterPlaces(places, '不存在'), []);
+});
+
+// ---------------------------------------------------------------------
+// 加一项：默认值（10-19 加条目改版；规则和小程序 components/item-edit/form.js 一样，用同一批输入对一遍）
+// ---------------------------------------------------------------------
+
+const D3 = [{ id: 'd1', date: '2026-10-16' }, { id: 'd2', date: '2026-10-17' }, { id: 'd3', date: '2026-10-18', title: '日落小镇' }, { id: 'd4', date: '2026-10-19' }];
+
+test('加一项：默认哪天——今天 / 还没出发是第一天 / 已经回来是最后一天；网址或页面给了日期就用它', () => {
+  assert.equal(defaultDayId(D3, { todayId: 'd3', today: '2026-10-18' }), 'd3');
+  assert.equal(defaultDayId(D3, { todayId: null, today: '2026-10-01' }), 'd1');
+  assert.equal(defaultDayId(D3, { todayId: null, today: '2026-11-01' }), 'd4');
+  assert.equal(defaultDayId([], { todayId: 'x' }), POOL);
+  const ctx = { todayId: 'd3', today: '2026-10-18', nowTime: '21:40' };
+  assert.equal(initialForm({ mode: 'new', days: D3, ctx }).day, 'd3', '没给日期：行程里的今天');
+  assert.equal(initialForm({ mode: 'new', days: D3, defaultDate: '2026-10-17', ctx }).day, 'd2', '在 D2 页上加：D2');
+  assert.equal(initialForm({ mode: 'new', days: D3, fields: { date: '2026-10-19' }, ctx }).day, 'd4');
+});
+
+test('加一项：今天默认现在、做完了默认打开；别的天几点空着、计划中；备选不填钟点', () => {
+  const ctx = { todayId: 'd3', today: '2026-10-18', nowTime: '21:40' };
+  const today = initialForm({ mode: 'new', days: D3, ctx });
+  assert.equal(today.start_time, '21:40');
+  assert.equal(today.status, 'done', '记一件刚做完的事（取钱）');
+  assert.equal(toRow({ ...today, title: '取了五百块' }).status, 'done');
+  const tomorrow = initialForm({ mode: 'new', days: D3, fields: { date: '2026-10-19' }, ctx });
+  assert.equal(tomorrow.start_time, '');
+  assert.equal(tomorrow.status, 'planned');
+  const backup = initialForm({ mode: 'new', days: D3, fields: { date: '2026-10-18', parent: 'P' }, ctx });
+  assert.equal(backup.start_time, '', '备选跟着主方案走，不填现在');
+  assert.equal(backup.status, 'planned');
+  // 改了几点：不晚于现在 + 5 分钟才算做完了
+  assert.equal(SOON_MIN, 5);
+  assert.equal(autoDone({ ...today, start_time: '21:45' }, ctx), true);
+  assert.equal(autoDone({ ...today, start_time: '21:46' }, ctx), false);
+  assert.equal(autoDone({ ...today, start_time: '' }, ctx), false);
+  assert.equal(autoDone({ ...today, day: 'd4' }, ctx), false, '别的天不算');
+  assert.equal(autoDone({ ...today, variant: 'rain' }, ctx), false);
+  assert.equal(autoDone(today, {}), false, '不在行程里');
+});
+
+test('加一项：今天没写钟点插在「现在」那一条后面；「现在」在最前面就排到最前；不在这一天照常排最后', () => {
+  const primary = [item({ id: 'a', start_time: '08:00', sort_key: 10 }), item({ id: 'b', start_time: '12:00', sort_key: 20 }), item({ id: 'c', start_time: '19:00', sort_key: 30 })];
+  assert.deepEqual(nowAnchor(primary, { visible: true, currentId: 'b', lineBefore: null }), { afterId: 'b', atStart: false });
+  assert.deepEqual(nowAnchor(primary, { visible: true, currentId: null, lineBefore: 2 }), { afterId: 'b', atStart: false });
+  assert.deepEqual(nowAnchor(primary, { visible: true, currentId: null, lineBefore: 3 }), { afterId: 'c', atStart: false });
+  assert.deepEqual(nowAnchor(primary, { visible: true, currentId: null, lineBefore: 0 }), { afterId: null, atStart: true });
+  assert.equal(nowAnchor(primary, { visible: false }), null);
+  // 和 nowOnTimeline 接上：14:00 在 12:00 那条（最多 2 小时）之后、19:00 之前
+  const info = nowOnTimeline(primary, 14 * 60 + 30);
+  const anchor = nowAnchor(primary, info);
+  assert.equal(anchor.afterId, 'b');
+  const base = initialForm({ mode: 'new', days: D3, ctx: {} });
+  assert.equal(resolveSortKey({ form: { ...base, title: 'x', start_time: '' }, primary, ...anchor }), 25);
+  assert.equal(resolveSortKey({ form: { ...base, title: 'x', start_time: '' }, primary, afterId: null, atStart: true }), 0, '排到最前');
+  assert.equal(resolveSortKey({ form: { ...base, title: 'x', start_time: '21:40' }, primary, afterId: 'a' }), 40, '有钟点按钟点');
+});
+
+test('加一项：选了地点按地点给类型（和小程序同表）；只有本来该有地点的种类才提醒补地点；更多设置的摘要', () => {
+  assert.equal(kindForPlace({ kind: 'hub' }), 'transport');
+  assert.equal(kindForPlace({ kind: 'bar' }), 'food');
+  assert.equal(kindForPlace({ kind: 'market' }), 'shopping');
+  assert.equal(kindForPlace({ kind: 'nope' }), null);
+  assert.equal(kindForPlace(null), null);
+  for (const k of Object.values(ITEM_KIND_OF_PLACE)) assert.ok(ENUMS['items.kind'].includes(k), k);
+  for (const k of Object.keys(ITEM_KIND_OF_PLACE)) assert.ok(ENUMS['places.kind'].includes(k), k);
+  assert.equal(needsPlace('food'), true);
+  assert.equal(needsPlace('sight'), true);
+  assert.equal(needsPlace('other'), false, '取钱、买水');
+  assert.equal(needsPlace('free'), false);
+  assert.equal(needsPlace('flight'), false);
+  const f = initialForm({ mode: 'new', days: D3, ctx: {} });
+  assert.equal(moreSummary(f), '');
+  assert.equal(moreSummary({ ...f, kind: 'food', time_label: '晚上', variant: 'rain' }), '吃饭 · 晚上 · 雨天方案');
+});
+
+test('加一项：「哪天」字签（今天写「今天」、其余「17日」、最后是备选池）；空着搜地点时这一天用到的、当晚住的在前', () => {
+  const chips = dayChips(D3, 'd3', { timeZone: TZ, at: at('2026-10-18T21:40:00+07:00') });
+  assert.deepEqual(chips.map((c) => c.label), ['16日', '17日', '今天', '19日', '备选池']);
+  assert.equal(chips[2].today, true);
+  assert.match(chips[2].aria, /^D3 · 10月18日/);
+  assert.equal(chips[4].value, POOL);
+  assert.deepEqual(dayPlaceIds([{ place_id: 'p3' }, { place_id: null }, { place_id: 'p1' }, { place_id: 'p3' }], 'p9'), ['p3', 'p1', 'p9']);
+  assert.deepEqual(dayPlaceIds([{ place_id: 'p1' }], 'p1'), ['p1']);
+  const places = [
+    { id: 'p1', name: 'A 粉店' }, { id: 'p2', name: 'B 酒店' }, { id: 'p3', name: 'C 码头' }, { id: 'p4', name: 'D 夜市' },
+  ];
+  assert.deepEqual(filterPlaces(places, '', 8, { first: ['p3', 'p2'] }).map((r) => r.place.id), ['p3', 'p2', 'p1', 'p4']);
+  assert.deepEqual(filterPlaces(places, '', 8, { first: ['p3'] }).map((r) => r.first), [true, false, false, false]);
+  assert.deepEqual(filterPlaces(places, '', 8).map((r) => r.place.id), ['p1', 'p2', 'p3', 'p4'], '没有 first 照旧按名字');
+  assert.deepEqual(filterPlaces(places, '码头', 8, { first: ['p2'] }).map((r) => r.place.id), ['p3'], '搜的时候不管 first');
+});
+
+test('改一项：状态能改（计划中 / 做完了 / 跳过了）；改回计划中把实际时间、实际情况一起清掉', () => {
+  assert.deepEqual(STATUS_OPTIONS.map((o) => o.value), [...ENUMS['items.status']]);
+  const row = item({ id: 'i', title: '取钱', kind: 'other', start_time: '21:40:00', status: 'done', actual_time: '21:45', day_id: 'd3', sort_key: 10 });
+  const f = initialForm({ mode: 'edit', item: row });
+  assert.equal(f.status, 'done');
+  assert.deepEqual(formPatch(f, { ...f }), {});
+  assert.deepEqual(formPatch(f, { ...f, status: 'planned' }), { status: 'planned', actual_time: null, actual_note: null });
+  assert.deepEqual(formPatch(f, { ...f, status: 'skipped' }), { status: 'skipped' });
+  assert.deepEqual(formPatch(f, { ...f, start_time: '21:30', description: '多取了点' }), { start_time: '21:30', description: '多取了点' }, '已完成的也能改时间、备注');
+  assert.equal(sameForm(f, { ...f, status: 'planned' }), false);
+});
+
+test('加一项「做完了」写实际时间：写了几点用几点，否则那一天当地的现在；提示条里的标题太长截短', () => {
+  assert.equal(actualTimeFor({ start_time: '21:40' }, '22:05'), '21:40');
+  assert.equal(actualTimeFor({ start_time: null }, '22:05'), '22:05');
+  assert.equal(actualTimeFor({ start_time: null }, ''), null, '不在那一天：不写');
+  assert.equal(shortTitle('取了五百块', 12), '取了五百块');
+  assert.equal(shortTitle('晚饭：Cơm Nhà 越南家常菜和海鲜', 9), '晚饭：Cơm N…');
+  assert.equal(Array.from(shortTitle('一二三四五六七八九十十一十二十三', 12)).length, 12);
 });

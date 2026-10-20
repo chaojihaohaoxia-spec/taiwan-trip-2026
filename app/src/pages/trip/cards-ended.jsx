@@ -1,7 +1,10 @@
 // =====================================================================
 // pages/trip/cards-ended.jsx：行程结束后的回顾（样稿台湾那趟的 .hero + 回顾）。
 //
-//   RecapHero        这趟旅行：几天几晚、日期、已结束多久、分段路线（雾港 —— 茶山 —— 南湾）、四个数字（地方 / 完成 / 日记 / 照片）
+//   CoverPhoto       封面照片（trips.cover.image_path，有才显示）：左右出血的 3:2，整页唯一的一张大图；能编辑的人「换封面」
+//   RecapHero        这趟旅行：几天几晚、日期、已结束多久、路线「雾港 —— 茶山 —— 南湾」一行字
+//                    （10-20 拿掉了路线速写：直线连地点，画出来是几笔小划痕或一团折线，体验评审）、几个数字（是 0 的不显示：地方 / 完成 / 日记 / 照片 / 记账）
+//   PhotoNudgeCard   还没有照片时：「从相册挑照片」→ 补照片面板（按拍摄日期分到每天）；顺手「换封面和主题色」
 //   SpendTotalCard   总花费：折合港币大数字、按币种分别列、分类前三（横条）；点进账本
 //   SettlementCard   谁该给谁多少：按币种分别结、不换汇（「Cathy 应给 Jeremy ¥2,625.63 + HK$418.66」）；点进账本
 //   PhotosCard       每天一张照片：横向一排，点开大图；没照片的那天点进那一天
@@ -9,16 +12,17 @@
 //   JournalCard      日记摘录：每天一段，点进日记相册
 // =====================================================================
 
-import { Card, ListRow, Glyph, KindIcon, MoneyText, PersonChip, PageEmptyState } from '../../kit/index.js';
-import { Badge, Button } from '../../ui/index.js';
+import { Card, ListRow, Glyph, KindIcon, MoneyText, PersonChip } from '../../kit/index.js';
+import { Badge } from '../../ui/index.js';
 import { RatingChips } from '../../kit/RatingChips.jsx';
 import { href } from '../../router/index.js';
 import { useSignedUrl } from '../../data/index.js';
 import { formatDate, formatDateRange, formatTripLength, weekdayName } from '../../lib/datetime.js';
 import { formatAmount } from '../../lib/money.js';
-import { openPhotoViewer, openPlaceSheet } from '../../sheets/index.js';
+import { openPhotoViewer, openPlaceSheet, openCoverSheet, importPhotosWith } from '../../sheets/index.js';
+import { PhotoInput } from '../../sheets/journal/PhotoInput.jsx';
 import { haptic } from '../../lib/native.js';
-import { recapStats, settlementLines, topRatedPlaces, journalExcerpts, dayPhotos, segmentRoute, tripTitleRest } from './model.js';
+import { recapStats, recapTiles, settlementLines, topRatedPlaces, journalExcerpts, dayPhotos, segmentRoute, tripTitleRest } from './model.js';
 
 // ---------------------------------------------------------------------
 // 回顾大卡
@@ -35,12 +39,7 @@ export function RecapHero({ tripId, trip, countdown, segments, stats }) {
   const chip = since === 1 ? '昨天结束' : since <= 30 ? `已结束 ${since} 天` : '已结束';
   const start = trip.start_date;
   const end = trip.end_date || start;
-  const tiles = [
-    { key: 'places', value: stats.places, label: stats.placesPlanned ? '安排的地方' : '去过的地方', to: { name: 'places', params: { tripId } } },
-    { key: 'done', value: stats.done, label: '完成的安排', to: null },
-    { key: 'journal', value: stats.journal, label: '篇日记', to: { name: 'journal', params: { tripId } } },
-    { key: 'photos', value: stats.photos, label: '张照片', to: { name: 'journal', params: { tripId }, query: { tab: 'photos' } } },
-  ];
+  const tiles = recapTiles(stats, tripId);
   return (
     <Card class="ov-hero ov-hero--recap" eyebrow="这趟旅行" action={<Badge tone="neutral">{chip}</Badge>} testId="ov-recap" data-phase="ended">
       <div class="ov-hero__main">
@@ -63,19 +62,67 @@ export function RecapHero({ tripId, trip, countdown, segments, stats }) {
           ])}
         </div>
       )}
-      <div class="ov-stats" data-testid="ov-recap-stats">
-        {tiles.map((t) => (t.to ? (
-          <a key={t.key} class="ov-stat material-raised" href={href(t.to)} data-press="scale">
-            <b class="t-figure">{t.value}</b>
-            <span>{t.label}</span>
-            <Glyph name="chev-r" size={14} stroke={2.2} class="ov-stat__chev" />
-          </a>
-        ) : (
-          <span key={t.key} class="ov-stat material-inset">
-            <b class="t-figure">{t.value}</b>
-            <span>{t.label}</span>
-          </span>
-        )))}
+      {tiles.length > 0 && (
+        <div class="ov-stats" data-testid="ov-recap-stats">
+          {tiles.map((t) => (t.to ? (
+            <a key={t.key} class="ov-stat material-raised" href={href(t.to)} data-press="scale">
+              <b class="t-figure">{t.value}</b>
+              <span>{t.label}</span>
+              <Glyph name="chev-r" size={14} stroke={2.2} class="ov-stat__chev" />
+            </a>
+          ) : (
+            <span key={t.key} class="ov-stat material-inset">
+              <b class="t-figure">{t.value}</b>
+              <span>{t.label}</span>
+            </span>
+          )))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+
+// ---------------------------------------------------------------------
+// 封面照片（有才显示，整页唯一的一张大图）、补照片
+// ---------------------------------------------------------------------
+
+/**
+ * 封面：左右出血的 3:2 照片，下面一行小字（行程名后半段 · 换封面）。
+ * @param {{ trip: object, canEdit: boolean }} props
+ */
+export function CoverPhoto({ trip, canEdit }) {
+  const url = useSignedUrl(trip.cover?.image_path || null);
+  return (
+    <figure class="ov-cover" data-testid="ov-cover">
+      <div class="ov-cover__frame" data-loaded={url ? '' : undefined}>
+        {url && <img src={url} alt={`${trip.title} 的封面`} decoding="async" draggable={false} />}
+      </div>
+      {canEdit && (
+        <figcaption class="ov-cover__cap">
+          <button type="button" class="ov-cardlink" data-press="scale" onClick={(e) => openCoverSheet({ trigger: e.currentTarget })} data-testid="ov-cover-edit">换封面</button>
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
+/**
+ * 还没有照片：从相册挑一批，按拍摄时间自动放进每天（sheets/photo-import）。能编辑的人顺手可以换封面和颜色。
+ * @param {{ canEdit: boolean, hasCover: boolean }} props
+ */
+export function PhotoNudgeCard({ canEdit, hasCover }) {
+  return (
+    <Card title="补照片" testId="ov-photo-nudge" class="ov-nudge">
+      <p class="ov-nudge__text">挑这趟拍的照片，按日期自动放进每天。</p>
+      <div class="ov-nudge__actions">
+        {/* 描边按钮：一屏里不放第二个实心的（评审：只有它是实心，偏重） */}
+        <PhotoInput multiple variant="secondary" block onFiles={(files) => importPhotosWith(files)} testId="ov-photo-import">从相册挑照片</PhotoInput>
+        {canEdit && !hasCover && (
+          <button type="button" class="ov-textlink" data-press="highlight" onClick={(e) => openCoverSheet({ trigger: e.currentTarget })} data-testid="ov-cover-open">
+            <span>封面和颜色</span><Glyph name="chev-r" size={14} stroke={2.2} />
+          </button>
+        )}
       </div>
     </Card>
   );
@@ -190,9 +237,9 @@ function DayPhoto({ entry, tripId, index }) {
 }
 
 /**
- * @param {{ tripId: string, days: object[], journalByDay: Map }} props
+ * @param {{ tripId: string, days: object[], journalByDay: Map, coverHint?: boolean }} props  coverHint：还没有封面、能编辑时，下面一行「挑一张当封面」
  */
-export function PhotosCard({ tripId, days, journalByDay }) {
+export function PhotosCard({ tripId, days, journalByDay, coverHint = false }) {
   const list = dayPhotos(days, journalByDay);
   const total = list.reduce((s, x) => s + x.count, 0);
   if (!total) return null;
@@ -201,6 +248,11 @@ export function PhotosCard({ tripId, days, journalByDay }) {
       <div class="ov-photos" role="list">
         {list.map((entry, i) => <DayPhoto key={entry.day.id} entry={entry} tripId={tripId} index={i} />)}
       </div>
+      {coverHint && (
+        <button type="button" class="ov-textlink ov-photos__cover" data-press="highlight" onClick={(e) => openCoverSheet({ trigger: e.currentTarget })} data-testid="ov-cover-pick">
+          <span>挑一张当这趟的封面</span><Glyph name="chev-r" size={14} stroke={2.2} />
+        </button>
+      )}
     </Card>
   );
 }
@@ -257,21 +309,6 @@ export function JournalCard({ tripId, entries, days, nameOf, timeZone }) {
           </blockquote>
         ))}
       </div>
-    </Card>
-  );
-}
-
-/** 结束了但什么记录都没有 */
-export function RecapEmpty({ tripId }) {
-  return (
-    <Card testId="ov-recap-empty">
-      <PageEmptyState
-        preset="journal"
-        compact
-        title="这趟还没留下记录"
-        description="记账、日记、照片、评级都还是空的。想补记的话，从日记相册开始。"
-        action={<Button variant="secondary" href={href({ name: 'journal', params: { tripId } })}>去日记相册</Button>}
-      />
     </Card>
   );
 }

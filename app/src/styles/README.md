@@ -105,7 +105,7 @@ reset < tokens < base < vendor < motion < ui < overlay < shell < pages < dev
 | `skeleton` / `skeleton-shine` | 骨架屏 |
 | `rating-1` … `rating-5`、`on-rating` | 评级五档：5 夯 / 4 顶级 / 3 人上人 / 2 NPC / 1 拉完了（实心底配白字） |
 | `cat-1` … `cat-8` | 分类色（图表、记账分类、头像；和 surface 对比 ≥3:1） |
-| `day-1` … `day-7`、`day-N-deep` | 第几天：一组低饱和的大地色（海绿、灰蓝、陶土、橄榄、灰紫、沙、苔绿），**只在地图上用**；页面上的 D1–D4 是墨色的字 |
+| `day-1` … `day-7`、`day-N-deep` | 第几天：一组低饱和的大地色（海绿、灰蓝、陶土、橄榄、灰紫、沙、苔绿），**只在地图上用**（路线速写 `kit/RouteSketch` 也用，现在没有页面用它）；页面上的 D1–D4 是墨色的字 |
 
 **行程主题色**（`trips.cover.accent` / `accent_2`）：整页换色 `setTripAccent('#0E8A8A', '#F2A65A')`（lib/theme.js，写 `<html>` 的 `--trip-accent` / `--trip-accent-2`；只传一个参数时第二主题色不动，`setTripAccent(null, null)` 恢复默认）——
 外壳（`shell/trip-state.js`）按当前行程统一调用，换行程时只写一次终值，页面不用自己调，**也不要逐帧往 `<html>` 写变量**（整页每一帧重算样式）。
@@ -161,7 +161,7 @@ reset < tokens < base < vendor < motion < ui < overlay < shell < pages < dev
 | 变量 | 字体 | 用在 | 规则 |
 |---|---|---|---|
 | `--font-serif`（= `--font-display`） | 思源宋体 Noto Serif SC 600 | 页面大标题、区块 / 卡片标题、行程名、D1–D4、预订名、面板标题、＋ 面板和「更多」菜单的名字 | 只在 **≥15px** 用；只有 600 一个字重（`--weight-serif`）；字距 `--tracking-display` / `--tracking-title` 都是 .01em；**不开 palt**；标题加 `word-break: keep-all`，只在标点、空格处折行；**按钮不用宋体** |
-| `--font-figure`（= `--font-rounded`） | Instrument Serif 400，「1」和越南盾符号「₫」换成 P2 Figure One | **只给几个主数字**：航班起降、账本总额（`MoneyText serif`）、入住 / 退房时刻（`.t-figure-serif`） | 只有 400，分量靠字号补；D1 这种字母 + 数字别用它（会读成 Dl）。Instrument Serif 没有 ₫，所以「₫」也由 P2 Figure One 接管 |
+| `--font-figure`（= `--font-rounded`） | Instrument Serif 400，「1」和越南盾符号「₫」换成 P2 Figure One | **只给几个主数字**：航班起降、账本总额（`MoneyText serif`）、入住 / 退房时刻（`.t-figure-serif`）、每天页页头的大号日期「18」、贴士页置顶的紧急电话「113 115 114」 | 只有 400，分量靠字号补；D1 这种字母 + 数字别用它（会读成 Dl）。Instrument Serif 没有 ₫，所以「₫」也由 P2 Figure One 接管 |
 | `--font-figure-italic` | Instrument Serif 400 斜体，「1」「₫」换成 P2 Figure One 的斜体 | 倒计时 | 斜体的 P2 Figure One 是思源宋体 Regular 的「1」「₫」按 Instrument Serif 斜体的角度（13°）斜切、收窄出来的：「1 天」不会读成「l 天」。斜体不预加载，第一次用到时下载、Service Worker 缓存 |
 | `--font-label` | 系统字体（= `--font-sans`） | 小号日期、计数、时间轴时间、标签、小按钮、分段（`--type-label`、`--type-eyebrow`） | 配 `font-variant-numeric: tabular-nums`（SF 自带等宽数字）。以前是 Geist，已经去掉 |
 | `--font-sans` | 系统字体（苹方优先） | 正文、说明、按钮、数字（`.t-figure`）、用户输入 | 不下载 |
@@ -190,7 +190,7 @@ reset < tokens < base < vendor < motion < ui < overlay < shell < pages < dev
 | `label` | 14 / 1.2 | 系统 500 | 小按钮、分段、筛选 |
 | `eyebrow` | 12 / 17 | 系统 500 | 眉标（「距离起飞还有」，装饰灰，字距 `--tracking-eyebrow` .04em） |
 
-大号数字的字号：`--text-figure-hero` 84（倒计时）· `-1` 48（金额输入）· `-2` 40（账本总额、记一笔）· `-3` 27（航班时间）· `-4` 22 · `-5` 19。除了倒计时、航班、账本总额、入住退房，都用系统字体。
+大号数字的字号：`--text-figure-hero` 84（倒计时）· `-1` 48（金额输入）· `-2` 40（账本总额、记一笔）· `-3` 27（航班时间）· `-4` 22 · `-5` 19。除了倒计时、航班、账本总额、入住退房、每天页的大号日期（hero 84）、紧急电话（-2 40），都用系统字体。
 样稿里 12.5 / 13.5 / 14.5 / 16.5px 这种半号都归到了最近的一级（组件里不写数字字号；唯一的例外是隐藏输入框的 16px，防止 iOS 放大）。
 
 字距（都不放宽：放宽的字距像请柬、像数据面板）：`--tracking-display` / `--tracking-title` .01em（宋体）· `--tracking-tight`（旧名 = display）· `normal` 0 · `wide` .02em · `label` 0 · `tab` 0（底栏）· `eyebrow` .04em · `button` / `button-lg` 0 · `figure` 0。

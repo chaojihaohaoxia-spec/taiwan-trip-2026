@@ -38,7 +38,7 @@ import { PhotoInput } from './PhotoInput.jsx';
 import { takeStashedPhotos } from './capture.js';
 import { readDraft, writeDraft } from './draft.js';
 import {
-  moodOptions, moodLabel, defaultJournalDay, formFromEntry, applyDraft, formIsDirty, formIsEmpty, formPatch, cleanPhoto,
+  moodOptions, moodLabel, defaultJournalDay, formFromEntry, applyDraft, carryNewPhotos, formIsDirty, formIsEmpty, formPatch, cleanPhoto,
   uploadStateOf, UPLOAD_LABELS, charCount, tripReady,
 } from './form.js';
 
@@ -195,6 +195,11 @@ function JournalForm({ controller, onStatus, photoMode }) {
     entryRef.current = entry;
     const base = formFromEntry(entry);
     if (!formIsDirty(form, baseRef.current)) setForm(base);
+    else {
+      // 改到一半，别处往这天的日记里加了照片（补照片）：并进来，保存时不会把它们去掉、删文件
+      const oldPhotos = baseRef.current?.photos || [];
+      setForm((f) => (f ? { ...f, photos: carryNewPhotos(f.photos, oldPhotos, base.photos) } : f));
+    }
     baseRef.current = base;
   }, [entry]);
 
@@ -205,7 +210,7 @@ function JournalForm({ controller, onStatus, photoMode }) {
     if (!form || !dayId || closedRef.current) return undefined;
     const t = setTimeout(() => {
       if (closedRef.current) return;
-      writeDraft(tripId, me, dayId, formIsDirty(form, baseRef.current) ? form : null);
+      writeDraft(tripId, me, dayId, formIsDirty(form, baseRef.current) ? form : null, baseRef.current);
     }, DRAFT_DEBOUNCE_MS);
     return () => clearTimeout(t);
   }, [form, dayId]);
@@ -230,7 +235,7 @@ function JournalForm({ controller, onStatus, photoMode }) {
   // 然后释放本机预览
   useEffect(() => () => {
     const l = latest.current;
-    if (!closedRef.current && l?.form && l.dayId) writeDraft(l.tripId, l.me, l.dayId, formIsDirty(l.form, baseRef.current) ? l.form : null);
+    if (!closedRef.current && l?.form && l.dayId) writeDraft(l.tripId, l.me, l.dayId, formIsDirty(l.form, baseRef.current) ? l.form : null, baseRef.current);
     closedRef.current = true;
     for (const u of previews.current.values()) URL.revokeObjectURL?.(u);
     previews.current.clear();
@@ -403,7 +408,7 @@ function JournalForm({ controller, onStatus, photoMode }) {
   const pickDay = (d) => {
     if (!d || d.id === dayId) return;
     // 当前这一天的草稿先落盘（防抖还没到也不丢）
-    if (form) writeDraft(tripId, me, dayId, formIsDirty(form, baseRef.current) ? form : null);
+    if (form) writeDraft(tripId, me, dayId, formIsDirty(form, baseRef.current) ? form : null, baseRef.current);
     loadedForDay.current = null;
     setDayId(d.id);
     haptic('selection');

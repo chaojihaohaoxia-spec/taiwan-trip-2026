@@ -537,7 +537,6 @@ function FilePanel({ store }) {
             <Row label="压缩" testid="file-compress">
               {res.converted ? `${kb(res.originalSize)} → ${kb(res.size)} · ${res.width}×${res.height}`
                 : res.reason === 'original-smaller' ? `原图已经够小（没有 EXIF），直接上传 · ${kb(res.size)} · ${res.width}×${res.height}`
-                  : res.reason === 'heic-unsupported' ? '这个浏览器转不了 HEIC，原样上传'
                     : `原样上传（${res.type}）`}
             </Row>
             <Row label="拍摄时间">{res.takenAt || '读不到'}</Row>

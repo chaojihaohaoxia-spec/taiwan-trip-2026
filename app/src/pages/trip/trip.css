@@ -980,6 +980,76 @@ button.ov-fl {
 }
 
 /* ---------- 回顾 ---------- */
+/* 封面照片：左右出血（盖过页边）的 3:2，整页唯一的一张大图；没加载出来时是一块浅墨 */
+.ov-cover {
+  margin: 0 calc(-1 * var(--gutter)) 4px;
+}
+
+.ov-cover__frame {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: var(--color-fill);
+}
+
+.ov-cover__frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: ov-cover-in var(--dur-slower) var(--ease-out) both;
+}
+
+@keyframes ov-cover-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.ov-cover__cap {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: -10px;
+  padding: 2px var(--gutter) 0;
+}
+
+@media (min-width: 768px) {
+  .ov-cover {
+    margin-inline: 0;
+  }
+
+  .ov-cover__frame {
+    border-radius: var(--radius-tile);
+  }
+
+  .ov-cover__cap {
+    padding-inline: 0;
+  }
+}
+
+/* 每天一张照片下面「挑一张当封面」 */
+.ov-photos__cover {
+  margin-top: var(--space-2);
+}
+
+/* 补照片：一句话 + 一个主按钮 + 一行文字链接 */
+.ov-nudge__text {
+  margin: 0;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.ov-nudge__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* 路线速写（kit/RouteSketch）：分段地名标在旁边，像手帐上描的路线；宽屏不跟着无限放大 */
 .ov-route {
   display: flex;
   align-items: center;

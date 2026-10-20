@@ -26,6 +26,7 @@
 | `exif.js` | `readExif()`、`exifTakenAt()`、`detectImageFormat()`、`locateExif()`、`readExifTiff()` | 读拍摄时间（JPEG / HEIC / WebP / PNG / TIFF），不读 GPS |
 | `image.js` | `compressImage()`、`readImageExif()`、`fitWithin()`、`formatBytes()`、`extensionFor()` | 照片压缩成长边 2048 的 JPEG |
 | `services/` | 汇率 `fx.js`、天气 `weather.js`、缓存 `cache.js`、请求 `http.js` | 见 `services/README.md` |
+| `translate/` | `text.js`（同一句、方向、拼音、称呼、哪趟要翻译）、`store.js`（最近翻过、收藏、称呼，localStorage）、`client.js`（翻译接口：text/plain、预热、重试、限频、以最后一次为准）、`demo.js`（演示接口） | 翻译页（`pages/translate/README.md`） |
 | `map/` | `TripMap` 组件、`geo.js` 纯函数、`markers.js` 图钉 | 见 `map/README.md` |
 | `theme.js` | `themePreference`、`effectiveScheme`、`setThemePreference()`、`applyTheme()`、`setTripAccent(hex, hex2?)`、`cssVar()` | 深浅色（偏好 + 实际生效的）、行程主题色（第二个参数是 `--trip-accent-2`；外壳 `shell/trip-state.js` 按当前行程统一设置、换行程时平滑过渡，页面不用自己调）、读设计变量 |
 | `storage.js` | `local`、`session`、`createSafeStorage()` | localStorage 的安全包装（键前缀 `rs7885:`） |

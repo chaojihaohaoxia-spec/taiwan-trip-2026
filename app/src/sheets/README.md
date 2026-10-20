@@ -8,7 +8,10 @@
 | `index.js` | **登记表** `SHEETS`（id → 种类、中文名、由谁完成、模块）+ `defineOverlays` 登记成按需加载 + **打开它们的帮手**（`openExpenseSheet` …）。由 `pages/index.js` 在启动时引入（只有几行，弹层本身的代码不进首屏包） |
 | `args.js` | 网址参数的写法：`encodeSheetArg` / `parseSheetArg`（纯函数，单元测试 `test/unit/kit.test.js`） |
 | `hooks.js` | 弹层里用：`useSheetArgs()`（参数解析好）、`useSheetTrip()` → `{ tripId, store, pending }`（属于哪个行程；**确定登录了才打开行程**，恢复登录期间 `store` 是 null、`pending` 为真）、`findRow(store, id)`（在各张表里找 id） |
-| `driver/DriverSheet.jsx` / `driver.css` | 给司机看（做完了，见下文） |
+| `driver/DriverSheet.jsx` / `driver.css` | 给司机看（做完了，见下文）；参数 `tr.<id>` = 给对方看一句翻译（`driver/translation.js`，从 localStorage 读） |
+| `converse/` | 翻译的对话模式（全屏上下分屏，上半屏转 180° 朝着对方；`openConverse()`，见 `pages/translate/README.md`） |
+| `cover/` | 封面和主题色（`openCoverSheet()`）：3:2 预览（照片，没有就是路线速写）+ 这趟的照片 / 从相册选（传到 `covers/`，没保存就关掉会删掉）+ 六个预设主题色（现在的颜色不是预设时放最前面）→ `store.updateTrip({ cover })`；纯逻辑 `cover/model.js` |
+| `photo-import/` | 补照片（`openPhotoImport()`；页面上先选好照片再开：`PhotoInput multiple onFiles={importPhotosWith}`）：读 EXIF 拍摄时间 → 按照片自己的当地日期分到每天（不是这几天的、已经在日记里的跳过；没有拍摄时间的可以挑一天）→ 一张一张压缩进写队列，一天传完存一次**我那天的**日记（`task.js`，面板关了也接着做完）。不显示原图缩略图（几十张原图同时解码 iPhone 会被系统关掉）；纯逻辑 `photo-import/model.js` |
 | `expense/` `item/` `place/` `review/` `booking/` `todo/` `journal/` `photo/` `trip-new/` `invite/` | 每个 id 一个目录，现在是占位，页面阶段由对应页面的 agent 整个替换 |
 
 | id | 中文名 | 种类 | 由谁完成 |
@@ -24,6 +27,9 @@
 | `photo` | 看大图 | 全屏（kind `menu`；占位暂时用底部面板） | 日记页 |
 | `trip-new` | 新建行程 | 底部面板 | 行程列表页 |
 | `invite` | 邀请成员 | 底部面板 | 设置页 |
+| `converse` | 对话（翻译） | 全屏（kind `menu`） | 翻译页 |
+| `cover` | 封面和颜色 | 底部面板 | 概览（回顾的封面、补照片卡、每天一张照片下面）/ 设置页每趟行程的卡 |
+| `photo-import` | 补照片 | 底部面板 | 日记页（结束后的「补照片」）/ 概览（还没有照片时） |
 
 ## 怎么打开（所有打开方都用这些帮手，不要自己拼参数）
 
@@ -119,7 +125,7 @@ function Form() {
 （`BookingSheet` 本来就是这样做的）。另外：
 - **记一笔**：编辑台湾那趟的旧记账（`paid_by` 是名字、`split` 是 `{}`）时，付款人、分摊按数据层认出来的人填（`ctx.legacyShares`）；只有亲手改过谁付 / 怎么分、或改了金额 / 币种才写这两个字段。
   行程那几天里人还在香港（出发当天落地前、回程那晚落地后：`store.presenceZone` ≠ 行程时区）时默认币种是本币（港币），时间框下面说一句「按越南时间记 · 香港现在 13:00」。每人平摊的折合港币和金额框下面同一个汇率。
-- **加条目**：保存后写 `sheets/item/saved.js` 的 `lastSavedItem`（每天页据此让新的一条在面板收回后淡入、高亮）；主方案换了天，挂在它下面的备选 / 雨天方案跟着搬；
+- **加一项**：默认值（今天、现在、做完了、插在「现在」）见 `sheets/item/README.md`；保存后写 `sheets/item/saved.js` 的 `lastSavedItem`（每天页据此让新的一条在面板收回后淡入、高亮），提示条带「撤销」；主方案换了天，挂在它下面的备选 / 雨天方案跟着搬；
   提示「已加到今天 / D3 的时间轴」按那一天是不是今天写。
 - **写评级**：删除评级以后，等删除真的发出去（撤销窗口过了）再删私有桶里的照片（和日记一样）。
 - **大图浏览**：分享走 `lib/native.js` 的 `share({ files })`（分享照片本身）；不能分享文件时不发链接（签名链接谁拿到都能看、刚拍的 `blob:` 对方打不开），提示长按存到相册。

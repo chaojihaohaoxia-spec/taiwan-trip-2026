@@ -1,1 +1,0 @@
-import{c as n}from"./chunk-QXB2GAJS.js";function l(e){if(!e||!e.id)return null;let r=e.user_metadata||{};return{id:e.id,email:e.email||null,displayName:r.display_name||r.name||null}}function o(e=globalThis.localStorage??null){try{let r=e?.getItem(n);if(!r)return null;let t=JSON.parse(r);return l(t?.user||t?.currentSession?.user)}catch{return null}}export{l as a,o as b};

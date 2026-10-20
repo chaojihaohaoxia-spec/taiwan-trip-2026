@@ -361,10 +361,13 @@ test('结束后（三城，01-20）：回顾大卡（9 天 8 晚、路线、四�
     const { page } = app;
     assert.equal(await page.$eval(T('page-trip'), (el) => el.dataset.phase), 'ended');
     const ids = await order(page);
-    assert.deepEqual(ids, ['ov-recap', 'ov-total', 'ov-settle', 'ov-photos', 'ov-top-places', 'ov-journal', 'ov-days']);
+    // 有封面照片：最上面一张左右出血的大图；有照片了不再出现「补照片」
+    assert.deepEqual(ids, ['ov-cover', 'ov-recap', 'ov-total', 'ov-settle', 'ov-photos', 'ov-top-places', 'ov-journal', 'ov-days']);
     assert.equal(await text(page, T('ov-recap-days')), '9');
     assert.match(await text(page, T('ov-recap')), /8 晚/);
-    assert.deepEqual(await page.$$eval(`${T('ov-recap-route')} .ov-route__city`, (els) => els.map((el) => el.textContent)), ['雾港', '茶山', '南湾']);
+    // 路线是一行字「雾港 —— 茶山 —— 南湾」（路线速写 10-20 拿掉了：画出来是几笔小划痕）
+    assert.equal(await page.$(T('ov-recap-sketch')), null);
+    assert.match(await page.$eval(T('ov-recap-route'), (el) => el.getAttribute('aria-label')), /雾港，茶山，南湾/);
     assert.equal((await page.$$(`${T('ov-recap-stats')} .ov-stat`)).length, 4);
     assert.match(await text(page, T('ov-total-home')), /^HK\$[\d,]+/);
     assert.match(await text(page, T('ov-settle-amounts')), /NT\$[\d,]+\s*\+\s*HK\$[\d,]+/);

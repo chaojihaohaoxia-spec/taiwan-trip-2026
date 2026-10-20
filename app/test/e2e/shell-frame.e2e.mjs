@@ -195,8 +195,9 @@ test('＋ 面板：从 ＋ 长出来（半路截图）、底栏浮在面板上�
     await page.waitForFunction(() => location.hash.endsWith('?sheet=fab'));
     await app.idle();
     const order = await page.$$eval('.fab-tile', (els) => els.map((e) => [e.dataset.testid, e.hasAttribute('data-hero')]));
-    assert.deepEqual(order.map((o) => o[0]), ['fab-expense', 'fab-photo', 'fab-journal', 'fab-item', 'fab-todo']);
+    assert.deepEqual(order.map((o) => o[0]), ['fab-expense', 'fab-item', 'fab-photo', 'fab-journal', 'fab-todo']);
     assert.equal(order[0][1], true);
+    assert.equal(await page.$$eval('.fab-pair > .fab-tile', (els) => els.map((e) => e.dataset.testid).join(',')), 'fab-expense,fab-item', '进行中：记一笔、加一项并排');
     // 底栏浮在面板上面、不是 inert，加号变成 ×（aria-expanded）
     const bar = await page.$eval(T('shell-tabbar'), (el) => ({ lifted: el.hasAttribute('data-lifted'), inert: el.inert, z: Number(getComputedStyle(el).zIndex) }));
     const layerZ = await page.$eval('.ov-layer--panel', (el) => Number(getComputedStyle(el).zIndex));
@@ -243,10 +244,11 @@ test('「更多」菜单：圆形扩散（半路截图）、瓷砖有实时状�
     await page.waitForFunction(() => location.hash.endsWith('?sheet=menu'));
     await app.idle();
     const tiles = await page.$$eval('.more-tile', (els) => els.map((e) => [e.dataset.testid, e.querySelector('i').textContent]));
-    assert.deepEqual(tiles.map((t) => t[0]), ['more-bookings', 'more-lists', 'more-journal', 'more-places', 'more-tips', 'more-contacts', 'more-trips', 'more-settings']);
-    assert.match(tiles[0][1], /个待确认|个还没订|都已订好/);
-    assert.match(tiles[1][1], /打包 \d+\/\d+/);
-    assert.match(tiles[5][1], /位/);
+    // 椰影岛是越南（越南盾）：第一行多一个「翻译」
+    assert.deepEqual(tiles.map((t) => t[0]), ['more-translate', 'more-bookings', 'more-lists', 'more-journal', 'more-places', 'more-tips', 'more-contacts', 'more-trips', 'more-settings']);
+    assert.match(tiles[1][1], /个待确认|个还没订|都已订好/);
+    assert.match(tiles[2][1], /打包 \d+\/\d+/);
+    assert.match(tiles[6][1], /位/);
     assert.equal(await page.$eval('.more-sign', (el) => el.textContent), '热爱生活7885 · Jeremy & Cathy');
     assert.equal(await page.$eval(T('tab-more'), (el) => el.getAttribute('aria-label')), '关闭菜单');
     await app.shot('menu', { fullPage: false });

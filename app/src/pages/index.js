@@ -34,6 +34,7 @@ export const pages = {
   places: lazyPage(() => import('./places/PlacesPage.jsx')),
   tips: lazyPage(() => import('./tips/TipsPage.jsx')),
   contacts: lazyPage(() => import('./contacts/ContactsPage.jsx')),
+  translate: lazyPage(() => import('./translate/TranslatePage.jsx')),
   settings: lazyPage(() => import('./settings/SettingsPage.jsx')),
   join: lazyPage(() => import('./join/JoinPage.jsx')),
   login: lazyPage(() => import('./login/LoginPage.jsx')),

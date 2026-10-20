@@ -1,9 +1,10 @@
 // =====================================================================
 // pages/day/parts.jsx：每天页时间轴以外的几块（样式在 day.css）。
 //
-//   <DayHead …/>          页头（「杂志纸本」）：眉标（D2 · 1月11日 周一 · 今天）、当天标题（宋体，不放 emoji）、一句概要、
+//   <DayHead …/>          页头（「杂志纸本」）：大号日期（DayVisual.jsx 的 DayMast；完整的「D2 · 1月11日 周一 · 今天」留给读屏）、
+//                         当天标题（宋体，不放 emoji）、一句概要、
 //                         一行事实（天气 · 日落 · 规划状态，用 · 隔开，不是胶囊）、当晚住哪（一行海色链接，点了开预订详情）、
-//                         节日 / 备注。节奏、条数不上屏；数据里的天气提示（预报模型那段）不上屏
+//                         节日 / 备注、那天的照片（三张）、日记的第一句。节奏、条数不上屏；数据里的天气提示（预报模型那段）不上屏
 //   <RoutePlanCard …/>    路线规划卡（days.route_plan，docs B5.3）：标题、副标题、几个指标、「打开路线」（经过的点和时间轴重复，不列）
 //   <DecisionsCard …/>    取舍说明（days.decisions，B5.4）：原地展开的卡片，收着的时候只有一行
 //   <RemindersCard …/>    当天的提醒：这一天自己的贴士（没被哪一条认领的）+ 这一天的待办（可以直接勾）
@@ -20,6 +21,7 @@ import { href } from '../../router/index.js';
 import { openBookingSheet } from '../../sheets/index.js';
 
 import { useNow } from '../../kit/useNow.js';
+import { DayMast, DayPhotos, DayQuote } from './DayVisual.jsx';
 import { PLANNING_LABELS, WEATHER_GLYPHS, dayEyebrow, routePlanView, sunTimes, dayNotes, firstLine, todoHint } from './model.js';
 
 /** 页头那一行事实里的天气：「晴 31° / 25°」「多云 · 降雨 60%」；超出预报范围「出发前一周可看」 */
@@ -48,7 +50,7 @@ export function titleSegments(title) {
  * @param {{ day: object, trip: object, dayNumber: number|null, timeZone: string, at: Date, weather: object|null,
  *           stay: { booking: object, place: object|null } | null }} props
  */
-export function DayHead({ day, trip, dayNumber, timeZone, at, weather, stay }) {
+export function DayHead({ day, trip, dayNumber, timeZone, at, weather, stay, store = null }) {
   const eyebrow = dayEyebrow({ dayNumber, date: day.date, timeZone, at });
   const title = (day.title || '').trim() || (dayNumber ? `第 ${dayNumber} 天` : day.date);
   const sun = sunTimes(day, weather?.weather);
@@ -58,9 +60,10 @@ export function DayHead({ day, trip, dayNumber, timeZone, at, weather, stay }) {
   const planning = PLANNING_LABELS[day.planning_status];
   const stayName = stay?.place?.name || stay?.booking?.title || null;
   const hasFacts = Boolean(wx || sunset || planning);
+  const byDay = store?.view?.journalByDay.value || null;
   return (
     <header class="day-head" data-testid="day-head">
-      <p class="day-head__eyebrow t-eyebrow">{eyebrow}</p>
+      <DayMast day={day} dayNumber={dayNumber} timeZone={timeZone} at={at} eyebrow={eyebrow} />
       <h2 class="day-head__title">
         {titleSegments(title).map((seg, i) => <span key={i} class="day-head__seg">{seg}</span>)}
       </h2>
@@ -87,6 +90,8 @@ export function DayHead({ day, trip, dayNumber, timeZone, at, weather, stay }) {
       {notes.notes.map((n) => (
         <p key={n.key} class="day-head__note"><Glyph name={n.key === 'holiday' ? 'gift' : 'info'} size={15} /><span><b>{n.label}：</b>{n.text}</span></p>
       ))}
+      <DayPhotos day={day} byDay={byDay} />
+      <DayQuote entries={byDay?.get(day.id) || []} nameOf={(id) => store?.memberName(id) || ''} />
     </header>
   );
 }

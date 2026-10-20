@@ -11,10 +11,10 @@
 /** 行程 tab 里的页面 → 底栏的哪一格 */
 export const TAB_OF = Object.freeze({ trip: 'trip', day: 'trip', map: 'map', ledger: 'ledger' });
 /** 行程里的二级页面（从「更多」进来） */
-export const SECTION_PAGES = Object.freeze(['bookings', 'lists', 'journal', 'places', 'tips', 'contacts']);
+export const SECTION_PAGES = Object.freeze(['bookings', 'lists', 'journal', 'places', 'tips', 'contacts', 'translate']);
 /** 二级页面的大标题（和「更多」菜单的瓷砖名字一致） */
 export const SECTION_TITLES = Object.freeze({
-  bookings: '预订', lists: '清单', journal: '日记相册', places: '地点与评级', tips: '贴士与常用语', contacts: '联系人',
+  bookings: '预订', lists: '清单', journal: '日记相册', places: '地点与评级', tips: '贴士与常用语', contacts: '联系人', translate: '翻译',
 });
 /** 底栏的五格（index 是指示块的位置；fab 那格没有指示块） */
 export const TABBAR_SLOTS = Object.freeze(['trip', 'map', 'fab', 'ledger', 'more']);
@@ -58,6 +58,9 @@ export function dayStripIndex(r, dates = []) {
   }
   return -1;
 }
+
+/** 底栏不随滚动收小的页面：翻译页下面浮着整宽的输入区，底栏收窄了两块宽度对不上（评审 7） */
+export const FULL_TABBAR_PAGES = Object.freeze(['translate']);
 
 /** 行程没加载成时副标题怎么写（数据层 TripStore 的 status） */
 const FAILED_TEXT = Object.freeze({ error: '没有加载成功', missing: '找不到这趟行程', removed: '你已经不在这趟行程里' });

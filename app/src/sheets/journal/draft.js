@@ -51,12 +51,18 @@ export function readDraft(tripId, userId, dayId) {
 
 /**
  * 写 / 删一天的草稿。form 为 null 时删掉。
+ * base：写草稿那一刻日记里已经有的样子（formFromEntry）——记下那时有哪些照片（basePaths），
+ * 之后「补照片」等别处往日记里加的照片，恢复草稿时不会被草稿里旧的照片列表冲掉（form.js 的 applyDraft）。
  * @param {{ mood: string, body: string, photos: object[] } | null} form
+ * @param {{ photos?: object[] } | null} [base]
  */
-export function writeDraft(tripId, userId, dayId, form) {
+export function writeDraft(tripId, userId, dayId, form, base = null) {
   if (!tripId || !userId || !dayId) return;
   const all = readAll(tripId, userId);
-  if (form) all[dayId] = { mood: form.mood || '', body: form.body || '', photos: form.photos || [], at: new Date().toISOString() };
+  if (form) {
+    all[dayId] = { mood: form.mood || '', body: form.body || '', photos: form.photos || [], at: new Date().toISOString() };
+    if (base) all[dayId].basePaths = (base.photos || []).map((p) => p?.path).filter(Boolean);
+  }
   else if (dayId in all) delete all[dayId];
   else return;
   writeAll(tripId, userId, all);

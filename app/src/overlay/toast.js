@@ -59,6 +59,12 @@ export function dismissToast(id) {
   toasts.value = toasts.peek().map((t) => (t.id === id && t.state !== 'closing' ? { ...t, state: 'closing' } : t));
 }
 
+/** 某个 key 的提示离场（例如打开「改一项」面板时收起上一条「已加 · 撤销」，不盖在面板上） */
+export function dismissToastKey(key) {
+  if (!key) return;
+  toasts.value = toasts.peek().map((t) => (t.key === key && t.state !== 'closing' ? { ...t, state: 'closing' } : t));
+}
+
 /** 全部离场 */
 export function dismissAllToasts() {
   toasts.value = toasts.peek().map((t) => (t.state === 'closing' ? t : { ...t, state: 'closing' }));

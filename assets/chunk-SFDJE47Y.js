@@ -1,0 +1,1 @@
+import{a}from"./chunk-RLOILQMF.js";function i({n:s,size:n="sm",today:o=!1,label:d,class:e,...l}){let t=["k-dayb",`k-dayb--${n}`,o&&"k-dayb--today",e].filter(Boolean).join(" ");return a("span",{class:t,"aria-hidden":"true",...l,children:["D",d??s]})}export{i as a};

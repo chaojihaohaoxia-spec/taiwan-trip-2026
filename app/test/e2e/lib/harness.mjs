@@ -70,6 +70,7 @@ function callerName() {
  * @param {object} [o.server]                  复用已有的服务器（startStaticServer 的返回值）
  * @param {object} [o.browser]                 复用已有的浏览器
  * @param {boolean} [o.waitForApp=true]
+ * @param {Function|string} [o.init]              页面脚本运行前先执行（page.evaluateOnNewDocument），例如换掉浏览器的语音识别
  * @param {boolean} [o.intercept=true]          拦截并阻断外网请求；false = 只记录不阻断
  *                                            （测 Service Worker 用 clients.navigate() 刷新页面时要关掉，否则导航会卡住）
  */
@@ -176,6 +177,7 @@ export async function openApp(o = {}) {
     },
   };
 
+  if (o.init) await page.evaluateOnNewDocument(o.init);
   await page.goto(url, { waitUntil: 'load' });
   if (waitForApp) await app.ready();
   return app;

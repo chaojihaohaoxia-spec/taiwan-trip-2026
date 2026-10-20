@@ -1,0 +1,156 @@
+/* =====================================================================
+   pages/day/day-visual.css：每天页页头的大号日期 + 路线速写、照片条、一句日记（DayVisual.jsx）。
+   杂志的做法：只是把已有的信息换个字号和位置，不加新颜色；今天的日期用强调色。
+   ===================================================================== */
+
+/* ---------- 大号日期 + 路线速写 ---------- */
+.day-mast {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 72px;
+}
+
+.day-mast__date {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.day-mast__num {
+  flex: none;
+  color: var(--color-text);
+  font-size: var(--text-figure-hero);
+  line-height: 0.74;
+  /* Instrument Serif 的数字下沿和右边小字的基线对齐 */
+  margin-bottom: 2px;
+}
+
+.day-mast[data-today] .day-mast__num {
+  color: var(--color-accent-text);
+}
+
+.day-mast__side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 2px;
+  color: var(--color-text-2);
+  font: var(--type-label);
+  font-size: var(--text-footnote);
+  white-space: nowrap;
+}
+
+.day-mast__side > span:first-child {
+  color: var(--color-text);
+}
+
+.day-mast__rel {
+  margin-left: 6px;
+  color: var(--color-accent-text);
+  font-weight: var(--weight-semibold);
+}
+
+.day-mast + .day-head__title {
+  margin-top: 14px;
+}
+
+/* ---------- 那天的照片：三张等高方图，2px 缝，不加圆角阴影 ---------- */
+.day-photos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  margin-top: var(--space-4);
+}
+
+.day-photos__item {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  transition: var(--press-transition);
+}
+
+/* 按张数排：一张整宽 3:2；两张对半 4:3；三张三等分方图（不留右边一块空） */
+.day-photos[data-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.day-photos[data-count="1"] .day-photos__item {
+  aspect-ratio: 3 / 2;
+}
+
+.day-photos[data-count="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.day-photos[data-count="2"] .day-photos__item {
+  aspect-ratio: 4 / 3;
+}
+
+.day-photos__img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: var(--color-fill);
+}
+
+.day-photos__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.day-photos__img[data-loaded] img {
+  opacity: 1;
+}
+
+.day-photos__more {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--color-scrim);
+  color: var(--color-text-inverse);
+  font-size: var(--text-title-3);
+}
+
+/* ---------- 一句日记 ---------- */
+.day-quote {
+  margin: var(--space-6) 0 var(--space-2);
+  padding: 0 var(--space-6);
+  text-align: center;
+}
+
+.day-quote::before,
+.day-quote::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 1px;
+  margin: 0 auto;
+  background: var(--color-border-strong);
+}
+
+.day-quote__text {
+  margin: var(--space-4) 0 var(--space-2);
+  color: var(--color-text);
+  font: var(--type-title-3);
+  letter-spacing: var(--tracking-title);
+  text-wrap: balance;
+}
+
+.day-quote__who {
+  display: block;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-2);
+  font-size: var(--text-footnote);
+}

@@ -1,15 +1,41 @@
-# sheets/item/ —— 弹层「item」：加条目 / 编辑条目（SPEC §9.2，每天页负责）
+# sheets/item/ —— 弹层「item」：加一项 / 改一项（SPEC §9.2，每天页负责）
 
 ```js
-openItemSheet({ date, after, parent, variant, kind })   // 加条目：预填哪天、插在哪一条后面、挂在哪个主方案下、方案、种类
-openItemSheet(item.id)                                  // 编辑
+openItemSheet({ date, after, parent, variant, kind })   // 加一项：预填哪天、插在哪一条后面、挂在哪个主方案下、方案、种类（都可以不给）
+openItemSheet(item.id)                                  // 改一项
 ```
+
+10-19 改版（富国岛回来的反馈「加条目不方便」；对齐小程序 1.4.3 的「加一项」`components/item-edit`）：目标是 ＋ → 打字 → 回车，两下加好一条刚做完的事。
 
 | 文件 | 内容 |
 |---|---|
-| `ItemSheet.jsx` | `<Sheet sheetId="item">`（`['content', 'large']`，底部 `SubmitButton`，`confirmClose` = 表单有改动）。表单：标题、类型（可横滑的种类胶囊）、时间（开始 / 结束用系统时间选择器；模糊时间 + 快捷词）、地点（搜这趟行程的地点，越南语不带声调也能搜；或新建一个只有名字的地点，保存时一起写进 `places`）、说明（自动长高）、方案（主 / 备选 / 雨天；备选可挂到那一天的某条主方案下）、哪天（含备选池）。只读成员：禁用并说明。编辑时底部有「删除这条（可以撤销）」：软删除，外壳弹「已删除 · 撤销」 |
-| `form-model.js` | **纯逻辑**（`test/unit/page-day.test.js`）：`initialForm`、`validateForm`、`toRow`、`formPatch`（只提交改了的字段）、`resolveSortKey`（新建按钟点插进那一天 / 插在某条后面 / 排到最后；编辑只在换天或钟点变了且位置不对时重排；算法在 `pages/day/model.js`）、`dayOptions` / `parentOptions`、`filterPlaces`、`sameForm` |
+| `ItemSheet.jsx` | `<Sheet sheetId="item">`（`['content', 'large']`，停在内容高度；底部受控的 `SubmitButton`，标题里按回车也走它；`confirmClose` = 表单有改动）。**上面一层**：「做什么 / 备注」同一张纸片（宋体标题，自动聚焦）→ 哪天（一排字签，今天写「今天」，最后是「备选池」）→ 几点（自己写的「21:40」，上面盖透明的系统时间框，点一下就是 iPhone 的滚轮；空着写「不定」；「到」结束、× 清掉）→ 在哪（空着写「不写」；展开搜这趟的地点，越南语不带声调也行；空着时这一天用到的、当晚住的排前面；没有就「就写「x」」新建只有名字的地点）→ 做完了（加的时候）/ 状态 计划中 · 做完了 · 跳过了（改的时候；改回计划中清掉实际时间和实际情况）。**更多设置**（默认收起，收起时写一行摘要；网址带了方案 / 挂在谁下 / 种类时展开）：类型、模糊时间、方案（主 / 备选 / 雨天，备选可挂到某条主方案下）。只读成员：禁用并说明。改的时候底部「删除这一项（可以撤销）」：软删除，外壳弹「已删除 · 撤销」 |
+| `form-model.js` | **纯逻辑**（`test/unit/page-day.test.js`）：`initialForm`（含默认值）、`defaultDayId`、`autoDone`、`nowAnchor`、`kindForPlace`（`ITEM_KIND_OF_PLACE`，和小程序同表）、`needsPlace`、`moreSummary`、`dayChips`、`dayPlaceIds`、`validateForm`、`toRow`、`formPatch`（只提交改了的字段）、`resolveSortKey`（新建按钟点插 / 插在某条后面 / 排到最前 / 排到最后；编辑只在换天或钟点变了且位置不对时重排；算法在 `pages/day/model.js`）、`dayOptions` / `parentOptions`、`filterPlaces`、`sameForm` |
+| `saved.js` | `lastSavedItem`：刚保存的是哪一条（每天页让它在面板收回后淡入、亮一下） |
 | `item.css` | 样式（pages 层，按需加载），类名 `.item-*` |
 
-保存成功：面板收回；加到当前页面这一天 → `toast.success`；加到别的天 → Toast 带「去看看」（跳到那一天并 `?item=` 展开）；放进备选池 → 提示。
-失败：`SubmitButton` 摇头 + 中文原因（校验的提示，或数据层 `DataError` 的 message）。
+## 默认值（加一项；和小程序 `components/item-edit/form.js` 同一套规则）
+
+| | 规则 |
+|---|---|
+| 哪天 | 网址给的 / 当前页面那一天；都没有 → 行程里的今天；还没出发 → 第一天；已经回来 → 最后一天 |
+| 几点 | 今天 → 那一天当地的现在；别的天 → 空着。换了哪天跟着变，直到人自己改过钟点 |
+| 做完了 | 今天、主方案、几点不晚于「现在 + 5 分钟」→ 打开（记一件刚做完的事，比如取钱）；跟着哪天 / 几点变，直到人自己拨过 |
+| 排在哪 | 有钟点按钟点插；今天又没写钟点 → 插在「现在」那一条后面（进行中的那一条，或「现在」线前面那一条；线在最前面就排最前）；都没有 → 排到最后 |
+| 类型 | 选了行程里的地点按地点给（`ITEM_KIND_OF_PLACE`），其余「其他」；人在更多设置里选过就不改。改的时候原来是「其他」也跟着地点 |
+
+数据写法和以前一样：`store.insert('items', row)`（`status` 直接写 `done`）、`store.update('items', id, patch)`；新地点 `store.insert('places', { name, kind: 'other' })`。不需要新迁移。
+
+保存成功：面板收回；新的一条原地淡入、亮一下；提示条「已加「…」· 21:40」（加到别的天：「已加到 D3 05:50：「…」」），带「撤销」——撤销 = 把这一条软删除（不再弹「已删除 · 撤销」），顺手建的新地点没别人用就一起删掉。改的：「已保存「…」」。
+失败：按钮摇头 + 中文原因（校验的提示，或数据层 `DataError` 的 message）。
+
+## 入口
+
+- 每天页：时间轴最后一行「＋ 加一项」、「现在」线右端的 ＋、时间轴标题旁的「加一项」、空状态「加第一条」（都只给 `date`）。
+- ＋ 面板：进行中和「记一笔」并排放第一行，一下就到；出发前在第一行。
+- 概览「今天的安排都完成了」卡上的「加一条」、地点页空状态。
+
+## 测试
+
+- 单元：`test/unit/page-day.test.js`（「加一项：…」「改一项：…」几条）。
+- e2e：`test/e2e/page-additem.e2e.mjs`（＋ 面板并排 → 默认值 → 回车加进去 → 插在「现在」、已完成、高亮 → 撤销；「现在」线的 ＋；末尾「＋ 加一项」、换到明天；地点排序、类型跟着地点；改一项：已完成的改时间 / 状态 / 备注；出发前；深色、375×667），`page-day.e2e.mjs`（加、改、删、备选、备选池、校验）。
