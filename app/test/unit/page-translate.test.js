@@ -14,7 +14,7 @@ import {
 import { createPhraseStore, RECENT_KEEP, STAR_KEEP } from '../../src/lib/translate/store.js';
 import { createTranslateClient, createLimiter, codeOfResponse, MSG, WARM_GAP, LIMITS } from '../../src/lib/translate/client.js';
 import { createDemoFetch, demoTranslate } from '../../src/lib/translate/demo.js';
-import { createTranslateController, viewOf, staleOf, TIMING, L } from '../../src/pages/translate/controller.js';
+import { createTranslateController, viewOf, staleOf, clearMsgOf, TABS, TIMING, L } from '../../src/pages/translate/controller.js';
 import { rowsOf, tail, CL } from '../../src/sheets/converse/model.js';
 import { canListen, listen, resetListen } from '../../src/lib/translate/listen.js';
 import { translationCard, isTranslationArg } from '../../src/sheets/driver/translation.js';
@@ -231,6 +231,24 @@ test('翻过的同一句：收藏 → 最近翻过 → 这次打开记着的', (
   s.star(OUT('你好', 'star'));
   assert.equal(s.peek('你好').vi, 'star');
   assert.equal(s.peek(''), null);
+});
+
+test('清空最近翻过：全删、通知页面重画、返回删了几条；收藏不动；本来就空不重画', () => {
+  const st = memStorage();
+  const s = createPhraseStore({ storage: st });
+  s.save('不要香菜', OUT('不要香菜'));
+  s.save('这个多少钱？', OUT('这个多少钱？'));
+  s.star(OUT('不要香菜'));
+  const v0 = s.version.value;
+  assert.equal(s.clearRecent(), 2);
+  assert.deepEqual(s.list(), []);
+  assert.equal(st._m.has('translate:recent'), false, '键也删掉');
+  assert.ok(s.version.value > v0);
+  assert.equal(s.stars().length, 1, '收藏不动');
+  assert.equal(s.peek('不要香菜').vi, 'VI(不要香菜)', '收藏的照样直接拿出来');
+  const v1 = s.version.value;
+  assert.equal(s.clearRecent(), 0);
+  assert.equal(s.version.value, v1);
 });
 
 test('称呼记在本机；不认识的当「不称呼」；坏掉的存储不报错', () => {
@@ -668,6 +686,91 @@ test('收藏、给对方看之前记一条（拿到 id）；粘贴马上翻；�
   assert.equal(ctl.paste('Dạ, chờ em một chút nha.'), true);
   assert.equal(client.calls.at(-1).input, 'Dạ, chờ em một chút nha.');
   assert.equal(client.calls.at(-1).opts.auto, false);
+});
+
+test('分栏：一开始停在「翻译」；去「记录」先把边打边翻的结果记下来；点一条回到「翻译」显示它；离开再进来回到「翻译」', async () => {
+  const { ctl, client, timers, phrases, shown } = setup();
+  assert.deepEqual(TABS, ['tr', 'rec']);
+  assert.equal(ctl.state.value.tab, 'tr');
+  ctl.input('不要香菜');
+  await timers.advance(TIMING.autoMid);
+  client.calls[0].resolve(OUT('不要香菜'));
+  await timers.flush();
+  assert.equal(phrases.list().length, 0, '边打边翻的还没记');
+  ctl.setTab('rec');
+  assert.equal(ctl.state.value.tab, 'rec');
+  assert.equal(phrases.list().length, 1, '去「记录」之前记下来（和收键盘一样），记录里看得到刚才那句');
+  assert.ok(ctl.state.value.res.id, '结果卡拿到了 id');
+  // 不认识的分栏当「翻译」；同一栏再点不做事
+  ctl.setTab('nope');
+  assert.equal(ctl.state.value.tab, 'tr');
+  ctl.setTab('rec');
+  const before = ctl.state.value;
+  ctl.setTab('rec');
+  assert.equal(ctl.state.value, before);
+  // 在「记录」点一条：回到「翻译」，成了结果卡
+  const { row } = phrases.star(OUT('这个多少钱？'));
+  ctl.openRow(row);
+  assert.equal(ctl.state.value.tab, 'tr');
+  assert.equal(ctl.state.value.text, '这个多少钱？');
+  assert.equal(ctl.state.value.res.vi, 'VI(这个多少钱？)');
+  assert.equal(shown.at(-1).o.opened, true);
+  // 离开这一页：下次进来停在「翻译」
+  ctl.setTab('rec');
+  ctl.leave();
+  assert.equal(ctl.state.value.tab, 'tr');
+});
+
+test('「记录」的清空：只删最近翻过、收藏不动；正在显示的那条被删了，「翻译」里这一句也收起；收藏着的留着', async () => {
+  const { ctl, client, timers, phrases } = setup();
+  ctl.input('不要香菜');
+  ctl.go();
+  client.calls[0].resolve(OUT('不要香菜'));
+  await timers.flush();
+  ctl.input('');
+  ctl.input('这个多少钱？');
+  ctl.go();
+  client.calls[1].resolve(OUT('这个多少钱？'));
+  await timers.flush();
+  phrases.star(OUT('谢谢'));
+  assert.equal(phrases.list().length, 2);
+  ctl.setTab('rec');
+  assert.equal(ctl.clearRecent(), 2);
+  assert.deepEqual(phrases.list(), []);
+  assert.equal(phrases.stars().length, 1, '收藏不动');
+  const st = ctl.state.value;
+  assert.equal(st.res, null, '正在显示的那条删了：结果卡收起');
+  assert.equal(st.text, '', '输入框里就是这一句：也清掉');
+  assert.equal(st.tab, 'rec');
+  // 再翻一句也收藏了：清空以后结果卡还在（换成收藏那条的 id，「给对方看」照样打得开）
+  ctl.input('谢谢');
+  ctl.go();
+  assert.equal(client.calls.length, 2, '收藏过的直接拿出来');
+  ctl.input('请问厕所在哪里？');
+  ctl.go();
+  client.calls[2].resolve(OUT('请问厕所在哪里？'));
+  await timers.flush();
+  const { row: star } = phrases.star(ctl.state.value.res);
+  ctl.clearRecent();
+  assert.equal(ctl.state.value.res.id, star.id);
+  assert.equal(ctl.state.value.text, '请问厕所在哪里？');
+  assert.equal(phrases.get(ctl.state.value.res.id).input, '请问厕所在哪里？');
+  // 确认框里那句话
+  assert.equal(clearMsgOf(3), '这 3 句会从这台手机上删掉，收藏的不动。');
+});
+
+test('删掉单条：正在显示的那条，输入框里没改过就一起清掉；改过字的留着', async () => {
+  const { ctl, client, timers, phrases } = setup();
+  ctl.input('不要香菜');
+  ctl.go();
+  client.calls[0].resolve(OUT('不要香菜'));
+  await timers.flush();
+  ctl.input('不要香菜，也不要葱');
+  const id = ctl.state.value.res.id;
+  ctl.remove(id);
+  assert.equal(ctl.state.value.res, null);
+  assert.equal(ctl.state.value.text, '不要香菜，也不要葱', '改过的字留着');
+  assert.equal(phrases.list().length, 0);
 });
 
 test('「翻译」没写字：提示先写一句；行程 id 跟着请求走', async () => {

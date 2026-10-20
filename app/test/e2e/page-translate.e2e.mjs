@@ -2,6 +2,8 @@
 //   入口：「更多」菜单第一行「翻译」（椰影岛有、三城没有）；
 //   页面：空的时候一句话；输入区浮在底栏上面；边打边翻（停一下自动出结果，越南语最大、意思是、英语）；「翻译」翻好变淡、记进最近翻过；
 //     收藏（星）、复制、「给对方看」从按钮长出全屏大字；⇄ 对调（回译现成）；加称呼；最近翻过点开；刷新以后收藏、最近翻过还在；
+//   分栏「翻译 · 记录」（拿手机给对方看时不露翻过的句子）：默认在「翻译」、「翻译」里没有任何列表；「记录」里有收藏和最近翻过、
+//     输入区收起；点一条回到「翻译」显示它；「清空」先问、只清最近翻过；离开再回来、回到后台都回到「翻译」；tablist 语义、方向键能切；
 //   对话：第一次讲怎么用、我说 → 对方那半屏（转 180°）出越南语、对方说 → 胶囊照着出字；退出；
 //   真接口的请求格式（?trhttp=1，拦下请求返回假的）：text/plain、token 和行程放 body、进页面先预热；bad_token 换 token 重试；
 //     连不上（接口没上线）说「暂时连不上」、收藏照样能看；
@@ -106,6 +108,47 @@ async function waitResult(page, vi) {
   await page.waitForFunction((v) => document.querySelector('[data-testid="tr-vi"], [data-testid="tr-zh"]')?.textContent.includes(v), { timeout: 6000 }, vi);
 }
 
+/** 换到某一栏（'tr' 翻译 / 'rec' 记录）：点标签，等那一栏的面板出来、动画停下 */
+async function toTab(app, id) {
+  const { page } = app;
+  await page.$eval('#tr-tab-' + id, (el) => el.scrollIntoView({ block: 'nearest' }));
+  await page.click('#tr-tab-' + id);
+  await page.waitForSelector(id === 'rec' ? T('tr-records') : T('tr-feed'), { timeout: 3000 });
+  await app.idle();
+}
+
+/** 现在停在哪一栏（读 aria-selected） */
+const tabNow = (page) => page.$eval('[role="tablist"] [aria-selected="true"]', (n) => n.id.replace('tr-tab-', ''));
+
+/** 页面上一行收藏 / 常用语 / 最近翻过都没有（不是藏起来，是根本不在页面里） */
+async function assertNoRows(page, why) {
+  const n = await page.evaluate(() => document.querySelectorAll('[data-testid="tr-row"], [data-testid="tr-tip-row"], [data-testid="tr-saved"], [data-testid="tr-recent"], [data-testid="tr-tips"], [data-testid="tr-records"]').length);
+  assert.equal(n, 0, why);
+}
+
+/** 本机存一条收藏、三条最近翻过（假的句子，不是真实行程） */
+const SEED = () => {
+  localStorage.setItem('rs7885:translate:star', JSON.stringify([
+    { id: 's1', dir: 'out', input: '我对花生过敏，菜里不能有花生和花生油。', vi: 'Tôi bị dị ứng đậu phộng, món ăn không được có đậu phộng và dầu đậu phộng nha.', en: "I'm allergic to peanuts.", zh: '', back: '我对花生过敏', at: 1 },
+  ]));
+  localStorage.setItem('rs7885:translate:recent', JSON.stringify([
+    { id: 't3', dir: 'out', input: '请问你们几点关门？', vi: 'Cho tôi hỏi tiệm mấy giờ đóng cửa ạ?', en: 'What time do you close?', zh: '', back: '请问店几点关门？', at: 3 },
+    { id: 't2', dir: 'out', input: '不要香菜，我们不吃海鲜。', vi: 'Không cho ngò nha, tụi tôi không ăn hải sản.', en: "No cilantro, please. We don't eat seafood.", zh: '', back: '别放香菜哦，我们不吃海鲜。', at: 2 },
+    { id: 't1', dir: 'in', input: 'Dạ, chờ em một chút nha.', vi: '', en: '', zh: '好的，稍等我一下。', back: '', at: 1 },
+  ]));
+};
+const SEEDED = ['我对花生过敏', '请问你们几点关门', '不要香菜', 'chờ em một chút'];
+
+/** 打开翻译页，本机先存好收藏和最近翻过 */
+async function openSeeded(o = {}) {
+  const app = await openTranslate(o);
+  await app.page.evaluate(SEED);
+  await app.page.reload({ waitUntil: 'load' });
+  await app.page.waitForSelector(T('tr-dock'), { timeout: 10000 });
+  await app.idle();
+  return app;
+}
+
 /** 只检查某一块里可点的东西 */
 async function assertTapTargetsIn(page, root) {
   const small = await page.evaluate((sel) => {
@@ -182,7 +225,11 @@ test('翻译页：空的时候一句话；输入区浮在底栏上面；边打�
   const app = await openTranslate();
   const { page } = app;
   try {
-    await page.waitForSelector(T('tr-empty'));
+    await page.waitForSelector(T('tr-tip'));
+    // 空的时候只有一句淡淡的话（不提「翻过的句子」）
+    const tip = await page.$eval(T('tr-tip'), (n) => n.textContent);
+    assert.match(tip, /中文或越南语/);
+    assert.doesNotMatch(tip, /翻过|记录|留在/);
     // 输入区在底栏上面，不重叠
     const geo = await page.evaluate(() => {
       const d = document.querySelector('[data-testid="tr-dock"]').getBoundingClientRect();
@@ -199,7 +246,8 @@ test('翻译页：空的时候一句话；输入区浮在底栏上面；边打�
     await page.waitForSelector(T('tr-result'), { timeout: 6000 });
     await waitResult(page, 'Không cho ngò nha');
     // 边打边翻的结果先不进最近翻过；「翻译」还能点
-    assert.equal(await page.$(T('tr-recent')), null);
+    assert.equal(await page.evaluate(() => localStorage.getItem('rs7885:translate:recent')), null);
+    assert.equal(await page.$(T('tr-tip')), null, '有结果了：提示收起');
     assert.equal(await page.$eval(T('tr-go'), (n) => n.hasAttribute('data-off')), false);
     const sizes = await page.evaluate(() => ({
       vi: parseFloat(getComputedStyle(document.querySelector('[data-testid="tr-vi"]')).fontSize),
@@ -221,13 +269,17 @@ test('翻译页：空的时候一句话；输入区浮在底栏上面；边打�
     await page.click(T('tr-go'));
     await app.idle();
     assert.equal(await page.$eval(T('tr-go'), (n) => n.hasAttribute('data-off')), true, '翻好了：「翻译」变淡');
-    // 再写一句：上一句进了最近翻过
+    // 再写一句：上一句进了最近翻过（在「记录」里看；「翻译」里只有这一张结果卡）
     await page.click(T('tr-clear'));
     await typeIn(page, '请问你们几点关门？');
     await waitResult(page, 'mấy giờ đóng cửa');
     await page.$eval(T('tr-input'), (n) => n.blur());
+    await app.idle();
+    await assertNoRows(page, '「翻译」里不该有最近翻过');
+    await toTab(app, 'rec');
     await page.waitForSelector(T('tr-recent'));
     const recent = await page.$$eval(`${T('tr-recent')} ${T('tr-row')}`, (n) => n.map((x) => x.textContent));
+    assert.ok(recent[0].includes('几点关门'), `新的在上面：${recent.join(' | ')}`);
     assert.ok(recent.some((x) => x.includes('不要香菜')), recent.join(' | '));
     await shot(app, '04-最近翻过');
     app.assertClean();
@@ -244,10 +296,10 @@ test('收藏、复制、给对方看（从按钮长出全屏大字）、⇄ 对�
     await waitResult(page, 'Mắc quá');
     await page.click(T('tr-go'));
     await app.idle();
-    // 收藏
+    // 收藏（收藏列表在「记录」里，「翻译」里看不到）
     await tap(page, T('tr-star'));
-    await page.waitForSelector(T('tr-saved'));
-    assert.equal(await page.$eval(T('tr-star'), (n) => n.getAttribute('aria-pressed')), 'true');
+    await page.waitForSelector(`${T('tr-star')}[aria-pressed="true"]`);
+    await assertNoRows(page, '收藏以后「翻译」里也不出现收藏列表');
     // 复制
     const ctx = page.browserContext();
     await ctx.overridePermissions(server.origin, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']).catch(() => {});
@@ -269,6 +321,9 @@ test('收藏、复制、给对方看（从按钮长出全屏大字）、⇄ 对�
     assert.match(card.secondary, /too expensive/);
     assert.match(card.note, /太贵了/);
     assert.match(card.hash, /sheet=driver:tr\./);
+    // 给对方看的全屏里只有这一句：没有收藏、最近翻过
+    await assertNoRows(page, '「给对方看」时页面上不该有记录');
+    assert.doesNotMatch(await page.$eval(T('driver-card'), (n) => n.textContent), /最近翻过|收藏/);
     await shot(app, '06-给对方看');
     await page.click(T('driver-close'));
     await page.waitForFunction(() => !document.querySelector('[data-testid="driver-card"]'), { timeout: 5000 });
@@ -296,14 +351,18 @@ test('收藏、复制、给对方看（从按钮长出全屏大字）、⇄ 对�
     await page.$eval(T('tr-input'), (n) => n.blur());
     await shot(app, '08-加称呼');
 
-    // 刷新：收藏、最近翻过、称呼还在（存在这台手机里）
+    // 刷新：收藏、最近翻过、称呼还在（存在这台手机里）；刷新以后停在「翻译」
     await page.reload({ waitUntil: 'load' });
-    await page.waitForSelector(T('tr-saved'), { timeout: 10000 });
-    await page.waitForSelector(T('tr-recent'));
+    await page.waitForSelector(T('tr-dock'), { timeout: 10000 });
+    assert.equal(await tabNow(page), 'tr');
     assert.equal(await page.$eval(T('tr-honor'), (n) => n.value), 'ge');
-    // 点开一条收藏：成了下面的结果卡，可以给对方看
+    await toTab(app, 'rec');
+    await page.waitForSelector(T('tr-saved'));
+    await page.waitForSelector(T('tr-recent'));
+    // 点开一条收藏：回到「翻译」，成了下面的结果卡，可以给对方看
     await tap(page, `${T('tr-saved')} ${T('tr-row')}`);
     await waitResult(page, 'Mắc quá');
+    assert.equal(await tabNow(page), 'tr');
     assert.ok(await page.$(T('tr-show')));
     app.assertClean();
   } finally {
@@ -405,13 +464,20 @@ test('对话（直接听）：点「我说」「对方说」不弹键盘、直�
   }
 });
 
-test('空的时候列出这趟的常用语，点一行直接给对方看；贴士页「常用语」右边「去翻译」', async () => {
+test('「记录」里没收藏时列出这趟的常用语，点一行直接给对方看；贴士页「常用语」右边「去翻译」', async () => {
   const app = await openTranslate();
   const { page } = app;
   try {
+    await assertNoRows(page, '「翻译」里不列常用语');
+    await toTab(app, 'rec');
     await page.waitForSelector(T('tr-tips'));
     const rows = await page.$$eval(`${T('tr-tips')} ${T('tr-tip-row')}`, (n) => n.length);
     assert.ok(rows >= 1 && rows <= 4, `先露几条：${rows}`);
+    // 还没翻过：没有「最近翻过」和「清空」，最下面一句淡淡的话
+    assert.equal(await page.$(T('tr-recent')), null);
+    assert.equal(await page.$(T('tr-clear-all')), null);
+    assert.match(await page.$eval(T('tr-rec-empty'), (n) => n.textContent), /翻过的句子/);
+    await shot(app, '20-记录-空');
     await tap(page, `${T('tr-tips')} ${T('tr-tip-row')}`);
     await page.waitForSelector(T('driver-card'));
     await app.idle();
@@ -430,7 +496,7 @@ test('空的时候列出这趟的常用语，点一行直接给对方看；贴�
   }
 });
 
-test('小屏、打字时能看见的地方不够：结果卡收紧，「给对方看」和越南语一直看得见；「最近翻过」的数字对得上', async () => {
+test('小屏、打字时能看见的地方不够：结果卡收紧，「给对方看」和越南语一直看得见（不被分栏挡住）；「最近翻过」的数字对得上', async () => {
   const app = await openTranslate({ device: 'small' });
   const { page } = app;
   try {
@@ -452,6 +518,8 @@ test('小屏、打字时能看见的地方不够：结果卡收紧，「给对�
     assert.ok(g.compact, '收紧了');
     assert.ok(!g.enShown, '英语先收起');
     assert.ok(g.showTop > 60 && g.showBottom <= g.dockTop, `「给对方看」被挡住：${JSON.stringify(g)}`);
+    const tabsBottom = await page.$eval(T('tr-tabs'), (n) => n.getBoundingClientRect().bottom);
+    assert.ok(g.showTop >= tabsBottom - 1, `「给对方看」钻到分栏下面了：${g.showTop} < ${tabsBottom}`);
     await shot(app, '14b-小屏-打字时');
     // 收起键盘：完整的卡
     await page.$eval(T('tr-input'), (n) => n.blur());
@@ -459,18 +527,22 @@ test('小屏、打字时能看见的地方不够：结果卡收紧，「给对�
     assert.equal(await page.$eval(T('tr-result'), (n) => n.hasAttribute('data-compact')), false);
     // 底部那行的「复制」写清楚复制什么
     assert.match(await page.$eval(T('tr-copy'), (n) => n.textContent), /复制越南语/);
-    // 再翻一句：上一句进了最近翻过，计数不算正在显示的那条
+    // 再翻一句：两句都进了最近翻过（「记录」里列全，计数对得上）
     await page.click(T('tr-go'));
     await page.click(T('tr-clear'));
     await typeIn(page, '请问你们几点关门？');
     await waitResult(page, 'mấy giờ đóng cửa');
     await page.$eval(T('tr-input'), (n) => n.blur());
+    await toTab(app, 'rec');
     await page.waitForSelector(T('tr-recent'));
     const c = await page.evaluate(() => ({
       count: document.querySelector('[data-testid="tr-recent"]').closest('section').querySelector('.k-sec__count')?.textContent.trim(),
       rows: document.querySelectorAll('[data-testid="tr-recent"] [data-testid="tr-row"]').length,
     }));
     assert.equal(String(c.rows), c.count, JSON.stringify(c));
+    assert.equal(c.rows, 2, JSON.stringify(c));
+    await assertNoHorizontalOverflow(page);
+    await assertTapTargetsIn(page, '.tr-page');
     app.assertClean();
   } finally {
     await app.close();
@@ -534,8 +606,10 @@ test('真接口的请求格式（拦下来返回假的）：进页面先预热�
     assert.match(msg, /暂时连不上|没连上网/);
     await page.$eval(T('tr-input'), (n) => n.blur());
     await shot(app, '13-接口连不上');
+    await toTab(app, 'rec');
     await tap(page, `${T('tr-saved')} ${T('tr-row')}`);
     await waitResult(page, 'Xin chào (mock)');
+    assert.equal(await tabNow(page), 'tr');
     const errs = app.errors.filter((e) => !/translate-web|Failed to load resource|ERR_CONNECTION_REFUSED/.test(e));
     assert.deepEqual(errs, []);
   } finally {
@@ -543,22 +617,235 @@ test('真接口的请求格式（拦下来返回假的）：进页面先预热�
   }
 });
 
-test('375 小屏 / 桌面 / 深色：不横向滚动，截图', async () => {
+test('分栏：默认在「翻译」，「翻译」里一行记录都没有（句子不在页面上）；tablist 语义、方向键能切；「记录」里输入区收起', async () => {
+  const app = await openSeeded();
+  const { page } = app;
+  try {
+    const a11y = await page.evaluate(() => {
+      const list = document.querySelector('[role="tablist"]');
+      const p = document.querySelector('[role="tabpanel"]');
+      return {
+        label: list.getAttribute('aria-label'),
+        tabs: [...list.querySelectorAll('[role="tab"]')].map((t) => [t.textContent.trim(), t.getAttribute('aria-selected'), t.tabIndex, t.getAttribute('aria-controls')]),
+        panel: p && [p.id, p.getAttribute('aria-labelledby')],
+      };
+    });
+    assert.ok(a11y.label, '分栏有读屏用的名字');
+    assert.deepEqual(a11y.tabs, [['翻译', 'true', 0, 'tr-panel-tr'], ['记录', 'false', -1, 'tr-panel-rec']]);
+    assert.deepEqual(a11y.panel, ['tr-panel-tr', 'tr-tab-tr']);
+    // 本机有收藏、有最近翻过，「翻译」里也一个字都不露（拿手机给对方看时对方看不到）
+    await assertNoRows(page, '默认的「翻译」里不该有列表');
+    const text = await page.$eval(T('page-translate'), (n) => n.innerText);
+    for (const t of SEEDED) assert.ok(!text.includes(t), `「翻译」里露出了翻过的句子：${t}`);
+    await page.waitForSelector(T('tr-tip'));
+    // 分栏吸顶：在顶栏下面
+    const geo = await page.evaluate(() => ({
+      tabs: document.querySelector('[data-testid="tr-tabs"]').getBoundingClientRect().top,
+      pos: getComputedStyle(document.querySelector('.tr-tabbar')).position,
+    }));
+    assert.equal(geo.pos, 'sticky');
+    assert.ok(geo.tabs > 40 && geo.tabs < 160, `分栏在顶栏下面：${geo.tabs}`);
+    await assertTapTargetsIn(page, '.tr-tabbar');
+    await shot(app, '17-翻译-空');
+
+    // 键盘：→ 换到「记录」（焦点跟过去），← 回来
+    await page.focus('#tr-tab-tr');
+    await page.keyboard.press('ArrowRight');
+    await page.waitForSelector(T('tr-records'));
+    await app.idle();
+    assert.equal(await tabNow(page), 'rec');
+    assert.equal(await page.evaluate(() => document.activeElement?.id), 'tr-tab-rec');
+    assert.deepEqual(await page.$eval('[role="tabpanel"]', (p) => [p.id, p.getAttribute('aria-labelledby')]), ['tr-panel-rec', 'tr-tab-rec']);
+    // 输入区收起：看不见、点不到、读屏读不到
+    const dock = await page.$eval(T('tr-dock'), (n) => ({ inert: n.inert, vis: getComputedStyle(n).visibility, op: getComputedStyle(n).opacity }));
+    assert.deepEqual(dock, { inert: true, vis: 'hidden', op: '0' });
+    await page.keyboard.press('ArrowLeft');
+    await page.waitForSelector(T('tr-feed'));
+    await app.idle();
+    assert.equal(await tabNow(page), 'tr');
+    assert.equal(await page.$eval(T('tr-dock'), (n) => n.inert), false);
+    assert.equal(await page.$eval(T('tr-dock'), (n) => getComputedStyle(n).visibility), 'visible');
+    await assertNoRows(page, '回到「翻译」：列表收走');
+    app.assertClean();
+  } finally {
+    await app.close();
+  }
+});
+
+test('「记录」：收藏和最近翻过都在（新的在上）；点一条回到「翻译」显示它；「对话」全屏里也没有记录', async () => {
+  const app = await openSeeded();
+  const { page } = app;
+  try {
+    await toTab(app, 'rec');
+    const saved = await page.$$eval(`${T('tr-saved')} ${T('tr-row')}`, (n) => n.map((x) => x.textContent));
+    assert.equal(saved.length, 1);
+    assert.match(saved[0], /我对花生过敏/);
+    assert.equal(await page.$(T('tr-tips')), null, '有收藏就不列常用语');
+    const recent = await page.$$eval(`${T('tr-recent')} ${T('tr-row')}`, (n) => n.map((x) => x.textContent));
+    assert.equal(recent.length, 3);
+    assert.match(recent[0], /几点关门/, '新的在上面');
+    assert.match(recent[2], /chờ em/);
+    assert.ok(await page.$(T('tr-clear-all')));
+    await assertNoHorizontalOverflow(page);
+    await assertTapTargetsIn(page, '.tr-page');
+    await shot(app, '19-记录');
+
+    // 点一条：回到「翻译」，成了结果卡；列表收走；焦点落在「翻译」标签上
+    await tap(page, `${T('tr-recent')} ${T('tr-row')}`);
+    await waitResult(page, 'mấy giờ đóng cửa');
+    assert.equal(await tabNow(page), 'tr');
+    assert.equal(await page.$eval(T('tr-input'), (n) => n.value), '请问你们几点关门？');
+    await assertNoRows(page, '回到「翻译」不带列表');
+    await page.waitForFunction(() => document.activeElement?.id === 'tr-tab-tr', { timeout: 2000 });
+    const fits = await page.waitForFunction(() => {
+      const c = document.querySelector('[data-testid="tr-result"]').getBoundingClientRect();
+      return c.bottom <= document.querySelector('[data-testid="tr-dock"]').getBoundingClientRect().top
+        && c.top >= document.querySelector('[data-testid="tr-tabs"]').getBoundingClientRect().bottom;
+    }, { timeout: 3000 }).then(() => true, () => false);
+    assert.ok(fits, '结果卡在分栏和输入区之间');
+    await shot(app, '18-翻译-点开一条');
+
+    // 对话：全屏里没有收藏、最近翻过
+    await page.evaluate(() => localStorage.setItem('rs7885:translate:converse-intro', '1'));
+    await page.click(T('tr-talk'));
+    await page.waitForSelector(T('converse'));
+    await app.idle();
+    const cv = await page.$eval(T('converse'), (n) => n.innerText);
+    for (const t of ['我对花生过敏', '不要香菜', 'chờ em một chút']) assert.ok(!cv.includes(t), `对话里露出了记录：${t}`);
+    assert.equal((await page.$$(`${T('converse')} ${T('tr-row')}`)).length, 0);
+    await page.click(T('cv-close'));
+    await page.waitForFunction(() => !document.querySelector('[data-testid="converse"]'), { timeout: 5000 });
+    app.assertClean();
+  } finally {
+    await app.close();
+  }
+});
+
+test('「清空」：先问一句；取消什么都不动；确定只清最近翻过，收藏还在；「翻译」里正在显示的那句也收起', async () => {
+  const app = await openSeeded();
+  const { page } = app;
+  try {
+    // 先点开一条最近翻过（「翻译」里显示它），再回「记录」清空
+    await toTab(app, 'rec');
+    await tap(page, `${T('tr-recent')} ${T('tr-row')}`);
+    await waitResult(page, 'mấy giờ đóng cửa');
+    await toTab(app, 'rec');
+    await tap(page, T('tr-clear-all'));
+    await page.waitForSelector(T('dialog-confirm'), { visible: true, timeout: 5000 });
+    const ask = await page.$eval('[role="alertdialog"], [role="dialog"]', (el) => el.textContent);
+    assert.match(ask, /清空最近翻过/);
+    assert.match(ask, /3 句/);
+    assert.match(ask, /收藏的不动/);
+    await sleep(300);
+    await shot(app, '21-清空-先问');
+    // 取消：什么都不动
+    await page.click(T('dialog-cancel'));
+    await page.waitForFunction(() => !document.querySelector('[data-testid="dialog-cancel"]'), { timeout: 5000 });
+    await app.idle();
+    assert.equal((await page.$$(`${T('tr-recent')} ${T('tr-row')}`)).length, 3);
+    // 确定：最近翻过没了，收藏还在
+    await tap(page, T('tr-clear-all'));
+    await page.waitForSelector(T('dialog-confirm'), { visible: true, timeout: 5000 });
+    await page.click(T('dialog-confirm'));
+    await page.waitForFunction(() => !document.querySelector('[data-testid="tr-recent"]'), { timeout: 5000 });
+    await app.idle();
+    assert.equal((await page.$$(`${T('tr-saved')} ${T('tr-row')}`)).length, 1, '收藏不动');
+    assert.equal(await page.$(T('tr-clear-all')), null);
+    assert.ok(await page.$(T('tr-rec-empty')));
+    const kept = await page.evaluate(() => ({
+      recent: localStorage.getItem('rs7885:translate:recent'),
+      star: JSON.parse(localStorage.getItem('rs7885:translate:star') || '[]').length,
+    }));
+    assert.deepEqual(kept, { recent: null, star: 1 });
+    // 回到「翻译」：刚才显示的那句（已经删了）也收起
+    await toTab(app, 'tr');
+    assert.equal(await page.$eval(T('tr-input'), (n) => n.value), '');
+    assert.equal(await page.$(T('tr-result')), null);
+    await page.waitForSelector(T('tr-tip'));
+    // 刷新以后也还是空的
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForSelector(T('tr-dock'), { timeout: 10000 });
+    await toTab(app, 'rec');
+    assert.equal(await page.$(T('tr-recent')), null);
+    assert.equal((await page.$$(`${T('tr-saved')} ${T('tr-row')}`)).length, 1);
+    app.assertClean();
+  } finally {
+    await app.close();
+  }
+});
+
+test('每次进来都停在「翻译」：在「记录」离开再回来、回到后台、刷新，都回到「翻译」', async () => {
+  const app = await openSeeded();
+  const { page } = app;
+  try {
+    // 离开这一页再回来
+    await toTab(app, 'rec');
+    await app.go('#/t/demo-island');
+    await page.waitForFunction(() => !document.querySelector('[data-testid="page-translate"]'), { timeout: 8000 });
+    await app.go('#/t/demo-island/translate');
+    await page.waitForSelector(T('tr-dock'), { timeout: 8000 });
+    await app.idle();
+    assert.equal(await tabNow(page), 'tr');
+    await assertNoRows(page, '回来停在「翻译」，不带列表');
+    // 浏览器返回键回来也一样
+    await toTab(app, 'rec');
+    await app.go('#/t/demo-island/tips');
+    await page.waitForFunction(() => !document.querySelector('[data-testid="page-translate"]'), { timeout: 8000 });
+    await page.goBack();
+    await page.waitForSelector(T('tr-dock'), { timeout: 8000 });
+    await app.idle();
+    assert.equal(await tabNow(page), 'tr');
+    await assertNoRows(page, '返回键回来停在「翻译」');
+    // 切到后台（锁屏、换别的 app）再回来
+    await toTab(app, 'rec');
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+      document.dispatchEvent(new Event('visibilitychange'));
+      delete document.visibilityState;
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await page.waitForSelector(T('tr-feed'), { timeout: 3000 });
+    await app.idle();
+    assert.equal(await tabNow(page), 'tr');
+    await assertNoRows(page, '回到前台停在「翻译」');
+    // 刷新
+    await toTab(app, 'rec');
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForSelector(T('tr-dock'), { timeout: 10000 });
+    await app.idle();
+    assert.equal(await tabNow(page), 'tr');
+    await assertNoRows(page, '刷新以后停在「翻译」');
+    app.assertClean();
+  } finally {
+    await app.close();
+  }
+});
+
+test('减少动态效果：换栏照样能用，输入区只淡出、不位移', async () => {
+  const app = await openSeeded({ reducedMotion: true });
+  const { page } = app;
+  try {
+    await toTab(app, 'rec');
+    const away = await page.$eval(T('tr-dock'), (n) => ({ tr: getComputedStyle(n).translate, vis: getComputedStyle(n).visibility }));
+    assert.deepEqual(away, { tr: 'none', vis: 'hidden' });
+    assert.equal(await page.$eval(T('tr-records'), (n) => getComputedStyle(n).transform), 'none', '面板停稳了');
+    await toTab(app, 'tr');
+    assert.equal(await page.$eval(T('tr-dock'), (n) => getComputedStyle(n).visibility), 'visible');
+    app.assertClean();
+  } finally {
+    await app.close();
+  }
+});
+
+test('375 小屏 / 桌面 / 深色：两栏都不横向滚动，截图', async () => {
   for (const [o, name] of [
     [{ device: 'small' }, '14-小屏375'],
     [{ colorScheme: 'dark' }, '15-深色'],
     [{ device: 'desktop' }, '16-桌面'],
   ]) {
-    const app = await openTranslate(o);
+    const app = await openSeeded(o);
     const { page } = app;
     try {
-      await page.evaluate(() => {
-        localStorage.setItem('rs7885:translate:star', JSON.stringify([
-          { id: 's1', dir: 'out', input: '我对花生过敏，菜里不能有花生和花生油。', vi: 'Tôi bị dị ứng đậu phộng, món ăn không được có đậu phộng và dầu đậu phộng nha.', en: "I'm allergic to peanuts.", zh: '', back: '我对花生过敏', at: 1 },
-        ]));
-      });
-      await page.reload({ waitUntil: 'load' });
-      await page.waitForSelector(T('tr-saved'), { timeout: 10000 });
       await typeIn(page, '可以帮我们拍张照吗？把后面的海也拍进去。');
       await waitResult(page, 'Chụp giùm');
       await page.$eval(T('tr-input'), (n) => n.blur());
@@ -566,6 +853,11 @@ test('375 小屏 / 桌面 / 深色：不横向滚动，截图', async () => {
       await assertNoHorizontalOverflow(page);
       await assertTapTargetsIn(page, '.tr-page');
       await shot(app, name);
+      await toTab(app, 'rec');
+      await page.waitForSelector(T('tr-saved'));
+      await assertNoHorizontalOverflow(page);
+      await assertTapTargetsIn(page, '.tr-page');
+      await shot(app, `${name}-记录`);
       app.assertClean();
     } finally {
       await app.close();

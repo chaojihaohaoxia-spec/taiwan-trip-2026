@@ -2,7 +2,7 @@
 // pages/translate/controller.js：翻译页的状态和规则（和小程序 1.4.5 的 components/trip-translate 同一套；不碰 DOM，Node 里能测）。
 //
 //   const c = createTranslateController({ client, phrases, timers, onShown })
-//   c.state.value     { text, res, busy, manual, msg, msgKind, failed, done, dir, spin, honor, trip }
+//   c.state.value     { text, res, busy, manual, msg, msgKind, failed, done, dir, spin, honor, trip, tab }
 //   viewOf(c.state.value)  → 界面要的派生：stale（结果已经不是输入框里这一句）、old（顶上写「上一句：…」）、canShow……
 //
 // 规则（照小程序）：
@@ -14,6 +14,11 @@
 //   - 语言栏「中文 ⇄ 越南语」：⇄ 对调（有结果时译文挪进输入框；中文 → 越南语的回译现成就有，不用再翻；
 //     对调出来的那条再按一下直接还原）。写的语言和栏里不一样，就按写的翻、栏自己翻过来，每个方向提示一次。
 //   - 翻过的同一句（收藏、最近翻过、这次打开翻过的）直接拿出来，不连网（没网也能用）。
+//
+// 分栏「翻译 · 记录」（tab：'tr' | 'rec'；拿手机给对方看时，翻过的句子不该摆在同一屏上）：
+//   - 每次进来都停在「翻译」：离开这一页（leave）、回到后台都回到「翻译」，不记上次停在哪；
+//   - 切到「记录」先把边打边翻的结果记下来（和收键盘一样）；在「记录」点一条（openRow）= 回到「翻译」显示那一条；
+//   - 「清空」（clearRecent）只删最近翻过，收藏不动；正在显示的那条要是被删了，「翻译」里的这一句也一起收起（remove 同理）。
 // =====================================================================
 
 import { signal } from '@preact/signals';
@@ -24,11 +29,13 @@ export const L = Object.freeze({
   phIn: '贴越南语或英语，翻成中文',
   go: '翻译', busy: '翻译中', clear: '清空', copy: '复制', copyVi: '复制越南语', copied: '已复制',
   vi: '越南语', en: '英语', zh: '中文', back: '意思是', show: '给对方看', plusEn: '＋英语', speak: '读出来',
-  recent: '最近翻过', empty: '翻过的句子会留在这里', emptySub: '没网也能看，点一条就能再给对方看',
+  recent: '最近翻过', tabs: '翻译和记录', tabTr: '翻译', tabRec: '记录',
+  hint: '写中文或越南语都行，也能点键盘上的话筒说',
+  recEmpty: '翻过的句子会留在这里',
+  clearAll: '清空', clearAsk: '清空最近翻过？',
   saved: '收藏', savedAll: '全部', savedLess: '收起', tips: '这趟的常用语',
   again: '之前翻过', demo: '演示模式：只认得几句', prev: '上一句',
   del: '删掉这条', star: '收藏', unstar: '取消收藏', swap: '对调方向',
-  mic: '可以点键盘上的话筒说话',
   micIn: '对方说越南语：键盘切到越南语再点话筒',
   paste: '粘贴', pasteNone: '剪贴板是空的',
   talk: '对话',
@@ -68,7 +75,13 @@ export function viewOf(s) {
   };
 }
 
-const INITIAL = { text: '', res: null, busy: false, manual: false, msg: '', msgKind: '', failed: false, done: false, dir: 'out', spin: 0, honor: '', trip: null };
+/** 分栏：翻译 / 记录 */
+export const TABS = Object.freeze(['tr', 'rec']);
+
+/** 「清空」确认框的那句说明：n 是最近翻过有几条 */
+export const clearMsgOf = (n) => `这 ${n} 句会从这台手机上删掉，收藏的不动。`;
+
+const INITIAL = { text: '', res: null, busy: false, manual: false, msg: '', msgKind: '', failed: false, done: false, dir: 'out', spin: 0, honor: '', trip: null, tab: 'tr' };
 
 /**
  * @param {{
@@ -331,7 +344,7 @@ export function createTranslateController({ client, phrases, timers, isComposing
     return { on, dropped };
   }
 
-  /** 点开一条（收藏、最近翻过）：成了下面的结果卡 */
+  /** 点开一条（收藏、最近翻过）：回到「翻译」，成了下面的结果卡 */
   function openRow(row) {
     if (!row) return;
     commit();
@@ -340,16 +353,49 @@ export function createTranslateController({ client, phrases, timers, isComposing
     const dir = row.dir === 'in' ? 'in' : 'out';
     set({
       text: row.input, res: { ...row, again: false, from: null, picked: true }, failed: false, busy: false, manual: false, msg: '', msgKind: '',
-      done: true, dir, spin: dir !== s.dir ? s.spin + 1 : s.spin,
+      done: true, dir, spin: dir !== s.dir ? s.spin + 1 : s.spin, tab: 'tr',
     });
     onShown(get().res, { manual: false, opened: true });
+  }
+
+  /** 换分栏（'tr' 翻译 / 'rec' 记录）。去「记录」之前把边打边翻的结果记下来（和收键盘一样） */
+  function setTab(tab) {
+    const next = TABS.includes(tab) ? tab : 'tr';
+    if (get().tab === next) return;
+    if (next === 'rec') {
+      autoT = clear(autoT);
+      commit();
+    }
+    set({ tab: next });
+  }
+
+  /** 正在显示的那条从手机里删掉了：结果卡收起；输入框里就是这一句的话也清掉（改过字的留着） */
+  function forgetShown() {
+    const s = get();
+    commitT = clear(commitT);
+    pending = null;
+    const patch = { res: null, done: false, failed: false, msg: '', msgKind: '' };
+    if (!staleOf(s.text, s.res, s.honor)) patch.text = '';
+    set(patch);
   }
 
   function remove(id) {
     if (!id) return;
     phrases.remove(id);
     const r = get().res;
-    if (r && r.id === id) set({ res: null });
+    if (r && r.id === id) forgetShown();
+  }
+
+  /** 「清空」：最近翻过全删，收藏不动；返回删了几条 */
+  function clearRecent() {
+    const n = phrases.clearRecent();
+    const r = get().res;
+    if (r && r.id && !phrases.get(r.id)) {
+      const star = phrases.starred(r.input);
+      if (star) set({ res: { ...r, id: star.id } });
+      else forgetShown();
+    }
+    return n;
   }
 
   /** 复制 / 给对方看之前：边打边翻的结果先记下来；返回这条（带 id） */
@@ -383,14 +429,15 @@ export function createTranslateController({ client, phrases, timers, isComposing
     if (get().msg) set({ msg: '', msgKind: '' });
   }
 
-  /** 离开翻译页：看着写完了的就记；正在翻的不作废（翻好了回来结果就在） */
+  /** 离开翻译页：看着写完了的就记；正在翻的不作废（翻好了回来结果就在）；下次进来停在「翻译」 */
   function leave() {
     autoT = clear(autoT);
     if (pending && finished(pending.input)) commit();
+    if (get().tab !== 'tr') set({ tab: 'tr' });
   }
 
   return {
-    state, setTrip, input, blur, go, clear: clearText, swap, setHonor, toggleStar, toggleStarRow, openRow, remove, keep, paste,
+    state, setTrip, setTab, input, blur, go, clear: clearText, swap, setHonor, toggleStar, toggleStarRow, openRow, remove, clearRecent, keep, paste,
     dismissMsg, leave, commit,
     /** 测试用 */
     _pending: () => pending,

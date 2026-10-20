@@ -2,6 +2,12 @@
    pages/translate/translate.css：翻译页（.tr-*）。「杂志纸本」：内容直接排在纸上、细线分组；
    只有结果卡和下面的输入区是纸片（结果卡 = 纸片 + 细线框；输入区 = 浮层的纸 + 细线框 + 很浅的柔影，像底栏）。
    字：越南语 / 译文用系统字体 600（宋体子集没有越南语字母）；段标题宋体（kit/SectionHeader）。只用一种海色。
+
+   版面（手机 390）：
+     分栏「翻译 · 记录」（ui/Tabs，两栏平分；往下滚贴在顶栏下面，换成玻璃胶囊，和清单页 .lists__bar 一样）
+     「翻译」.tr-feed：结果卡（内容不够一屏时贴着下面排，紧挨输入区）；空的时候一句淡提示
+     「记录」.tr-rec：收藏 / 这趟的常用语、最近翻过（右边「清空」）；空的时候一句淡提示；输入区收起（[data-away]）
+     输入区 .tr-dock：浮在底栏上面
    ===================================================================== */
 
 .tr {
@@ -23,6 +29,57 @@
   padding-bottom: calc(var(--tr-dock-h) + 24px);
 }
 
+/* 「记录」：输入区收起了，不用给它留地方（外壳已经给底栏留了） */
+.tr-page[data-tab='rec'] {
+  padding-bottom: 0;
+}
+
+/* ---------- 分栏：贴顶时变成玻璃胶囊（和清单页同一个样子） ---------- */
+.tr-sentinel {
+  display: block;
+  height: 1px;
+  margin-bottom: -1px;
+}
+
+.tr-tabbar {
+  /* 同步状态条让出的高度（JS 按外壳的 syncSpace 写） */
+  --tr-sync: 0px;
+  position: sticky;
+  top: calc(var(--safe-top) + var(--topbar-h) + var(--space-1) + var(--tr-sync));
+  z-index: var(--z-sticky);
+  /* 左右各伸出 4px：胶囊的圆角有地方放，标签下面那根细线和下面的列表对齐 */
+  margin: 0 calc(-1 * var(--space-1)) var(--space-4);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-pill);
+  transition: background-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+
+.tr-tabbar[data-stuck] {
+  background: var(--material-glass-strong);
+  box-shadow: 0 1px 0 var(--color-separator);
+}
+
+.tr-tabbar[data-stuck] .tabs__list {
+  border-bottom-color: transparent;
+}
+
+/* 两栏平分一行（只有两个，不用横滑，也不要两端的渐隐） */
+.tr-tabs {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.tr-tabs .tabs__list {
+  gap: 0;
+  padding: 0;
+}
+
+.tr-tabs .tabs__tab {
+  flex: 1 1 0;
+  justify-content: center;
+  padding: 0 var(--space-2);
+}
+
 .tr-feed {
   display: flex;
   flex-direction: column;
@@ -32,7 +89,7 @@
 }
 
 .tr-sec + .tr-sec {
-  margin-top: var(--space-2);
+  margin-top: var(--space-7);
 }
 
 /* ---------- 收藏、最近翻过：一列细线分隔的行 ---------- */
@@ -114,22 +171,26 @@
   color: var(--color-accent-text);
 }
 
-/* ---------- 空的时候：一句话，安静 ---------- */
-.tr-empty {
-  padding: var(--space-6) 0 var(--space-2);
+/* ---------- 「记录」：一列一列往下排，正常滚动 ---------- */
+.tr-rec {
+  padding-top: var(--space-2);
+}
+
+/* 「清空」：灰字（不抢眼；点了先问一句） */
+.tr-clearall {
+  color: var(--color-text-2);
+}
+
+/* 空的时候：一句淡淡的话 */
+.tr-rec__empty {
+  margin: var(--space-8) 0 0;
+  color: var(--color-text-3);
+  font: var(--type-footnote);
   text-align: center;
 }
 
-.tr-empty__t {
-  margin: 0;
-  font: var(--type-title-3);
-  letter-spacing: var(--tracking-title);
-}
-
-.tr-empty__s {
-  margin: var(--space-1) 0 0;
-  color: var(--color-text-2);
-  font: var(--type-footnote);
+.tr-sec + .tr-rec__empty {
+  margin-top: var(--space-6);
 }
 
 /* ---------- 结果卡：纸片 ---------- */
@@ -439,11 +500,28 @@
   border-radius: var(--radius-2xl);
   background: var(--material-glass-strong);
   box-shadow: var(--shadow-glass-edge), var(--shadow-3);
-  transition: bottom var(--spring-smooth-duration) var(--spring-smooth);
+  transition:
+    bottom var(--spring-smooth-duration) var(--spring-smooth),
+    translate var(--spring-smooth-duration) var(--spring-smooth),
+    opacity var(--dur-base) var(--ease-out),
+    visibility 0s;
 }
 
 .tr-dock[data-kb] {
   transition: none;
+}
+
+/* 「记录」：输入区沉下去淡出（不占地方、点不到）；回到「翻译」弹回来 */
+.tr-dock[data-away] {
+  translate: 0 40px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    bottom var(--spring-smooth-duration) var(--spring-smooth),
+    translate var(--dur-base) var(--ease-in),
+    opacity var(--dur-fast) var(--ease-out),
+    visibility 0s linear var(--dur-base);
 }
 
 .tr-msg {
@@ -746,5 +824,10 @@
   .tr-lang__t,
   .tr-swap {
     animation: none;
+  }
+
+  /* 输入区收起 / 弹回：只淡入淡出，不位移 */
+  .tr-dock[data-away] {
+    translate: none;
   }
 }

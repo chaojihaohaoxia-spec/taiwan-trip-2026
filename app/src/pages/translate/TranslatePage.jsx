@@ -2,13 +2,19 @@
 // pages/translate/TranslatePage.jsx：翻译（路由 translate，#/t/:tripId/translate）。照小程序 1.4.5 的翻译栏做，换成网页的组件和「杂志纸本」。
 //
 // 版式（学 iMessage / 谷歌翻译：要点的都在下面，拇指够得着）：
-//   上面随页面滚动的是看的东西：收藏（先露 4 条，「全部」展开）、最近翻过（旧的在上、新的在下）、结果卡（最新的一张紧挨着输入区）；
+//   顶栏下面吸顶一条分栏「翻译 · 记录」（ui/Tabs，role=tablist；贴住时换成玻璃胶囊，和清单页一样）。
+//   拿手机给当地人看翻译时，对方只该看到这一句：翻过的句子都收在「记录」里，点进去才看得到。
+//   每次进来都停在「翻译」（离开再回来、回到后台也是），不记上次停在哪。
+//   「翻译」：只有结果卡（最新的一张紧挨着输入区；第一句还在翻时是一张等着的空卡）；空的时候只有一句很淡的提示。
+//   「记录」：收藏（先露 4 条，「全部」展开；还没收藏过就是这趟的常用语）、最近翻过（新的在上，可删单条，「清空」先问一句）；
+//     输入区收起（沉下去淡出，不占地方），列表正常滚动；点一条 = 回到「翻译」显示那一条，点常用语 = 直接给对方看。
+//   换栏：内容从换过去的方向滑进来（清单页同一套弹簧；减少动态效果时只淡入）。
 //   下面固定一块输入区（.tr-dock，浮在底栏上面的一张纸片）：语言栏「中文 ⇄ 越南语 ＋英语」+「对话」；输入框（× 清空、加称呼、粘贴、「翻译」）。
 //   键盘弹起时底栏沉下去，输入区整块贴着键盘上沿（overlay/keyboard.js 的 visualViewport 高度）。
 // 结果卡：越南语最大（点它 = 给对方看）、一行小字「意思是 …」（回译）、英语；或者翻成的中文。
 //   星（收藏）、复制、读出来（这台设备有越南语的声音才有）、「给对方看」排在卡片最下面一行。
 //   「给对方看」= sheets/ 的 driver 全屏大字卡（arg `tr.<这条的 id>`，从按钮长出来；刷新、没网也能打开，内容在 localStorage）。
-// 「对话」= sheets/converse 全屏分屏（上半屏转 180° 朝着对方）。
+// 「对话」= sheets/converse 全屏分屏（上半屏转 180° 朝着对方）。「给对方看」「对话」里都不出现收藏、最近翻过。
 // 状态和规则在 controller.js（Node 里测）；接口在 data/translate.js（lib/translate/client.js）。
 // 只在越南这类外语行程里有入口（「更多」菜单第一行）；别的行程打开这一页，说一句「这趟不用翻译」。
 // =====================================================================
@@ -22,7 +28,9 @@ import { SectionHeader } from '../../kit/SectionHeader.jsx';
 import { Glyph } from '../../kit/Glyph.jsx';
 import { PageEmptyState, ErrorState } from '../../kit/States.jsx';
 import { Button } from '../../ui/Button.jsx';
+import { Tabs, tabId, tabPanelId } from '../../ui/Tabs.jsx';
 import { toast } from '../../overlay/toast.js';
+import { confirm } from '../../overlay/dialogs.js';
 import { keyboardState } from '../../overlay/keyboard.js';
 import { useKeyboardOpen } from '../../shell/keyboard.js';
 import { openDriverCard, openConverse } from '../../sheets/index.js';
@@ -30,10 +38,12 @@ import { copyText } from '../../lib/clipboard.js';
 import { haptic } from '../../lib/native.js';
 import { coarsePointer, prefersReducedMotion, safeAreaInsets } from '../../lib/media.js';
 import { href } from '../../router/index.js';
-import { usePageChrome } from '../../shell/chrome.js';
+import { usePageChrome, syncSpace } from '../../shell/chrome.js';
+import { animateSpring } from '../../motion/animate.js';
+import { num } from '../../motion/physics.js';
 import { useSpeech } from '../tips/speech.js';
 import { normalizeTipKind, tipLang } from '../tips/model.js';
-import { createTranslateController, viewOf, L } from './controller.js';
+import { createTranslateController, viewOf, clearMsgOf, TABS, L } from './controller.js';
 
 /** 收藏先露几条 */
 const SAVED_SHOW = 4;
@@ -45,6 +55,9 @@ const TIPS_SHOW = 4;
 const TIGHT_PX = 360;
 /** 顶栏一直是胶囊（这一页像聊天：大标题会停在半淡的样子，评审 7） */
 const CHROME = { collapse: 'always' };
+/** 分栏的 id 前缀（标签 tr-tab-tr / tr-tab-rec，面板 tr-panel-tr / tr-panel-rec） */
+const TAB_ID = 'tr';
+const TAB_LIST = [{ id: 'tr', label: L.tabTr }, { id: 'rec', label: L.tabRec }];
 
 // 整个页面共用一个（离开再回来：写到一半的字、刚出的结果、语言栏的方向都还在）
 let shownHook = null;
@@ -96,10 +109,16 @@ function Translate({ tripId, store }) {
   const s = ctl.state.value;
   const v = viewOf(s);
   phrases.version.value;   // 收藏、最近翻过变了就重画
+  const tab = s.tab;
+  const rec = tab === 'rec';
   const pageRef = useRef(null);
+  const sentinelRef = useRef(null);
+  const barRef = useRef(null);
+  const panelRef = useRef(null);
   const dockRef = useRef(null);
   const resRef = useRef(null);
   const boxRef = useRef(null);
+  const [stuck, setStuck] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
   const [tipsOpen, setTipsOpen] = useState(false);
   const [tight, setTight] = useState(false);
@@ -110,13 +129,17 @@ function Translate({ tripId, store }) {
   const speech = useSpeech();
   const canPaste = typeof navigator !== 'undefined' && Boolean(navigator.clipboard?.readText);
 
-  // 进来：认这趟行程、预热接口（回到前台再预热一次；4 分钟内只发一次）；离开：看着写完了的记进最近翻过
+  // 进来：认这趟行程、预热接口（回到前台再预热一次；4 分钟内只发一次）；离开：看着写完了的记进最近翻过、下次停在「翻译」
+  // 回到后台也回到「翻译」：再拿出手机给对方看时，不会停在翻过的句子上
   useEffect(() => {
     ctl.setTrip(tripId);
     translator.warm({ trip: tripId });
     const onVisible = () => {
       if (document.visibilityState === 'visible') translator.warm({ trip: tripId });
-      else ctl.commit();
+      else {
+        ctl.commit();
+        ctl.setTab('tr');
+      }
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => {
@@ -129,10 +152,10 @@ function Translate({ tripId, store }) {
   const scrollLatest = (smooth = true) => {
     const card = resRef.current;
     const dock = dockRef.current;
-    if (!card || !dock) return;
+    if (!card || !dock || ctl.state.peek().tab !== 'tr') return;
     const r = card.getBoundingClientRect();
-    const topLine = topLineOf();
-    const bottomLine = dock.getBoundingClientRect().top - 14;
+    const topLine = topLineOf(barRef.current);
+    const bottomLine = dockTopOf(dock) - 14;
     const fits = r.height <= bottomLine - topLine;
     const d = Math.round(fits ? r.bottom - bottomLine : r.top - topLine);
     if (Math.abs(d) < 2) return;
@@ -154,24 +177,25 @@ function Translate({ tripId, store }) {
   useLayoutEffect(() => {
     const dock = dockRef.current;
     if (!dock) return;
-    const next = kbOpen && dock.getBoundingClientRect().top - topLineOf() < TIGHT_PX;
+    const next = kbOpen && !rec && dockTopOf(dock) - topLineOf(barRef.current) < TIGHT_PX;
     if (next !== tight) setTight(next);
   });
 
   // ---------- 输入区多高：内容最下面垫多高（最后一张卡片停在输入区上面）；内容不够一屏时贴着下面排（像聊天） ----------
+  // 只在「翻译」量（「记录」里输入区收起了）；换回「翻译」重新量一次
   useLayoutEffect(() => {
     const dock = dockRef.current;
     const page = pageRef.current;
     if (!dock || !page || typeof ResizeObserver === 'undefined') return undefined;
     const lay = () => {
       page.style.setProperty('--tr-dock-h', `${Math.round(dock.offsetHeight)}px`);
-      const feed = page.firstElementChild;
-      if (!feed) return;
+      const feed = panelRef.current;
+      if (!feed || ctl.state.peek().tab !== 'tr') return;
       // 键盘开着时不量（输入区被推上去了，量出来的不是平时的位置）
       if (keyboardState.peek().inset > 0) return;
       const top = feed.getBoundingClientRect().top + window.scrollY;
       // 内容最下面 = 输入区上沿再往上 14px
-      const min = Math.max(0, Math.round(dock.getBoundingClientRect().top - 14 - top));
+      const min = Math.max(0, Math.round(dockTopOf(dock) - 14 - top));
       page.style.setProperty('--tr-feed-min', `${min}px`);
     };
     const ro = new ResizeObserver(lay);
@@ -182,7 +206,7 @@ function Translate({ tripId, store }) {
       ro.disconnect();
       window.removeEventListener('resize', lay);
     };
-  }, []);
+  }, [tab]);
 
   // 键盘弹起、收起、结果卡收紧 / 放开：最新的结果卡跟着对一下
   useEffect(() => {
@@ -204,9 +228,59 @@ function Translate({ tripId, store }) {
   const savedRows = savedOpen ? saved : saved.slice(0, SAVED_SHOW);
   const starKeys = useMemo(() => new Set(saved.map((x) => keyOf(x.input))), [phrases.version.value]);
   const res = s.res;
-  // 最近翻过：新的在下面（离输入框近）；正在看的那一条就是下面的结果卡，不重复
-  const hist = phrases.list().filter((x) => !res || x.id !== res.id).reverse();
-  const empty = !saved.length && !hist.length && !res && !v.waiting;
+  // 最近翻过（只在「记录」里）：新的在上面
+  const hist = rec ? phrases.list() : [];
+
+  // ---------- 分栏：换过去的内容从那个方向滑进来；换栏从头看（「翻译」再对一下最新的结果卡） ----------
+  const lastTab = useRef(tab);
+  useLayoutEffect(() => {
+    const prev = lastTab.current;
+    lastTab.current = tab;
+    if (prev === tab) return;
+    // 分栏已经贴在顶上（往下滚过了）：退回到刚好贴住的位置，新的一栏从头露出来；没滚过就不动（不平白惊动顶栏）
+    const bar = barRef.current;
+    const mark = sentinelRef.current;
+    if (bar && mark) {
+      const stick = Math.max(0, Math.round(mark.getBoundingClientRect().top + window.scrollY - (parseFloat(getComputedStyle(bar).top) || 0)));
+      if (window.scrollY > stick + 1) window.scrollTo(0, stick);
+    }
+    if (tab === 'tr') requestAnimationFrame(() => scrollLatest(false));
+    if (!panelRef.current) return;
+    const dir = Math.sign(TABS.indexOf(tab) - TABS.indexOf(prev)) || 1;
+    animateSpring(panelRef.current, {
+      channel: 'tr-tab',
+      from: { x: dir * 28, o: 0 },
+      to: { x: 0, o: 1 },
+      velocity: { x: 0, o: 0 },
+      spring: { x: 'snappy', o: 'smooth' },
+      commit: 'clear',
+      reduced: 'tween',
+      render: ({ x, o }) => ({ transform: `translateX(${num(x)}px)`, opacity: num(Math.min(1, Math.max(0, o)), 3) }),
+    });
+  }, [tab]);
+
+  // ---------- 分栏贴顶时换成玻璃胶囊（和清单页一样：前面 1px 的哨兵滚过贴住的那条线 = 贴住了） ----------
+  useEffect(() => {
+    const el = sentinelRef.current;
+    const bar = barRef.current;
+    if (!el || !bar || typeof IntersectionObserver === 'undefined') return undefined;
+    let io = null;
+    const observe = () => {
+      io?.disconnect();
+      const top = parseFloat(getComputedStyle(bar).top) || 0;
+      io = new IntersectionObserver(([e]) => setStuck(e.boundingClientRect.top < top + 1), {
+        rootMargin: `-${Math.ceil(top + 1)}px 0px 0px 0px`,
+        threshold: [0, 1],
+      });
+      io.observe(el);
+    };
+    observe();
+    window.addEventListener('resize', observe);
+    return () => {
+      io?.disconnect();
+      window.removeEventListener('resize', observe);
+    };
+  }, []);
 
   // ---------- 动作 ----------
   const blurOnPhone = () => { if (coarsePointer.peek()) boxRef.current?.blur(); };
@@ -257,6 +331,24 @@ function Translate({ tripId, store }) {
       if (ctl.paste(t)) blurOnPhone();
     }, () => toast(L.pasteNone));
   };
+  const onTab = (t) => {
+    haptic('selection');
+    ctl.setTab(t);
+  };
+  /** 在「记录」点一条：回到「翻译」显示它；焦点落在「翻译」标签上（点的那一行已经不在了） */
+  const onOpenRow = (row) => {
+    ctl.openRow(row);
+    requestAnimationFrame(() => document.getElementById(tabId(TAB_ID, 'tr'))?.focus({ preventScroll: true }));
+  };
+  /** 「清空」最近翻过：先问一句（收藏不动） */
+  const onClearAll = async () => {
+    const n = phrases.list().length;
+    if (!n) return;
+    const ok = await confirm({ title: L.clearAsk, message: clearMsgOf(n), confirmText: L.clearAll, destructive: true });
+    if (!ok) return;
+    ctl.clearRecent();
+    haptic('light');
+  };
   const onKey = (e) => {
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) {
       e.preventDefault();
@@ -266,196 +358,174 @@ function Translate({ tripId, store }) {
 
   const busyManual = s.busy && s.manual;
   const out = s.dir === 'out';
-  const showTip = !s.text && !s.msg;
+  const showTip = !s.text && !s.msg && !res && !v.waiting;
 
   return (
-    <div ref={pageRef} class="tr-page" data-kb={kbOpen ? '' : undefined}>
-      <div class="tr-feed" data-testid="tr-feed">
-        {/* 还没收藏过：先把这趟贴士里的常用语列出来，点一行直接给对方看（贴士页「常用语」同一份） */}
-        {!saved.length && tips.length > 0 && (
-          <section class="tr-sec" aria-label={L.tips}>
-            <SectionHeader
-              title={L.tips}
-              count={tips.length}
-              action={tips.length > TIPS_SHOW
-                ? { label: tipsOpen ? L.savedLess : `${L.savedAll} ${tips.length}`, onClick: () => setTipsOpen(!tipsOpen), glyph: tipsOpen ? 'chev-u' : 'chev-d', testId: 'tr-tips-more' }
-                : undefined}
-            />
-            <ul class="tr-list" data-testid="tr-tips">
-              {tipRows.map((tip) => <TipRow key={tip.id} tip={tip} />)}
-            </ul>
-          </section>
-        )}
+    <div ref={pageRef} class="tr-page" data-tab={tab} data-kb={kbOpen ? '' : undefined}>
+      {/* ============ 分栏「翻译 · 记录」：吸顶；贴住时是玻璃胶囊 ============ */}
+      <span ref={sentinelRef} class="tr-sentinel" aria-hidden="true" />
+      {/* 同步状态条（离线、同步中）在顶栏下面出现时，贴顶的分栏再往下让出它的高度 */}
+      <div ref={barRef} class="tr-tabbar" data-stuck={stuck ? '' : undefined} style={{ '--tr-sync': `${syncSpace.value}px` }}>
+        <Tabs label={L.tabs} idPrefix={TAB_ID} value={tab} onChange={onTab} tabs={TAB_LIST} class="tr-tabs" data-testid="tr-tabs" />
+      </div>
 
-        {saved.length > 0 && (
-          <section class="tr-sec" aria-label={L.saved}>
-            <SectionHeader
-              title={L.saved}
-              count={saved.length}
-              action={saved.length > SAVED_SHOW
-                ? { label: savedOpen ? L.savedLess : `${L.savedAll} ${saved.length}`, onClick: () => setSavedOpen(!savedOpen), glyph: savedOpen ? 'chev-u' : 'chev-d', testId: 'tr-saved-more' }
-                : undefined}
-            />
-            <ul class="tr-list" data-testid="tr-saved">
-              {savedRows.map((row) => (
-                <PhraseRow key={row.id} row={row} star onOpen={() => ctl.openRow(row)} onStar={() => phrases.unstar(row.id)} />
-              ))}
-            </ul>
-          </section>
-        )}
+      {rec ? (
+        <Records
+          key="rec"
+          panelRef={panelRef}
+          saved={saved}
+          savedRows={savedRows}
+          savedOpen={savedOpen}
+          onSavedOpen={() => setSavedOpen(!savedOpen)}
+          tips={tips}
+          tipRows={tipRows}
+          tipsOpen={tipsOpen}
+          onTipsOpen={() => setTipsOpen(!tipsOpen)}
+          hist={hist}
+          starKeys={starKeys}
+          onOpen={onOpenRow}
+          onClearAll={onClearAll}
+        />
+      ) : (
+        <div
+          key="tr"
+          ref={panelRef}
+          class="tr-feed"
+          role="tabpanel"
+          id={tabPanelId(TAB_ID, 'tr')}
+          aria-labelledby={tabId(TAB_ID, 'tr')}
+          data-testid="tr-feed"
+        >
+          {v.waiting && (
+            <div ref={resRef} class="tr-res" data-going="" data-testid="tr-waiting" aria-label={L.busy}>
+              <span class="tr-res__line" aria-hidden="true" />
+              <p class="tr-k">{out ? L.vi : L.zh}</p>
+              <span class="tr-sk" aria-hidden="true" />
+              <span class="tr-sk tr-sk--s" aria-hidden="true" />
+            </div>
+          )}
 
-        {hist.length > 0 && (
-          <section class="tr-sec" aria-label={L.recent}>
-            <SectionHeader title={L.recent} count={hist.length} />
-            <ul class="tr-list" data-testid="tr-recent">
-              {hist.map((row) => (
-                <PhraseRow
-                  key={row.id}
-                  row={row}
-                  star={starKeys.has(keyOf(row.input))}
-                  onOpen={() => ctl.openRow(row)}
-                  onStar={() => { const r = ctl.toggleStarRow(row); if (r?.dropped) toast(L.full); }}
-                  onDelete={() => ctl.remove(row.id)}
-                />
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {empty && (
-          <div class="tr-empty" data-testid="tr-empty">
-            <p class="tr-empty__t">{L.empty}</p>
-            <p class="tr-empty__s">{L.emptySub}</p>
-          </div>
-        )}
-
-        {v.waiting && (
-          <div ref={resRef} class="tr-res" data-going="" data-testid="tr-waiting" aria-label={L.busy}>
-            <span class="tr-res__line" aria-hidden="true" />
-            <p class="tr-k">{out ? L.vi : L.zh}</p>
-            <span class="tr-sk" aria-hidden="true" />
-            <span class="tr-sk tr-sk--s" aria-hidden="true" />
-          </div>
-        )}
-
-        {res && (
-          <article
-            ref={resRef}
-            class="tr-res"
-            data-dim={v.dim ? '' : undefined}
-            data-going={s.busy ? '' : undefined}
-            data-compact={tight ? '' : undefined}
-            data-testid="tr-result"
-            aria-busy={s.busy ? 'true' : undefined}
-          >
-            <span class="tr-res__line" aria-hidden="true" />
-            {v.old && <p class="tr-prev" data-testid="tr-prev"><b>{L.prev}</b>{res.input}</p>}
-            {res.dir === 'out' ? (
-              <>
-                {/* 「给对方看」和越南语在同一处：键盘弹起、卡片收紧时也一直看得见（评审 1） */}
-                <div class="tr-res__head">
-                  <p class="tr-k">{L.vi}</p>
-                  {v.canShow && (
-                    <button
-                      type="button"
-                      class="tr-btn tr-btn--show"
-                      data-press="scale"
-                      data-overlay-trigger="driver"
-                      onClick={onShow}
-                      data-testid="tr-show"
-                    >
-                      <Glyph name="show" size={18} />
-                      <span>{L.show}</span>
-                    </button>
+          {res && (
+            <article
+              ref={resRef}
+              class="tr-res"
+              data-dim={v.dim ? '' : undefined}
+              data-going={s.busy ? '' : undefined}
+              data-compact={tight ? '' : undefined}
+              data-testid="tr-result"
+              aria-busy={s.busy ? 'true' : undefined}
+            >
+              <span class="tr-res__line" aria-hidden="true" />
+              {v.old && <p class="tr-prev" data-testid="tr-prev"><b>{L.prev}</b>{res.input}</p>}
+              {res.dir === 'out' ? (
+                <>
+                  {/* 「给对方看」和越南语在同一处：键盘弹起、卡片收紧时也一直看得见（评审 1） */}
+                  <div class="tr-res__head">
+                    <p class="tr-k">{L.vi}</p>
+                    {v.canShow && (
+                      <button
+                        type="button"
+                        class="tr-btn tr-btn--show"
+                        data-press="scale"
+                        data-overlay-trigger="driver"
+                        onClick={onShow}
+                        data-testid="tr-show"
+                      >
+                        <Glyph name="show" size={18} />
+                        <span>{L.show}</span>
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    class="tr-vi"
+                    lang="vi"
+                    data-press={v.canShow ? 'scale' : undefined}
+                    aria-disabled={v.canShow ? undefined : 'true'}
+                    aria-label={v.canShow ? `${res.vi}（点了给对方看）` : res.vi}
+                    data-overlay-trigger="driver"
+                    onClick={onShow}
+                    data-testid="tr-vi"
+                  >
+                    {res.vi}
+                  </button>
+                  {res.back && (
+                    <p class="tr-back tr-more" data-testid="tr-back"><b>{L.back}</b>{res.back}</p>
                   )}
-                </div>
+                  {res.en && (
+                    <div class="tr-en tr-more">
+                      <div class="tr-en__head">
+                        <p class="tr-k">{L.en}</p>
+                        <button type="button" class="tr-mini" data-press="scale" onClick={() => onCopy('en', 'en')} data-done={copiedKey === 'en' ? '' : undefined} data-testid="tr-copy-en" aria-label={`${L.copy}${L.en}`}>
+                          <Glyph name={copiedKey === 'en' ? 'check' : 'copy'} size={16} />
+                          <span>{copiedKey === 'en' ? L.copied : L.copy}</span>
+                        </button>
+                      </div>
+                      <p class="tr-en__t" lang="en">{res.en}</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p class="tr-k">{L.zh}</p>
+                  <p class="tr-zh" data-testid="tr-zh">{res.zh}</p>
+                </>
+              )}
+              <div class="tr-acts tr-more">
                 <button
                   type="button"
-                  class="tr-vi"
-                  lang="vi"
-                  data-press={v.canShow ? 'scale' : undefined}
-                  aria-disabled={v.canShow ? undefined : 'true'}
-                  aria-label={v.canShow ? `${res.vi}（点了给对方看）` : res.vi}
-                  data-overlay-trigger="driver"
-                  onClick={onShow}
-                  data-testid="tr-vi"
+                  class="tr-btn tr-btn--icon"
+                  data-press="scale"
+                  data-on={phrases.starred(res.input) ? '' : undefined}
+                  aria-pressed={phrases.starred(res.input) ? 'true' : 'false'}
+                  aria-label={phrases.starred(res.input) ? L.unstar : L.star}
+                  onClick={onStar}
+                  data-testid="tr-star"
                 >
-                  {res.vi}
+                  <Glyph name="star" size={20} fill={phrases.starred(res.input) ? 'currentColor' : 'none'} />
                 </button>
-                {res.back && (
-                  <p class="tr-back tr-more" data-testid="tr-back"><b>{L.back}</b>{res.back}</p>
-                )}
-                {res.en && (
-                  <div class="tr-en tr-more">
-                    <div class="tr-en__head">
-                      <p class="tr-k">{L.en}</p>
-                      <button type="button" class="tr-mini" data-press="scale" onClick={() => onCopy('en', 'en')} data-done={copiedKey === 'en' ? '' : undefined} data-testid="tr-copy-en" aria-label={`${L.copy}${L.en}`}>
-                        <Glyph name={copiedKey === 'en' ? 'check' : 'copy'} size={16} />
-                        <span>{copiedKey === 'en' ? L.copied : L.copy}</span>
-                      </button>
-                    </div>
-                    <p class="tr-en__t" lang="en">{res.en}</p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <p class="tr-k">{L.zh}</p>
-                <p class="tr-zh" data-testid="tr-zh">{res.zh}</p>
-              </>
-            )}
-            <div class="tr-acts tr-more">
-              <button
-                type="button"
-                class="tr-btn tr-btn--icon"
-                data-press="scale"
-                data-on={phrases.starred(res.input) ? '' : undefined}
-                aria-pressed={phrases.starred(res.input) ? 'true' : 'false'}
-                aria-label={phrases.starred(res.input) ? L.unstar : L.star}
-                onClick={onStar}
-                data-testid="tr-star"
-              >
-                <Glyph name="star" size={20} fill={phrases.starred(res.input) ? 'currentColor' : 'none'} />
-              </button>
-              <button
-                type="button"
-                class="tr-btn"
-                data-press="scale"
-                data-done={copiedKey === 'main' ? '' : undefined}
-                onClick={() => onCopy(res.dir === 'out' ? 'vi' : 'zh', 'main')}
-                data-testid="tr-copy"
-              >
-                <Glyph name={copiedKey === 'main' ? 'check' : 'copy'} size={18} />
-                <span>{copiedKey === 'main' ? L.copied : res.dir === 'out' ? L.copyVi : L.copy}</span>
-              </button>
-              {res.dir === 'out' && speech.can('vi') && (
                 <button
                   type="button"
                   class="tr-btn"
                   data-press="scale"
-                  aria-pressed={speech.speaking === res.vi ? 'true' : 'false'}
-                  onClick={() => speech.speak(res.vi, 'vi')}
-                  data-testid="tr-speak"
+                  data-done={copiedKey === 'main' ? '' : undefined}
+                  onClick={() => onCopy(res.dir === 'out' ? 'vi' : 'zh', 'main')}
+                  data-testid="tr-copy"
                 >
-                  <Glyph name="speaker" size={20} />
-                  <span>{L.speak}</span>
+                  <Glyph name={copiedKey === 'main' ? 'check' : 'copy'} size={18} />
+                  <span>{copiedKey === 'main' ? L.copied : res.dir === 'out' ? L.copyVi : L.copy}</span>
                 </button>
+                {res.dir === 'out' && speech.can('vi') && (
+                  <button
+                    type="button"
+                    class="tr-btn"
+                    data-press="scale"
+                    aria-pressed={speech.speaking === res.vi ? 'true' : 'false'}
+                    onClick={() => speech.speak(res.vi, 'vi')}
+                    data-testid="tr-speak"
+                  >
+                    <Glyph name="speaker" size={20} />
+                    <span>{L.speak}</span>
+                  </button>
+                )}
+              </div>
+              {(res.again || res.demo || translateDemo) && (
+                <p class="tr-foot tr-more">{res.demo || translateDemo ? L.demo : L.again}</p>
               )}
-            </div>
-            {(res.again || res.demo || translateDemo) && (
-              <p class="tr-foot tr-more">{res.demo || translateDemo ? L.demo : L.again}</p>
-            )}
-          </article>
-        )}
+            </article>
+          )}
 
-        {showTip && <p class="tr-tip" data-testid="tr-tip">{out ? L.mic : L.micIn}</p>}
-      </div>
+          {showTip && <p class="tr-tip" data-testid="tr-tip">{out ? L.hint : L.micIn}</p>}
+        </div>
+      )}
 
-      {/* ============ 输入区：浮在底栏上面；键盘弹起时贴着键盘 ============ */}
+      {/* ============ 输入区：浮在底栏上面；键盘弹起时贴着键盘；「记录」里沉下去收起（inert：点不到、读屏读不到） ============ */}
       <div
         ref={dockRef}
         class="tr-dock"
         data-kb={kbOpen ? '' : undefined}
+        data-away={rec ? '' : undefined}
+        inert={rec}
         style={kb > 0 ? { bottom: `${kb + 8}px` } : undefined}
         data-testid="tr-dock"
       >
@@ -565,10 +635,97 @@ function Translate({ tripId, store }) {
   );
 }
 
-/** 顶栏（一直是胶囊）下沿：--topbar-h + 刘海 + 8 */
-function topLineOf() {
+/** 上面能看见的那条线：顶栏（一直是胶囊）下沿 --topbar-h + 刘海 + 8；分栏在它下面时取分栏下沿 + 8 */
+function topLineOf(bar) {
   const topbar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topbar-h')) || 70;
-  return topbar + (safeAreaInsets().top || 0) + 8;
+  const line = topbar + (safeAreaInsets().top || 0) + 8;
+  const b = bar ? bar.getBoundingClientRect().bottom + 8 : 0;
+  return Math.max(line, b);
+}
+
+/** 输入区停稳时的上沿（不算收起 / 展开动画里的位移：读 translate 的当前值扣掉） */
+function dockTopOf(dock) {
+  const t = getComputedStyle(dock).translate;
+  const dy = t && t !== 'none' ? parseFloat(t.split(' ')[1] || '0') || 0 : 0;
+  return dock.getBoundingClientRect().top - dy;
+}
+
+/**
+ * 「记录」：收藏（还没收藏过就是这趟的常用语）、最近翻过（新的在上；可删单条、「清空」先问一句）；空的时候一句淡提示。
+ * 点一条 = 回到「翻译」显示它；点常用语 = 直接给对方看。
+ */
+function Records({ panelRef, saved, savedRows, savedOpen, onSavedOpen, tips, tipRows, tipsOpen, onTipsOpen, hist, starKeys, onOpen, onClearAll }) {
+  return (
+    <div
+      ref={panelRef}
+      class="tr-rec"
+      role="tabpanel"
+      id={tabPanelId(TAB_ID, 'rec')}
+      aria-labelledby={tabId(TAB_ID, 'rec')}
+      data-testid="tr-records"
+    >
+      {/* 还没收藏过：先把这趟贴士里的常用语列出来，点一行直接给对方看（贴士页「常用语」同一份） */}
+      {!saved.length && tips.length > 0 && (
+        <section class="tr-sec" aria-label={L.tips}>
+          <SectionHeader
+            title={L.tips}
+            count={tips.length}
+            action={tips.length > TIPS_SHOW
+              ? { label: tipsOpen ? L.savedLess : `${L.savedAll} ${tips.length}`, onClick: onTipsOpen, glyph: tipsOpen ? 'chev-u' : 'chev-d', testId: 'tr-tips-more' }
+              : undefined}
+          />
+          <ul class="tr-list" data-testid="tr-tips">
+            {tipRows.map((tip) => <TipRow key={tip.id} tip={tip} />)}
+          </ul>
+        </section>
+      )}
+
+      {saved.length > 0 && (
+        <section class="tr-sec" aria-label={L.saved}>
+          <SectionHeader
+            title={L.saved}
+            count={saved.length}
+            action={saved.length > SAVED_SHOW
+              ? { label: savedOpen ? L.savedLess : `${L.savedAll} ${saved.length}`, onClick: onSavedOpen, glyph: savedOpen ? 'chev-u' : 'chev-d', testId: 'tr-saved-more' }
+              : undefined}
+          />
+          <ul class="tr-list" data-testid="tr-saved">
+            {savedRows.map((row) => (
+              <PhraseRow key={row.id} row={row} star onOpen={() => onOpen(row)} onStar={() => phrases.unstar(row.id)} />
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {hist.length > 0 && (
+        <section class="tr-sec" aria-label={L.recent}>
+          <SectionHeader
+            title={L.recent}
+            count={hist.length}
+            action={(
+              <button type="button" class="k-sec__action tr-clearall" data-press="scale" onClick={onClearAll} data-testid="tr-clear-all">
+                {L.clearAll}
+              </button>
+            )}
+          />
+          <ul class="tr-list" data-testid="tr-recent">
+            {hist.map((row) => (
+              <PhraseRow
+                key={row.id}
+                row={row}
+                star={starKeys.has(keyOf(row.input))}
+                onOpen={() => onOpen(row)}
+                onStar={() => { const r = ctl.toggleStarRow(row); if (r?.dropped) toast(L.full); }}
+                onDelete={() => ctl.remove(row.id)}
+              />
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {!hist.length && <p class="tr-rec__empty" data-testid="tr-rec-empty">{L.recEmpty}</p>}
+    </div>
+  );
 }
 
 /** 这趟的一句常用语：点了直接全屏给对方看（driver 弹层，arg 是贴士 id；和贴士页同一个） */

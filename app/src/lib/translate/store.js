@@ -3,6 +3,7 @@
 //
 //   const s = createPhraseStore({ storage })      storage = lib/storage.js 的 local（测试传内存版）
 //   s.list() / s.save(input, res) / s.remove(id) / s.find(input)        最近翻过的（30 条，新的在前）
+//   s.clearRecent()                                                     最近翻过的全删（收藏不动）；返回删了几条
 //   s.stars() / s.star(res) / s.unstar(idOrInput) / s.starred(input)    收藏（50 条，整条结果都存）
 //   s.get(id)                                                           按 id 找（最近翻过、收藏都找；「给对方看」用）
 //   s.remember(input, res) / s.peek(input)                              这次打开期间翻过的（同一句不重发、不进历史）
@@ -78,6 +79,13 @@ export function createPhraseStore({ storage, now = () => Date.now() } = {}) {
     }
     return next;
   }
+  /** 最近翻过的全删（翻译页「记录」的「清空」）；收藏不动。返回删了几条 */
+  function clearRecent() {
+    const n = list().length;
+    storage?.remove(K_RECENT);
+    if (n) bump();
+    return n;
+  }
   /** 收藏一条（同一句只留一条，排到最前）。返回 { row, dropped }：收藏满了挤掉最早那条时 dropped = true */
   function star(res) {
     if (!res || !text(res.input)) return { row: null, dropped: false };
@@ -125,5 +133,5 @@ export function createPhraseStore({ storage, now = () => Date.now() } = {}) {
     storage?.set(K_HONOR, h.id);
     return h.id;
   }
-  return { version, list, stars, find, starred, save, remove, star, unstar, get, remember, peek, honor, setHonor, _memo: memo };
+  return { version, list, stars, find, starred, save, remove, clearRecent, star, unstar, get, remember, peek, honor, setHonor, _memo: memo };
 }
