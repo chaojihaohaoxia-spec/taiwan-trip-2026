@@ -296,7 +296,8 @@ export function SelectedCard({ marker, place, distance, onOpen, onClose }) {
         </button>
       </div>
       {place ? (
-        <PlaceActions place={place} size="compact" actions={['nav', 'grab', 'driver', 'copy']} testId="map-card-actions" />
+        // 不点名动作：按这趟的目的地档案给（这趟怎么走、岛上叫不到车、坐标只到城市都在规则包里筛）
+        <PlaceActions place={place} size="compact" testId="map-card-actions" />
       ) : (
         <PlaceActions place={{ name: marker.title, lat: marker.lat, lng: marker.lng }} size="compact" actions={['nav']} hideNote testId="map-card-actions" />
       )}

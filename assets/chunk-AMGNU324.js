@@ -1,1 +1,0 @@
-import{c as t}from"./chunk-NS36I5ZI.js";import{a}from"./chunk-RLOILQMF.js";function h({to:f,replace:u,scroll:n,children:d,...i}){let e=t.href(f),r=t.route.value,o=r?r.href===e||r.href.startsWith(`${e}?`):!1;return a("a",{href:e,"data-replace":u?"true":void 0,"data-scroll":n!==void 0?String(n):void 0,"aria-current":o?"page":void 0,...i,children:d})}export{h as a};

@@ -1,0 +1,53 @@
+/* =====================================================================
+   pages/trip/local.css：概览「当地」小卡（cards-shared.jsx 的 LocalCard）。
+   两行小字：紧急电话（叫法灰字 + 号码墨色，点了直接拨）、插座 · 小费；右上一个文字链接「当地须知」。
+   ===================================================================== */
+
+.ov-local__more {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 2px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  text-decoration: none;
+}
+
+.ov-local__more::after {
+  content: "";
+  position: absolute;
+  inset: -12px -8px;
+}
+
+.ov-local__sos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  margin: -6px 0 0;
+}
+
+.ov-local__tel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  text-decoration: none;
+  transition: var(--press-transition);
+}
+
+.ov-local__tel b {
+  color: var(--color-text);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.ov-local__line {
+  margin: 4px 0 0;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  line-height: 1.5;
+}

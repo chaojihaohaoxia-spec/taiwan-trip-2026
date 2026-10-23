@@ -38,6 +38,12 @@
 | `kit.test.js` | `kit/` 的纯逻辑：每个枚举都有中文名和图标（图形都存在、在 24×24 内）、插图的颜色角色、状态的中文名和语气、剩下的时间怎么说、**免费取消截止**（过了 / 1 天内 / 3 天内 / 更晚）、行程阶段；**动作行**（导航用坐标、默认开车、步行；Grab 链接和 `lib/ride-links` 一致；没坐标按名字 + 地址；城市级坐标不用；只有名字；什么都没有全部禁用、说明只说一句；只读成员；没存的地点；电话 → tel:）；**金额显示**（文字和 formatMoney 一致、大号换行和中文单位、signed 正绿负红）；`sheets/` 的**参数写法**（新建 / 编辑 / 预填、短键、超长按优先级丢、非法值报错）和**登记表**（SPEC §9.2 的每个 id 都登记、模块都在、启动时就登记、不经过 overlay/index.js）；kit / sheets / 占位页不直接写 window.open、navigator.vibrate |
 | `kit.search.test.js` | `kit/search`：越南语去声调和帽子、đ、全角、大小写；“字母 + 组合符号”写法的原文也能高亮到整字；高亮区间合并、切段；空查询 / 没有命中；中文子串；**每个词都要命中**；**排序**（完全一样 > 开头 > 词开头 > 中间 > 次要字段 > 说明）；每组 limit / total；**跳转目标**（条目 → 那天 ?item=、备选池 → 概览、地点 / 预订 → 详情弹层……）；软删除不搜；订单号、航班号、电话能搜；片段；键盘上下选择；速度 |
 | `shell-review.test.js` | **外壳阶段三份评审的回归（纯逻辑部分）**：底部面板 footer 的反向位移、换行程主题色 OKLCH 短色相（中途不发灰）、光场曲线和减弱动态效果、胶囊短语、`collapse: 'never'`、**下车点**（`ride_via` 的 key / uuid、叫车 / 给司机看 / 复制去下车点、导航不去、「去缆车站」、uuid v5 和导入脚本一致、演示数据有例子）、弹层参数丢字段时 `onDrop`、搜索不认只有标点的词、带声调完全一致的排前面 |
+| `rules.cases.test.js` | **规则包金标准**（`src/rules/cases/*.json`，网页和小程序跑同一批）：源码、esbuild 打成的小程序那份、删掉 Intl 后各跑一遍，结果一字不差 |
+| `rules.data.test.js` | 规则包的内置表：23 个地区都核过（`checked` + 来源）、城市表的 id / 坐标 / 别名、城市区域、时区偏移、币种 |
+| `rules.how.test.js` | `rules/how.js` 用例以外的细节：上一站、值机窗口、「有人接」打给谁（`transferPhone`）、`transportPatch` 不改原对象 |
+| `kit.how.test.js` | 动作行按「这一项怎么去」和目的地档案给（`data/dest.js` 的 `itemHow` / `placeHow`、`kit/place-actions.js`）：主按钮、「⋯」、叫 Uber / GO、给司机看的字（中文 / 当地文字 / 英文）、当地须知、灰字和「改」 |
+| `data.trip-admin.test.js` | 新建行程、改日期、改档案、拉对方的 RPC（`data/rpc.js`）在演示后台里的行为：重放 token、need_move / journal、合并写档案 |
+| `trip-new.test.js` | 新建行程（去哪、日历、每城住几晚、这趟怎么走、名字、提交参数、草稿、重试换 token）、空白的一天快速加（钟点、结束时间、半夜）、设置里改日期、「这趟怎么走」按城市、删掉这一趟的提示 |
 | `build.test.js` | CSS 分层（含 `kit` 层）、**首屏 / 按需样式表**（styles、motion、shell 和外壳用到的 ui / overlay 进首屏，页面、kit、弹层、地图跟着页面加载；首屏 CSS 在预算内；index.html 登记了每个页面要哪些；一个 CSS 只在一个样式表里；按需样式表进预缓存）、动态 import 改写、字体授权文件随站部署、**开发页样式单独成 dev-*.css**（不进首屏、不进预缓存、`<meta>` 登记位置）、演示后台不进预缓存、内容哈希、sw.js 占位、index.html（viewport-fit、theme-color、CSP、相对路径）、manifest、图标尺寸、**构建确定性**、页面登记表覆盖路由、每个目录有 README、依赖锁定精确版本、源码不写死仓库名、**图标一个文件一个文件地引、首屏代码只用 icons-core** |
 
 `helpers/`：

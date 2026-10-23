@@ -626,7 +626,8 @@ test('小卡：有下车点的地点显示下车提示；开车到不了的「�
     assert.match(await text(page, T('map-card-actions-note')), new RegExp(viaPlace.extra.ride_note));
     await clip(app, 'card-ride-note');
     await pick(noRoad.id);
-    const grab = await page.$eval(`${T('map-card-actions')} [data-action="grab"]`, (el) => el.getAttribute('aria-label') || el.textContent);
+    // 批 A：动作键 grab 改名 ride（点名 'grab' 照样认，DOM 上写 ride）
+    const grab = await page.$eval(`${T('map-card-actions')} [data-action="ride"]`, (el) => el.getAttribute('aria-label') || el.textContent);
     assert.match(grab, /去缆车站/);
     const note = await text(page, T('map-card-actions-note'));
     assert.match(note, /开车到不了/);

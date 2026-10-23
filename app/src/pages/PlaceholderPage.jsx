@@ -16,7 +16,7 @@ const PURPOSE = {
   journal: '日记和相册',
   places: '地点、想去清单、评级',
   tips: '贴士：防坑、消息模板、常用语、实用信息',
-  settings: '设置：账号、主题、成员和邀请',
+  settings: '设置：账号、主题、每趟行程',
   join: '加入行程：输入或打开邀请码',
   login: '登录',
   'auth-callback': '登录回调：数据模块处理完会自动离开这一页',

@@ -571,3 +571,18 @@
   color: var(--color-text-2);
   font: var(--type-footnote);
 }
+
+/* 怎么去：芯片（pages/day/how.css 的 .how-chips）+ 下面一行灰字（会给哪几个按钮、为什么） */
+.item-row--how .item-row__ctl {
+  padding: 6px 0;
+}
+
+.item-row--how .how-chips {
+  margin-top: 0;
+}
+
+.item-how__hint {
+  display: block;
+  margin-top: 8px;
+  line-height: 1.45;
+}

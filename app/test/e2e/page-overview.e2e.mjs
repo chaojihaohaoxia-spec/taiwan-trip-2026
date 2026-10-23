@@ -246,7 +246,8 @@ test('进行中（01-11 10:00）：「现在」是半日浮潜（导航 / 叫 Gr
     const { page } = app;
     assert.equal(await page.$eval(T('page-trip'), (el) => el.dataset.phase), 'ongoing');
     const ids = await order(page);
-    assert.deepEqual(ids, ['ov-now', 'ov-stay', 'ov-today-weather', 'ov-todos', 'ov-deadlines', 'ov-tomorrow']);
+    // 批 A：最后多一张「当地」小卡（紧急电话一直在，按目的地档案）
+    assert.deepEqual(ids, ['ov-now', 'ov-stay', 'ov-today-weather', 'ov-todos', 'ov-deadlines', 'ov-tomorrow', 'ov-local']);
     for (const gone of ['ov-timeline', 'ov-spend', 'ov-pool', 'ov-days']) assert.equal(await page.$(T(gone)), null, `${gone} 不在概览上`);
     // 现在
     assert.equal(await page.$eval(T('ov-now'), (el) => el.dataset.mode), 'current');
@@ -254,10 +255,13 @@ test('进行中（01-11 10:00）：「现在」是半日浮潜（导航 / 叫 Gr
     assert.match(await text(page, T('ov-now-title')), /半日浮潜/);
     assert.match(await page.$eval(T('ov-now-title'), (el) => el.getAttribute('href')), /\/day\/2027-01-11\?item=/);
     const actions = await page.$$eval(`${T('ov-now-actions')} [data-action]`, (els) => els.map((el) => [el.dataset.action, el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true']));
-    assert.deepEqual(actions.map((a) => a[0]), ['nav', 'grab', 'driver', 'expense']);
-    assert.ok(actions.every((a) => !a[1]), '四个动作都能点');
+    // 批 A：按「这一项怎么去」——浮潜写了步行过去，只给导航 + 记一笔；叫车、给司机看在最后的「⋯」里
+    assert.deepEqual(actions.map((a) => a[0]), ['nav', 'expense']);
+    assert.ok(actions.every((a) => !a[1]), '动作都能点');
     assert.match(await page.$eval(`${T('ov-now-actions')} [data-action="nav"]`, (el) => el.getAttribute('href')), /google\.com\/maps\/dir/);
-    assert.match(await page.$eval(`${T('ov-now-actions')} [data-action="grab"]`, (el) => el.getAttribute('href')), /grab\.onelink\.me/);
+    await page.click(T('ov-now-actions-more'));
+    await page.waitForSelector(`${T('ov-now-actions-more-row')} [data-action="ride"]`);
+    assert.match(await page.$eval(`${T('ov-now-actions-more-row')} [data-action="ride"]`, (el) => el.getAttribute('href')), /grab\.onelink\.me/);
     assert.ok(await page.$(T('ov-now-done')));
     assert.ok(await page.$(T('ov-now-skip')));
     assert.match(await text(page, T('ov-now-next')), /接下来.*老码头海鲜午餐.*还有 3 小时/);
@@ -270,7 +274,8 @@ test('进行中（01-11 10:00）：「现在」是半日浮潜（导航 / 叫 Gr
     // 今晚住哪：三个动作 + 打电话、预订详情
     assert.match(await text(page, `${T('ov-stay')} .k-card__title`), /椰影湾酒店/);
     const stayActions = await page.$$eval(`${T('ov-stay-actions')} [data-action]`, (els) => els.map((el) => el.dataset.action));
-    assert.deepEqual(stayActions, ['nav', 'grab', 'driver', 'call']);
+    // 批 A：动作键 grab 改名 ride（叫哪家按目的地档案，越南还是「叫 Grab」）
+    assert.deepEqual(stayActions, ['nav', 'ride', 'driver', 'call']);
     assert.match(await text(page, T('ov-stay-booking')), /预订详情/);
     assert.match(await text(page, T('ov-stay')), /明天 12:00 前退房/);
     assert.ok(await page.$(T('ov-tomorrow')));
@@ -328,7 +333,7 @@ test('进行中：傍晚（19:30）今晚住哪提到第二张、叫 Grab 是主
     const { page } = app;
     const ids = await order(page);
     assert.deepEqual(ids.slice(0, 2), ['ov-now', 'ov-stay']);
-    assert.ok(await page.$(`${T('ov-stay-actions')} [data-action="grab"].k-act--primary`), '叫 Grab 是主要按钮');
+    assert.ok(await page.$(`${T('ov-stay-actions')} [data-action="ride"].k-act--primary`), '叫 Grab 是主要按钮（批 A：动作键改名 ride）');
     await app.shot('ongoing-evening', { fullPage: false });
     app.assertClean();
   } finally {

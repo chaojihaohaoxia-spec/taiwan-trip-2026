@@ -2,13 +2,17 @@
 // pages/trip/cards-ongoing.jsx：行程进行中的卡片。
 //
 //   NowCard       「现在 / 接下来」大卡：正在进行的条目（或下一项）、地点、一句说明、怎么过去；
-//                 kit 的 PlaceActions 完整尺寸（导航 / 叫 Grab / 给司机看 / 记一笔）+「完成」（SubmitButton 转圈打勾）+「跳过」；
+//                 kit 的 PlaceActions 完整尺寸，按「这一项怎么去」给按钮（data/dest.js 的 itemHow，和每天页同一套；
+//                 接下来那一项的主按钮在第一个，说明行带上为什么，例如「离上一站 3.2 公里，按打车算」）+ 记一笔
+//                 +「完成」（SubmitButton 转圈打勾）+「跳过」；
 //                 下面一行「接下来 …」。标题点进那一天并展开那一条（?item=）。
 //   TomorrowCard  明天一张小卡：标题、路线一句话、住哪
 // =====================================================================
 
 import { useState, useRef, useLayoutEffect } from 'preact/hooks';
-import { Card, Glyph, PlaceActions, kindLabel, rideHintFor, itemClock } from '../../kit/index.js';
+import { Card, Glyph, PlaceActions, kindLabel, itemClock } from '../../kit/index.js';
+import { itemHow } from '../../data/dest.js';
+import { now as clockNow } from '../../lib/clock.js';
 import { Button, SubmitButton, Badge } from '../../ui/index.js';
 import { toast } from '../../overlay/index.js';
 import { captureHeight, playHeight } from '../../motion/index.js';
@@ -101,8 +105,9 @@ export function NowCard({ store, tripId, trip, today, primary, canEdit }) {
   const time = itemTimeText(focus, clockOpts(focus));
   const transport = m.mode !== 'current' ? transportText(focus) : null;
   const category = expenseCategoryOf(focus.kind);
-  // 主按钮跟着交通方式走（和每天页一样）：走路的条目是导航，打车的是叫 Grab；正在进行的那一条不设主按钮（人已经在那儿了）
-  const ride = rideHintFor(focus.transport_in);
+  // 按钮跟着「这一项怎么去」走（和每天页一样）：走路的条目只有导航，打车的是叫车 + 给司机看；
+  // 正在进行的那一条不设主按钮（人已经在那儿了）
+  const how = place ? itemHow(store, focus, { now: clockNow() }) : null;
   const desc = focus.description ? markdownToText(focus.description).replace(/\s+/g, ' ').trim() : '';
 
   const finish = async (status) => {
@@ -162,10 +167,10 @@ export function NowCard({ store, tripId, trip, today, primary, canEdit }) {
         {place ? (
           <PlaceActions
             place={place}
-            actions={['nav', 'grab', 'driver']}
+            how={how}
             expense={{ itemId: focus.id, date: day.date, category: category || undefined }}
-            primary={m.mode === 'next' ? ride.primary || undefined : undefined}
-            mode={ride.navMode || undefined}
+            plain={m.mode !== 'next'}
+            showHint={m.mode === 'next' && !transport}
             readOnly={!canEdit}
             testId="ov-now-actions"
           />

@@ -459,14 +459,15 @@ test('下车点：园区里的餐厅叫 Grab 去大堂、导航仍到餐厅、�
     const via = await page.evaluate(() => {
       const root = document.querySelector('[data-testid="kit-pa-via"]');
       const href = (k) => root.querySelector(`[data-action="${k}"]`)?.getAttribute('href') || '';
-      return { grab: decodeURIComponent(decodeURIComponent(href('grab'))), nav: decodeURIComponent(href('nav')), note: root.querySelector('.k-acts__note')?.textContent || '' };
+      // 批 A：动作键 grab 改名 ride
+      return { grab: decodeURIComponent(decodeURIComponent(href('ride'))), nav: decodeURIComponent(href('nav')), note: root.querySelector('.k-acts__note')?.textContent || '' };
     });
     assert.match(via.grab, /dropOffLatitude=8\.6902/, `叫车去大堂：${via.grab}`);
     assert.match(via.nav, /8\.6921,106\.6003/, '导航到餐厅本身');
     assert.match(via.note, /^在度假村大堂下车，园区里坐免费电瓶车过去/);
     const noroad = await page.evaluate(() => {
       const root = document.querySelector('[data-testid="kit-pa-noroad"]');
-      return { label: root.querySelector('[data-action="grab"]').textContent.trim(), note: root.querySelector('.k-acts__note')?.textContent || '' };
+      return { label: root.querySelector('[data-action="ride"]').textContent.trim(), note: root.querySelector('.k-acts__note')?.textContent || '' };
     });
     assert.equal(noroad.label, '去缆车站');
     assert.match(noroad.note, /开车到不了：在日出缆车站坐缆车过海/);

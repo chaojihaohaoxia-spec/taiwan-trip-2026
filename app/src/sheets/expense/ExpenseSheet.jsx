@@ -39,6 +39,7 @@ import { useSheetArgs, useSheetTrip } from '../hooks.js';
 import { categoryFromCode, parseSheetArg } from '../args.js';
 import { AmountField } from './AmountField.jsx';
 import { CategoryChips, PayerSegment, SplitSection, WhenRow, LinkRow, ReceiptField, shakeElement } from './parts.jsx';
+import { currencyAt } from '../../data/dest.js';
 import { initialState, validateState, toInsert, toPatch, isDirty, buildSplit, formatAmountInput, perPerson } from './form-model.js';
 import { footerNote } from './notes.js';
 import { lastSavedExpense } from './saved.js';
@@ -195,6 +196,8 @@ function Body() {
       getBooking: (x) => store.tables.bookings.value.get(x) || null,
       getDay: (x) => store.tables.days.value.get(x) || null,
       getExpense: (x) => store.tables.expenses.value.get(x) || null,
+      // 这一项 / 地点所在地的币种（目的地档案；香港出发前那几条是港币）
+      currencyAt: (o) => currencyAt(store, o),
       legacyShares: (e) => {
         const r = selectors.expenseShares(e, store.bundle);
         return { payer: r.payer, ids: [...r.shares.keys()] };

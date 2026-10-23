@@ -4,7 +4,8 @@
 // 外壳画左上返回、大标题「设置」（settings 外框：没有底栏、没有搜索），这一页只放内容，从上到下：
 //   1. 账号：头像、名字、邮箱（离线时说明）、「退出登录」（有没同步的改动先确认，account.js）；
 //   2. 旧版本机记录（这台设备上有旧版的键才出现，LegacyImport.jsx）：明文 AI 密钥一键删除；台湾行程的本机记录预览并导入；
-//   3. 成员和邀请：每趟行程一张可以原地展开的卡（Members.jsx），创建者能邀请（invite 弹层）、改权限、移出；
+//   3. 每趟行程（成员和邀请）：每趟一张可以原地展开的卡（Members.jsx）：能编辑的成员先看到日期（改日期面板 TripDates.jsx）、
+//      这趟怎么走、叫车用、只有自己时拉对方进来（TripPrefs.jsx）；创建者能邀请（invite 弹层）、改权限、移出；
 //   4. 外观：自动 / 浅色 / 深色（分段控件，指示块弹簧跟随；lib/theme.js）；
 //   5. 这台设备：同步状态（重试 / 放弃没保存上的改动）、网络、本机存储（syncStatus.storage）、本机占用和「长期保存」
 //      （navigator.storage；iOS 不加到主屏的网页 7 天不用会被清掉）；
@@ -31,6 +32,7 @@ import { lastTripId } from '../../shell/trip-state.js';
 import { signOutFlow } from './account.js';
 import { MembersSection } from './Members.jsx';
 import { LegacyCards, LegacyImportSheet, useLegacyScan } from './LegacyImport.jsx';
+import { TripDatesSheet } from './TripDates.jsx';
 import { formatBytes, storageLabel, syncTone, FONT_LICENSES, versionParts } from './model.js';
 import { memberColor } from '../../kit/RatingChips.jsx';
 
@@ -53,7 +55,7 @@ export default function SettingsPage() {
       <AccountCard color={myColor(entries)} />
       <LegacyCards scan={scan} />
 
-      <SectionHeader title="成员和邀请" meta="每趟分别邀请" />
+      <SectionHeader title="每趟行程" meta="日期、怎么走、成员和邀请" />
       {ready ? (
         <MembersSection entries={entries} currentId={currentId} />
       ) : list.status === 'error' ? (
@@ -82,6 +84,7 @@ export default function SettingsPage() {
 
       <p class="set-sign" data-testid="settings-sign">{APP_NAME} · Jeremy &amp; Cathy</p>
       <LegacyImportSheet entries={entries} scan={scan} />
+      <TripDatesSheet />
     </div>
   );
 }

@@ -292,8 +292,9 @@
 
 /* 紧急电话：三个大号数字并排（Instrument Serif），下面一行小字；整格点了直接拨 */
 .tp-sos {
+  --tp-sos-cols: 3;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--tp-sos-cols), minmax(0, 1fr));
   margin: 0 0 var(--space-3);
   padding: 0;
   list-style: none;
@@ -773,4 +774,57 @@
   .tp-phrase__acts .tp-btn--show > .glyph {
     display: none;
   }
+}
+
+/* =====================================================================
+   当地须知（LocalFacts.jsx）：从目的地档案现算——紧急电话大号数字 + 几行「标签 · 一句话」
+   ===================================================================== */
+
+.tp-facts {
+  display: flex;
+  flex-direction: column;
+}
+
+.tp-facts__sos {
+  margin-top: var(--space-1);
+}
+
+.tp-facts__rows {
+  margin: 0;
+}
+
+.tp-facts__row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  column-gap: var(--space-2);
+  padding: 10px 0;
+  box-shadow: inset 0 1px 0 var(--color-separator);
+}
+
+.tp-facts__row dt {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  align-self: start;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+  line-height: 20px;
+}
+
+.tp-facts__row dt .glyph {
+  flex: none;
+  color: var(--color-text-3);
+}
+
+.tp-facts__row dd {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--type-subhead);
+  line-height: 20px;
+}
+
+.tp-facts__note {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-3);
+  font: var(--type-caption-1);
 }

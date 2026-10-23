@@ -7,6 +7,8 @@
 // 两层（10-19 加条目改版，对齐小程序 1.4.3 的「加一项」；默认值的规则在 form-model.js）：
 //   上面一层，一屏放得下：「做什么 / 备注」同一块（自动聚焦，回车 = 加进去）→ 哪天（一排字签，今天写「今天」）
 //     → 几点（今天默认现在；空着写「不定」）→ 在哪（空着时这一天用到的地点、当晚住的排在前面）
+//     → 怎么去（选了地点才有：自动 · 走路 · 打车 · 地铁公交 · 自驾 · 骑车 · 有人接 · 更多；下面一行灰字说现在会给哪几个按钮、为什么，
+//       芯片和写法在 rules/how.js，和每天页的「改」同一排 pages/day/HowRow.jsx）
 //     → 做完了（加的时候；今天、几点不晚于现在 5 分钟默认打开）/ 状态（改的时候：计划中 · 做完了 · 跳过了）
 //   「更多设置」默认收起（收起时写一行摘要）：类型（选了地点按地点给，不用人选）、模糊时间、方案（主 / 备选 / 雨天，备选可挂到某条主方案下）。
 //     网址带了方案 / 挂在谁下 / 类型时展开。
@@ -34,6 +36,10 @@ import { route } from '../../router/index.js';
 import { defaultActualTime, minutesIntoDay, nowOnTimeline } from '../../pages/day/model.js';
 import { useSheetArgs, useSheetTrip } from '../hooks.js';
 import { lastSavedItem } from './saved.js';
+import { TransportChips } from '../../pages/day/HowRow.jsx';
+import { howPreview } from '../../pages/day/how-model.js';
+import { itemHow } from '../../data/dest.js';
+import { transportPatch } from '../../rules/how.js';
 import {
   POOL, KIND_OPTIONS, VARIANT_OPTIONS, STATUS_OPTIONS, TIME_LABEL_PRESETS, initialForm, validateForm, toRow, formPatch, resolveSortKey,
   dayChips, parentOptions, filterPlaces, dayPlaceIds, sameForm, autoDone, nowAnchor, kindForPlace, moreSummary, shortTitle, actualTimeFor,
@@ -265,6 +271,20 @@ function Form({ api, onMeta }) {
     return dayPlaceIds(targetPlan?.all || [], store.stayForDay(targetDay)?.place?.id || null);
   }, [targetDay, targetPlan, store]);
   const missingEdit = mode === 'edit' && ready && !item;
+  // 「怎么去」的预览：拿面板里还没保存的地点、天、钟点、怎么去，按规则包算一遍（和每天页一样）
+  const howNow = useMemo(() => {
+    if (!store || !form.place_id) return null;
+    const draft = {
+      ...(item || {}), id: item?.id || '__draft', title: form.title, kind: form.kind, variant: form.variant,
+      parent_item_id: form.parent_item_id, start_time: form.start_time || null, day_id: form.day === POOL ? null : form.day,
+      place_id: form.place_id, transport_in: form.transport_in, status: form.status,
+    };
+    try {
+      return itemHow(store, draft);
+    } catch {
+      return null;
+    }
+  }, [store, item, form.place_id, form.day, form.start_time, form.transport_in, form.kind, form.title, form.variant, form.parent_item_id, form.status]);
 
   // 「哪天」的字签多于一屏：选中的那一个横着滚到中间（只动这一排；不用 scrollIntoView——入场时面板还在屏幕外，它会去滚面板的外框）
   const daysRef = useRef(null);
@@ -515,6 +535,27 @@ function Form({ api, onMeta }) {
         <Row label="在哪" testId="item-field-place">
           <PlacePicker form={form} onPick={onPickPlace} places={places} first={firstPlaces} readOnly={readOnly} />
         </Row>
+
+        {(form.place_id || form.newPlace) && (
+          <Row label="怎么去" class="item-row--how" testId="item-field-how">
+            <TransportChips
+              item={item || {}}
+              transportIn={form.transport_in}
+              disabled={readOnly}
+              testId="item-how"
+              onPick={(choice) => {
+                try {
+                  const next = transportPatch({ ...(item || {}), transport_in: form.transport_in }, choice);
+                  setForm((f) => ({ ...f, transport_in: next }));
+                } catch (e) {
+                  setError(e?.message || '没改成');
+                }
+              }}
+            />
+            {howNow && <span class="item-row__hint item-how__hint" data-testid="item-how-hint">{howPreview(howNow, !form.transport_in || form.transport_in.auto === true)}</span>}
+            {!howNow && form.newPlace && <span class="item-row__hint item-how__hint">新地点还没有位置：存好以后按距离算</span>}
+          </Row>
+        )}
 
         {mode === 'new' ? (
           <div class="item-row item-row--done" data-testid="item-field-done">

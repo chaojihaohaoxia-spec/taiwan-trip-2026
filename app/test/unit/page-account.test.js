@@ -13,11 +13,6 @@ import {
 import {
   codeFromInput, joinErrorInfo, pendingInvite, rememberInvite, forgetInvite, inviterLine, PENDING_KEY, PENDING_TTL_MS,
 } from '../../src/pages/join/model.js';
-import {
-  ZONE_PRESETS, COVER_PRESETS, EMOJI_PRESETS, initialTripForm, validateTripForm, tripFormToInput, adjustEndDate, formLengthLabel,
-  startHint, currencyForZone, currencyOptions, searchZones, canonicalZone, zoneSummary, nextTripId, isIdConflict, isTripFormDirty,
-  coverFromForm, presetStyle,
-} from '../../src/sheets/trip-new/model.js';
 import { inviteRowInfo, sortInvites, inviteMeta, inviteMetaParts, inviteShareText, validLabel, ROLE_OPTIONS } from '../../src/sheets/invite/model.js';
 import { formatBytes, storageLabel, syncTone, versionParts, FONT_LICENSES } from '../../src/pages/settings/model.js';
 import {
@@ -178,89 +173,10 @@ test('加入后的「邀请人」：创建者的显示名（没有用邮箱前�
 });
 
 // ---------------------------------------------------------------------
-// 新建行程
+// 新建行程：批 A 重写成一屏（去哪 / 日历 / 这趟怎么走 / 和对方一起 / 带行李清单），测试挪到 test/unit/trip-new.test.js。
+// 原来这里测的时区芯片、emoji 封面、两个系统日期框、自己起 id 撞了换下一个，新表单里都没有了（id 由服务器 create_trip_v2 起、
+// 封面按目的地默认、时区按城市带出），对应的旧断言一起去掉。
 // ---------------------------------------------------------------------
-
-test('新建行程表单：校验（名字、日期先后、太长的行程、时区、币种代码）', () => {
-  const ok = { ...initialTripForm(), title: '海岛 · 秋假' };
-  assert.equal(validateTripForm(ok), null);
-  assert.deepEqual(validateTripForm({ ...ok, title: '   ' }), { field: 'title', message: '给这趟旅行起个名字' });
-  assert.equal(validateTripForm({ ...ok, title: 'x'.repeat(61) }).field, 'title');
-  assert.equal(validateTripForm({ ...ok, startDate: '2027-02-10', endDate: '2027-02-01' }).message, '回来的日期不能早于出发日期');
-  assert.equal(validateTripForm({ ...ok, endDate: '2027-02-01' }).message, '先选出发日期');
-  assert.equal(validateTripForm({ ...ok, startDate: '2027-01-01', endDate: '2027-06-01' }).field, 'dates');
-  assert.equal(validateTripForm({ ...ok, startDate: '2027-02-30' }).message, '出发日期不对');
-  assert.equal(validateTripForm({ ...ok, timezone: '' }).field, 'timezone');
-  assert.equal(validateTripForm({ ...ok, currency: 'VN' }).field, 'currency');
-  assert.equal(validateTripForm({ ...ok, startDate: '2027-02-01', endDate: '2027-02-01' }), null, '一天的行程可以');
-});
-
-test('新建行程表单：写进 createTrip 的参数（id 自动起、回来日期默认同一天、币种大写、封面写 #RRGGBB）', () => {
-  const f = { ...initialTripForm(), title: ' Phu Quoc · 重阳 ', startDate: '2027-10-16', endDate: '', timezone: 'Asia/Saigon', currency: 'vnd', cover: 'lantern', emoji: '🏮' };
-  const input = tripFormToInput(f, ['phu-quoc-2027']);
-  assert.equal(input.title, 'Phu Quoc · 重阳');
-  assert.equal(input.id, 'phu-quoc-2027-2', '撞了已有的 id 换下一个');
-  assert.equal(input.startDate, '2027-10-16');
-  assert.equal(input.endDate, '2027-10-16');
-  assert.equal(input.timezone, 'Asia/Ho_Chi_Minh', '浏览器的旧时区名换成通用写法');
-  assert.equal(input.homeCurrency, 'HKD');
-  assert.equal(input.localCurrency, 'VND');
-  assert.deepEqual(input.cover, { accent: '#C2255C', accent_2: '#F59F00', emoji: '🏮' });
-  const zh = tripFormToInput({ ...initialTripForm(), title: '富国岛', startDate: '' }, []);
-  assert.equal(zh.id, 'trip', '全中文名字、没日期');
-  assert.equal(zh.startDate, null);
-  assert.equal(zh.endDate, null);
-  assert.equal(tripFormToInput({ ...initialTripForm(), title: 'Đảo Ngọc Phú Quốc · 重阳', startDate: '2026-10-16' }, []).id, 'dao-ngoc-phu-quoc-2026', '越南语去声调再起 id');
-  assert.equal(nextTripId('trip-2027', 1), 'trip-2027-2');
-  assert.equal(nextTripId('trip-2027', 2), 'trip-2027-3');
-  assert.ok(isIdConflict({ kind: 'conflict' }) && isIdConflict({ message: '行程 id x 已存在' }) && !isIdConflict({ kind: 'network' }));
-  for (const p of COVER_PRESETS) {
-    assert.match(coverFromForm({ cover: p.key }).accent, /^#[0-9A-F]{6}$/);
-    assert.match(presetStyle(p)['--trip-accent-2'], /^#[0-9A-F]{6}$/);
-  }
-  assert.equal(new Set(EMOJI_PRESETS).size, EMOJI_PRESETS.length);
-});
-
-test('新建行程表单：日期联动（默认 4 天 3 晚、回来早于出发时跟着挪）、几天几晚、多久后出发、改没改过', () => {
-  assert.equal(adjustEndDate('2027-03-28', ''), '2027-03-31');
-  assert.equal(adjustEndDate('2027-03-28', '2027-03-20'), '2027-03-31');
-  assert.equal(adjustEndDate('2027-03-28', '2027-04-02'), '2027-04-02');
-  assert.equal(formLengthLabel({ startDate: '2027-03-28', endDate: '2027-03-31' }), '4 天 3 晚');
-  assert.equal(formLengthLabel({ startDate: '2027-03-28', endDate: '' }), '');
-  const at = new Date('2027-01-08T09:00:00+07:00');
-  assert.equal(startHint({ startDate: '2027-01-20', timezone: VN }, at), '12 天后出发');
-  assert.equal(startHint({ startDate: '2027-01-09', timezone: VN }, at), '明天出发');
-  assert.match(startHint({ startDate: '2026-12-01', timezone: VN }, at), /已经过去/);
-  assert.equal(isTripFormDirty(initialTripForm()), false);
-  assert.equal(isTripFormDirty({ ...initialTripForm(), title: 'x' }), true);
-  assert.equal(isTripFormDirty({ ...initialTripForm(), cover: 'ocean' }), true);
-});
-
-test('时区：快捷芯片、推荐币种、搜索（中文地名 / 英文城市 / 旧名字）、一行说明', () => {
-  assert.equal(ZONE_PRESETS[0].tz, VN);
-  assert.equal(currencyForZone(VN), 'VND');
-  assert.equal(currencyForZone('Asia/Saigon'), 'VND');
-  assert.equal(currencyForZone('Asia/Tokyo'), 'JPY');
-  assert.equal(currencyForZone('Antarctica/Troll'), null);
-  assert.deepEqual(currencyOptions('Asia/Tokyo'), ['JPY', 'HKD', 'CNY', 'USD']);
-  assert.deepEqual(currencyOptions(HK), ['HKD', 'CNY', 'USD']);
-  const all = ['Asia/Saigon', 'Asia/Tokyo', 'Europe/Paris', 'Asia/Calcutta', 'America/New_York'];
-  assert.equal(searchZones('富国岛', all)[0], VN);
-  assert.equal(searchZones('大阪', all)[0], 'Asia/Tokyo');
-  assert.equal(searchZones('saigon', all)[0], VN);
-  assert.equal(searchZones('paris', all)[0], 'Europe/Paris');
-  assert.equal(searchZones('kolkata', all)[0], 'Asia/Kolkata');
-  assert.deepEqual(searchZones('', all), []);
-  assert.deepEqual(searchZones('zzzz', all), []);
-  assert.equal(canonicalZone('Asia/Katmandu'), 'Asia/Kathmandu');
-  assert.equal(zoneSummary(VN, new Date('2027-01-08T00:00:00Z')), '越南 · UTC+7 · 比香港慢 1 小时');
-  assert.equal(zoneSummary('Asia/Taipei', new Date('2027-01-08T00:00:00Z')), '台湾 · UTC+8 · 和香港时间相同');
-});
-
-test('新建行程的源码里没有写死的界面颜色（主题色预设不带 #，写数据时才补上）', () => {
-  const src = readFileSync(fileURLToPath(new URL('../../src/sheets/trip-new/model.js', import.meta.url)), 'utf8');
-  assert.equal(/['"`]#[0-9a-fA-F]{6}['"`]/.test(src), false);
-});
 
 // ---------------------------------------------------------------------
 // 邀请

@@ -7,7 +7,8 @@
 //   ForecastCard    目的地天气预报（每天一行，useTripWeather；超出 16 天「出发前一周可看」）
 //   TodayWeatherCard 今天的天气和日出日落（进行中）
 //   DaysSection     每天概要卡（列表 ↔ 网格，FLIP），点进那一天
-//   StayCard        今晚住哪（酒店 + 导航 / 叫 Grab / 给司机看 / 打电话）
+//   StayCard        今晚住哪（酒店 + 按目的地档案的一排：导航 / 叫车 / 给司机看 / 打电话）
+//   LocalCard       「当地」小卡：两行——紧急电话（点了直接拨）、插座和小费；右上「当地须知」进贴士页（data/dest.js 的 localSummary）
 //   FlightCard      回程航班（最后一天）
 //   OverviewSkeleton 加载中的骨架
 // =====================================================================
@@ -32,6 +33,8 @@ import {
   flightView, stayShortName,
 } from './model.js';
 import { FlightBlock } from './Countdown.jsx';
+import { tripProfile, localSummary } from '../../data/dest.js';
+import './local.css';
 
 const TODO_LIST_LABEL = { confirm: '待确认', todo: '待办', buy: '要买', packing: '打包' };
 const READ_ONLY_NOTE = '你是只读成员，不能勾选';
@@ -476,7 +479,8 @@ export function StayCard({ stay, day, trip, tripId, canEdit, isLast, first = fal
           </p>
         )}
         {place ? (
-          <PlaceActions place={place} actions={['nav', 'grab', 'driver']} call primary={first ? 'grab' : undefined} readOnly={!canEdit} testId="ov-stay-actions" />
+          // 按目的地档案（打车为主的地方：导航 · 叫车 · 给司机看；自驾的只有导航）；傍晚以后叫车放第一个做主按钮
+          <PlaceActions place={place} call prefer={first ? 'ride' : undefined} noCopy readOnly={!canEdit} testId="ov-stay-actions" />
         ) : (
           <p class="ov-note">这个预订还没关联地点：在预订详情里补上地点就能导航、叫车。</p>
         )}
@@ -485,6 +489,42 @@ export function StayCard({ stay, day, trip, tripId, canEdit, isLast, first = fal
           <Glyph name="chev-r" size={16} stroke={2.2} />
         </button>
       </div>
+    </Card>
+  );
+}
+
+/**
+ * 「当地」小卡（出发前、进行中）：紧急电话一行（点了直接拨）、插座 · 小费一行；没核过的地区只写钱和叫车。
+ * 认不出是哪儿（中性档案）不显示。
+ * @param {{ store: object, tripId: string }} props
+ */
+export function LocalCard({ store, tripId }) {
+  const s = localSummary(tripProfile(store));
+  if (!s) return null;
+  const line = [s.plugShort, s.tipShort].filter(Boolean).join(' · ') || [s.money, s.ride].filter(Boolean).join(' · ');
+  if (!s.sos.length && !line) return null;
+  return (
+    <Card
+      eyebrow={`当地 · ${s.name}`}
+      action={(
+        <a class="ov-local__more" href={href({ name: 'tips', params: { tripId } })} data-press="highlight" data-testid="ov-local-more">
+          <span>当地须知</span>
+          <Glyph name="chev-r" size={14} stroke={2.2} />
+        </a>
+      )}
+      testId="ov-local"
+    >
+      {s.sos.length > 0 && (
+        <p class="ov-local__sos" data-testid="ov-local-sos">
+          {s.sos.map((n) => (
+            <a key={n.number} class="ov-local__tel" href={`tel:${n.number}`} data-press="scale" aria-label={`${n.label} ${n.number}，拨打`}>
+              <span>{n.label}</span>
+              <b class="t-label">{n.number}</b>
+            </a>
+          ))}
+        </p>
+      )}
+      {line && <p class="ov-local__line" data-testid="ov-local-line">{line}</p>}
     </Card>
   );
 }

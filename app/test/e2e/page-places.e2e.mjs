@@ -364,7 +364,8 @@ test('地点详情：从底部升起（关掉后焦点回到卡片）；名字�
     assert.equal(await page.$eval(T('place-sheet-title'), (el) => el.textContent), SEAFOOD.name);
     assert.equal(await page.$eval(T('place-sheet-local'), (el) => el.textContent), SEAFOOD.name_local);
     const actions = await page.$$eval(`${T('place-sheet-actions')} [data-action]`, (els) => els.map((e) => e.dataset.action));
-    assert.deepEqual(actions, ['nav', 'grab', 'driver', 'copy', 'call', 'expense']);
+    // 批 A：动作键 grab 改名 ride（叫哪家按目的地档案，越南还是「叫 Grab」）
+    assert.deepEqual(actions, ['nav', 'ride', 'driver', 'copy', 'call', 'expense']);
     assert.equal(await page.$eval(`${T('place-sheet-actions')} [data-action="nav"]`, (el) => el.getAttribute('href')), googleMapsNavigateUrl(SEAFOOD, { mode: 'driving' }));
     await page.screenshot({ path: path.join(SHOTS, 'place-medium.png'), captureBeyondViewport: false });
     await largeSheet(page);
@@ -430,7 +431,7 @@ test('下车点：园中厨房的叫车提示、下车点能点过去；云屿�
     // 云屿
     await app.go(`#/t/demo-island/places?sheet=place:${CLOUD.id}`);
     await waitPlaceSheet(page, CLOUD.id);
-    assert.equal(await page.$eval(`${T('place-sheet-actions')} [data-action="grab"] .k-act__label`, (el) => el.textContent), '去缆车站');
+    assert.equal(await page.$eval(`${T('place-sheet-actions')} [data-action="ride"] .k-act__label`, (el) => el.textContent), '去缆车站');
     assert.ok(await page.$(T('place-sheet-approx')), '大概位置');
     await largeSheet(page);
     assert.match(await page.$eval(T('place-sheet-facts'), (el) => el.textContent), /开车到不了/);

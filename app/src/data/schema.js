@@ -54,7 +54,8 @@ export const ENUMS = Object.freeze({
   'tips.kind': ['warning', 'tip', 'template', 'phrase', 'info'],
   'expenses.category': ['餐饮', '交通', '住宿', '购物', '门票', '活动', '其他'],
   /** items.transport_in.options[].mode、days.route_plan.mode */
-  transportMode: ['walk', 'metro', 'bus', 'taxi', 'grab', 'scooter', 'bicycle', 'ferry', 'train', 'hsr', 'flight', 'car', 'cable_car', 'other'],
+  // subway（导入数据里的地铁写法）、transfer（有人接：包车、接送、跟团、酒店接驳）和规则包 rules/how.js 的 MODES 一致（批 A）
+  transportMode: ['walk', 'metro', 'subway', 'bus', 'taxi', 'grab', 'scooter', 'bicycle', 'ferry', 'train', 'hsr', 'flight', 'car', 'cable_car', 'transfer', 'other'],
 });
 
 /** 表结构。键的顺序 = 数据库里列的顺序。 */

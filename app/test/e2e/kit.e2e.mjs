@@ -321,7 +321,8 @@ test('动作行：导航、Grab 的链接和 lib/ 生成的一致；点导航同
     assert.equal(hrefs.nav, nav);
     assert.equal(new URL(nav).searchParams.get('destination'), `${HOTEL.lat},${HOTEL.lng}`);
     assert.equal(new URL(nav).searchParams.get('travelmode'), 'driving');
-    assert.equal(hrefs.grab, grabBookingUrl(HOTEL));
+    // 批 A：动作键 grab 改名 ride（叫哪家按目的地档案，越南还是「叫 Grab」）
+    assert.equal(hrefs.ride, grabBookingUrl(HOTEL));
     assert.equal(hrefs.call, 'tel:+0000000000001');
     // 没坐标的：导航按名字 + 地址
     const noCoordsNav = await page.$eval(`${T('kit-pa-address-only')} [data-action="nav"]`, (el) => el.getAttribute('href'));
@@ -339,7 +340,7 @@ test('动作行：导航、Grab 的链接和 lib/ 生成的一致；点导航同
     assert.match(await hash(page), /^#\/dev\/kit/, '还在原页（204）');
 
     // 点 Grab：剪贴板先有「当地语名 + 地址」，1.5 秒后提示
-    await page.click(`${T('kit-pa-hotel')} [data-action="grab"]`);
+    await page.click(`${T('kit-pa-hotel')} [data-action="ride"]`);
     await sleep(300);
     assert.equal(opened.at(-1), grabBookingUrl(HOTEL));
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), addressForCopy(HOTEL));
@@ -620,12 +621,12 @@ test('全部页面（正式版）：每一页都能打开、读到数据、没�
     await app.go('#/trips');
     await page.waitForSelector(T('trip-demo-island'));
     assert.equal((await page.$$('[data-testid^="trip-demo-"]')).length, 3);
-    // 每天页带 ?item=：那一条原地展开，下面有它的动作行（叫 Grab）
+    // 每天页带 ?item=：那一条原地展开，下面有它的动作行（批 A：按「这一项怎么去」给按钮，做完了的收进「⋯」）
     const it = island('items').find((x) => x.place_id && x.day_id && x.variant === 'primary');
     const day = island('days').find((d) => d.id === it.day_id);
     await app.go(`#/t/demo-island/day/${day.date}?item=${it.id}`);
     await page.waitForSelector(`${T(`item-${it.id}`)} .xcard__header[aria-expanded="true"]`, { timeout: 10000 });
-    await page.waitForSelector(`${T(`item-actions-${it.id}`)} [data-action="grab"]`, { timeout: 10000 });
+    await page.waitForSelector(`${T(`item-actions-${it.id}`)} .k-act`, { timeout: 10000 });
     // 旧版快捷方式 ?go=ledger：替换到当前行程的账本
     await page.evaluate(() => { location.hash = '#/trips?go=ledger'; });
     await page.waitForFunction(() => /^#\/t\/demo-island\/ledger/.test(location.hash), { timeout: 8000 });

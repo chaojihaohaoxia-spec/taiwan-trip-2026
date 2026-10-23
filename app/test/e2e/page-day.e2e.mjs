@@ -318,15 +318,18 @@ test('原地展开：点一张展开、再点另一张时前一张收起（一�
     const body = await page.$eval(T(`item-${DIVE.id}`), (el) => ({
       transport: Boolean(el.querySelector('[data-testid="tl-transport"]')),
       cost: el.querySelector('[data-testid="tl-cost"]')?.textContent || '',
-      acts: [...el.querySelectorAll('.k-act')].map((a) => a.textContent.trim()),
+      acts: [...el.querySelectorAll('.k-act:not(.k-act--more)')].map((a) => a.textContent.trim()),
+      moreToggle: Boolean(el.querySelector('.k-act--more')),
       more: [...el.querySelectorAll('.tl-act')].map((a) => a.textContent.trim()),
       booking: Boolean(el.querySelector('[data-testid="tl-booking"]')),
       done: Boolean(el.querySelector(`[data-testid="tl-done-${el.dataset.itemId}"]`)),
     }));
     assert.equal(body.transport, true);
     assert.ok(body.booking, '浮潜有关联预订（价格看预订，费用估算不重复写）');
-    // 动作行一排四个（样稿 04）；「复制地址」挪到地址那一行（点地址就复制），「评级」在下面一排（视觉评审 P2-13、现场走查 P2-10）
-    assert.deepEqual(body.acts, ['导航', '叫 Grab', '给司机看', '记一笔']);
+    // 动作行按「这一项怎么去」（批 A）：浮潜写了步行过去 → 只给导航（+ 记一笔），叫车、给司机看收进最后的「⋯」；
+    // 「复制地址」挪到地址那一行（点地址就复制），「评级」在下面一排（视觉评审 P2-13、现场走查 P2-10）
+    assert.deepEqual(body.acts, ['导航', '记一笔']);
+    assert.equal(body.moreToggle, true, '最后一格是「⋯」');
     assert.deepEqual(body.more, ['打卡', '写日记', '评级', '编辑']);
     const actRows = await page.$eval(T(`item-${DIVE.id}`), (el) => new Set([...el.querySelectorAll('.k-act')].map((a) => Math.round(a.getBoundingClientRect().top))).size);
     assert.equal(actRows, 1, '动作行一排放下');
@@ -338,15 +341,21 @@ test('原地展开：点一张展开、再点另一张时前一张收起（一�
   }
 });
 
-test('动作行：导航 / 叫 Grab 的链接和 lib/ 一致（步行到的条目导航按步行）；「记一笔」打开记一笔面板并预填这一条', async () => {
+test('动作行：导航 / 叫 Grab 的链接和 lib/ 一致（步行到的条目导航按步行；叫车在「⋯」里临时用）；「记一笔」打开记一笔面板并预填这一条', async () => {
   const app = await openDay(D2);
   const { page } = app;
   try {
     await expand(app, DIVE.id);
     const place = placeById(DIVE.place_id);
-    const links = await page.$eval(T(`item-actions-${DIVE.id}`), (el) => Object.fromEntries([...el.querySelectorAll('.k-act')].map((a) => [a.dataset.action, a.getAttribute('href')])));
+    const links = await page.$eval(T(`item-actions-${DIVE.id}`), (el) => Object.fromEntries([...el.querySelectorAll('.k-act[data-action]')].map((a) => [a.dataset.action, a.getAttribute('href')])));
     assert.equal(links.nav, googleMapsNavigateUrl(place, { mode: 'walk' }), '步行过去 → 导航按步行');
-    assert.equal(links.grab, grabBookingUrl(place, { getPlace: placeById }));
+    assert.equal(links.ride, undefined, '走路的条目不给叫车（批 A）');
+    // 「⋯」：下雨了想打车——点开多一排，这一次临时能叫 Grab（不写库）
+    await tap(page, T(`item-actions-${DIVE.id}-more`));
+    await page.waitForSelector(T(`item-actions-${DIVE.id}-more-row`));
+    const more = await page.$eval(T(`item-actions-${DIVE.id}-more-row`), (el) => Object.fromEntries([...el.querySelectorAll('.k-act')].map((a) => [a.dataset.action, a.getAttribute('href')])));
+    assert.equal(more.ride, grabBookingUrl(place, { getPlace: placeById }));
+    assert.ok('driver' in more, '「⋯」里也能给司机看');
     await tap(page, `${T(`item-actions-${DIVE.id}`)} [data-action="expense"]`);
     await page.waitForFunction((id) => location.hash.includes(`sheet=expense:i.${id}`), {}, DIVE.id);
     assert.match(await hash(page), /sheet=expense:i\.[0-9a-f-]+/);

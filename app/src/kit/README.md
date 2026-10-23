@@ -146,6 +146,14 @@ kit 只给**按需加载**的页面、弹层、外壳的按需面板用：首屏
 
 条目展开、地点面板、地图面板、预订（酒店 / 餐厅）里**都用它**。逻辑在 `place-actions.js` 的 `placeActionModel()`（单元测试覆盖链接、禁用、说明）。
 
+**批 A 起按「这一项怎么去」给按钮**（规则包 `rules/how.js`，两端同一套；`data/dest.js` 的 `itemHow` / `placeHow` 接好数据）：
+- 每天页、概览「接下来」传 `how={itemHow(store, item)}`：打车才给「叫车 + 给司机看」，走路 / 自己骑只给导航，同一个地方只留一行灰字，
+  有人接给「给司机看 + 打电话」，坐飞机给「值机 · 登机牌 · 航班动态」；最后一格很淡的「⋯」临时用其余动作（不写库）。
+- 地点页、预订卡、住处卡不传 `how`：按地点所在行程的目的地档案（`placeActions`）+ 复制地址；住处卡 `prefer="ride" noCopy`。
+- 动作键 `grab` 改名 `ride`（点名 `'grab'` 照样认）；按钮上的字按档案：「叫 Grab」「叫 Uber」，网页带不了目的地的 App（GO、滴滴…）
+  写「叫 GO」+ 小字「复制地址」，点了先复制再提示自己打开。导航按档案选地图（内地高德、韩国 Naver）。
+- 新参数：`how`、`profile`、`booking`、`showHint`、`plain`、`prefer`、`noCopy`、`noMore`；测试 `test/unit/kit.how.test.js`、`test/e2e/page-how.e2e.mjs`。
+
 | 参数 | 说明 |
 |---|---|
 | `place` | places 行（或同样字段的对象：`id trip_id name name_local name_en address phone lat lng coord_precision maps_url google_place_id extra`） |
@@ -234,7 +242,7 @@ kit 只给**按需加载**的页面、弹层、外壳的按需面板用：首屏
 - **`day-tone.js`**：第几天的颜色（tokens `--color-day-1…7`，一组低饱和的大地色：跟主题走；`--color-day-N-deep`：两种主题一样的深色调）。
   「杂志纸本」里**只在地图上用**（图钉、路线、筛选小点）；页面上的 D1–D4 是墨色的字。`dayToneIndex(n)` 7 天一轮、不合法 8（灰）；`dayTone(n)`、`dayToneDeep(n)` 返回 CSS 值。
 - **`DayBadge.jsx`**：「D1」徽章 `<DayBadge n size="sm|md|lg" today />`：墨色的字（小号系统字体，中号、大号宋体），今天海色；不是色块。
-- **`place-actions.js`**：`rideHintOfMode(mode)` / `rideHintFor(transport_in)`——交通方式 → 主按钮（走路 = 导航、打车 = 叫 Grab）和导航方式，每天页和概览同一套。
+- **`place-actions.js`**：`rideHintOfMode(mode)` / `rideHintFor(transport_in)`——旧接口（交通方式 → 主按钮 `nav` / `ride` 和导航方式），只剩 `pages/day/model.js` 的 `rideHint` 和测试在用；每天页、概览的按钮已经改走规则包（`placeActionModel(place, { how })`）。
 - **`status.js`**：`deadlineWhen(until, { timeZone, at })`——截止正好零点写成前一天「24:00（周五深夜）」；`freeCancelInfo` 用它。
 - **`MoneyText`**：新参数 `hkdValue`（已经算好的折合港币，例如记账时记下的 `amount_home`）：给了就不再按汇率估，同一屏的合计、小计、每一行同一套数。
 - **`SwipeRow`**：拉到底执行时约 180ms 的缓出补间滑出去就执行（不等弹簧停稳）；焦点在这一行里（键盘删除）时，执行后焦点放到下一行（没有就上一行）。

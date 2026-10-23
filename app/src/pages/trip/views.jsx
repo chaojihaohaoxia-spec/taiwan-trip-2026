@@ -1,11 +1,11 @@
 // =====================================================================
 // pages/trip/views.jsx：按阶段把卡片排好（“这一刻最需要什么”排前面，顺序由 model.js 的 upcomingOrder / ongoingOrder 决定）。
 //
-//   <UpcomingView …>  出发前：倒计时 + 去程航班 → 出发前待办 → 免费取消截止 → 打包进度 → 天气预报 → 每天概要（四天目录）
+//   <UpcomingView …>  出发前：倒计时 + 去程航班 → 出发前待办 → 免费取消截止 → 打包进度 → 天气预报 →「当地」小卡 → 每天概要（四天目录）
 //                     （不到 1 天就截止的免费取消紧跟倒计时；3 天内出发且还有没打包的，打包提前；7 天内出发天气提前）。
 //                     备选池不在概览上（在地点页）。
 //   <OngoingView …>   进行中（「杂志纸本」：一屏一个主角，约 2.4 屏）：现在 / 接下来 →（最后一天：回程航班）→ 今晚住哪
-//                     → 天气一行 → 今天的待办 → 免费取消截止 → 明天。今天的时间轴缩略、今天花了、备选池、每天安排都不渲染
+//                     → 天气一行 → 今天的待办 → 免费取消截止 → 明天 →「当地」小卡（紧急电话一直在）。今天的时间轴缩略、今天花了、备选池、每天安排都不渲染
 //                     （和那一天的页面、账本、地点页、天数条重复）。
 //   <EndedView …>     结束后：（封面照片）→ 回顾（路线速写）→（还没有照片：补照片）→ 总花费 → 结算 → 每天一张照片 → 评级最高 → 日记摘录 → 每天概要
 //
@@ -15,7 +15,7 @@
 import { useFx } from '../../lib/services/fx.js';
 import { CountdownHero } from './Countdown.jsx';
 import {
-  TodoCard, DeadlinesCard, PackingCard, ForecastCard, TodayWeatherCard, DaysSection, StayCard, FlightCard,
+  TodoCard, DeadlinesCard, PackingCard, ForecastCard, TodayWeatherCard, DaysSection, StayCard, FlightCard, LocalCard,
 } from './cards-shared.jsx';
 import { NowCard, TomorrowCard } from './cards-ongoing.jsx';
 import {
@@ -28,6 +28,12 @@ import {
 
 
 const HOURS_3 = 3 * 60 * 60_000;
+
+/** 「当地」小卡排在哪：出发前在每天概要前面，进行中放最后（顺序表在 model.js，这一张不参与排序） */
+function withLocal(order, before) {
+  const i = before ? order.indexOf(before) : -1;
+  return i >= 0 ? [...order.slice(0, i), 'local', ...order.slice(i)] : [...order, 'local'];
+}
 
 /** 天气查询：行程那几天，每天用当晚住处的坐标（没有用分段中心），见 lib/services/weather.js */
 function weatherQuery(store, trip, days) {
@@ -89,8 +95,9 @@ export function UpcomingView({ store, tripId, trip, at }) {
     packing: <PackingCard key="packing" todos={c.todos} nameOf={c.nameOf} tripId={tripId} />,
     weather: <ForecastCard key="weather" tripId={tripId} trip={trip} days={c.days} query={weatherQuery(store, trip, c.days)} />,
     days: <DaysSection key="days" store={store} tripId={tripId} trip={trip} days={c.days} today={null} returnFlight={c.back} />,
+    local: <LocalCard key="local" store={store} tripId={tripId} />,
   };
-  return <>{order.map((k) => cards[k] || null)}</>;
+  return <>{withLocal(order, 'days').map((k) => cards[k] || null)}</>;
 }
 
 /**
@@ -149,8 +156,9 @@ export function OngoingView({ store, tripId, trip, at }) {
     weather: <TodayWeatherCard key="weather" tripId={tripId} day={day} query={query} nowMinutes={nowMinutes} />,
     deadlines: <DeadlinesCard key="deadlines" list={c.deadlines.list} urgent={c.deadlines.urgent} bookings={c.bookingsMap} timeZone={c.tz} />,
     tomorrow: tomorrow ? <TomorrowCard key="tomorrow" tripId={tripId} day={tomorrow} plan={plans.get(tomorrow.id)} stay={store.stayForDay(tomorrow)} places={c.places} index={c.days.indexOf(tomorrow)} /> : null,
+    local: <LocalCard key="local" store={store} tripId={tripId} />,
   };
-  return <>{order.map((k) => cards[k] || null)}</>;
+  return <>{withLocal(order, null).map((k) => cards[k] || null)}</>;
 }
 
 /**

@@ -31,8 +31,8 @@ export const KIND_LABELS = Object.freeze({
   }),
   expense: Object.freeze({ 餐饮: '餐饮', 交通: '交通', 住宿: '住宿', 购物: '购物', 门票: '门票', 活动: '活动', 其他: '其他' }),
   transport: Object.freeze({
-    walk: '步行', metro: '地铁', bus: '巴士', taxi: '出租车', grab: 'Grab', scooter: '摩托', bicycle: '自行车',
-    ferry: '渡轮', train: '火车', hsr: '高铁', flight: '飞机', car: '自驾', cable_car: '缆车', other: '其他',
+    walk: '步行', metro: '地铁', subway: '地铁', bus: '巴士', taxi: '出租车', grab: 'Grab', scooter: '摩托', bicycle: '自行车',
+    ferry: '渡轮', train: '火车', hsr: '高铁', flight: '飞机', car: '自驾', cable_car: '缆车', transfer: '有人接', other: '其他',
   }),
   todo: Object.freeze({ confirm: '待确认', packing: '打包', todo: '待办', buy: '要买' }),
   tip: Object.freeze({ warning: '防坑', tip: '小贴士', template: '消息模板', phrase: '常用语', info: '实用信息' }),
@@ -59,8 +59,8 @@ export const KIND_GLYPHS = Object.freeze({
   }),
   expense: Object.freeze({ 餐饮: 'bowl', 交通: 'car', 住宿: 'bed', 购物: 'bag', 门票: 'ticket', 活动: 'flag', 其他: 'wallet' }),
   transport: Object.freeze({
-    walk: 'walk', metro: 'train', bus: 'bus', taxi: 'car', grab: 'car', scooter: 'scooter', bicycle: 'bike',
-    ferry: 'boat', train: 'train', hsr: 'train', flight: 'plane', car: 'car', cable_car: 'cable', other: 'route',
+    walk: 'walk', metro: 'train', subway: 'train', bus: 'bus', taxi: 'car', grab: 'car', scooter: 'scooter', bicycle: 'bike',
+    ferry: 'boat', train: 'train', hsr: 'train', flight: 'plane', car: 'car', cable_car: 'cable', transfer: 'car', other: 'route',
   }),
   todo: Object.freeze({ confirm: 'check-circle', packing: 'suitcase', todo: 'checklist', buy: 'bag' }),
   tip: Object.freeze({ warning: 'alert', tip: 'bulb', template: 'message', phrase: 'languages', info: 'info' }),

@@ -294,6 +294,9 @@ test('请求格式：POST text/plain（不发预检）、token 放 body、带行
   assert.equal(init.credentials, 'omit');
   assert.equal(init.headers.Authorization, undefined);
   assert.deepEqual(body, { text: '你好', trip: 'phuquoc2026', token: 'tok-1' });
+  // 批 A：多语言只留通路——给了 lang 就带上（给司机看「让 AI 翻一下」按档案的语言）
+  await c.translate('椰影咖啡', { trip: 'phuquoc2026', lang: 'vi' });
+  assert.equal(f.calls[1].body.lang, 'vi');
 });
 
 test('预热：带 warm 和行程、4 分钟内只发一次；刚翻成过也算热；没认成下次再试', async () => {

@@ -15,9 +15,13 @@
 //   parseAmount('450k') → 450000；parseAmount('45万') → 450000；parseAmount('450.000', { currency: 'VND' }) → 450000
 //
 // 金额一律按原币存数字（不带千分位）；越南盾没有小数，港币、人民币最多两位小数（docs/数据结构.md A2）。
+// 币种资料（符号、小数位、要不要用「万」）以规则包 rules/currency.js 为准（两端同一份）：下面 CURRENCIES 的五种和它一字不差，
+// 其余币种（日元、韩元、泰铢、欧元……）的写法、中文名、小数位直接读规则包：formatAmount(1200, 'JPY') → 'JP¥1,200'（¥ 留给人民币）、
+// formatAmountReadable(15000, 'KRW') → '1.5 万韩元'、formatAmount(350, 'THB') → '฿350'。规则包也没有的币种写成 'XYZ 1,000'。
 // =====================================================================
 
 import { formatNumber, roundTo, numberSlots } from './number.js';
+import { CURRENCIES as RULE_CURRENCIES } from '../rules/currency.js';
 
 /** 1 单位外币 ≈ 多少港币（用户定的固定汇率）。没有列出的币种不标折合港币。 */
 export const APPROX_HKD_PER_UNIT = Object.freeze({
@@ -44,7 +48,12 @@ export const CURRENCIES = Object.freeze({
   USD: Object.freeze({ name: '美元', prefix: 'US$', decimals: null, minor: 2 }),
 });
 
-/** 其他币种只认中文名和小数位（写法退回 'JPY 1,000'，也不标折合港币） */
+/** 规则包里有、上面没列的币种：写法、中文名、小数位按规则包（不标折合港币，除非有实时汇率） */
+const RULE_STYLES = Object.freeze(Object.fromEntries(Object.entries(RULE_CURRENCIES)
+  .filter(([c]) => !CURRENCIES[c])
+  .map(([c, r]) => [c, Object.freeze({ name: r.zh, prefix: r.pre || '', suffix: r.suf || '', decimals: r.dec ?? null, minor: r.minor, wan: Boolean(r.wan) })])));
+
+/** 规则包也没有的币种只认中文名和小数位（写法退回 'CLP 1,000'，也不标折合港币） */
 const OTHER_CURRENCIES = Object.freeze({
   JPY: { name: '日元', minor: 0 },
   KRW: { name: '韩元', minor: 0 },
@@ -75,13 +84,13 @@ export function normalizeCurrency(currency) {
 /** 币种中文名：'VND' → '越南盾'；不认识的原样返回代码 */
 export function currencyName(currency) {
   const c = normalizeCurrency(currency);
-  return CURRENCIES[c]?.name || OTHER_CURRENCIES[c]?.name || c;
+  return CURRENCIES[c]?.name || RULE_STYLES[c]?.name || OTHER_CURRENCIES[c]?.name || c;
 }
 
 /** 存储/计算保留几位小数：VND 0、HKD 2；不认识的币种按 2 */
 export function currencyMinorUnits(currency) {
   const c = normalizeCurrency(currency);
-  return CURRENCIES[c]?.minor ?? OTHER_CURRENCIES[c]?.minor ?? 2;
+  return CURRENCIES[c]?.minor ?? RULE_STYLES[c]?.minor ?? OTHER_CURRENCIES[c]?.minor ?? 2;
 }
 
 /** 按币种的小数位四舍五入（存库前、算分摊时用） */
@@ -92,7 +101,7 @@ export function roundMoney(amount, currency) {
 }
 
 function styleOf(c) {
-  return CURRENCIES[c] || { prefix: `${c} `, decimals: null };
+  return CURRENCIES[c] || RULE_STYLES[c] || { prefix: `${c} `, decimals: null };
 }
 
 /**
@@ -150,9 +159,10 @@ export function formatAmountReadable(amount, currency) {
   const n = Number(amount);
   const c = normalizeCurrency(currency);
   if (amount === null || amount === undefined || amount === '' || !Number.isFinite(n)) return '—';
-  if (!CURRENCIES[c]?.wan) return formatAmount(n, c);
+  const style = styleOf(c);
+  if (!style.wan) return formatAmount(n, c);
   const body = formatWan(n);
-  return `${body}${/[万亿]$/.test(body) ? '' : ' '}${CURRENCIES[c].name}`;
+  return `${body}${/[万亿]$/.test(body) ? '' : ' '}${style.name}`;
 }
 
 /**
@@ -246,7 +256,7 @@ export function formatMoneyRange(min, max, currency, opts = {}) {
   const style = styleOf(c);
   // 共用符号：'NT$200–300'、'200,000–300,000₫'；“万”写法时 '20 万–30 万越南盾'
   let main;
-  if (opts.readable && CURRENCIES[c]?.wan) {
+  if (opts.readable && style.wan) {
     main = `${formatWan(min)}–${formatAmountReadable(max, c)}`;
   } else {
     const strip = (s) => s.replace(style.prefix || '\u0000', '').replace(style.suffix || '\u0000', '');

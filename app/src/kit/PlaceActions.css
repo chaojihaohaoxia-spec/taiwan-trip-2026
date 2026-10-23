@@ -2,11 +2,15 @@
    kit/PlaceActions.css：动作行（.k-acts）。
    「杂志纸本」完整版：一行纯文字链接（海色字、没有图标、没有灰方块），上面一根细线，中间用短竖线隔开；
    多于 4 个时折成两行（每行 --k-acts-cols 个）。主要动作（primary）字重一点。
+   最后一格很淡的「⋯」（--k-acts-more 宽）：点开下面多一排这一次临时能用的其余动作（次要色）。
+   规则说不用按钮时（同一个地方、做完了）：一行灰字 +「⋯」（.k-acts--quiet）。
+   叫车 App 网页带不了目的地（GO、滴滴）：按钮两行，下面一行小字「复制地址」。
    紧凑版：一排 44px 的纸片圆（图标，读屏有名字）。
    ===================================================================== */
 
 .k-acts {
   --k-acts-cols: 4;
+  --k-acts-more: 44px;
 }
 
 .k-acts__row {
@@ -49,6 +53,94 @@
   white-space: nowrap;
 }
 
+/* 「叫 GO」下面一行小字「复制地址」 */
+.k-act--sub .k-act__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.k-act__sub {
+  color: var(--color-text-3);
+  font: var(--type-caption-2);
+  font-weight: var(--weight-regular);
+  letter-spacing: 0;
+}
+
+/* 地点只有名字：按钮照画，颜色退一档（下面一行说明为什么） */
+.k-act--weak {
+  color: var(--color-text-2);
+}
+
+/* 最后一格是「⋯」的那一排：多一条 --k-acts-more 宽的轨道（没有「⋯」时不加，不然折行的按钮会落进空轨道） */
+.k-acts__row--more {
+  grid-template-columns: repeat(var(--k-acts-cols), minmax(0, 1fr)) var(--k-acts-more);
+}
+
+/* 「⋯」：很淡，不抢主按钮 */
+.k-act--more {
+  min-width: 44px;
+  padding: 0;
+  color: var(--color-text-3);
+}
+
+.k-act--more[aria-expanded="true"] {
+  color: var(--color-text-2);
+}
+
+/* 点开「⋯」以后多的那一排：次要色、不加粗，只用这一次 */
+.k-acts__more {
+  border-top-style: dashed;
+  animation: k-acts-in var(--dur-fast) var(--ease-out) both;
+}
+
+.k-acts__more .k-act {
+  color: var(--color-text-2);
+  font-weight: var(--weight-regular);
+}
+
+@keyframes k-acts-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k-acts__more { animation: none; }
+}
+
+/* 不用按钮的一行：灰字 +「⋯」 */
+.k-acts__quiet {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  border-top: 1px solid var(--color-separator);
+}
+
+.k-acts__quiet-text {
+  flex: 1;
+  min-width: 0;
+  color: var(--color-text-3);
+  font: var(--type-footnote);
+}
+
+.k-acts__quiet .k-act::before,
+.k-acts__tail .k-act::before {
+  display: none;
+}
+
+/* 灰字那一行右边的「记一笔」：和「⋯」并排，文字按钮 */
+.k-acts__quiet .k-act:not(.k-act--more) {
+  flex: none;
+  padding: 0 10px;
+}
+
+.k-acts__tail {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .k-act[data-pressed] {
   background-color: var(--color-fill);
 }
@@ -69,7 +161,8 @@
 }
 
 /* 紧凑：一排纸片圆（图标） */
-.k-acts--compact .k-acts__row {
+.k-acts--compact .k-acts__row,
+.k-acts--compact .k-acts__quiet {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -89,6 +182,11 @@
 
 .k-acts--compact .k-act::before {
   display: none;
+}
+
+.k-acts--compact .k-act--more {
+  background: transparent;
+  box-shadow: none;
 }
 
 .k-acts--compact .k-act--primary {

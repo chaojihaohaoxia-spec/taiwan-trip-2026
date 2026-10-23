@@ -18,7 +18,7 @@ export { KindIcon } from './KindIcon.jsx';
 export { Glyph } from './Glyph.jsx';
 export { StatusChip, PhaseChip, PersonChip, CountdownText, DateLabel } from './Chips.jsx';
 export { CopyText } from './CopyText.jsx';
-export { PlaceActions, callGrab } from './PlaceActions.jsx';
+export { PlaceActions, callGrab, callRide } from './PlaceActions.jsx';
 export { PageEmptyState, ErrorState, Illustration, PRESETS as EMPTY_PRESETS } from './States.jsx';
 export { InlineAdd } from './InlineAdd.jsx';
 export { SwipeRow } from './SwipeRow.jsx';

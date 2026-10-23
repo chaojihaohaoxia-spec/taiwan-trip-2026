@@ -167,7 +167,8 @@ test('怎么过去：推荐的那种走法做主；时长、距离、费用（�
 
 test('交通方式 → 动作行的主按钮和导航方式：步行 → 导航（步行）；打车 / Grab → 叫 Grab；缆车 / 飞机 → 不指定', () => {
   assert.deepEqual(rideHint(transportView({ options: [{ mode: 'walk' }] })), { primary: 'nav', navMode: 'walk' });
-  assert.deepEqual(rideHint(transportView({ options: [{ mode: 'grab' }] })), { primary: 'grab', navMode: 'driving' });
+  // 批 A：主按钮的键 grab 改名 ride（每天页的动作行已经改用 rules/how.js 的 howToGet，rideHint 只剩旧调用）
+  assert.deepEqual(rideHint(transportView({ options: [{ mode: 'grab' }] })), { primary: 'ride', navMode: 'driving' });
   assert.deepEqual(rideHint(transportView({ options: [{ mode: 'bus' }] })), { primary: 'nav', navMode: 'bus' });
   assert.deepEqual(rideHint(transportView({ options: [{ mode: 'cable_car' }] })), { primary: null, navMode: null });
   assert.deepEqual(rideHint(null), { primary: null, navMode: null });

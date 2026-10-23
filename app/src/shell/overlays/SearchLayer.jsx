@@ -27,6 +27,7 @@ import { SearchResults, optionId } from '../../kit/search/SearchResults.jsx';
 import { Glyph } from '../../kit/Glyph.jsx';
 import { searchQuery, recentSearches, rememberSearch, clearRecentSearches, searchExiting } from '../search-state.js';
 import { tripStore, currentTripId } from '../trip-state.js';
+import { tripProfile } from '../../data/dest.js';
 
 const DEBOUNCE_MS = 120;
 const ID = 'shell-search';
@@ -44,6 +45,7 @@ export default function SearchLayer() {
   const open = Boolean(route.value?.sheets?.some((s) => s.id === 'search'));
   const tripId = currentTripId.value;
   const store = tripStore.value;
+  const toneHint = Boolean(store) && tripProfile(store).lang === 'vi';
   const q = searchQuery.value;
   const [query, setQuery] = useState(q);
   const [active, setActive] = useState(-1);
@@ -233,7 +235,8 @@ export default function SearchLayer() {
             </div>
           </div>
         ) : (
-          <p class="search-hint">越南语不用打声调</p>
+          // 去声调的提示只在当地语言是越南语这类带声调的拉丁字母时写（目的地档案）
+          toneHint && <p class="search-hint">越南语不用打声调</p>
         )}
       </div>
     </div>

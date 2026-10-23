@@ -52,7 +52,7 @@ export function SearchResults({ groups = [], query = '', activeIndex = -1, onAct
   if (!groups.length) {
     return (
       <div class={className ? `k-sres ${className}` : 'k-sres'} data-testid="search-results">
-        <PageEmptyState preset="search" compact description={emptyText || `没有和「${query.trim()}」有关的内容。中文、英文、不带声调的越南语都可以搜。`} />
+        <PageEmptyState preset="search" compact description={emptyText || `没有和「${query.trim()}」有关的内容。中文、英文、当地文字都可以搜，不用打声调。`} />
       </div>
     );
   }

@@ -2,11 +2,12 @@
 // sheets/driver/translation.js：「给对方看」一句翻译（driver 弹层的参数是 tr.<id>）。
 //
 // 翻译页的句子不在行程数据里，存在这台手机的 localStorage（lib/translate/store.js：最近翻过、收藏）——
-// 所以刷新、没网也能打开。版式：越南语最大，下面英语（副标题那一行），最下面小字是自己写的中文。
+// 所以刷新、没网也能打开。版式：当地语（现在只有越南语）最大，下面英语（副标题那一行），最下面小字是自己写的中文。
 // =====================================================================
 
 import { local } from '../../lib/storage.js';
 import { createPhraseStore } from '../../lib/translate/store.js';
+import { langName } from '../../lib/translate/text.js';
 
 const PREFIX = 'tr.';
 let store = null;
@@ -36,8 +37,8 @@ export function translationCard(arg, phrases) {
     note: row.input,
     phone: null,
     copy: row.vi,
-    copyLabel: '越南语',
+    copyLabel: langName(row.lang || 'vi'),
     badge: '给对方看',
-    lang: 'vi',
+    lang: row.lang || 'vi',
   };
 }

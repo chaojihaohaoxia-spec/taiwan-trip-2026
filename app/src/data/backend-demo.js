@@ -13,6 +13,7 @@
 //   - 触发器：created_at / updated_at / created_by / updated_by、清单勾选时记录 done_at / done_by、
 //     记账的 currency_iso 生成列；
 //   - RPC：create_trip / create_invite / peek_invite / redeem_invite / revoke_invite（邀请码同样只存 sha256）；
+//     平台化批 A 的 create_trip_v2 / set_trip_dates / set_trip_dest / add_household_to_trip（「我们俩」= 演示的两个账号）；
 //   - 文件：路径规则（第一级行程 id、第二级自己的 user id），文件存 IndexedDB，签名链接用 blob: 网址；
 //   - 实时：写入后推送给订阅者（DELETE 只带主键）；多个标签页之间用 BroadcastChannel 同步，
 //     开两个标签页（?demo=1&demouser=cathy）就能看到“对方”改动实时出现；
@@ -24,13 +25,14 @@
 
 import { signal } from '@preact/signals';
 import { TABLES, defaultsFor } from './schema.js';
-import { BUNDLE_TABLES, REFERENCES, UNIQUE, keyColumns, rowKey, validateRow } from './tables.js';
+import { BUNDLE_TABLES, REFERENCES, UNIQUE, keyColumns, rowKey, validateRow, isValidTimeZone } from './tables.js';
 import { DataError } from './errors.js';
-import { newId, toTimestamptz, clone, fnv1a, sleep, emailHandle, isEmail, tsMs } from './util.js';
+import { newId, toTimestamptz, clone, fnv1a, sleep, emailHandle, isEmail, tsMs, isValidDate, addDays, stableStringify } from './util.js';
 import { normalizeCurrency } from './fx.js';
 import { ALLOWED_MIME, MAX_FILE_BYTES } from './config.js';
 import { now as clockNow } from '../lib/clock.js';
 import { searchParam } from '../lib/env.js';
+import { destOk, segDestOk, regionSlug } from '../rules/dest.js';
 
 export const DEMO_PASSWORD = 'demo1234';
 export const DEMO_OTP = '123456';
@@ -445,6 +447,330 @@ export async function createDemoBackend(o) {
   }
 
   // ------------------------------------------------------------------
+  // 平台化 · 批 A 的 RPC（supabase/migrations/20261022090000_platform_a.sql 的同款：
+  // create_trip_v2 / set_trip_dates / set_trip_dest / add_household_to_trip，规则、报错、返回值一样）
+  // ------------------------------------------------------------------
+  /** 演示里的「我们俩」= demo-db.json 里的那两个人（private.household） */
+  const HOUSEHOLD = db.users.map((u) => u.id);
+
+  /** 服务器那边以 SECURITY DEFINER 写入：不看 RLS，照样记 created_by、查约束；改动攒进 changes 一起推送 */
+  function sysInsert(uid, table, values, changes) {
+    const row = fullRow(table, { ...defaultsFor(table), ...clone(values) });
+    if (!row.id && 'id' in TABLES[table].columns) row.id = newId();
+    touchInsert(table, row, uid);
+    checkConstraints(table, row, null);
+    T(table).push(row);
+    changes.push({ table, type: 'INSERT', row: clone(row), old: {} });
+    return row;
+  }
+  function sysUpdate(uid, table, row, patch, changes) {
+    const list = T(table);
+    const i = list.indexOf(row);
+    const next = { ...row, ...clone(patch) };
+    touchUpdate(table, next, row, uid);
+    checkConstraints(table, next, rowKey(table, row));
+    list[i] = next;
+    changes.push({ table, type: 'UPDATE', row: clone(next), old: pkOf(table, row) });
+    return next;
+  }
+  const commit = (changes) => {
+    persist();
+    emit(changes);
+  };
+  const raise = (code, message, extra = {}) => new DataError(message, {
+    kind: code === '42501' ? 'permission' : code === '23505' ? 'conflict' : 'validation', code,
+    cause: { code, message, hint: extra.hint ?? null, details: extra.details ?? null },
+  });
+  const zhMd = (d) => `${Number(d.slice(5, 7))}月${Number(d.slice(8, 10))}日`;
+  const dayDiff = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86_400_000);
+  const isObjV = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+  const blank = (v) => (v === null || v === undefined ? '' : String(v).trim());
+  const numOf = (v) => (typeof v === 'number' ? v : typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v)) ? Number(v) : null);
+  const journalHasContent = (j) => blank(j.body) !== '' || (Array.isArray(j.photos) && j.photos.length > 0) || (j.mood !== null && j.mood !== undefined);
+  const lastLook = (userId, exceptTrip) => T('trip_members')
+    .filter((m) => m.user_id === userId && m.trip_id !== exceptTrip)
+    .sort((a, b) => tsMs(b.joined_at) - tsMs(a.joined_at) || String(a.trip_id).localeCompare(String(b.trip_id)))[0] || null;
+  const membersOf = (tripId) => T('trip_members').filter((m) => m.trip_id === tripId);
+
+  /** 某一天落在哪一段（private.trip_seg_for）：覆盖它的段里开始最晚的；都不覆盖取最近的 */
+  function segFor(tripId, date) {
+    const segs = T('segments').filter((s) => s.trip_id === tripId && s.start_date && s.end_date);
+    if (!segs.length) return null;
+    const covers = (s) => s.start_date <= date && date <= s.end_date;
+    const key = (s) => (covers(s) ? dayDiff(s.start_date, date) : Math.min(Math.abs(dayDiff(s.start_date, date)), Math.abs(dayDiff(s.end_date, date))));
+    return [...segs].sort((a, b) => (covers(b) - covers(a)) || key(a) - key(b) || (a.sort ?? 0) - (b.sort ?? 0) || String(a.id).localeCompare(String(b.id)))[0].id;
+  }
+
+  /** private.starter_todos */
+  function starterTodos(region, home, local) {
+    const r = region || '';
+    return [
+      ['买流量卡或 eSIM', r !== 'HK'],
+      ['换点当地现金', Boolean(local) && local !== (home || 'HKD')],
+      ['网上值机', !['HK', 'MO', 'CN'].includes(r)],
+      ['查入境要求（按你们的护照）', !['HK', 'CN'].includes(r)],
+    ].filter(([, keep]) => keep).map(([title]) => ({ list: 'todo', title }));
+  }
+
+  /** private.add_household：自己在「我们俩」里才拉得动 */
+  function addHousehold(tripId, uid, changes) {
+    if (!HOUSEHOLD.includes(uid)) return { added: [], in_household: false };
+    const added = [];
+    for (const other of HOUSEHOLD) {
+      if (other === uid || memberRow(tripId, other)) continue;
+      const user = userOf(other);
+      const look = lastLook(other, tripId);
+      const member = fullRow('trip_members', { trip_id: tripId, user_id: other, email: user?.email || null, role: 'editor', joined_at: stamp(), display_name: look?.display_name ?? null, color: look?.color ?? null });
+      T('trip_members').push(member);
+      changes.push({ table: 'trip_members', type: 'INSERT', row: clone(member), old: {} });
+      added.push(other);
+    }
+    return { added, in_household: true };
+  }
+
+  function createTripV2(uid, p) {
+    if (!uid) throw raise('42501', '需要先登录');
+    if (!isObjV(p)) throw raise('22023', '新建行程的格式不对');
+    const token = blank(p.token);
+    if (!/^[A-Za-z0-9_-]{8,64}$/.test(token)) throw raise('22023', '缺少新建凭据（token），刷新一下再试');
+    state.createTokens = state.createTokens || {};
+    const prev = state.createTokens[`${uid}:${token}`];
+    if (prev && tripRow(prev.trip_id)) return { ...clone(prev), replay: true };
+
+    const title = blank(p.title);
+    if (!title) throw raise('22023', '行程名字不能为空');
+    if (title.length > 100) throw raise('22023', '行程名字太长了');
+    const start = p.start_date || null;
+    const end = p.end_date || null;
+    if (!start || !end) throw raise('22023', '要选出发和回来的日期');
+    if (!isValidDate(start) || !isValidDate(end)) throw raise('22007', '日期或时间的格式不对');
+    if (end < start) throw raise('22023', '回来的日期不能早于出发');
+    if (dayDiff(start, end) > 59) throw raise('22023', '一趟最多 60 天');
+    let segs = p.segments === null || p.segments === undefined ? [] : p.segments;
+    if (!Array.isArray(segs) || segs.length > 5) throw raise('22023', '一趟最多 5 个城市');
+    const tz = blank(p.timezone) || blank(segs[0]?.timezone) || 'Asia/Hong_Kong';
+    if (!isValidTimeZone(tz)) throw raise('22023', '时区不对（例如 Asia/Ho_Chi_Minh）');
+    const home = (blank(p.home_currency) || 'HKD').toUpperCase();
+    const local = blank(p.local_currency) ? blank(p.local_currency).toUpperCase() : null;
+    if (!/^[A-Z]{3}$/.test(home) || (local && !/^[A-Z]{3}$/.test(local))) throw raise('22023', '币种要写三位代码（如 HKD、VND）');
+    let dest = p.dest === undefined || p.dest === null ? null : p.dest;
+    if (!destOk(dest)) throw raise('22023', '目的地的写法不对');
+    if (dest && !('v' in dest)) dest = { v: 1, ...dest };
+    const short = blank(p.short_name) || null;
+    if (short && short.length > 20) throw raise('22023', '简称最多 20 个字');
+    const cover = isObjV(p.cover) ? p.cover : {};
+    if (blank(p.subtitle).length > 200) throw raise('22023', '副标题太长了');
+    const sorted = segs.map((s, i) => ({ s, i, start: (isObjV(s) && s.start_date) || start }))
+      .sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.i - b.i)).map((x) => x.s);
+    let prevEnd = null;
+    for (const s of sorted) {
+      if (!isObjV(s) || !blank(s.name)) throw raise('22023', '每个城市都要有名字');
+      const name = blank(s.name);
+      if (String(s.name).length > 80) throw raise('22023', '城市名字太长了');
+      const ss = s.start_date || start;
+      const se = s.end_date || end;
+      if (ss < start || se > end || se < ss) throw raise('22023', `「${name}」的日期不在这趟的日期里`);
+      if (prevEnd && ss < prevEnd) throw raise('22023', '几个城市的日期重叠了');
+      prevEnd = se;
+      if (blank(s.timezone) && !isValidTimeZone(blank(s.timezone))) throw raise('22023', `「${name}」的时区不对`);
+      const lat = numOf(s.center_lat);
+      const lng = numOf(s.center_lng);
+      if ((lat === null) !== (lng === null) || (lat !== null && Math.abs(lat) > 90) || (lng !== null && Math.abs(lng) > 180)) throw raise('22023', `「${name}」的位置不对`);
+      if (!segDestOk(s.dest ?? null)) throw raise('22023', `「${name}」的目的地写法不对`);
+    }
+    const todos = 'todos' in p && p.todos !== null ? p.todos : starterTodos(dest?.region, home, local);
+    if (!Array.isArray(todos) || todos.length > 12) throw raise('22023', '待办的格式不对');
+    for (const t of todos) {
+      if (!isObjV(t) || !blank(t.title) || !['confirm', 'packing', 'todo', 'buy'].includes(blank(t.list) || 'todo')) throw raise('22023', '待办的格式不对');
+    }
+    const copy = blank(p.copy_from) || null;
+    if (copy && !isMember(copy, uid)) throw raise('42501', '没法从那一趟带清单过来');
+
+    let base = blank(p.id) || null;
+    if (base && !TRIP_ID_RE.test(base)) throw raise('22023', '行程 id 只能用小写字母、数字、- 和 _，2 到 40 位');
+    // 和 SQL 一样：第一个内置城市 id；只选了国家按国家英文名（thailand-2027）
+    if (!base) base = `${typeof dest?.cities?.[0] === 'string' ? dest.cities[0].slice(0, 34) : regionSlug(dest?.region)}-${start.slice(0, 4)}`;
+    let id = base;
+    for (let n = 2; tripRow(id); n++) {
+      if (n > 50) throw raise('23505', `行程 id ${base} 已存在`);
+      id = `${base.slice(0, 40 - String(n).length - 1)}-${n}`;
+    }
+
+    const changes = [];
+    const extra = {};
+    if (dest) extra.dest = dest;
+    if (short) extra.short_name = short;
+    const trip = fullRow('trips', {
+      ...defaultsFor('trips'), id, title, subtitle: blank(p.subtitle) || null, description: null, start_date: start, end_date: end, timezone: tz,
+      home_currency: home, local_currency: local, cover, cover_emoji: blank(cover.emoji) || '✈️', status: 'planning', sort: 0, owner_id: uid, extra,
+    });
+    touchInsert('trips', trip, uid);
+    checkConstraints('trips', trip, null);
+    T('trips').push(trip);
+    changes.push({ table: 'trips', type: 'INSERT', row: clone(trip), old: {} });
+    const me = userOf(uid);
+    const look = lastLook(uid, id);
+    const owner = fullRow('trip_members', { trip_id: id, user_id: uid, email: me?.email || null, role: 'owner', joined_at: stamp(), display_name: look?.display_name ?? null, color: look?.color ?? null });
+    T('trip_members').push(owner);
+    changes.push({ table: 'trip_members', type: 'INSERT', row: clone(owner), old: {} });
+    const partner = p.with_partner === false || p.with_partner === 'false' ? { added: [], in_household: false } : addHousehold(id, uid, changes);
+    trip.extra = { ...trip.extra, party_size: membersOf(id).length };
+
+    if (!sorted.length) {
+      const sd = dest ? { region: dest.region } : null;
+      if (sd && Array.isArray(dest.cities) && dest.cities.length === 1) sd.city = dest.cities[0];
+      sorted.push({ name: short || title, ...(sd ? { dest: sd } : {}) });
+    }
+    sorted.forEach((s, i) => {
+      const segTz = blank(s.timezone) || null;
+      sysInsert(uid, 'segments', {
+        id: blank(s.id) || newId(), trip_id: id, sort: (i + 1) * 10, name: blank(s.name), name_en: blank(s.name_en) || null,
+        start_date: s.start_date || start, end_date: s.end_date || end, center_lat: numOf(s.center_lat), center_lng: numOf(s.center_lng),
+        timezone: segTz && segTz !== tz ? segTz : null, icon: blank(s.icon).slice(0, 8) || null,
+        extra: isObjV(s.dest) ? { dest: clone(s.dest) } : {},
+      }, changes);
+    });
+    let days = 0;
+    for (let d = start; d <= end; d = addDays(d, 1)) {
+      sysInsert(uid, 'days', { trip_id: id, date: d, segment_id: segFor(id, d), title: '', planning_status: 'tbd' }, changes);
+      days += 1;
+    }
+    let packing = 0;
+    if (copy) {
+      const src = T('todos').filter((t) => t.trip_id === copy && t.list === 'packing')
+        .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0) || tsMs(a.created_at) - tsMs(b.created_at) || String(a.id).localeCompare(String(b.id)));
+      for (const t of src) {
+        sysInsert(uid, 'todos', { trip_id: id, list: 'packing', title: t.title, category: t.category ?? null, note: t.note ?? null, qty: t.qty ?? null, sort: t.sort ?? 0, done: false }, changes);
+        packing += 1;
+      }
+    }
+    for (const t of todos) {
+      const list = blank(t.list) || 'todo';
+      const sort = T('todos').filter((x) => x.trip_id === id && x.list === list).reduce((m, x) => Math.max(m, x.sort ?? 0), 0) + 10;
+      sysInsert(uid, 'todos', { trip_id: id, list, title: blank(t.title).slice(0, 200), note: blank(t.note).slice(0, 5000) || null, sort, done: false }, changes);
+    }
+    const res = { trip_id: id, days, segments: sorted.length, packing, todos: todos.length, ...partner, replay: false };
+    state.createTokens[`${uid}:${token}`] = clone(res);
+    // trips 行最后的样子（party_size 补上了）再推一次，和数据库里事务结束时看到的一样
+    changes[0] = { table: 'trips', type: 'INSERT', row: clone(trip), old: {} };
+    commit(changes);
+    return res;
+  }
+
+  function setTripDates(uid, tripId, startDate, endDate, moveToPool) {
+    if (!uid) throw raise('42501', '需要先登录');
+    const trip = tripRow(tripId);
+    if (!trip || !isEditor(tripId, uid)) throw raise('42501', '只有能编辑这个行程的人才能改日期');
+    if (!startDate || !endDate) throw raise('22023', '要选出发和回来的日期');
+    if (!isValidDate(startDate) || !isValidDate(endDate)) throw raise('22007', '日期或时间的格式不对');
+    if (endDate < startDate) throw raise('22023', '回来的日期不能早于出发');
+    if (dayDiff(startDate, endDate) > 59) throw raise('22023', '一趟最多 60 天');
+
+    const outDays = T('days').filter((d) => d.trip_id === tripId && (d.date < startDate || d.date > endDate)).sort((a, b) => (a.date < b.date ? -1 : 1));
+    const outIds = new Set(outDays.map((d) => d.id));
+    const wrote = outDays.find((d) => T('journal_entries').some((j) => j.trip_id === tripId && j.day_id === d.id && journalHasContent(j)));
+    if (wrote) throw raise('22023', `${zhMd(wrote.date)} 写了日记，先挪走再改`, { hint: 'journal' });
+    const detail = [];
+    for (const d of outDays) {
+      const items = T('items').filter((i) => i.trip_id === tripId && i.day_id === d.id && !i.deleted_at).length;
+      const todos = T('todos').filter((x) => x.trip_id === tripId && x.day_id === d.id).length;
+      const tips = T('tips').filter((x) => x.trip_id === tripId && x.day_id === d.id).length;
+      const stay = Boolean(d.stay_booking_id);
+      if (items + todos + tips > 0 || stay) detail.push({ date: d.date, items, todos, tips, stay });
+    }
+    if (detail.length && !moveToPool) {
+      const f = detail[0];
+      const parts = [];
+      if (f.items) parts.push(`${f.items} 项`);
+      if (f.todos) parts.push(`${f.todos} 条待办`);
+      if (f.tips) parts.push(`${f.tips} 条贴士`);
+      if (f.stay) parts.push('住处');
+      const more = detail.length > 1 ? `（还有 ${detail.length - 1} 天也有）` : '';
+      throw raise('22023', `${zhMd(f.date)} 还有 ${parts.join('、')}，先挪走再改${more}`, { hint: 'need_move', details: JSON.stringify(detail) });
+    }
+
+    const changes = [];
+    let moved = 0, unTodos = 0, unTips = 0, stays = 0, removed = 0, added = 0;
+    if (outIds.size) {
+      for (const i of T('items').filter((x) => x.trip_id === tripId && outIds.has(x.day_id) && !x.deleted_at)) { sysUpdate(uid, 'items', i, { day_id: null }, changes); moved += 1; }
+      for (const x of T('todos').filter((r) => r.trip_id === tripId && outIds.has(r.day_id))) { sysUpdate(uid, 'todos', x, { day_id: null }, changes); unTodos += 1; }
+      for (const x of T('tips').filter((r) => r.trip_id === tripId && outIds.has(r.day_id))) { sysUpdate(uid, 'tips', x, { day_id: null }, changes); unTips += 1; }
+      stays = outDays.filter((d) => d.stay_booking_id).length;
+      for (const d of outDays) { deleteCascade('days', d, changes); removed += 1; }   // 空日记、软删的条目按外键规则处理
+    }
+
+    const dated = () => T('segments').filter((s) => s.trip_id === tripId && s.start_date && s.end_date);
+    if (!dated().some((s) => s.start_date <= endDate && s.end_date >= startDate) && trip.start_date) {
+      const delta = dayDiff(trip.start_date, startDate);
+      for (const s of dated()) sysUpdate(uid, 'segments', s, { start_date: addDays(s.start_date, delta), end_date: addDays(s.end_date, delta) }, changes);
+    }
+    for (const s of dated()) if (s.end_date < startDate || s.start_date > endDate) sysUpdate(uid, 'segments', s, { start_date: null, end_date: null }, changes);
+    for (const s of dated()) {
+      if (s.start_date < startDate || s.end_date > endDate) {
+        sysUpdate(uid, 'segments', s, { start_date: s.start_date < startDate ? startDate : s.start_date, end_date: s.end_date > endDate ? endDate : s.end_date }, changes);
+      }
+    }
+    const segs = () => T('segments').filter((s) => s.trip_id === tripId);
+    const first = segs().filter((s) => s.start_date).sort((a, b) => (a.start_date < b.start_date ? -1 : a.start_date > b.start_date ? 1 : (a.sort ?? 0) - (b.sort ?? 0) || String(a.id).localeCompare(String(b.id))))[0];
+    if (first && first.start_date !== startDate) sysUpdate(uid, 'segments', first, { start_date: startDate }, changes);
+    const last = segs().filter((s) => s.end_date).sort((a, b) => (a.end_date > b.end_date ? -1 : a.end_date < b.end_date ? 1 : (b.sort ?? 0) - (a.sort ?? 0) || String(b.id).localeCompare(String(a.id))))[0];
+    if (last && last.end_date !== endDate) sysUpdate(uid, 'segments', last, { end_date: endDate }, changes);
+
+    for (let d = startDate; d <= endDate; d = addDays(d, 1)) {
+      if (T('days').some((x) => x.trip_id === tripId && x.date === d)) continue;
+      sysInsert(uid, 'days', { trip_id: tripId, date: d, segment_id: segFor(tripId, d), title: '', planning_status: 'tbd' }, changes);
+      added += 1;
+    }
+    const cur = tripRow(tripId);
+    if (cur.start_date !== startDate || cur.end_date !== endDate) sysUpdate(uid, 'trips', cur, { start_date: startDate, end_date: endDate }, changes);
+    commit(changes);
+    return { trip_id: tripId, start_date: startDate, end_date: endDate, added, removed, moved_items: moved, unlinked_todos: unTodos, unlinked_tips: unTips, dropped_stays: stays };
+  }
+
+  function setTripDest(uid, tripId, patch, segmentId) {
+    if (!uid) throw raise('42501', '需要先登录');
+    if (!tripId || !tripRow(tripId) || !isEditor(tripId, uid)) throw raise('42501', '只有能编辑这个行程的人才能改');
+    if (patch !== null && patch !== undefined && !isObjV(patch)) throw raise('22023', '目的地的写法不对');
+    const table = segmentId ? 'segments' : 'trips';
+    const row = segmentId ? T('segments').find((s) => s.trip_id === tripId && s.id === segmentId) : tripRow(tripId);
+    if (!row) throw raise('22023', '这一段不在这个行程里');
+    let next = null;
+    if (patch !== null && patch !== undefined) {
+      next = isObjV(row.extra?.dest) ? clone(row.extra.dest) : {};
+      for (const [k, v] of Object.entries(patch)) {
+        if (v === null) delete next[k];
+        else next[k] = clone(v);
+      }
+      if (!segmentId && !('v' in next)) next = { v: 1, ...next };
+      if (segmentId ? !segDestOk(next) : !destOk(next)) throw raise('22023', '目的地的写法不对');
+    }
+    const cur = row.extra?.dest ?? null;
+    if (stableStringify(cur) === stableStringify(next)) return clone(row);   // 没变化：不写
+    const extra = { ...(row.extra || {}) };
+    if (next === null) delete extra.dest;
+    else extra.dest = next;
+    const changes = [];
+    const out = sysUpdate(uid, table, row, { extra }, changes);
+    commit(changes);
+    return clone(out);
+  }
+
+  function addPartner(uid, tripId) {
+    if (!uid) throw raise('42501', '需要先登录');
+    if (!tripId || !tripRow(tripId) || !isEditor(tripId, uid)) throw raise('42501', '只有能编辑这个行程的人才能拉人进来');
+    const changes = [];
+    const res = addHousehold(tripId, uid, changes);
+    const trip = tripRow(tripId);
+    if (res.added.length && (trip.extra?.party_size === undefined || typeof trip.extra?.party_size === 'number')) {
+      sysUpdate(uid, 'trips', trip, { extra: { ...trip.extra, party_size: membersOf(tripId).filter((m) => ['owner', 'editor'].includes(m.role)).length } }, changes);
+    }
+    commit(changes);
+    const members = membersOf(tripId).sort((a, b) => tsMs(a.joined_at) - tsMs(b.joined_at) || String(a.user_id).localeCompare(String(b.user_id)))
+      .map((m) => ({ user_id: m.user_id, role: m.role, display_name: m.display_name ?? null, color: m.color ?? null }));
+    return { ...res, trip_id: tripId, members };
+  }
+
+  // ------------------------------------------------------------------
   // RPC（和 SQL 里的函数同样的规则和中文报错）
   // ------------------------------------------------------------------
   async function doRpc(uid, name, p = {}) {
@@ -533,6 +859,10 @@ export async function createDemoBackend(o) {
         const inviterName = inviter ? inviter.display_name || (inviter.user_id === trip?.owner_id ? '行程创建者' : '行程成员') : null;
         return { trip_title: trip?.title || null, inviter_name: inviterName || null, role: inv.role || 'viewer', expires_at: inv.expires_at, already_member: member };
       }
+      case 'create_trip_v2': return createTripV2(uid, p.p);
+      case 'set_trip_dates': return setTripDates(uid, p.p_trip_id, p.p_start_date, p.p_end_date, Boolean(p.p_move_to_pool));
+      case 'set_trip_dest': return setTripDest(uid, p.p_trip_id, p.p_patch ?? null, p.p_segment_id ?? null);
+      case 'add_household_to_trip': return addPartner(uid, p.p_trip_id);
       case 'revoke_invite': {
         const inv = T('trip_invites').find((x) => x.id === p.p_invite_id);
         if (!inv || !isEditor(inv.trip_id, uid)) throw pgError('42501', '邀请不存在或没有权限');

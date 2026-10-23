@@ -250,94 +250,9 @@ test('不是创建者（Cathy）：设置里说明只有创建者能邀请；退
 // 新建行程
 // =====================================================================
 
-test('新建行程：空名字摇一下说原因（不转圈）→ 填名字、日期（默认 4 天 3 晚）、选日本（币种自动换日元）、深海蓝 → 转圈 → 对勾 → 进新行程；列表里有它', async () => {
-  const app = await openTrips();
-  const { page } = app;
-  try {
-    await page.click(T('trips-new'));
-    await page.waitForSelector(T('trip-new-form'));
-    await app.idle();
-    // 名字自动聚焦
-    assert.equal(await page.evaluate(() => document.activeElement?.dataset.testid), 'trip-new-title');
-    await assertNoHorizontalOverflow(page);
-    await assertTapTargetsIn(page, T('sheet-trip-new'));
-    await screen(page, 'trip-new-empty');
-    // 空名字：不转圈，名字那一栏标红、说原因
-    await page.click(T('trip-new-submit'));
-    await page.waitForFunction(() => /给这趟旅行起个名字/.test(document.querySelector('#tnf-title-hint')?.textContent || ''));
-    assert.notEqual(await page.$eval(T('trip-new-submit'), (el) => el.dataset.state), 'loading');
-    assert.equal(await page.$eval('#tnf-title', (el) => el.getAttribute('aria-invalid')), 'true');
-
-    await page.type(T('trip-new-title'), '大阪 · 樱花五日');
-    await page.$eval(T('trip-new-start'), (el) => {
-      el.value = '2027-03-28';
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-    await page.waitForFunction(() => document.querySelector('[data-testid="trip-new-end"]').value === '2027-03-31');
-    assert.match(await page.$eval(T('trip-new-length'), (el) => el.textContent), /4 天 3 晚 · 79 天后出发/);
-    await page.click(T('trip-new-zone-Tokyo'));
-    await page.waitForFunction(() => /日本 · UTC\+9 · 比香港快 1 小时/.test(document.querySelector('[data-testid="trip-new-zone-summary"]').textContent));
-    assert.equal(await page.$eval(T('trip-new-cur-JPY'), (el) => el.getAttribute('aria-pressed')), 'true', '时区换成日本，币种跟着变日元');
-    // 搜时区
-    await page.click(T('trip-new-zone-other'));
-    await page.type(T('trip-new-zone-search'), '富国岛');
-    await page.waitForSelector(`${T('trip-new-zone-results')} button`);
-    assert.match(await page.$eval(`${T('trip-new-zone-results')} button`, (el) => el.textContent), /越南.*UTC\+7/);
-    await page.click(T('trip-new-zone-Tokyo'));
-    await page.click(T('trip-new-color-ocean'));
-    assert.match(await page.$eval(T('trip-new-preview'), (el) => el.textContent), /大阪 · 樱花五日.*03-28.*4 天 3 晚/);
-    await screen(page, 'trip-new-filled');
-
-    await page.click(T('trip-new-submit'));
-    await page.waitForFunction(() => document.querySelector('[data-testid="trip-new-submit"]')?.dataset.state === 'loading', { timeout: 3000 });
-    await screen(page, 'trip-new-loading');
-    await page.waitForFunction(() => document.querySelector('[data-testid="trip-new-submit"]')?.dataset.state === 'success', { timeout: 6000 });
-    await waitHash(page, /^#\/t\/trip-2027$/, 10000);
-    await page.waitForFunction(() => /大阪/.test(document.querySelector('[data-testid="shell-head"]')?.textContent || ''), { timeout: 8000 });
-    // 主题色是选的深海蓝
-    await page.waitForFunction(() => document.documentElement.style.getPropertyValue('--trip-accent').toUpperCase() === '#2F6FDE', { timeout: 6000 });
-    // 返回：回到行程列表（弹层的历史已经清掉），新行程在「接下来」里
-    await page.goBack();
-    await page.waitForSelector(T('trip-trip-2027'), { timeout: 8000 });
-    assert.equal(await page.evaluate(() => location.hash), '#/trips');
-    app.assertClean();
-  } finally {
-    await app.close();
-  }
-});
-
-test('超长行程名（含越南语声调）：卡片标题最多两行、不撑宽；375 不横向滚动；网格里最多三行', async () => {
-  const app = await openTrips({ device: 'small' });
-  const { page } = app;
-  try {
-    const long = 'Đảo Ngọc Phú Quốc · 重阳三晚和朋友一起去看日落吃海鲜还要坐全世界最长的跨海缆车去香岛';
-    await page.click(T('trips-new'));
-    await page.waitForSelector(T('trip-new-title'));
-    await app.idle();
-    await page.type(T('trip-new-title'), long);
-    await page.click(T('trip-new-submit'));
-    await waitHash(page, /^#\/t\/dao-ngoc-phu-quoc$/, 10000);
-    await app.go('#/trips');
-    const card = T('trip-dao-ngoc-phu-quoc');
-    await page.waitForSelector(card, { timeout: 8000 });
-    await app.idle();
-    const m = await page.$eval(`${card} .tcard__title`, (el) => ({ h: el.getBoundingClientRect().height, lh: parseFloat(getComputedStyle(el).lineHeight), sw: el.scrollWidth, cw: el.clientWidth }));
-    assert.ok(m.h <= m.lh * 2 + 1, `最多两行：${m.h} / 行高 ${m.lh}`);
-    assert.ok(m.sw <= m.cw + 1, '不撑宽');
-    assert.match(await page.$eval(card, (el) => el.getAttribute('aria-label')), /Đảo Ngọc Phú Quốc/, '读屏读得到全名');
-    await assertNoHorizontalOverflow(page);
-    await full(page, 'trips-long-title-375');
-    await page.click(T('trips-view'));
-    await waitForAnimationsDone(page, 4000);
-    const g = await page.$eval(`${card} .tcard__title`, (el) => ({ h: el.getBoundingClientRect().height, lh: parseFloat(getComputedStyle(el).lineHeight) }));
-    assert.ok(g.h <= g.lh * 3 + 1, `网格最多三行：${g.h}`);
-    await assertNoHorizontalOverflow(page);
-    await full(page, 'trips-long-title-grid-375');
-    app.assertClean();
-  } finally {
-    await app.close();
-  }
-});
+// 新建行程（批 A 重写成一屏：去哪 / 日历 / 这趟怎么走 / 和对方一起 / 带行李清单）的两个用例挪到 page-trip-new.e2e.mjs：
+// 原来的「空名字摇一下 → 选时区芯片、深海蓝」和「超长名字 → id dao-ngoc-phu-quoc」流程在新表单里没有了
+// （名字按城市自动起、时区按城市带、id 由服务器按「城市-年份」起），在新文件里按新流程重写。
 
 // =====================================================================
 // 设置

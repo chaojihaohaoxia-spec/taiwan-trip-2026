@@ -19,6 +19,8 @@
 //   做完了：今天、几点不晚于「现在 + 5 分钟」→ 默认打开（记一件刚做完的事，比如取钱）；人自己拨过就不再跟着变
 //   排在哪：有钟点按钟点插；今天又没写钟点 → 插在「现在」那一条后面（nowAnchor）；都没有 → 排到最后
 //   类型：选了行程里的地点就按地点给（ITEM_KIND_OF_PLACE，和小程序同表），其余「其他」；人在「更多设置」里选过就不改
+//   怎么去：form.transport_in（items.transport_in 原样；null = 自动，按规则包推）。芯片和写法在 rules/how.js
+//          （transportChoices / transportPatch）；没选地点时不提交（toRow 照样带上原来的值，formPatch 只在改了时提交）
 // =====================================================================
 
 import { formatDate, formatTime, parseTime } from '../../lib/datetime.js';
@@ -87,6 +89,7 @@ export function initialForm({ mode, item = null, fields = {}, defaultDate = null
       parent_item_id: item.parent_item_id || null,
       day: item.day_id || POOL,
       status: item.status || 'planned',
+      transport_in: item.transport_in && typeof item.transport_in === 'object' ? item.transport_in : null,
     };
   }
   const byDate = new Map(days.map((d) => [d.date, d]));
@@ -107,6 +110,7 @@ export function initialForm({ mode, item = null, fields = {}, defaultDate = null
     parent_item_id: variant === 'primary' ? null : fields.parent || null,
     day,
     status: 'planned',
+    transport_in: null,
   };
   form.status = autoDone(form, ctx) ? 'done' : 'planned';
   return form;
@@ -189,7 +193,22 @@ export function toRow(form) {
     parent_item_id: form.variant === 'primary' ? null : form.parent_item_id || null,
     day_id: form.day === POOL ? null : form.day || null,
     status: ['planned', 'done', 'skipped'].includes(form.status) ? form.status : 'planned',
+    transport_in: form.transport_in && typeof form.transport_in === 'object' ? form.transport_in : null,
   };
+}
+
+/** 两个字段值一样吗（transport_in 这种对象按内容比，键的顺序不算） */
+export function sameValue(a, b) {
+  if (a === b) return true;
+  if (a === null || a === undefined || b === null || b === undefined) return (a ?? null) === (b ?? null);
+  if (typeof a !== 'object' || typeof b !== 'object') return false;
+  return stableJson(a) === stableJson(b);
+}
+
+function stableJson(v) {
+  if (Array.isArray(v)) return `[${v.map(stableJson).join(',')}]`;
+  if (v && typeof v === 'object') return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${stableJson(v[k])}`).join(',')}}`;
+  return JSON.stringify(v ?? null);
 }
 
 /**
@@ -213,7 +232,7 @@ export function formPatch(initial, form) {
   const b = toRow(form);
   const patch = {};
   for (const k of Object.keys(b)) {
-    if ((a[k] ?? null) !== (b[k] ?? null)) patch[k] = b[k];
+    if (!sameValue(a[k], b[k])) patch[k] = b[k];
   }
   // 改回「计划中」：实际时间、实际情况一起清掉（和时间轴上的「恢复为计划中」一样）
   if (patch.status === 'planned') {
@@ -349,5 +368,5 @@ export function dayPlaceIds(dayItems = [], stayPlaceId = null) {
 export function sameForm(a, b) {
   const x = { ...toRow(a), newPlace: str(a.newPlace).trim() };
   const y = { ...toRow(b), newPlace: str(b.newPlace).trim() };
-  return Object.keys(x).every((k) => (x[k] ?? null) === (y[k] ?? null));
+  return Object.keys(x).every((k) => sameValue(x[k], y[k]));
 }

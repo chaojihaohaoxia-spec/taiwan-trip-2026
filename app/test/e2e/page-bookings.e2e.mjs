@@ -333,7 +333,8 @@ test('详情（酒店）：入住退房、免费取消已过、地址 + 导航 /
     assert.equal(await page.$eval(T('booking-cancel'), (el) => el.dataset.deadline), 'passed');
     assert.match(await text(page, T('booking-cancel')), /已不可免费取消.*1月5日 23:59（越南时间）/);
     const acts = await page.$$eval(`${T('booking-actions')} [data-action]`, (els) => els.map((el) => el.dataset.action));
-    assert.deepEqual(acts, ['nav', 'grab', 'driver', 'copy']);
+    // 批 A：动作键 grab 改名 ride（叫哪家按目的地档案，越南还是「叫 Grab」）
+    assert.deepEqual(acts, ['nav', 'ride', 'driver', 'copy']);
     assert.match(await text(page, T('booking-payment')), /到店付.*2,400,000₫.*押金.*500,000₫/);
     const wa = await page.$$eval(`${T('booking-contacts')} [data-contact-action="whatsapp"]`, (els) => els.map((el) => el.getAttribute('href')));
     assert.ok(wa.length >= 1 && wa.every((h) => /^https:\/\/wa\.me\/\d{7,}$/.test(h)), `WhatsApp 链接：${wa}`);

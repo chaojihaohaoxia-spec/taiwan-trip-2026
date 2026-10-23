@@ -8,8 +8,13 @@
 //   HONORS / honorOf / withHonor   对方称呼：选了「大哥」就把「大哥，」拼在中文原文前面再翻
 //   foreign(s)               一句外文（粘贴时提示「粘贴并翻译」用）
 //   shape(r, input)          云函数的返回 → 界面用的结果 { dir, input, vi, en, zh, back, demo }
-//   translateLang(trip)      这趟行程要不要翻译：越南（越南盾 / 越南时区）→ 'vi'；别的 → null（提示词只写了越南）
+//   translateLang(trip)      这趟行程要不要翻译：按目的地档案（rules/dest.js 的 translateLang）——档案要翻译、语言包过了测试
+//                            才有（现在只有越南语 'vi'）；港澳台内地、没过测试的语言 → null（不显示翻译入口）
+//   langName(lang)           'vi' → '越南语'（「中文 ⇄ 越南语」、「还没有越南语名字」）；不认识 → '当地语言'
+//   translateDetail(lang)    「更多」菜单翻译那一格的小字：'中文 ⇄ 越南语，带英语'
 // =====================================================================
+
+import { profileOf, translateLang as profileTranslateLang } from '../../rules/dest.js';
 
 /** 一句最多几个字（和云函数一样：中文翻出去要写三份） */
 export const MAX_CHARS = 300;
@@ -132,15 +137,30 @@ export function outputOf(row) {
   return row.dir === 'in' ? row.zh || '' : row.vi || '';
 }
 
-const VI_ZONES = new Set(['Asia/Ho_Chi_Minh', 'Asia/Saigon']);
 /**
- * 这趟行程要不要翻译：越南（当地币越南盾，或行程时区在越南）→ 'vi'；台湾这类说中文的 → null。
- * 提示词写死了越南（中文 → 越南语 + 英语），以后去别的国家要把提示词按行程参数化（小程序也受影响，另议）。
+ * 这趟行程要不要翻译（翻译入口、贴士页「去翻译」）：看目的地档案（trips.extra.dest，没补档案的老行程按时区、当地币反查）。
+ * 档案的语言要翻译、而且那种语言的提示词过了测试集（rules/dest.js 的 TR_READY，现在只有越南语）才给入口；
+ * 台湾、香港、内地这类说中文的 → null；日本、泰国这些等语言包测过了再开（半成品不如不给）。
+ * @param {object|null} trip trips 行
+ * @returns {string|null} 'vi' / null
  */
 export function translateLang(trip) {
   if (!trip) return null;
-  const cur = String(trip.local_currency || '').toUpperCase();
-  if (cur === 'VND') return 'vi';
-  if (VI_ZONES.has(trip.timezone)) return 'vi';
-  return null;
+  return profileTranslateLang(profileOf(trip, {}));
+}
+
+/** 语言代码 → 中文叫法 */
+export const LANG_NAMES = Object.freeze({
+  vi: '越南语', en: '英语', ja: '日语', ko: '韩语', th: '泰语', fr: '法语', de: '德语', es: '西班牙语', it: '意大利语',
+  ms: '马来语', id: '印尼语', km: '高棉语', 'zh-Hant': '繁体中文', 'zh-Hans': '中文',
+});
+
+export function langName(lang) {
+  return LANG_NAMES[lang] || '当地语言';
+}
+
+/** 「更多」菜单翻译那一格的小字（越南语的提示词同时给英语） */
+export function translateDetail(lang) {
+  if (!lang) return '';
+  return lang === 'en' ? '中文 ⇄ 英语' : `中文 ⇄ ${langName(lang)}，带英语`;
 }

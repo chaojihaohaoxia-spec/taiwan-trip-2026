@@ -10,6 +10,8 @@
 //   ?item=<id>（搜索结果跳进来）  滚到并展开那一条（挂在主方案下的备选：展开主方案并切到它）
 //   左右滑动换到前一天 / 后一天（swipe.js useDaySwipe：和分段条同步、有方向感，边缘 24px 不接，竖着滚照常）
 //   备选换成主方案（model.js promotePlan）：改 variant / parent_item_id / sort_key，Toast 里能撤销
+//   空白的一天（empty.jsx BlankDay）：「还空着」+ 快速添加（回车就加进这一天，打头的钟点自动拆出来）+「详细加一项」；
+//                                 这次是从快速添加加的，时间轴下面留着快速添加，可以接着写（换天就收起）
 // 数据：hooks.js（useTrip + 派生）；写操作全部走 data/ 的 TripStore；弹层用 sheets/ 的帮手。
 // =====================================================================
 
@@ -25,7 +27,9 @@ import { formatDate } from '../../lib/datetime.js';
 import { haptic } from '../../lib/native.js';
 import { openItemSheet } from '../../sheets/index.js';
 import { useDayData, useDayWeather, useNowOnDay } from './hooks.js';
-import { DayHead, RoutePlanCard, DecisionsCard, RemindersCard, DaySkeleton, DayEmpty } from './parts.jsx';
+import { DayHead, RoutePlanCard, DecisionsCard, RemindersCard, DaySkeleton } from './parts.jsx';
+import { BlankDay } from './empty.jsx';
+import { quickRow } from './empty-model.js';
 import { Timeline, AltList } from './timeline.jsx';
 import { useDaySwipe } from './swipe.js';
 import { scrollIntoComfort, onceForEntry, watchUserInput } from './scroll.js';
@@ -124,6 +128,20 @@ export default function DayPage({ route }) {
   const onAdd = useCallback((e) => {
     openItemSheet({ date }, { keyboard: true, trigger: e?.currentTarget });
   }, [date]);
+
+  // 空白天的快速添加：直接写进这一天（离线也行，走写队列）。按 store 里最新的当天主方案排（一次粘贴几行时每行都要接在上一行后面）
+  const [quickOn, setQuickOn] = useState(null);
+  const onQuickAdd = useCallback((text) => {
+    if (!store || !day) return undefined;
+    const fresh = store.view.plans.value.get(day.id)?.primary || [];
+    const row = quickRow(text, { dayId: day.id, primary: fresh });
+    if (!row) throw new Error('只有钟点，再写上做什么');
+    setQuickOn(day.id); // 先记下：时间轴出来的同一次渲染里输入框还在原位
+    const res = store.insert('items', row, { label: `加「${row.title}」` });
+    haptic('light');
+    res.saved?.catch?.(() => {});
+    return undefined;
+  }, [store, day?.id]);
 
   // ---- ?item=：展开并滚到那一条（同一条历史记录只滚一次：返回 / 刷新回来由路由恢复位置） ----
   useEffect(() => {
@@ -236,19 +254,10 @@ export default function DayPage({ route }) {
       <RoutePlanCard plan={day.route_plan} getPlace={getPlace} />
       <DecisionsCard decisions={day.decisions} />
       <RemindersCard tips={dayTips} todos={dayTodos} tripId={tripId} store={store} canEdit={canEdit} timeZone={timeZone} />
-      {empty ? (
-        <DayEmpty
-          canEdit={canEdit}
-          onAdd={onAdd}
-          title={phase === 'ended' ? '这一天没有留下安排' : '这一天还没有安排'}
-          description={canEdit ? '加第一条，或者在备选池里把想做的事排进来。' : '等创建者排好就会出现在这里。'}
-        />
-      ) : (
-        <>
-          <Timeline primary={primary} alternatives={plan.alternatives} ctx={ctx} acc={acc} now={now} altView={altView} onAltChange={onAltChange} onAdd={onAdd} />
-          <AltList general={plan.general} ctx={ctx} acc={acc} />
-        </>
-      )}
+      {/* 空白天和「接着写」用同一个位置的同一个组件：加了第一条换成时间轴时，输入框不重建（焦点、键盘都留着） */}
+      {!empty && <Timeline primary={primary} alternatives={plan.alternatives} ctx={ctx} acc={acc} now={now} altView={altView} onAltChange={onAltChange} onAdd={onAdd} />}
+      {(empty || (canEdit && quickOn === day.id)) && <BlankDay compact={!empty} canEdit={canEdit} phase={phase} onAdd={onAdd} onQuickAdd={onQuickAdd} />}
+      {!empty && <AltList general={plan.general} ctx={ctx} acc={acc} />}
       <SwipeHint hint={hint} />
     </div>
   );

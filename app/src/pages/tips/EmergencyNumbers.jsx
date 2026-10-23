@@ -2,6 +2,7 @@
 // pages/tips/EmergencyNumbers.jsx：置顶组最上面的紧急电话——三个大号数字并排，下面一行小字，点了直接拨。
 // 号码从「紧急电话」那条贴士的正文第一行拆出来（emergency.js）；拆不出两个以上就不显示（正文照常）。
 // 拆出来的那一行不再在贴士正文里重复（PinnedCard 用 emergencyRest 去掉）；小字前面一个电话图标，看得出能点。
+// 贴士页最上面「当地须知」已经按目的地档案列了紧急电话（LocalFacts.jsx）：known 里的号码不再拆一遍，只补档案里没有的。
 // =====================================================================
 
 import { Glyph } from '../../kit/Glyph.jsx';
@@ -13,13 +14,13 @@ export function sosTip(tips) {
   return (tips || []).find((t) => isEmergencyTip(t) && emergencyNumbers(t.body).length) || null;
 }
 
-/** @param {{ tips: object[] }} props 置顶的贴士 */
-export function EmergencyNumbers({ tips }) {
+/** @param {{ tips: object[], known?: Set<string> }} props 置顶的贴士；known：「当地须知」已经列了的号码 */
+export function EmergencyNumbers({ tips, known }) {
   const tip = sosTip(tips);
-  const list = tip ? emergencyNumbers(tip.body) : [];
+  const list = (tip ? emergencyNumbers(tip.body) : []).filter((n) => !known || !known.has(n.number));
   if (!list.length) return null;
   return (
-    <ul class="tp-sos" aria-label="紧急电话" data-testid="tips-sos">
+    <ul class="tp-sos" aria-label="紧急电话" data-testid="tips-sos" style={{ '--tp-sos-cols': Math.min(3, list.length) }}>
       {list.map((n) => (
         <li key={n.number}>
           <a class="tp-sos__item" href={`tel:${n.number}`} data-press="scale" aria-label={`${n.label} ${n.number}，拨打`}>

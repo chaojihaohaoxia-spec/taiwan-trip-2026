@@ -171,7 +171,8 @@ test('免费取消截止正好零点：写成前一天 24:00（周几深夜）�
 
 test('主按钮跟着交通方式走：走路 = 导航、打车 = 叫 Grab、不知道就没有主按钮（概览和每天页同一套）', () => {
   assert.deepEqual(rideHintFor({ options: [{ mode: 'walk', recommended: true }, { mode: 'grab' }] }), { primary: 'nav', navMode: 'walk' });
-  assert.deepEqual(rideHintFor({ options: [{ mode: 'grab' }] }), { primary: 'grab', navMode: 'driving' });
+  // 批 A：主按钮的键 grab 改名 ride（叫哪家按目的地档案；新代码用 rules/how.js 的 howToGet）
+  assert.deepEqual(rideHintFor({ options: [{ mode: 'grab' }] }), { primary: 'ride', navMode: 'driving' });
   assert.deepEqual(rideHintFor(null), { primary: null, navMode: null });
   assert.deepEqual(rideHintOfMode('train'), { primary: 'nav', navMode: 'train' });
 });

@@ -1,7 +1,7 @@
 // =====================================================================
 // sheets/invite/InviteSheet.jsx：弹层「invite」——邀请成员（SPEC §5.12）。
 //
-// 打开：设置页「成员和邀请」里创建者的「邀请成员」（网址带 ?trip=<id>）；行程内页面也能开（路径里的 :tripId）。
+// 打开：设置页「每趟行程」里创建者的「邀请成员」（网址带 ?trip=<id>）；行程内页面也能开（路径里的 :tripId）。
 // 参数：openInviteSheet({ role: 'viewer' }) 预选只读（sheets/index.js）。
 //
 //   顶上：邀请到哪一趟（封面点 + 行程名）
@@ -49,7 +49,7 @@ function InviteBody() {
   const trip = store?.trip.value || null;
 
   if (!tripId) {
-    return <EmptyState compact title="不知道要邀请到哪一趟" description="从「设置 → 成员和邀请」里点某一趟的「邀请成员」。" data-testid="invite-no-trip" />;
+    return <EmptyState compact title="不知道要邀请到哪一趟" description="从「设置 → 每趟行程」里点某一趟的「邀请成员」。" data-testid="invite-no-trip" />;
   }
   if (!trip) {
     if (!pending && store && (store.status.value === 'error' || store.status.value === 'missing')) {

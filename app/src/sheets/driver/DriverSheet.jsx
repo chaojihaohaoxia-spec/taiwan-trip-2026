@@ -1,8 +1,11 @@
 // =====================================================================
 // sheets/driver/DriverSheet.jsx：「给司机看 / 给对方看」全屏大字卡（弹层 id: driver，SPEC §6）。
 //
-//   openDriverCard(place.id)        地点：最大号当地语名字（name_local），下面地址，再下面小字中文名；有电话才有「打电话」；
+//   openDriverCard(place.id)        地点：最大号按目的地档案（rules/dest.js 的 driverText）——港澳台内地直接写中文名，
+//                                   别处写当地语名字（name_local），下面地址，再下面小字中文名；有电话才有「打电话」；
 //                                   有下车点（extra.ride_via，SPEC §10）时显示下车点那个地点，再加一行下车提示（ride_note）
+//                                   要当地文字、地点还没有当地名（F5）：下面多一行「还没有越南语名字 · 补一下」，点了就地填
+//                                   （「让 AI 翻一下」走现有的翻译接口；只有翻译测过的语言才有这个按钮），存进 places.name_local
 //   openDriverCard(tip.id)          贴士：最大号当地语原文（local_text），下面小字中文标题（「给对方看」）
 //   也接受预订 / 条目 / 联系人的 id：取它关联的地点。参数写法见 sheets/README.md。
 //
@@ -35,7 +38,7 @@ import { trackDrag } from '../../motion/gesture.js';
 import { clamp, num, rubberBand } from '../../motion/physics.js';
 import { spring } from '../../motion/springs.js';
 import { prefersReducedMotion } from '../../lib/media.js';
-import { driverCardFields, addressForCopy } from '../../lib/ride-links.js';
+import { driverCardFields, addressForCopy, rideTarget } from '../../lib/ride-links.js';
 import { useCopy } from '../../lib/clipboard.js';
 import { openExternal, haptic } from '../../lib/native.js';
 import { Glyph } from '../../kit/Glyph.jsx';
@@ -44,6 +47,9 @@ import { useSheetTrip, findRow } from '../hooks.js';
 import { translationCard } from './translation.js';
 import { useSpeech } from '../../pages/tips/speech.js';
 import { tipLang } from '../../pages/tips/model.js';
+import { tripProfile } from '../../data/dest.js';
+import { langName, translateLang } from '../../lib/translate/text.js';
+import { toast } from '../../overlay/index.js';
 
 /** 名字的字号范围（px）；地址 = 名字 × ADDRESS_RATIO，但不小于 ADDRESS_MIN。
  *  上限在手机上是 72；屏幕更宽（平板、桌面）时按宽度放大，最大 NAME_MAX_WIDE */
@@ -79,13 +85,95 @@ export function driverContent(found, store) {
   if (!place && row.place_id) place = store?.tables?.places?.value?.get(row.place_id) || null;
   if (!place) return null;
   const placeTable = store?.tables?.places?.value;
-  const o = { getPlace: (id) => placeTable?.get(id) || null };
+  // 司机看得懂什么字：目的地档案（条目在香港时按香港档案）；没有行程上下文按当地文字
+  const profile = store?.trip ? tripProfile(store, { place, item: table === 'items' ? row : null }) : null;
+  const text = profile?.driverText || 'local';
+  const o = { getPlace: (id) => placeTable?.get(id) || null, text };
   const f = driverCardFields(place, o);
   if (!f.primary) return null;
+  const target = rideTarget(place, o).place || place;
+  // F5：要当地文字、地点还没有当地名（有下车点时看下车点那个地点）
+  const needLocal = text === 'local' && Boolean(profile?.lang) && !String(target?.name_local || '').trim() && Boolean(target?.id);
   return {
     kind: 'place', primary: f.primary, address: f.address, secondary: f.secondary, phone: f.phone, note: f.note,
     copy: addressForCopy(place, o), badge: '给司机看',
+    lang: text === 'zh' ? 'zh-Hant' : undefined,
+    fill: needLocal ? { placeId: target.id, name: target.name || target.name_en || '', lang: profile.lang, ai: translateLang(store.trip.value) === profile.lang } : null,
   };
+}
+
+/**
+ * 「还没有越南语名字 · 补一下」：就地填当地名字（存进 places.name_local）；「让 AI 翻一下」按中文名翻成当地语言。
+ * 只读成员只看提示、不能填。
+ */
+function LocalNameFill({ fill, store, canEdit }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('');
+  const [busy, setBusy] = useState(false);
+  const label = langName(fill.lang);
+  const ai = async () => {
+    if (!fill.name || busy) return;
+    setBusy(true);
+    try {
+      const { translator } = await import('../../data/translate.js');
+      const r = await translator.translate(fill.name, { trip: store.tripId, lang: fill.lang });
+      const out = String(r?.[fill.lang] || r?.vi || '').trim().split('\n')[0];
+      if (out) setValue(out);
+      else toast.error('没翻出来，自己写一下');
+    } catch (e) {
+      toast.error(e?.message || '没翻出来，自己写一下');
+    } finally {
+      setBusy(false);
+    }
+  };
+  const save = async () => {
+    const v = value.trim();
+    if (!v) return;
+    try {
+      const r = store.update('places', fill.placeId, { name_local: v }, { label: `补「${fill.name}」的${label}名字` });
+      haptic('success');
+      setOpen(false);
+      await r.saved;
+    } catch (e) {
+      toast.error(e?.message || '没有存上');
+    }
+  };
+  return (
+    <div class="drv__fill" data-drv-keep="" data-testid="driver-fill">
+      {!open ? (
+        <p class="drv__fill-line" lang="zh-CN">
+          <span>还没有{label}名字</span>
+          {canEdit && (
+            <button type="button" class="drv__fill-link" onClick={() => setOpen(true)} data-press="scale" data-testid="driver-fill-open">补一下</button>
+          )}
+        </p>
+      ) : (
+        <div class="drv__fill-form" lang="zh-CN">
+          <input
+            class="drv__fill-input"
+            type="text"
+            value={value}
+            lang={fill.lang}
+            placeholder={`${label}名字`}
+            aria-label={`${fill.name}的${label}名字`}
+            onInput={(e) => setValue(e.currentTarget.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); save(); } }}
+            autocomplete="off"
+            enterKeyHint="done"
+            data-testid="driver-fill-input"
+          />
+          <div class="drv__fill-btns">
+            {fill.ai && fill.name && (
+              <button type="button" class="drv__fill-btn" onClick={ai} disabled={busy} data-press="scale" data-testid="driver-fill-ai">
+                {busy ? '在翻…' : '让 AI 翻一下'}
+              </button>
+            )}
+            <button type="button" class="drv__fill-btn drv__fill-btn--save" onClick={save} disabled={!value.trim()} data-press="scale" data-testid="driver-fill-save">存</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 /** 元素还看得见（触发按钮被别的弹层盖住、滚出屏幕时就不“收回到按钮”） */
@@ -393,6 +481,7 @@ function DriverLayer({ ov }) {
                   {content.address && <p class="drv__address" data-testid="driver-address">{content.address}</p>}
                   {content.secondary && <p class="drv__secondary" lang="zh-CN" data-testid="driver-secondary">{content.secondary}</p>}
                   {content.note && <p class="drv__note" lang="zh-CN" data-testid="driver-note">{content.note}</p>}
+                  {content.fill && <LocalNameFill fill={content.fill} store={store} canEdit={Boolean(store?.view?.canEdit?.value)} />}
                 </>
               ) : (
                 <>

@@ -166,18 +166,19 @@ test('下车点：叫 Grab、给司机看、复制都去下车点（带下车提
   const nav = m.actions.find((a) => a.key === 'nav');
   assert.match(decodeURIComponent(nav.href), new RegExp(`${KITCHEN.lat},${KITCHEN.lng}`), '导航到餐厅本身（步行认路）');
   assert.match(m.note, /^在大堂下车，坐电瓶车过去/, '说明行先放下车提示');
-  assert.equal(m.actions.find((a) => a.key === 'grab').label, '叫 Grab');
+  // 批 A：动作键 grab 改名 ride
+  assert.equal(m.actions.find((a) => a.key === 'ride').label, '叫 Grab');
 });
 
 test('开车到不了（no_road）：「叫 Grab」改叫「去缆车站」，说明里有怎么过去', () => {
   const m = placeActionModel(ISLE, { getPlace });
-  assert.equal(m.actions.find((a) => a.key === 'grab').label, '去缆车站');
+  assert.equal(m.actions.find((a) => a.key === 'ride').label, '去缆车站');
   assert.match(m.note, /开车到不了：坐缆车过海/);
   assert.match(m.note, /叫车去「日出缆车站」/);
   assert.equal(noRoadLabel({ name: '椰影码头' }), '去码头');
   assert.equal(noRoadLabel({ name: '园区门口' }), '去下车点');
   // 没有 getPlace（找不到下车点）：按钮照旧，不乱改
-  assert.equal(placeActionModel(ISLE).actions.find((a) => a.key === 'grab').label, '叫 Grab');
+  assert.equal(placeActionModel(ISLE).actions.find((a) => a.key === 'ride').label, '叫 Grab');
 });
 
 test('演示数据：椰影岛有一个“在大堂下车”的地点和一个“只能坐缆车”的地点，ride_via 都指向真实存在的地点', () => {

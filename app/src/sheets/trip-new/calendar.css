@@ -1,0 +1,163 @@
+/* =====================================================================
+   sheets/trip-new/calendar.css：选区间的日历（.rcal，RangeCalendar.jsx；新建行程、设置里改日期共用）。
+   两端墨色实心圆，中间一条浅灰带；只点了出发时，补上的那几天是虚的（更淡）
+   ===================================================================== */
+.rcal {
+  --rcal-cell: 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.rcal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+}
+
+.rcal__title {
+  font: var(--weight-serif) var(--text-headline) / 1.2 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+  font-variant-numeric: tabular-nums;
+}
+
+.rcal__nav {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: var(--press-transition);
+}
+
+.rcal__week,
+.rcal__row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.rcal__week span {
+  padding: 4px 0;
+  color: var(--color-text-3);
+  font: var(--type-caption-2);
+  text-align: center;
+}
+
+.rcal__week span[data-weekend] {
+  color: var(--color-text-2);
+}
+
+.rcal__cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: var(--rcal-cell);
+}
+
+/* 区间的底带：在格子上铺满，两端只铺朝里的一半 */
+.rcal__cell[data-role="in"]::before,
+.rcal__cell[data-role="start"]::before,
+.rcal__cell[data-role="end"]::before {
+  content: "";
+  position: absolute;
+  inset: 4px 0;
+  background: var(--color-fill);
+}
+
+.rcal__cell[data-role="start"]::before {
+  left: 50%;
+}
+
+.rcal__cell[data-role="end"]::before {
+  right: 50%;
+}
+
+/* 行首、行尾的底带收成圆头（区间跨行时看起来是一段段的） */
+.rcal__cell[data-role="in"][data-row-start]::before {
+  left: 4px;
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+}
+
+.rcal__cell[data-role="in"][data-row-end]::before {
+  right: 4px;
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+}
+
+.rcal__cell[data-role="end"][data-row-start]::before,
+.rcal__cell[data-role="start"][data-row-end]::before {
+  display: none;
+}
+
+.rcal[data-auto] .rcal__cell[data-role="in"]::before,
+.rcal[data-auto] .rcal__cell[data-role="end"]::before {
+  opacity: 0.55;
+}
+
+.rcal__day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--color-text);
+  font: var(--weight-regular) var(--text-callout) / 1 var(--font-label);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), var(--press-transition);
+}
+
+/* 看起来 40px，可点的扩到 44px */
+.rcal__day::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+}
+
+.rcal__day[data-past] {
+  color: var(--color-text-3);
+}
+
+.rcal__day[data-today]::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  transform: translateX(-50%);
+}
+
+.rcal__day[aria-pressed="true"] {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  font-weight: var(--weight-semibold);
+}
+
+/* 只点了出发：回来那天是虚的（细线圈，不是实心） */
+.rcal[data-auto] .rcal__cell[data-role="end"] .rcal__day {
+  background: transparent;
+  color: var(--color-text);
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  font-weight: var(--weight-regular);
+}
+
+@media (hover: hover) {
+  .rcal__day:not([aria-pressed="true"]):hover {
+    background: var(--color-fill-hover);
+  }
+}

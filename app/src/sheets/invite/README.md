@@ -1,6 +1,6 @@
 # sheets/invite/ —— 弹层「invite」：邀请成员（SPEC §5.12）
 
-打开：设置页「成员和邀请」里创建者的「邀请成员」（`navigate({ name: 'settings', query: { trip: id }, sheets: [{ id: 'invite' }] })`）；
+打开：设置页「每趟行程」里创建者的「邀请成员」（`navigate({ name: 'settings', query: { trip: id }, sheets: [{ id: 'invite' }] })`）；
 行程内页面也能用 `openInviteSheet({ role })`（行程从路径的 `:tripId` 读）。参数 `role: 'viewer'` 预选只读。底部面板 `['content', 'large']`。
 
 ## 内容

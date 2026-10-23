@@ -8,11 +8,16 @@
 //   googleMapsNavigateUrl(place, { mode: 'walk' })  → 从“我的位置”导航过去
 //   googleMapsRouteUrls(points, { mode })           → 多点路线；超过途经点上限自动分成几段
 //   travelModeFor('grab')                           → 'driving'（数据里的交通方式 → Google 的出行方式）
+//   navigateUrl(place, { map, coord, mode, byName }) → 按目的地档案选地图（rules/dest.js 的 profile.map / coord）：
+//                                                      google（默认）/ amap 高德（内地，坐标先转 GCJ-02）/ naver（韩国）
+//   amapNavUrl(place, { mode, coord }) / naverNavUrl(place, { mode })   高德、Naver 的导航链接
 //
 // 地点参数接受数据库的 places 行（name / name_local / lat / lng / google_place_id / address / maps_url），
 // 也接受 { lat, lng } 或一个字符串（当搜索词）。
 // 有坐标优先用坐标（不会搜错同名地点）；有 google_place_id 一起带上（Google 显示正确的店名）。
 // =====================================================================
+
+import { wgs84ToGcj02 } from '../rules/geo.js';
 
 const BASE = 'https://www.google.com/maps';
 
@@ -31,6 +36,7 @@ const MODE_MAP = Object.freeze({
   walk: 'walking',
   bicycle: 'bicycling',
   metro: 'transit',
+  subway: 'transit',
   bus: 'transit',
   train: 'transit',
   hsr: 'transit',
@@ -40,6 +46,7 @@ const MODE_MAP = Object.freeze({
   grab: 'driving',
   car: 'driving',
   scooter: 'driving',
+  transfer: 'driving',
   flight: null,
   other: null,
 });
@@ -183,4 +190,64 @@ export function googleMapsRouteUrls(points, { mode, maxWaypoints = MAX_WAYPOINTS
 /** 只要一个链接时用：分段时返回第一段 */
 export function googleMapsRouteUrl(points, opts) {
   return googleMapsRouteUrls(points, opts)[0]?.url ?? null;
+}
+
+// ---------------------------------------------------------------------
+// 按目的地档案选地图：内地用高德（Google 在内地用不了、坐标是 GCJ-02），韩国用 Naver（Google 在韩国没有步行和驾车导航）
+// ---------------------------------------------------------------------
+
+const AMAP_MODE = Object.freeze({ walking: 'walk', transit: 'bus', driving: 'car', bicycling: 'ride' });
+const NAVER_MODE = Object.freeze({ walking: 'walk', transit: 'transit', driving: 'car', bicycling: 'bicycle' });
+
+function destName(p) {
+  return String(p?.name_local || p?.name || p?.name_en || '').trim();
+}
+
+/**
+ * 高德导航（uri.amap.com：装了高德 App 直接打开，没装开网页版）。有坐标用坐标（WGS-84 存的，按 coord 转成 GCJ-02），
+ * 没坐标按名字 + 地址搜。
+ * @param {object} place
+ * @param {{ mode?: string, coord?: 'wgs84'|'gcj02' }} [o] mode：walking / transit / driving / bicycling（或数据里的 walk、bus…）
+ */
+export function amapNavUrl(place, { mode, coord = 'gcj02' } = {}) {
+  if (!place) return null;
+  const name = destName(place);
+  const tm = AMAP_MODE[travelModeFor(mode) || 'driving'] || 'car';
+  if (hasCoords(place)) {
+    const c = coord === 'gcj02' ? wgs84ToGcj02(Number(place.lat), Number(place.lng)) : { lat: Number(place.lat), lng: Number(place.lng) };
+    const to = [Number(c.lng.toFixed(6)), Number(c.lat.toFixed(6)), name].join(',');
+    return `https://uri.amap.com/navigation?to=${encodeURIComponent(to).replace(/%2C/g, ',')}&mode=${tm}&coordinate=gaode&callnative=1`;
+  }
+  const q = [name, place.address].filter(Boolean).join(' ').trim();
+  return q ? `https://uri.amap.com/search?keyword=${encodeURIComponent(q)}&callnative=1` : null;
+}
+
+/**
+ * Naver 地图导航（map.naver.com 新版路线页：装了 App 会提示打开）。写法等去韩国前真机试一次。
+ * @param {object} place
+ * @param {{ mode?: string }} [o]
+ */
+export function naverNavUrl(place, { mode } = {}) {
+  if (!place) return null;
+  const name = destName(place);
+  const tm = NAVER_MODE[travelModeFor(mode) || 'transit'] || 'transit';
+  if (hasCoords(place)) {
+    const goal = [Number(Number(place.lng).toFixed(6)), Number(Number(place.lat).toFixed(6)), encodeURIComponent(name || '目的地'), '', ''].join(',');
+    return `https://map.naver.com/p/directions/-/${goal}/-/${tm}`;
+  }
+  const q = [name, place.address].filter(Boolean).join(' ').trim();
+  return q ? `https://map.naver.com/p/search/${encodeURIComponent(q)}` : null;
+}
+
+/**
+ * 导航链接（按目的地档案选地图）。byName：坐标只精确到城市，按名字 + 地址找（不用坐标）。
+ * @param {object} place
+ * @param {{ map?: 'google'|'amap'|'naver', coord?: 'wgs84'|'gcj02', mode?: string, byName?: boolean }} [o]
+ */
+export function navigateUrl(place, { map = 'google', coord = 'wgs84', mode, byName = false } = {}) {
+  if (!place) return null;
+  const p = byName || place.coord_precision === 'city' ? { ...place, lat: null, lng: null, google_place_id: place.google_place_id } : place;
+  if (map === 'amap') return amapNavUrl(p, { mode, coord });
+  if (map === 'naver') return naverNavUrl(p, { mode });
+  return googleMapsNavigateUrl(p, { mode });
 }

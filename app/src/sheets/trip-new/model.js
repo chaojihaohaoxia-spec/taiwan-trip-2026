@@ -1,66 +1,44 @@
 // =====================================================================
-// sheets/trip-new/model.js：新建行程表单的纯逻辑（Node 里能直接测：test/unit/page-account.test.js）。
+// sheets/trip-new/model.js：新建行程（一屏：去哪、什么时候、这趟怎么走、和对方一起、带上一趟的行李清单）的纯逻辑。
+// Node 里能直接测：test/unit/trip-new.test.js。
 //
-//   ZONE_PRESETS / CURRENCY_PRESETS / COVER_PRESETS / EMOJI_PRESETS   表单里的快捷选项
-//   currencyForZone(tz)            时区 → 推荐的当地币种（选了越南 → 越南盾；用户自己改过币种就不再跟着变）
-//   zoneSummary(tz, at)            「越南 · UTC+7 · 比香港慢 1 小时」
-//   searchZones(query, all)        时区搜索：中文地名、英文城市名、IANA 名都能搜（「胡志明」「saigon」「Asia/Tokyo」）
-//   canonicalZone(tz)              浏览器给的旧名字 → 现在通用的写法（Asia/Saigon → Asia/Ho_Chi_Minh）
-//   initialTripForm(at) / validateTripForm(form) / tripFormToInput(form, taken) / nextTripId(id, n)
-//   coverFromForm(form)            表单 → trips.cover（{ emoji, accent, accent_2 }）
+//   去哪       quickCities(entries) 常用（去过的城市在前，再补几个热门）· rankCities(q, used) 搜城市（去过的排前面）
+//              searchRegions(q) 城市表里没有时按国家建 · selectionInfo(form) 选了什么
+//   什么时候   pickDate(range, date) 日历点一下（改日期用 pickEdit：挪最近的那头）· monthGrid(ym) · rangeText(range) · splitNights / shiftNights 每个城市住几晚
+//   怎么走     moveFor(form) 芯片当前值（没点过 = 按第一个城市默认）· moveHint(form) 几个城市默认不一样时的一句话
+//   名字       autoTitle(form) 「富国岛 · 10 月」（自己改过就不再跟着变）
+//   预览       profileForForm(form) → rules 的 profileOf 结果 · starterTodoTitles(region, local) 顺带加的几条待办
+//   提交       validateTripForm(form) · tripFormToInput(form, { token, copyFrom }) → data.rpc.createTripV2 的参数 ·
+//              submitKey(input) 内容变了换 token
+//   草稿       draftOf(form) / restoreDraft(raw, { todayDate }) 填了一半关掉，下次接着填
+//   上一趟     packingCandidates(entries, start) 从哪趟带行李清单 · partnerOf(members, me) 「和 Cathy 一起」
+//   更多       searchZones / zoneSummary / zoneName / canonicalZone / currencyOptions / currencyLabel（时区、币种手动改）
 //
-// 主题色预设是写进 trips.cover 的**数据**（每趟行程自己的主题色，和 trips.cover.accent 同一种东西），
-// 不是界面颜色：界面上一律用 tokens.css 由 --trip-accent 派生的变量（accent-scope）。所以这里存的是不带 # 的六位十六进制，
+// 主题色预设是写进 trips.cover 的**数据**（每趟行程自己的主题色），不是界面颜色：存不带 # 的六位十六进制，
 // 写进数据时补上 #（tokens 测试不让 JS 里出现 '#xxxxxx' 这样的界面颜色字符串）。
+// 时区 → 币种不再自己写表，统一用规则包（rules/dest.js 的 currencyOfTz）。
 // =====================================================================
 
-import { isValidDate, addDays, timeZoneLabel, tzOffsetMinutes, formatUtcOffset, tzDifferenceLabel, daysBetween, today } from '../../lib/datetime.js';
+import { isValidDate, addDays, timeZoneLabel, tzOffsetMinutes, formatUtcOffset, tzDifferenceLabel } from '../../lib/datetime.js';
+import { MAX_DAYS, rangeDays } from './calendar.js';
+import { MOVE_HINT, partnerOf } from './moves.js';
 import { normalizeCurrency, currencyName } from '../../lib/money.js';
-import { suggestTripId, TRIP_ID_RE } from '../../data/rpc.js';
+import { REGIONS } from '../../rules/dest-data.js';
+import { profileOf, cityInfo, regionInfo, currencyOfTz, moveDefault, MOVES, MOVE_CHOICES, destOk } from '../../rules/dest.js';
+import { allCities, searchCities, foldName } from '../../rules/dest-cities.js';
 
-/** 常用时区（快捷芯片，按他们去的可能性排） */
-export const ZONE_PRESETS = Object.freeze([
-  { tz: 'Asia/Ho_Chi_Minh', label: '越南' },
-  { tz: 'Asia/Taipei', label: '台湾' },
-  { tz: 'Asia/Tokyo', label: '日本' },
-  { tz: 'Asia/Seoul', label: '韩国' },
-  { tz: 'Asia/Bangkok', label: '泰国' },
-  { tz: 'Asia/Hong_Kong', label: '香港' },
-]);
+export { MOVE_CHOICES };
+export * from './calendar.js';
+export { MOVE_HINT, partnerOf };
 
-/** 时区 → 当地币种（选时区后自动带出来；用户可以改） */
-export const ZONE_CURRENCY = Object.freeze({
-  'Asia/Ho_Chi_Minh': 'VND',
-  'Asia/Taipei': 'TWD',
-  'Asia/Tokyo': 'JPY',
-  'Asia/Seoul': 'KRW',
-  'Asia/Bangkok': 'THB',
-  'Asia/Singapore': 'SGD',
-  'Asia/Kuala_Lumpur': 'MYR',
-  'Asia/Shanghai': 'CNY',
-  'Asia/Hong_Kong': 'HKD',
-  'Asia/Macau': 'MOP',
-  'Asia/Manila': 'PHP',
-  'Asia/Jakarta': 'IDR',
-  'Asia/Makassar': 'IDR',
-  'Asia/Phnom_Penh': 'KHR',
-  'Europe/London': 'GBP',
-  'Europe/Paris': 'EUR',
-  'Europe/Berlin': 'EUR',
-  'Europe/Rome': 'EUR',
-  'Europe/Madrid': 'EUR',
-  'Australia/Sydney': 'AUD',
-  'America/New_York': 'USD',
-  'America/Los_Angeles': 'USD',
-});
+/** 一趟最多几个城市 */
+export const MAX_CITIES = 5;
 
-/** 常用币种（快捷芯片：推荐的当地币种排最前，再加这几个；别的点「其他」写三位代码） */
-export const CURRENCY_PRESETS = Object.freeze(['HKD', 'CNY', 'USD']);
+/** 没去过哪儿时「常用」补的热门城市（按他们可能去的排） */
+export const POPULAR = Object.freeze(['tokyo', 'osaka', 'seoul', 'bangkok', 'taipei', 'phu-quoc', 'da-nang', 'singapore']);
 
-/** 币种芯片：按时区推荐的当地币种排最前，再加几个常用的（去重） */
-export function currencyOptions(timezone) {
-  return [...new Set([currencyForZone(timezone), ...CURRENCY_PRESETS].filter(Boolean))];
-}
+/** 海岛：封面默认 🏝️ + 海岛青绿 */
+const ISLANDS = new Set(['phu-quoc', 'bali', 'phuket', 'koh-samui', 'krabi', 'boracay', 'cebu', 'jeju', 'okinawa', 'honolulu', 'sanya', 'penang', 'kota-kinabalu', 'nha-trang']);
 
 /** 封面主题色预设：[主题色, 第二主题色]（不带 #，见文件头） */
 export const COVER_PRESETS = Object.freeze([
@@ -72,10 +50,405 @@ export const COVER_PRESETS = Object.freeze([
   { key: 'dusk', label: '暮色紫', colors: ['6A4FB8', 'E58BA8'] },
 ]);
 
-/** 封面 emoji 预设 */
-export const EMOJI_PRESETS = Object.freeze(['🏝️', '✈️', '🏮', '⛰️', '🏙️', '🌸']);
-
 const hex = (code) => `#${code}`;
+const str = (v) => (v === null || v === undefined ? '' : String(v));
+
+// ---------------------------------------------------------------------
+// 表单
+// ---------------------------------------------------------------------
+
+/**
+ * 表单的初始值。
+ *   cities：选了的城市，每个是 { id, zh, r } —— 内置表里的城市；或 { id: null, zh, r, custom: true } —— 只选了国家（城市名是自己打的）
+ *   range：{ start, end, auto }，auto = 只点了出发（回来是按默认天数补的，再点一下就定回来）
+ *   nights：每个城市住几晚（和 cities 一一对应；只有一个城市时不用）
+ */
+export function initialTripForm() {
+  return {
+    cities: [],
+    range: { start: '', end: '', auto: false },
+    nights: [],
+    move: null, // null = 没点过，按城市默认
+    title: '',
+    titleTouched: false,
+    withPartner: true,
+    copyPacking: true,
+    timezone: '',
+    currency: '',
+    /** 用户在「更多」里自己改过：之后换城市不再自动改 */
+    zoneTouched: false,
+    currencyTouched: false,
+  };
+}
+
+/** 表单改过吗（存草稿；存不了草稿时关面板前问一句） */
+export function isTripFormDirty(form) {
+  return Boolean(form.cities.length || form.range.start || (form.titleTouched && str(form.title).trim()));
+}
+
+// ---------------------------------------------------------------------
+// 草稿：填了一半关掉面板，下次打开接着填（这台设备的 localStorage；建好了就清掉）
+// ---------------------------------------------------------------------
+
+/** 草稿留多久（天） */
+export const DRAFT_DAYS = 14;
+const DRAFT_KEYS = Object.keys(initialTripForm());
+
+/** 表单 → 存进草稿的样子（没填什么 → null，删掉草稿） */
+export function draftOf(form, at = Date.now()) {
+  if (!form || !isTripFormDirty(form)) return null;
+  const f = {};
+  for (const k of DRAFT_KEYS) f[k] = form[k];
+  return { v: 1, at, form: f };
+}
+
+/**
+ * 草稿 → 表单（读不懂、太旧 → null）。出发日已经过了：日期清掉（城市、名字这些留着）。
+ * @param {unknown} raw local.getJSON 读出来的
+ * @param {{ at?: number, todayDate?: string }} [o] todayDate：香港今天（'2027-01-10'）
+ */
+export function restoreDraft(raw, { at = Date.now(), todayDate = '' } = {}) {
+  if (!raw || typeof raw !== 'object' || raw.v !== 1 || !raw.form || typeof raw.form !== 'object') return null;
+  if (!Number.isFinite(raw.at) || at - raw.at > DRAFT_DAYS * 86_400_000) return null;
+  const base = initialTripForm();
+  const f = raw.form;
+  const cities = Array.isArray(f.cities)
+    ? f.cities.filter((c) => c && typeof c.zh === 'string' && c.zh.trim() && typeof c.r === 'string' && (c.id === null || cityInfo(c.id))).slice(0, MAX_CITIES)
+    : [];
+  const r = f.range && typeof f.range === 'object' ? f.range : {};
+  let range = isValidDate(r.start) && (!r.end || isValidDate(r.end)) ? { start: r.start, end: r.end || r.start, auto: Boolean(r.auto) } : base.range;
+  if (range.start && todayDate && range.start < todayDate) range = base.range;
+  const form = {
+    ...base,
+    cities: cities.map((c) => (c.id ? { id: c.id, zh: c.zh, r: c.r } : { id: null, zh: c.zh, r: c.r, custom: true })),
+    range,
+    nights: Array.isArray(f.nights) && Array.isArray(f.cities) && f.cities.length === cities.length && f.nights.length === cities.length && f.nights.every((n) => Number.isInteger(n) && n >= 0) ? f.nights : [],
+    move: MOVES.includes(f.move) ? f.move : null,
+    title: typeof f.title === 'string' ? f.title.slice(0, 120) : '',
+    titleTouched: Boolean(f.titleTouched),
+    withPartner: f.withPartner !== false,
+    copyPacking: f.copyPacking !== false,
+    timezone: typeof f.timezone === 'string' ? f.timezone : '',
+    currency: typeof f.currency === 'string' ? f.currency.slice(0, 3) : '',
+    zoneTouched: Boolean(f.zoneTouched),
+    currencyTouched: Boolean(f.currencyTouched),
+  };
+  return isTripFormDirty(form) ? form : null;
+}
+
+/** 同一张表单内容（不含 token）：重试时内容变了就换一个 token（不然服务器会把上次建成的那趟原样还回来） */
+export function submitKey(input) {
+  if (!input) return '';
+  const { token, ...rest } = input;
+  return JSON.stringify(rest);
+}
+
+// ---------------------------------------------------------------------
+// 去哪
+// ---------------------------------------------------------------------
+
+/** 城市表的一行 → 表单里存的样子 */
+export function cityPick(row) {
+  return { id: row.id, zh: row.zh, r: row.r };
+}
+
+/** 去过的城市（行程 extra.dest.cities 里内置表的 id），最近一趟的在前 */
+export function usedCities(entries = []) {
+  const trips = entries.map((e) => e.trip || e).filter(Boolean)
+    .sort((a, b) => str(b.start_date).localeCompare(str(a.start_date)));
+  const out = [];
+  for (const t of trips) {
+    const list = t?.extra?.dest?.cities;
+    if (!Array.isArray(list)) continue;
+    for (const c of list) if (typeof c === 'string' && cityInfo(c) && !out.includes(c)) out.push(c);
+  }
+  return out;
+}
+
+/** 「常用」芯片：去过的在前，再补热门的，最多 limit 个；已经选了的不再出现 */
+export function quickCities(entries = [], { limit = 6, exclude = [] } = {}) {
+  const ids = [...usedCities(entries), ...POPULAR].filter((id, i, a) => a.indexOf(id) === i && !exclude.includes(id));
+  const rows = new Map(allCities().map((c) => [c.id, c]));
+  return ids.map((id) => rows.get(id)).filter(Boolean).slice(0, limit);
+}
+
+/** 搜城市：rules 的 searchCities，去过的排在最前（同一档里） */
+export function rankCities(query, used = [], { limit = 8, exclude = [] } = {}) {
+  const rows = searchCities(query, { limit: 30 }).filter((c) => !exclude.includes(c.id));
+  const rank = (c) => (used.includes(c.id) ? 0 : 1);
+  return rows.map((c, i) => ({ c, i })).sort((a, b) => rank(a.c) - rank(b.c) || a.i - b.i).slice(0, limit).map((x) => x.c);
+}
+
+/** 城市表里没有：按国家建。q 是国家名就只给那一个；否则给全部地区（港澳台、内地在前） */
+export function searchRegions(query) {
+  const q = foldName(query);
+  const all = Object.keys(REGIONS).map((code) => ({ code, zh: REGIONS[code].zh, en: REGIONS[code].en }));
+  if (!q) return all;
+  const hit = all.filter((r) => foldName(r.zh).indexOf(q) === 0 || foldName(r.en).indexOf(q) === 0 || q.indexOf(foldName(r.zh)) === 0);
+  return hit.length ? hit : all;
+}
+
+/** 只选国家时，城市名用打的字（没打就用国家名） */
+export function regionPick(code, typed) {
+  const r = regionInfo(code);
+  const name = str(typed).trim().slice(0, 20) || (r ? r.zh : code);
+  return { id: null, zh: name, r: code, custom: true };
+}
+
+/** 第一个城市（决定行程的地区、时区、币种） */
+export function primaryCity(form) {
+  return form.cities[0] || null;
+}
+
+// ---------------------------------------------------------------------
+// 每个城市住几晚（换城那天归后一段）
+// ---------------------------------------------------------------------
+
+/** 平均分（前面的多分一晚）；除了最后一个，每个城市至少 1 晚 */
+export function splitNights(total, n) {
+  if (n <= 0) return [];
+  if (n === 1) return [Math.max(0, total)];
+  const t = Math.max(total, n - 1);
+  const base = Math.floor(t / n);
+  const extra = t % n;
+  return Array.from({ length: n }, (_, i) => base + (i < extra ? 1 : 0));
+}
+
+const minNights = (i, n) => (i === n - 1 ? 0 : 1);
+
+/**
+ * 第 i 个城市加 / 减一晚：总晚数不变，从后面（没有就前面）能让的城市挪一晚。挪不动返回原数组。
+ */
+export function shiftNights(nights, i, delta) {
+  const n = nights.length;
+  if (n < 2 || !delta) return nights;
+  const next = [...nights];
+  if (next[i] + delta < minNights(i, n)) return nights;
+  const order = [...Array.from({ length: n - i - 1 }, (_, k) => n - 1 - k), ...Array.from({ length: i }, (_, k) => i - 1 - k)];
+  const donor = order.find((j) => (delta > 0 ? next[j] - 1 >= minNights(j, n) : true));
+  if (donor === undefined) return nights;
+  next[i] += delta;
+  next[donor] -= delta;
+  return next;
+}
+
+/** 晚数和行程对不上（改了日期、加减了城市）时重新平均分 */
+export function fitNights(nights, total, n) {
+  if (nights.length === n && nights.reduce((a, b) => a + b, 0) === total && nights.every((x, i) => x >= minNights(i, n))) return nights;
+  return splitNights(total, n);
+}
+
+/**
+ * 每个城市的起止日期（换城那天归后一段；最后一段到回来那天）。
+ * @returns {Array<{ start: string, end: string }>}
+ */
+export function cityDates(range, nights) {
+  const out = [];
+  let cur = range.start;
+  for (let i = 0; i < nights.length; i++) {
+    const last = i === nights.length - 1;
+    const end = last ? range.end : addDays(cur, Math.max(1, nights[i]) - 1);
+    out.push({ start: cur, end });
+    cur = addDays(cur, Math.max(1, nights[i]));
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------
+// 这趟怎么走、名字、预览
+// ---------------------------------------------------------------------
+
+/** 芯片现在亮哪个：点过就是点的；没点过按第一个城市默认 */
+export function moveFor(form) {
+  if (form.move && MOVES.includes(form.move)) return form.move;
+  const c = primaryCity(form);
+  return c ? moveDefault(c.r, c.id) : null;
+}
+
+const MOVE_LABEL = Object.fromEntries(MOVE_CHOICES.map((m) => [m.id, m.label]));
+
+
+/**
+ * 芯片下面的一句话：几个城市默认不一样（台北公交、垦丁骑车）→「没改就按城市：台北公交为主、垦丁骑车」；
+ * 城市自己有提示（垦丁公交很少，一般租电动车）→ 那句；都没有 → 这一种给什么按钮（MOVE_HINT）。点过芯片 → 也是 MOVE_HINT。
+ */
+export function moveHint(form) {
+  const cities = form.cities.filter((c) => c.id);
+  if (form.move) return `${MOVE_HINT[form.move] || '每天的按钮按这个给'}，单独一项还能改`;
+  const defaults = cities.map((c) => ({ c, m: moveDefault(c.r, c.id) }));
+  if (new Set(defaults.map((x) => x.m)).size > 1) {
+    return `没改就按城市：${defaults.map((x) => `${x.c.zh}${MOVE_LABEL[x.m] || ''}`).join('、')}`;
+  }
+  const note = cities.map((c) => cityInfo(c.id)?.note).find(Boolean);
+  if (note) return note;
+  const m = moveFor(form);
+  return m && MOVE_HINT[m] ? `${MOVE_HINT[m]}，单独一项还能改` : '';
+}
+
+/** 自动起的名字：「富国岛 · 10 月」「台北、垦丁 · 5 月」 */
+export function autoTitle(form) {
+  const names = form.cities.map((c) => c.zh);
+  if (!names.length) return '';
+  const head = names.length > 3 ? `${names.slice(0, 3).join('、')}等` : names.join('、');
+  const start = form.range.start;
+  return isValidDate(start) ? `${head} · ${Number(start.slice(5, 7))} 月` : head;
+}
+
+/** 名字框里显示的：自己改过用自己的，否则自动的 */
+export function titleOf(form) {
+  return form.titleTouched ? str(form.title) : autoTitle(form);
+}
+
+/** 简称（豆豆账本「旅游」下的细分名）：一个城市写城市；同一地区几个城市写地区；否则第一个城市 */
+export function shortNameOf(form) {
+  const cs = form.cities;
+  if (!cs.length) return '';
+  if (cs.length === 1) return cs[0].zh.slice(0, 20);
+  const regions = new Set(cs.map((c) => c.r));
+  if (regions.size === 1) return (regionInfo(cs[0].r)?.zh || cs[0].zh).slice(0, 20);
+  return cs[0].zh.slice(0, 20);
+}
+
+/** 按第一个城市带出来的时区（城市有自己的时区就用城市的） */
+export function zoneForCity(c) {
+  if (!c) return '';
+  return cityInfo(c.id)?.tz || regionInfo(c.r)?.tz || '';
+}
+
+/** 表单 → trips.extra.dest */
+export function destOf(form) {
+  const c = primaryCity(form);
+  if (!c) return null;
+  const d = { v: 1, region: c.r };
+  const ids = form.cities.filter((x) => x.id).map((x) => x.id);
+  if (ids.length) d.cities = ids;
+  if (form.move && MOVES.includes(form.move)) d.move = form.move;
+  return d;
+}
+
+/** 预览用的档案（rules 的 profileOf，拿表单拼一个假的行程行） */
+export function profileForForm(form) {
+  const dest = destOf(form);
+  if (!dest) return null;
+  return profileOf({ extra: { dest }, timezone: form.timezone || zoneForCity(primaryCity(form)) });
+}
+
+/**
+ * 服务器会顺带加的几条待办（和 private.starter_todos 一样，预览那行字用；以服务器为准）。
+ */
+export function starterTodoTitles(region, local, home = 'HKD') {
+  const r = region || '';
+  return [
+    ['流量卡', r !== 'HK'],
+    ['换钱', Boolean(local) && local !== home],
+    ['网上值机', !['HK', 'MO', 'CN'].includes(r)],
+    ['入境要求', !['HK', 'CN'].includes(r)],
+  ].filter(([, keep]) => keep).map(([t]) => t);
+}
+
+/** 默认封面：海岛 🏝️ + 海岛青绿；别的 ✈️ + 深海蓝（建好后在设置里能换） */
+export function coverFor(form) {
+  const island = form.cities.some((c) => c.id && ISLANDS.has(c.id));
+  const preset = COVER_PRESETS.find((p) => p.key === (island ? 'island' : 'ocean'));
+  return { accent: hex(preset.colors[0]), accent_2: hex(preset.colors[1]), emoji: island ? '🏝️' : '✈️' };
+}
+
+/** 主题色预设 → 色块 style（accent-scope 里由 tokens 派生出各种强调色） */
+export function presetStyle(preset) {
+  return { '--trip-accent': hex(preset.colors[0]), '--trip-accent-2': hex(preset.colors[1]) };
+}
+
+// ---------------------------------------------------------------------
+// 提交
+// ---------------------------------------------------------------------
+
+/** 校验：返回第一个问题 { field, message }；没问题返回 null */
+export function validateTripForm(form) {
+  if (!form.cities.length) return { field: 'where', message: '先选去哪' };
+  if (!form.range.start) return { field: 'when', message: '点一下出发那天' };
+  const days = rangeDays(form.range);
+  if (!days) return { field: 'when', message: '回来的日期不能早于出发' };
+  if (days > MAX_DAYS) return { field: 'when', message: `一趟最多 ${MAX_DAYS} 天` };
+  if (form.cities.length > 1 && days - 1 < form.cities.length - 1) {
+    return { field: 'when', message: `${form.cities.length} 个城市至少要住 ${form.cities.length - 1} 晚` };
+  }
+  const title = titleOf(form).trim();
+  if (!title) return { field: 'title', message: '起个名字' };
+  if (title.length > 60) return { field: 'title', message: '名字最多 60 个字' };
+  const cur = str(form.currency).trim().toUpperCase();
+  if (cur && !/^[A-Z]{3}$/.test(cur)) return { field: 'more', message: '币种要写三位代码，例如 JPY' };
+  if (!destOk(destOf(form))) return { field: 'where', message: '目的地的写法不对' };
+  return null;
+}
+
+
+/**
+ * 表单 → data.rpc.createTripV2 的参数。
+ * @param {object} form
+ * @param {{ token: string, copyFrom?: string|null }} o
+ */
+export function tripFormToInput(form, { token, copyFrom = null } = {}) {
+  const c = primaryCity(form);
+  const range = form.range;
+  const tz = canonicalZone(form.timezone || zoneForCity(c) || 'Asia/Hong_Kong');
+  const local = (str(form.currency).trim().toUpperCase() || regionInfo(c?.r)?.cur || currencyOfTz(tz) || '') || null;
+  const n = form.cities.length;
+  const nights = n > 1 ? fitNights(form.nights, rangeDays(range) - 1, n) : [rangeDays(range) - 1];
+  const dates = n > 1 ? cityDates(range, nights) : [{ start: range.start, end: range.end }];
+  const segments = form.cities.map((city, i) => {
+    const info = city.id ? cityInfo(city.id) : null;
+    const segTz = zoneForCity(city);
+    const seg = {
+      name: city.zh,
+      startDate: dates[i].start,
+      endDate: dates[i].end,
+      dest: city.id ? { region: city.r, city: city.id } : { region: city.r },
+    };
+    if (info) {
+      seg.lat = info.lat;
+      seg.lng = info.lng;
+    }
+    if (segTz && segTz !== tz) seg.timezone = segTz;
+    return seg;
+  });
+  return {
+    token,
+    // 行程 id 由服务器起：「城市 id-年份」，只选了国家「国家英文名-年份」（private.region_slug；两端一样）
+    title: titleOf(form).trim(),
+    startDate: range.start,
+    endDate: range.end,
+    timezone: tz,
+    homeCurrency: 'HKD',
+    localCurrency: local,
+    shortName: shortNameOf(form) || undefined,
+    cover: coverFor(form),
+    dest: destOf(form),
+    segments,
+    withPartner: form.withPartner !== false,
+    copyFrom: form.copyPacking && copyFrom ? copyFrom : undefined,
+  };
+}
+
+// ---------------------------------------------------------------------
+// 上一趟（行李清单从哪趟带）、对方是谁
+// ---------------------------------------------------------------------
+
+/**
+ * 从哪几趟里找行李清单：最近出发的在前（不要还没出发的那几趟以后的），最多 3 趟；页面挨个看哪趟有打包项。
+ * @param {Array<{ id, trip, role }>} entries
+ */
+export function packingCandidates(entries = [], start = '') {
+  return entries
+    .filter((e) => e.trip?.start_date && e.trip.status !== 'archived' && e.role !== 'viewer')
+    .filter((e) => !start || e.trip.start_date <= start)
+    .sort((a, b) => str(b.trip.start_date).localeCompare(str(a.trip.start_date)))
+    .slice(0, 3)
+    .map((e) => e.id);
+}
+
+// ---------------------------------------------------------------------
+// 更多：时区、当地币种（一般不用改）
+// ---------------------------------------------------------------------
 
 /** 浏览器（Intl）给的旧名字 → 现在通用的写法 */
 const ZONE_ALIASES = Object.freeze({
@@ -95,205 +468,64 @@ export function canonicalZone(tz) {
   return ZONE_ALIASES[tz] || tz;
 }
 
-/** 搜时区用的中文名（timeZoneLabel 里没有的补几个常用的） */
-const ZONE_KEYWORDS = Object.freeze({
-  'Asia/Ho_Chi_Minh': '越南 胡志明 富国岛 岘港 河内 芽庄 vietnam saigon',
-  'Asia/Taipei': '台湾 台北 高雄 台中 垦丁 taiwan',
-  'Asia/Tokyo': '日本 东京 大阪 京都 北海道 冲绳 japan',
-  'Asia/Seoul': '韩国 首尔 釜山 济州 korea',
-  'Asia/Bangkok': '泰国 曼谷 清迈 普吉 thailand',
-  'Asia/Singapore': '新加坡 singapore',
-  'Asia/Kuala_Lumpur': '马来西亚 吉隆坡 槟城 malaysia',
-  'Asia/Shanghai': '内地 中国 北京 上海 深圳 广州 成都 重庆 china',
-  'Asia/Hong_Kong': '香港 hong kong',
-  'Asia/Macau': '澳门 macau',
-  'Asia/Manila': '菲律宾 马尼拉 宿务 philippines',
-  'Asia/Jakarta': '印尼 雅加达 indonesia',
-  'Asia/Makassar': '巴厘岛 印尼 bali',
-  'Asia/Phnom_Penh': '柬埔寨 金边 暹粒 cambodia',
-  'Asia/Kathmandu': '尼泊尔 加德满都 nepal',
-  'Asia/Dubai': '迪拜 阿联酋 dubai',
-  'Europe/London': '英国 伦敦 uk',
-  'Europe/Paris': '法国 巴黎 france',
-  'Europe/Berlin': '德国 柏林 germany',
-  'Europe/Rome': '意大利 罗马 italy',
-  'Europe/Madrid': '西班牙 马德里 spain',
-  'Australia/Sydney': '澳洲 悉尼 墨尔本 australia',
-  'America/New_York': '美国 纽约 美东 usa',
-  'America/Los_Angeles': '美国 洛杉矶 旧金山 美西 usa',
-});
+/** 时区的中文名：地区表里的叫法（越南、台湾……），其次 lib/datetime 的地名 */
+export function zoneName(tz) {
+  const r = Object.values(REGIONS).find((x) => x.tz === tz);
+  return r ? r.zh : timeZoneLabel(tz);
+}
 
 /** 时区一行说明：「越南 · UTC+7 · 比香港慢 1 小时」 */
 export function zoneSummary(tz, at = new Date()) {
   if (!tz) return '';
   try {
-    const off = formatUtcOffset(tzOffsetMinutes(tz, at));
-    return [zoneName(tz), off, tzDifferenceLabel(tz, undefined, at)].join(' · ');
+    return [zoneName(tz), formatUtcOffset(tzOffsetMinutes(tz, at)), tzDifferenceLabel(tz, undefined, at)].join(' · ');
   } catch {
     return tz;
   }
 }
 
-/** 时区的中文名：预设里的叫法优先（越南、台湾……），其次 lib/datetime 的地名 */
-export function zoneName(tz) {
-  return ZONE_PRESETS.find((z) => z.tz === tz)?.label || timeZoneLabel(tz);
-}
-
-/** 时区 → 当地币种（不认识的返回 null） */
-export function currencyForZone(tz) {
-  return ZONE_CURRENCY[canonicalZone(tz)] || null;
-}
-
-/** 币种芯片上的字：「越南盾」；不认识的写代码 */
-export function currencyLabel(code) {
-  const c = normalizeCurrency(code);
-  return currencyName(c);
-}
-
-const fold = (s) => String(s || '').normalize('NFKC').toLowerCase().replace(/[_/]+/g, ' ').trim();
+const foldZone = (s) => str(s).normalize('NFKC').toLowerCase().replace(/[_/]+/g, ' ').trim();
 
 /**
- * 搜时区。
+ * 搜时区：城市表的中文名、英文名，地区名，IANA 名都能搜（「大阪」「saigon」「Asia/Tokyo」）。
  * @param {string} query
- * @param {string[]} all  全部 IANA 时区（浏览器的 Intl.supportedValuesOf('timeZone')）
- * @param {{ limit?: number }} [o]
- * @returns {string[]}  规范写法的时区，最相关的在前
+ * @param {string[]} all 全部 IANA 时区（浏览器的 Intl.supportedValuesOf('timeZone')）
  */
 export function searchZones(query, all = [], { limit = 8 } = {}) {
-  const q = fold(query);
+  const q = foldZone(query);
   if (!q) return [];
+  const words = new Map();
+  const addWord = (tz, w) => {
+    if (!tz) return;
+    words.set(tz, `${words.get(tz) || ''} ${w}`);
+  };
+  for (const c of allCities()) addWord(c.tz || REGIONS[c.r]?.tz, `${c.zh} ${c.en} ${c.regionZh} ${(c.alias || []).join(' ')}`);
+  for (const r of Object.values(REGIONS)) addWord(r.tz, `${r.zh} ${r.en}`);
   const seen = new Set();
   const scored = [];
-  const pool = [...Object.keys(ZONE_KEYWORDS), ...all.map(canonicalZone)];
-  for (const tz of pool) {
+  for (const tz of [...words.keys(), ...all.map(canonicalZone)]) {
     if (seen.has(tz)) continue;
     seen.add(tz);
-    const words = fold(`${ZONE_KEYWORDS[tz] || ''} ${timeZoneLabel(tz)} ${tz}`);
-    const city = fold(tz.split('/').pop());
+    const w = foldZone(`${words.get(tz) || ''} ${timeZoneLabel(tz)} ${tz}`);
+    const city = foldZone(tz.split('/').pop());
     let score = 0;
-    if (city === q || fold(zoneName(tz)) === q) score = 100;
+    if (city === q || foldZone(zoneName(tz)) === q) score = 100;
     else if (city.startsWith(q)) score = 70;
-    else if (words.split(' ').some((w) => w.startsWith(q))) score = 60;
-    else if (words.includes(q)) score = 40;
-    if (score) scored.push({ tz, score: score + (ZONE_KEYWORDS[tz] ? 5 : 0) });
+    else if (w.split(' ').some((x) => x.startsWith(q))) score = 60;
+    else if (w.includes(q)) score = 40;
+    if (score) scored.push({ tz, score: score + (words.has(tz) ? 5 : 0) });
   }
   return scored.sort((a, b) => b.score - a.score || a.tz.localeCompare(b.tz)).slice(0, limit).map((x) => x.tz);
 }
 
-/** 表单的初始值 */
-export function initialTripForm() {
-  const preset = COVER_PRESETS[0];
-  return {
-    title: '',
-    startDate: '',
-    endDate: '',
-    timezone: 'Asia/Ho_Chi_Minh',
-    currency: 'VND',
-    /** 用户自己选过币种：之后换时区不再自动改币种 */
-    currencyTouched: false,
-    cover: preset.key,
-    emoji: EMOJI_PRESETS[0],
-  };
+/** 常用币种（当地币种排最前，再加这几个；别的点「其他」写三位代码） */
+export const CURRENCY_PRESETS = Object.freeze(['HKD', 'CNY', 'USD']);
+
+export function currencyOptions(local) {
+  return [...new Set([local, ...CURRENCY_PRESETS].filter(Boolean))];
 }
 
-/** 选了出发日期、还没选回来的日期：默认 4 天 3 晚（富国岛那样的短途）；回来早于出发时跟着挪 */
-export function adjustEndDate(startDate, endDate) {
-  if (!isValidDate(startDate)) return endDate;
-  if (!isValidDate(endDate) || daysBetween(startDate, endDate) < 0) return addDays(startDate, 3);
-  return endDate;
-}
-
-/** 几天几晚（表单里实时显示）；没选全返回 '' */
-export function formLengthLabel(form) {
-  if (!isValidDate(form.startDate) || !isValidDate(form.endDate)) return '';
-  const n = daysBetween(form.startDate, form.endDate);
-  if (n < 0) return '';
-  return n ? `${n + 1} 天 ${n} 晚` : '1 天';
-}
-
-/** 出发前还有几天（表单里的小字）：「12 天后出发」；已经过去的日期：「这个日期已经过去了」 */
-export function startHint(form, at = new Date()) {
-  if (!isValidDate(form.startDate)) return '';
-  const t = today(form.timezone || 'Asia/Hong_Kong', at);
-  const d = daysBetween(t, form.startDate);
-  if (d > 1) return `${d} 天后出发`;
-  if (d === 1) return '明天出发';
-  if (d === 0) return '今天出发';
-  return '这个日期已经过去了（记一趟以前的旅行也可以）';
-}
-
-/**
- * 校验。返回第一个问题 { field, message }，没问题返回 null。
- */
-export function validateTripForm(form) {
-  const title = String(form.title || '').trim();
-  if (!title) return { field: 'title', message: '给这趟旅行起个名字' };
-  if (title.length > 60) return { field: 'title', message: '名字最多 60 个字' };
-  if (form.startDate && !isValidDate(form.startDate)) return { field: 'dates', message: '出发日期不对' };
-  if (form.endDate && !isValidDate(form.endDate)) return { field: 'dates', message: '回来的日期不对' };
-  if (form.endDate && !form.startDate) return { field: 'dates', message: '先选出发日期' };
-  if (form.startDate && form.endDate && daysBetween(form.startDate, form.endDate) < 0) return { field: 'dates', message: '回来的日期不能早于出发日期' };
-  if (form.startDate && form.endDate && daysBetween(form.startDate, form.endDate) > 90) return { field: 'dates', message: '一趟最长 90 天，日期是不是选错了？' };
-  if (!form.timezone) return { field: 'timezone', message: '选一个时区' };
-  const cur = String(form.currency || '').trim().toUpperCase();
-  if (cur && !/^[A-Z]{3}$/.test(cur)) return { field: 'currency', message: '币种要写三位代码，例如 VND、JPY' };
-  return null;
-}
-
-/** 表单 → trips.cover */
-export function coverFromForm(form) {
-  const preset = COVER_PRESETS.find((p) => p.key === form.cover) || COVER_PRESETS[0];
-  const out = { accent: hex(preset.colors[0]), accent_2: hex(preset.colors[1]) };
-  if (form.emoji) out.emoji = form.emoji;
-  return out;
-}
-
-/** 主题色预设 → 渲染色块时写的 style（accent-scope 里由 tokens 派生出各种强调色） */
-export function presetStyle(preset) {
-  return { '--trip-accent': hex(preset.colors[0]), '--trip-accent-2': hex(preset.colors[1]) };
-}
-
-/** 起行程 id 前先把声调去掉（越南语「Phú Quốc」→「Phu Quoc」、đ → d）：data/rpc.js 的 suggestTripId 直接把带声调的字母当分隔符，会起出 'phu-quo-c' */
-export function asciiFold(text) {
-  return String(text || '').normalize('NFKD').replace(/\p{M}+/gu, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
-}
-
-/**
- * 表单 → data.rpc.createTrip 的参数。
- * @param {object} form
- * @param {string[]} taken  已知被占用的行程 id（全部行程）
- */
-export function tripFormToInput(form, taken = []) {
-  const title = String(form.title || '').trim();
-  const startDate = form.startDate || null;
-  const endDate = form.endDate || (form.startDate ? form.startDate : null);
-  const local = String(form.currency || '').trim().toUpperCase() || null;
-  return {
-    id: suggestTripId(asciiFold(title), startDate, taken),
-    title,
-    startDate,
-    endDate,
-    timezone: canonicalZone(form.timezone || 'Asia/Hong_Kong'),
-    homeCurrency: 'HKD',
-    localCurrency: local,
-    cover: coverFromForm(form),
-  };
-}
-
-/** 行程 id 撞了（别人的行程用了同一个 id，我们看不见）：第 n 次撞了换成 <最初的 id>-<n+1> */
-export function nextTripId(id, n) {
-  const c = `${String(id)}-${n + 1}`.slice(0, 40);
-  return TRIP_ID_RE.test(c) ? c : `trip-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-/** 后台说 id 已存在 */
-export function isIdConflict(error) {
-  return error?.kind === 'conflict' || error?.code === '23505' || /已存在|already exists|duplicate/i.test(String(error?.message || ''));
-}
-
-/** 表单改过吗（关面板前问一句） */
-export function isTripFormDirty(form) {
-  const init = initialTripForm();
-  return Boolean(String(form.title || '').trim() || form.startDate || form.endDate || form.timezone !== init.timezone
-    || form.cover !== init.cover || form.emoji !== init.emoji || form.currency !== init.currency);
+/** 币种芯片上的字：「越南盾」；不认识的写代码 */
+export function currencyLabel(code) {
+  return currencyName(normalizeCurrency(code));
 }

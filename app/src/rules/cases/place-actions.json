@@ -1,0 +1,30 @@
+{
+  "_说明": "placeActions 的金标准：没有条目上下文时（地点页、地图小卡、预订卡、住处卡）的一排（演示数据）。",
+  "fn": "placeActions",
+  "places": {
+    "p-hotel": { "id": "p-hotel", "name": "椰影湾酒店", "name_local": "Khách sạn Vịnh Dừa", "lat": 8.68, "lng": 106.606 },
+    "p-town": { "id": "p-town", "name": "椰影镇", "lat": 8.6833, "lng": 106.6085, "coord_precision": "city" },
+    "p-cloud-beach": { "id": "p-cloud-beach", "name": "云屿白沙滩", "name_local": "Bãi Mây", "lat": 8.634, "lng": 106.608 },
+    "f-museum": { "id": "f-museum", "name": "旧城博物馆", "lat": 25.1024, "lng": 121.5485 }
+  },
+  "cases": [
+    { "name": "没有地点", "place": null, "profile": "VN", "expect": { "key": "none", "actions": [] } },
+    { "name": "越南（打车为主）：导航、叫 Grab、给司机看", "place": "p-hotel", "profile": "VN",
+      "expect": { "key": "place", "actions": ["nav", "ride", "driver"], "primary": "nav", "ride": { "label": "叫 Grab" }, "more": ["copy"] } },
+    { "name": "台湾（公交为主）：导航、叫 Uber", "place": "f-museum", "profile": "TW",
+      "expect": { "actions": ["nav", "ride"], "navMode": "transit", "ride": { "label": "叫 Uber" }, "more": ["driver", "copy"] } },
+    { "name": "住处卡第一晚：叫车做主按钮", "place": "p-hotel", "profile": "VN", "prefer": "ride",
+      "expect": { "actions": ["ride", "nav", "driver"], "primary": "ride" } },
+    { "name": "自驾的行程：只给导航", "place": "p-hotel", "profile": { "region": "VN", "move": "self_drive" },
+      "expect": { "actions": ["nav"], "navMode": "driving" } },
+    { "name": "走路为主：导航（步行）+ 叫车", "place": "f-museum", "profile": { "region": "TW", "move": "walk" },
+      "expect": { "actions": ["nav", "ride"], "navMode": "walking" } },
+    { "name": "坐标只到城市：只给导航，按名字搜", "place": "p-town", "profile": "VN",
+      "expect": { "actions": ["nav"], "navByName": true } },
+    { "name": "中性档案：叫不到车", "place": "p-hotel", "profile": { "region": null },
+      "expect": { "actions": ["nav"], "ride": null, "more": ["driver", "copy"] } },
+    { "name": "在叫不到车的岛上：只给导航", "place": "p-cloud-beach", "profile": "VN",
+      "profilePatch": { "zones": [{ "id": "cloud-isle", "box": [8.62, 106.59, 8.64, 106.62], "ride": [], "note": "岛上叫不到车" }] },
+      "expect": { "actions": ["nav"], "zone": "cloud-isle", "ride": null } }
+  ]
+}

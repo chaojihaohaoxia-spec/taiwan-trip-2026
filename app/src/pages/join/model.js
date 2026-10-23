@@ -53,7 +53,7 @@ export function joinErrorInfo(error, { online = true } = {}) {
     return {
       kind: 'invalid',
       title: '这个邀请用不了',
-      message: '请让对方在「设置 → 成员和邀请」里重新生成一个邀请链接发给你。',
+      message: '请让对方在「设置 → 每趟行程」里重新生成一个邀请链接发给你。',
       reasons: ['已经过期了（邀请链接有有效期）', '已经被用过了（一个链接能用的次数有限）', '被创建者撤销了', '复制的时候少了几位'],
       retry: false,
     };

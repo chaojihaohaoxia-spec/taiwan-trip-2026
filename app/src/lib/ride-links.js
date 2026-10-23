@@ -1,11 +1,14 @@
 // =====================================================================
-// lib/ride-links.js：叫车链接和“给司机看”的内容（Grab 为主，越南、东南亚通用）。
+// lib/ride-links.js：叫车链接和“给司机看”的内容。叫哪家按目的地档案（rules/dest.js 的 profile.ride）：
+// Grab、Uber 能带目的地跳过去；其他（GO、滴滴、Xanh SM……）网页没有能带目的地的链接，先复制地址再自己打开 App。
 //
 //   import { grabBookingUrl, GRAB_OPEN_URL, driverCardFields, addressForCopy } from '../lib/ride-links.js';
 //
 //   grabBookingUrl(place, o)   → 打开 Grab 叫车页、目的地预填好的链接（不设上车点，Grab 用当前位置）；什么都没有 → null
 //   GRAB_OPEN_URL              → 只打开 Grab（不带目的地），「没打开 Grab？」提示里的按钮用
-//   driverCardFields(place, o) → 「给司机看」全屏卡：{ primary, address, secondary, phone, note }
+//   uberRideUrl(place, o)      → 打开 Uber、目的地预填好的链接（写法 UBER_STYLE，真机试后定）；UBER_OPEN_URL 只打开 Uber
+//   rideUrl(app, place, o)     → 按叫车 App 的 link（'grab' / 'uber'）给链接；别的 App → null（只能复制地址）
+//   driverCardFields(place, o) → 「给司机看」全屏卡：{ primary, address, secondary, phone, note }（o.text：'zh' / 'local' / 'en'）
 //   addressForCopy(place, o)   → 复制给司机 / 粘贴进 Grab 的文字：当地语名 + 换行 + 地址
 //   rideTarget(place, o)       → 叫车 / 给司机看真正的目的地（见下面「下车点」）：{ place, via, note, noRoad, access, approximate }
 //   placeRideInfo(place)       → 地点 extra 里的叫车提示（不解析下车点）：{ via, note, noRoad, access, approximate }
@@ -238,28 +241,116 @@ export function grabBookingUrl(place, o) {
   return `${GRAB_ONELINK}?${query.join('&')}`;
 }
 
+// ---------------------------------------------------------------------
+// Uber（香港、澳门、台湾、日本、欧美……档案里叫车写 uber 的地方）
+// ---------------------------------------------------------------------
+
+/**
+ * Uber 带目的地的写法（两种都是 Uber 官方的通用链接：装了 App 直接打开，没装落到网页版）：
+ *   'ul'       https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=…&dropoff[longitude]=…&dropoff[nickname]=…&dropoff[formatted_address]=…
+ *   'looking'  https://m.uber.com/looking?drop[0]={"latitude":…,"longitude":…,"addressLine1":…,"addressLine2":…}（新版网页叫车页）
+ * 等用户在手机上实测哪种能直接进叫车页，要改只改这一个常量。
+ */
+export const UBER_STYLE = 'ul';
+/** 只打开 Uber，不带目的地（「没打开 Uber？」提示里的按钮） */
+export const UBER_OPEN_URL = 'https://m.uber.com/ul/';
+
+/**
+ * 打开 Uber、目的地预填好的链接（有下车点时目的地是下车点）。没坐标只带名字和地址（Uber 自己搜）；什么都没有 → null。
+ * Uber 搜中文地名基本搜得到（港澳台、内地以外按当地名 > 英文名 > 中文名）。
+ * @param {object|null} place
+ * @param {{ getPlace?: (id: string) => object|null, style?: 'ul'|'looking' }} [o]
+ */
+export function uberRideUrl(place, o = {}) {
+  const p = rideTarget(place, o).place;
+  if (!p) return null;
+  const coords = rideCoords(p);
+  const name = rideKeywords(p) || '';
+  const address = oneLine(p.address);
+  if (!coords && !address && !name) return null;
+  const style = o.style || UBER_STYLE;
+  if (style === 'looking') {
+    const drop = {};
+    if (coords) {
+      const [lat, lng] = coordText(coords.lat, coords.lng).split(',');
+      drop.latitude = Number(lat);
+      drop.longitude = Number(lng);
+    }
+    drop.addressLine1 = name || address;
+    if (address && address !== drop.addressLine1) drop.addressLine2 = address;
+    return `https://m.uber.com/looking?drop%5B0%5D=${encodeURIComponent(JSON.stringify(drop))}`;
+  }
+  const params = [['action', 'setPickup'], ['pickup', 'my_location']];
+  if (coords) {
+    const [lat, lng] = coordText(coords.lat, coords.lng).split(',');
+    params.push(['dropoff[latitude]', lat], ['dropoff[longitude]', lng]);
+  }
+  if (name) params.push(['dropoff[nickname]', name]);
+  if (address || !coords) params.push(['dropoff[formatted_address]', address || name]);
+  return `${UBER_OPEN_URL}?${params.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&')}`;
+}
+
+/**
+ * 叫车 App（rules 的 profile.ride[0] / how.ride）→ 带目的地的链接：link 'grab' → Grab、'uber' → Uber；
+ * 别的 App（GO、滴滴、Xanh SM……）没有能带目的地的网页链接 → null（界面先复制地址，再提示自己打开 App）。
+ * @param {{ link?: string|null }|null} app
+ */
+export function rideUrl(app, place, o) {
+  if (!app || !place) return null;
+  if (app.link === 'grab') return grabBookingUrl(place, o);
+  if (app.link === 'uber') return uberRideUrl(place, o);
+  return null;
+}
+
+/** 「没打开 XX？」提示里「打开 XX」用的链接（只打开 App，不带目的地）；没有 → null */
+export function rideOpenUrl(app) {
+  if (!app) return null;
+  if (app.link === 'grab') return GRAB_OPEN_URL;
+  if (app.link === 'uber') return UBER_OPEN_URL;
+  return null;
+}
+
 /**
  * 「给司机看」全屏卡的内容（有下车点时显示下车点那个地点）：
- *   primary    最大号：当地语名字（name_local，没有就用 name）
+ *   primary    最大号：按 o.text（目的地档案的 driverText）——'local' 当地语名字（name_local，没有就用 name）；
+ *              'zh' 中文名（港澳台内地的司机直接看中文）；'en' 英文名
  *   address    地址（保留分行）
- *   secondary  小字：中文名（name），和 primary 一样时为 null
+ *   secondary  小字：中文名（name）；大字已经是中文名时写当地名；和 primary 一样时为 null
  *   phone      电话（有才显示「打电话」；下车点自己的电话）
  *   note       下车提示（ride_note；开车到不了时接上 access_note）
  * 都没有的字段是 null。
  * @param {object|null} place
- * @param {{ getPlace?: (id: string) => object|null }} [o]
+ * @param {{ getPlace?: (id: string) => object|null, text?: 'local'|'zh'|'en' }} [o]
  * @returns {{ primary: string|null, address: string|null, secondary: string|null, phone: string|null, note: string|null }}
  */
+const HAN = /[\u3400-\u9fff]/;
+
 export function driverCardFields(place, o) {
   const t = rideTarget(place, o);
   const p = t.place;
-  const primary = clean(p?.name_local) || clean(p?.name) || clean(p?.name_en);
+  const local = clean(p?.name_local);
   const zh = clean(p?.name);
+  const en = clean(p?.name_en);
+  // 司机看得懂什么字（目的地档案的 driverText），和小程序 pages/trip/view.js 的 driverFields 一套：
+  //   'zh'    港澳台内地：当地名是汉字就用当地名（「雾港车站」，不用自己写的「雾港车站（集合）」），否则中文名
+  //   'en'    英文名在前
+  //   'local' 当地文字在前；地点还没有当地名时先给英文名（越南司机看英文比看中文强）
+  //   不传    旧写法：当地名 → 中文名 → 英文名（小程序 trip-core 的 driverCardFields 逐字比对这一支）
+  const text = o?.text || null;
+  let primary;
+  if (text === 'zh') primary = (local && HAN.test(local) ? local : '') || zh || local || en;
+  else if (text === 'en') primary = en || local || zh;
+  else if (text === 'local') primary = local || en || zh;
+  else primary = local || zh || en;
   const note = [t.note, t.noRoad ? t.access : null].filter(Boolean).join('；') || null;
+  // 小字：大字不是中文名时写中文名（自己认得是哪儿）；大字已经是中文名时写当地名、英文名（有的话）
+  const secondary = text
+    ? [zh, local, en].find((x) => x && x !== primary) || null
+    : primary && primary !== zh ? zh : local && local !== primary ? local : null;
   return {
     primary,
     address: clean(p?.address),
-    secondary: zh && zh !== primary ? zh : null,
+    secondary,
     phone: clean(p?.phone),
     note,
   };

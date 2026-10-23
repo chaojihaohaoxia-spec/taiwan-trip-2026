@@ -15,7 +15,11 @@ test('金额：各币种写法', () => {
   assert.equal(formatAmount(1580, 'TWD'), 'NT$1,580');
   assert.equal(formatAmount(400000, 'VND'), '400,000₫');
   assert.equal(formatAmount(12.5, 'USD'), 'US$12.50');
-  assert.equal(formatAmount(1000, 'JPY'), 'JPY 1,000');
+  // 批 A：别的币种的写法读规则包 rules/currency.js（补上了符号），以前是 'JPY 1,000'；
+  // 日元写 JP¥，不写 ¥：两人平时用 ¥ 记人民币，日本行程里要分得清（网页评审 4）
+  assert.equal(formatAmount(1000, 'JPY'), 'JP¥1,000');
+  assert.equal(formatAmount(350, 'THB'), '฿350');
+  assert.equal(formatAmount(1000, 'CLP'), 'CLP 1,000', '规则包也没有的币种还是写代码');
   assert.equal(formatAmount(-50, 'HKD'), '−HK$50');
   assert.equal(formatAmount(Number.NaN, 'HKD'), '—');
 });
@@ -26,7 +30,7 @@ test('外币后面括号标折合港币（1 港币≈3,300 越南盾，1 人民�
   assert.equal(formatMoney(1580, 'TWD'), 'NT$1,580（约 HK$388）');
   assert.equal(formatMoney(20000, 'VND'), '20,000₫（约 HK$6.1）');
   assert.equal(formatMoney(88.5, 'HKD'), 'HK$88.50', '港币本身不标');
-  assert.equal(formatMoney(10, 'JPY'), 'JPY 10', '没有约定汇率的币种不标');
+  assert.equal(formatMoney(10, 'JPY'), 'JP¥10', '没有约定汇率的币种不标（写法读规则包，批 A）');
   assert.deepEqual(moneyParts(3300, 'VND'), { main: '3,300₫', hkd: '约 HK$1' });
   assert.equal(approxHKD(1, 'CNY'), 1.17);
   assert.equal(approxHKD(1, 'XXX'), null);

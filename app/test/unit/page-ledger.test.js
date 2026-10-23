@@ -474,7 +474,8 @@ test('页面和弹层只从 data/index.js、sheets/index.js 拿数据和开弹�
     assert.ok(!/window\.open\(/.test(src), `${f} 不直接 window.open`);
     assert.ok(!/supabase/.test(src), `${f} 不直接碰 supabase`);
     assert.ok(!/grab\.onelink|google\.com\/maps/.test(src), `${f} 不自己拼外链`);
-    assert.ok(!/from '\.\.\/\.\.\/data\/(?!index\.js)/.test(src), `${f} 只从 data/index.js 拿数据`);
+    // data/dest.js 是规则包的胶水（目的地档案、这一项所在地的币种；纯函数、不碰后台），批 A 起也可以直接引
+    assert.ok(!/from '\.\.\/\.\.\/data\/(?!index\.js|dest\.js)/.test(src), `${f} 只从 data/index.js 拿数据`);
   }
 });
 

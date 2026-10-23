@@ -2,7 +2,7 @@
 // lib/translate/client.js：调翻译接口（云开发 HTTP 访问服务上的 translate-web，和小程序同一份提示词、同一个 hy3）。
 //
 //   const c = createTranslateClient({ url, fetch, getToken, online, now, setTimeout, clearTimeout })
-//   c.translate(text, { trip, auto, signal }) → Promise<结果 { dir, input, vi, en, zh, back, demo }>
+//   c.translate(text, { trip, auto, signal, lang }) → Promise<结果 { dir, input, vi, en, zh, back, demo }>（lang 只是通路，见 translate()）
 //       失败 reject 一个 Error：message 是给人看的中文（一句话），code 见 MSG；限频时 e.wait = 还要等几毫秒
 //   c.warm({ trip })      预热（拉起实例、认人，不调模型、不算次数）：打开翻译、回到前台、点输入框时调；4 分钟内只发一次
 //   c.runner()            边打边翻用的「以最后一次为准」：新的一发出去，旧的作废（AbortController），旧的 reject code 'stale'
@@ -10,7 +10,7 @@
 //
 // 请求（接口说明见仓库外 scratchpad/web-v2/translate-web-api.md）：
 //   POST url，Content-Type: text/plain;charset=UTF-8（「简单请求」，浏览器不发 CORS 预检，省一个来回），
-//   body = JSON { text, token, trip } / { warm: true, token, trip }。token 是 Supabase 的 access token（getToken() 给）。
+//   body = JSON { text, token, trip, lang? } / { warm: true, token, trip }。token 是 Supabase 的 access token（getToken() 给）。
 //   返回 200 { ok: true, src, vi, en, back, zh } / { ok: false, code, error }；401 no_token / bad_token；403 not_member；429 rate；503 auth_down。
 // 规则：
 //   - 客户端超时 10 秒（长句多给一点）；网络断了一下（fetch 抛错、不是我们自己停的）再试一次；
@@ -202,7 +202,8 @@ export function createTranslateClient(deps = {}) {
     const kind = opts.auto ? 'auto' : 'manual';
     if (!limiter.take(kind)) throw fail('rate', { wait: limiter.waitMs(kind) });
     if (!online()) throw fail('offline');
-    const body = await call({ text: input, ...(opts.trip ? { trip: opts.trip } : {}) }, { signal: opts.signal, timeout: waitFor(input) });
+    // opts.lang：要翻成哪种当地语言（目的地档案的 tr，现在只有 vi）。多语言只留通路：云函数现在不认这个字段、照旧按越南语翻
+    const body = await call({ text: input, ...(opts.trip ? { trip: opts.trip } : {}), ...(opts.lang ? { lang: String(opts.lang) } : {}) }, { signal: opts.signal, timeout: waitFor(input) });
     warmAt = now();
     return shape(body, input);
   }

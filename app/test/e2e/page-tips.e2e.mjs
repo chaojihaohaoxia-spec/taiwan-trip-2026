@@ -185,7 +185,8 @@ test('贴士页（行程中 390）：置顶提醒在最上面，其余按 防坑
   const { page } = app;
   try {
     const order = await page.$$eval('.tp__stack > section', (els) => els.map((e) => e.dataset.testid));
-    assert.deepEqual(order, ['tips-pinned', 'tips-group-warning', 'tips-group-tip', 'tips-group-info', 'tips-group-template', 'tips-group-phrase']);
+    // 批 A：最上面多了按目的地档案现算的「当地须知」
+    assert.deepEqual(order, ['tips-local', 'tips-pinned', 'tips-group-warning', 'tips-group-tip', 'tips-group-info', 'tips-group-template', 'tips-group-phrase']);
     const pinned = await page.$$eval(`${T('tips-pinned')} [data-tip-id]`, (els) => els.map((e) => e.dataset.tipId));
     assert.deepEqual(pinned, island('tips').filter((t) => t.pinned).map((t) => t.id));
     const chips = await page.$$eval(`${T('tips-kinds')} .chip`, (els) => els.map((e) => [e.dataset.value, e.querySelector('.chip__count')?.textContent]));

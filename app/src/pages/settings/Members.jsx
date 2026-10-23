@@ -1,17 +1,20 @@
 // =====================================================================
-// pages/settings/Members.jsx：设置页「成员和邀请」——每趟行程一张可以原地展开的卡（一次只开一张，ui/ExpandableCard + useAccordion），
+// pages/settings/Members.jsx：设置页「每趟行程」（日期、怎么走、成员和邀请）——每趟行程一张可以原地展开的卡（一次只开一张，ui/ExpandableCard + useAccordion），
 // 默认展开“当前行程”（上次打开的那趟；没有就列表第一趟）。
 //
 //   收起：封面点 + 行程名 +「2 位成员 · 你是创建者」
 //   展开：成员（头像、名字、「我」、邮箱、角色芯片：创建者 / 可编辑 / 只读）
 //         创建者：「邀请成员」（打开 invite 弹层，网址带 ?trip=<id>）；每位成员右边「⋯」小菜单：改成可编辑 / 改成只读 / 移出行程（先确认）
 //         不是创建者：说明「只有创建者可以邀请」；自己那一行「退出这趟行程」（先确认）
-//         能编辑的成员：「封面和主题色」（sheets/cover，网址带 ?trip=<id>）
+//         能编辑的成员：最上面「这趟」几项（TripPrefs.jsx：日期 [改]、这趟怎么走、叫车用、只有自己时「把 Cathy 加进来」），
+//                       最下面「封面和主题色」（sheets/cover，网址带 ?trip=<id>）
+//         创建者：最下面一个很淡的「删掉这一趟」：要联网；先确认，说清楚一起删掉多少安排、账、日记（删了找不回来）。
+//                 小程序里记了账、写了日记的行程删不了，会叫人到这里删。
 // 成员数据在展开时才读（useTrip：卡片收起、离开设置页 15 秒后自动退订）。改角色、移出走数据层（写队列，离线也行）。
 // =====================================================================
 
 import { useState } from 'preact/hooks';
-import { useTrip, authState } from '../../data/index.js';
+import { useTrip, authState, online } from '../../data/index.js';
 import { navigate, route } from '../../router/index.js';
 import { ExpandableCard, useAccordion } from '../../ui/ExpandableCard.jsx';
 import { Avatar } from '../../ui/Avatar.jsx';
@@ -24,6 +27,9 @@ import { Glyph } from '../../kit/Glyph.jsx';
 import { CoverDot } from '../../shell/CoverDot.jsx';
 import { ROLE_LABELS } from '../trips/model.js';
 import { memberColor } from '../../kit/RatingChips.jsx';
+import { TripPrefs } from './TripPrefs.jsx';
+import { tripContentCounts, deleteTripMessage } from './model.js';
+import { haptic } from '../../lib/native.js';
 
 const ROLE_TONE = { owner: 'accent', editor: 'success', viewer: 'neutral' };
 
@@ -55,7 +61,7 @@ export function MembersSection({ entries, currentId }) {
           subtitle={e.role === 'owner' ? '你是创建者' : e.role === 'viewer' ? '你是只读成员' : '你可以编辑'}
           data-testid={`settings-trip-${e.id}`}
         >
-          <TripMembers entry={e} />
+          <TripMembers entry={e} entries={entries} />
         </ExpandableCard>
       ))}
       <MemberMenu />
@@ -63,7 +69,7 @@ export function MembersSection({ entries, currentId }) {
   );
 }
 
-function TripMembers({ entry }) {
+function TripMembers({ entry, entries }) {
   const store = useTrip(entry.id);
   const me = authState.value.user?.id || null;
   const ready = store && store.trip.value;
@@ -119,6 +125,7 @@ function TripMembers({ entry }) {
   };
   return (
     <div class="set-members" data-testid={`settings-members-${entry.id}`}>
+      {store.view.canEdit.value && <TripPrefs entry={entry} store={store} entries={entries} />}
       <ul class="set-member-list">
         {members.map((m) => {
           const you = m.user_id === me;
@@ -155,6 +162,46 @@ function TripMembers({ entry }) {
           封面和颜色
         </Button>
       )}
+      {isOwner && <DeleteTrip entry={entry} store={store} />}
+    </div>
+  );
+}
+
+/** 创建者：删掉这一趟（硬删除，连成员、安排、账、日记一起；先确认，要联网） */
+function DeleteTrip({ entry, store }) {
+  const [busy, setBusy] = useState(false);
+  const del = async () => {
+    if (busy) return;
+    if (online.value === false) {
+      toast.warning('要联网才能删');
+      return;
+    }
+    const title = store.trip.value?.title || entry.trip.title;
+    const ok = await confirm({
+      title: `删掉「${title}」？`,
+      message: deleteTripMessage(tripContentCounts(store.tables)),
+      confirmText: '删掉',
+      cancelText: '先不删',
+      destructive: true,
+    });
+    if (!ok) return;
+    setBusy(true);
+    try {
+      const r = store.remove('trips', entry.id, { undoMs: 0, label: `删掉行程「${title}」` });
+      const res = await r.synced;
+      if (res && res.ok === false) throw res.error || new Error('没删成，再试一次');
+      haptic('success');
+      toast.success(`删掉了「${title}」`);
+    } catch (err) {
+      toast.error(err?.message && /[一-鿿]/.test(err.message) ? err.message : '没删成，再试一次');
+      setBusy(false);
+    }
+  };
+  return (
+    <div class="set-members__danger">
+      <Button variant="danger-soft" size="sm" disabled={busy} onClick={del} data-testid={`settings-delete-${entry.id}`}>
+        {busy ? '正在删…' : '删掉这一趟'}
+      </Button>
     </div>
   );
 }

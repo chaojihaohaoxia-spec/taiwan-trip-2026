@@ -135,6 +135,84 @@
   overflow-wrap: anywhere;
 }
 
+/* F5：还没有当地文字名字 · 补一下（就地填，存进 places.name_local）——正文字号、次要色，不和大字抢 */
+.drv__fill {
+  margin-top: var(--space-4);
+  color: var(--color-text-2);
+  font: var(--type-callout);
+}
+
+.drv__fill-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0;
+}
+
+.drv__fill-link {
+  position: relative;
+  color: var(--color-accent-text);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: var(--press-transition);
+}
+
+.drv__fill-link::after {
+  content: "";
+  position: absolute;
+  inset: -12px -8px;
+}
+
+.drv__fill-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 520px;
+}
+
+.drv__fill-input {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  font: var(--type-body);
+}
+
+.drv__fill-input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.drv__fill-btns {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.drv__fill-btn {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  background: var(--color-fill);
+  color: var(--color-text);
+  font: var(--type-label);
+  transition: var(--press-transition);
+}
+
+.drv__fill-btn--save {
+  margin-left: auto;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.drv__fill-btn:disabled {
+  opacity: 0.45;
+}
+
 .drv__empty {
   margin: 0;
   font: var(--type-title-1);

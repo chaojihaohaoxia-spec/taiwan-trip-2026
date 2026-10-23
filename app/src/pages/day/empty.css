@@ -1,0 +1,64 @@
+/* =====================================================================
+   pages/day/empty.css：空白的一天（.dblank）。一页留白：细线 + 宋体「还空着」+ 一行字 + 快速添加 + 一行「详细加」。
+   ===================================================================== */
+
+.dblank {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-6) 0 var(--space-2);
+}
+
+.dblank__rule {
+  display: block;
+  width: 36px;
+  height: 1px;
+  margin-bottom: var(--space-2);
+  background: var(--color-text);
+}
+
+.dblank__title {
+  margin: 0;
+  font: var(--weight-serif) var(--text-title-1) / 1.15 var(--font-serif);
+  letter-spacing: var(--tracking-title);
+}
+
+.dblank__desc {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  text-wrap: pretty;
+}
+
+.dblank__more {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  padding: 0 4px;
+  border: 0;
+  border-bottom: 1px solid var(--color-separator);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dblank__more span {
+  flex: 1;
+  min-width: 0;
+}
+
+.dblank__more .glyph:first-child {
+  color: var(--color-accent-text);
+}
+
+.dblank--compact {
+  margin-top: var(--space-3);
+  padding: 0;
+}

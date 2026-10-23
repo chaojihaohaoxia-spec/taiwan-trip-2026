@@ -39,7 +39,7 @@ D1–D4 是墨色的宋体字（像书的目录）；倒计时是纯色的海色
 
 - 「现在 / 接下来」：`nowModel(store.view.today, primary)`（current / next / loose / done / free）；标题行点进那天并展开那一条（`?item=`）；标题最多三行（超长标题不把按钮推下去）；说明先去掉 Markdown；
   钟点和每天页同一套（`kit/item-clock.js`：在香港发生的条目「13:00–14:15 香港」、航班「16:45 香港 → 18:35」）；`kit/PlaceActions` 完整尺寸 `['nav','grab','driver'] + expense`（预填条目、日期、分类），
-  接下来时主按钮跟着交通方式走（`kit` 的 `rideHintFor`：走路 = 导航、打车 = 叫 Grab，和每天页一样）；「完成」是 `SubmitButton`（`store.setItemStatus(id, 'done', { actual_time })`，转圈 → 打勾 → 卡片换成下一项：
+  接下来时按钮按「这一项怎么去」给（`data/dest.js` 的 `itemHow` → 规则包 `howToGet`，和每天页一样；叫车的字按目的地档案：叫 Grab / 叫 Uber…）；「完成」是 `SubmitButton`（`store.setItemStatus(id, 'done', { actual_time })`，转圈 → 打勾 → 卡片换成下一项：
   新内容淡入、卡片高度用 `motion/flip.js` 的 `playHeight` 平滑过渡），「跳过」文字按钮；完成 / 跳过以后提示条上有「撤销」（恢复成计划中）；下面一行「接下来 · 13:00 老码头海鲜午餐 · 还有 3 小时」。
 - 今晚住哪：`store.stayForDay(day)` + `stayInfo`（今天 14:00 起可入住 / 明天 12:00 前退房 / 第 N 晚）；`PlaceActions ['nav','grab','driver'] + call`（18:00 后或今天都做完了「叫 Grab」字重一点）；最后一天不显示。
 - 「现在」卡里「接下来」那一行只写开始钟点（+ 时区标签），不把标题挤没。

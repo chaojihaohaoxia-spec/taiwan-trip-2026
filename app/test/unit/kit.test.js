@@ -134,6 +134,7 @@ const HOTEL = {
 };
 const by = (model) => Object.fromEntries(model.actions.map((a) => [a.key, a]));
 
+// 批 A：动作键 grab 改名 ride（叫哪家按目的地档案；没传档案时按 Grab，和以前一样），所以下面 a.grab → a.ride
 test('动作行：有坐标时导航用坐标（开车）、叫 Grab 用 lib/ride-links 的链接；默认四个动作，记一笔、打电话按需加在后面', () => {
   const m = placeActionModel(HOTEL);
   assert.deepEqual(m.actions.map((a) => a.key), DEFAULT_ACTIONS);
@@ -143,9 +144,10 @@ test('动作行：有坐标时导航用坐标（开车）、叫 Grab 用 lib/rid
   assert.equal(nav.searchParams.get('destination'), '8.68,106.6');
   assert.equal(nav.searchParams.get('dir_action'), 'navigate');
   assert.equal(nav.searchParams.get('travelmode'), 'driving', '默认开车（SPEC §5.3）');
-  assert.equal(a.grab.href, grabBookingUrl(HOTEL));
-  assert.ok(a.grab.href.startsWith(`${GRAB_ONELINK}?`));
-  assert.ok(decodeURIComponent(new URL(a.grab.href).searchParams.get('af_dp')).includes('dropOffLatitude=8.68'));
+  assert.equal(a.ride.href, grabBookingUrl(HOTEL));
+  assert.equal(a.ride.label, '叫 Grab');
+  assert.ok(a.ride.href.startsWith(`${GRAB_ONELINK}?`));
+  assert.ok(decodeURIComponent(new URL(a.ride.href).searchParams.get('af_dp')).includes('dropOffLatitude=8.68'));
   assert.equal(a.copy.label, '复制地址');
   assert.equal(m.note, null);
   assert.ok(m.actions.every((x) => !x.disabled));
@@ -155,14 +157,14 @@ test('动作行：有坐标时导航用坐标（开车）、叫 Grab 用 lib/rid
   const full = by(placeActionModel(HOTEL, { call: true, expense: true }));
   assert.equal(full.call.href, 'tel:+0000000000001');
   assert.equal(full.expense.disabled, false);
-  assert.deepEqual(placeActionModel(HOTEL, { call: true, expense: true }).actions.map((x) => x.key), ['nav', 'grab', 'driver', 'copy', 'call', 'expense']);
+  assert.deepEqual(placeActionModel(HOTEL, { call: true, expense: true }).actions.map((x) => x.key), ['nav', 'ride', 'driver', 'copy', 'call', 'expense']);
 });
 
 test('动作行：没坐标 → 导航和 Grab 按名字 + 地址找，并说明；坐标只精确到城市的不用；只有名字 → 复制名字并提醒补地址', () => {
   const noCoords = placeActionModel({ ...HOTEL, lat: null, lng: null });
   const a = by(noCoords);
   assert.equal(new URL(a.nav.href).searchParams.get('destination'), 'Khách sạn Gió Biển 27 Đường Hoa Sứ（虚构地址）');
-  assert.ok(!decodeURIComponent(new URL(a.grab.href).searchParams.get('af_dp')).includes('dropOffLatitude'));
+  assert.ok(!decodeURIComponent(new URL(a.ride.href).searchParams.get('af_dp')).includes('dropOffLatitude'));
   assert.equal(noCoords.note, '没有坐标：导航和叫车按名字和地址找');
 
   const city = placeActionModel({ ...HOTEL, coord_precision: 'city' });
@@ -180,8 +182,8 @@ test('动作行：没坐标 → 导航和 Grab 按名字 + 地址找，并说明
 test('动作行：什么都没有 → 导航、叫车、给司机看、复制都禁用，说明只说一句；只读成员记一笔禁用；没存的地点不能给司机看；没电话不显示打电话', () => {
   const none = placeActionModel({ name: '', address: '' }, { expense: true, call: true, readOnly: true });
   const a = by(none);
-  for (const k of ['nav', 'grab', 'driver', 'copy', 'expense']) assert.equal(a[k].disabled, true, `${k} 禁用`);
-  assert.ok(a.nav.reason && a.grab.reason && a.copy.reason && a.expense.reason);
+  for (const k of ['nav', 'ride', 'driver', 'copy', 'expense']) assert.equal(a[k].disabled, true, `${k} 禁用`);
+  assert.ok(a.nav.reason && a.ride.reason && a.copy.reason && a.expense.reason);
   assert.equal(a.call, undefined, '没电话不显示');
   assert.equal(none.note, '这个地点没有名字、地址和坐标：导航、叫车、给司机看、复制都用不了，先在地点页补上；只读成员不能记账');
 

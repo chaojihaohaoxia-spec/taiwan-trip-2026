@@ -2,7 +2,8 @@
 // pages/tips/TipsPage.jsx：贴士与常用语（路由 tips，#/t/:tripId/tips，SPEC §5.10）。
 //
 // 大标题「贴士与常用语」、返回、右上全局搜索由外壳画（shell/ 的 section 页）；这里只放内容：
-//   - 本页搜索框（标题、当地语原文、正文、标签、关联地点名；越南语不带声调也能搜，?q=）
+//   - 最上面「当地须知」：按目的地档案现算的紧急电话、插座、小费、叫车、钱（LocalFacts.jsx；新行程没写贴士也有）
+//   - 本页搜索框（标题、当地语原文、正文、标签、关联地点名；越南语不带声调也能搜，?q=；提示只在越南这类带声调的语言才写）
 //   - 类型芯片：全部 / 防坑 / 小贴士 / 实用信息 / 消息模板 / 常用语（带数量，?kind=）
 //   - 置顶提醒：最上面一张暖色的卡（醒目但不吓人），一行一条、点开看全文
 //   - 按类型分组：防坑、小贴士、实用信息（长的原地展开、一次只开一张；短的整段显示）、
@@ -25,6 +26,8 @@ import { Glyph } from '../../kit/Glyph.jsx';
 import { PageEmptyState, ErrorState } from '../../kit/States.jsx';
 import { haptic } from '../../lib/native.js';
 import { translateLang } from '../../lib/translate/text.js';
+import { tripProfile } from '../../data/dest.js';
+import { LocalFacts, profileSosNumbers } from './LocalFacts.jsx';
 import {
   pageState, useSkeletonHold, useUrlText, PageSearch, FilterChips, MissingTrip, onMarkdownLink, useFocusOnce,
 } from './common.jsx';
@@ -96,8 +99,11 @@ function Tips({ store, route }) {
   const phase = store.view.phase.value?.phase;
   const todayDayId = phase === 'ongoing' ? store.view.today.value?.day?.id || null : null;
   const speech = useSpeech();
-  // 越南这类外语行程：「常用语」标题右边「去翻译」（常用语里没有的，到翻译页现翻）
+  // 要翻译的外语行程（目的地档案，语言包测过的）：「常用语」标题右边「去翻译」（常用语里没有的，到翻译页现翻）
   const canTranslate = Boolean(translateLang(store.trip.value));
+  // 去声调的提示只在当地语言是带声调的拉丁字母（越南语）时写
+  const toneHint = tripProfile(store).lang === 'vi';
+  const knownSos = useMemo(() => profileSosNumbers(store), [store.trip.value]);
 
   const kind = normalizeFilter(route.query.kind);
   const [query, setQueryText] = useUrlText(route, 'q');
@@ -167,21 +173,25 @@ function Tips({ store, route }) {
 
   if (!total) {
     return (
-      <PageEmptyState
-        preset="tips"
-        description="防坑提醒、常用语、消息模板都会放在这里：常用语和模板可以一键复制，或者全屏大字给对方看。"
-        testId="tips-empty"
-      />
+      <div class="tp__stack">
+        <LocalFacts store={store} />
+        <PageEmptyState
+          preset="tips"
+          description="防坑提醒、常用语、消息模板都会放在这里：常用语和模板可以一键复制，或者全屏大字给对方看。"
+          testId="tips-empty"
+        />
+      </div>
     );
   }
 
   return (
     <div class="tp__stack" onClick={onMarkdownLink}>
+      {!searching && kind === 'all' && <LocalFacts store={store} />}
       <div class="tp-tools">
         <PageSearch
           value={query}
           onValue={setQueryText}
-          placeholder="搜贴士、常用语（越南语不用打声调）"
+          placeholder={toneHint ? '搜贴士、常用语（越南语不用打声调）' : '搜贴士、常用语'}
           label="在贴士里搜索"
           testId="tips-search"
         />
@@ -203,13 +213,13 @@ function Tips({ store, route }) {
           class="tp-none"
           icon={(p) => <Glyph name="search" size={p.size} />}
           title={searching ? `没有找到「${query.trim()}」` : `没有${KIND_TITLES[kind] || ''}`}
-          description={searching ? '换个说法试试：中文、英文、不带声调的越南语都可以搜。' : null}
+          description={searching ? (toneHint ? '换个说法试试：中文、英文、不带声调的越南语都可以搜。' : '换个说法试试：中文、英文都可以搜。') : null}
           action={<Button variant="secondary" size="sm" onClick={clearFilters}>{searching ? '清除搜索' : '看全部'}</Button>}
           data-testid="tips-none"
         />
       )}
 
-      {view.pinned.length > 0 && <PinnedCard rows={view.pinned} ctx={ctx} acc={acc} />}
+      {view.pinned.length > 0 && <PinnedCard rows={view.pinned} ctx={ctx} acc={acc} knownSos={knownSos} />}
 
       {view.groups.map((g) => (
         <section key={g.kind} class="tp-group" data-kind={g.kind} data-testid={`tips-group-${g.kind}`} aria-labelledby={`tips-h-${g.kind}`}>

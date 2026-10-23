@@ -425,7 +425,8 @@ test('日期与金额：时区切换实时重算；数字滚动按分位滚（�
     assert.match(money, /1235 万越南盾/);
     assert.match(money, /1\.5 亿越南盾/);
     assert.match(money, /−45,000₫（约 −HK\$14）/);
-    assert.match(money, /JPY 1,000/);
+    // 批 A（网页评审 4）：日元改写 JP¥（¥ 留给人民币）；以前断言的「JPY 1,000」按新写法过时了
+    assert.match(money, /JP¥1,000/);
 
     // 数字滚动（ui/RollingNumber，分位由 numberSlots 认定）：1,234,000 + 45,000 = 1,279,000：千位和万位滚动，截 40% 处
     await page.$eval('[data-testid="roll-total"]', (el) => el.scrollIntoView({ block: 'center' }));

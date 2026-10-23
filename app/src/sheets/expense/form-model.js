@@ -8,7 +8,8 @@
 //   币种：    currencyChoices(trip)                                  分段：当地币 / 港币 / 人民币 / 其他
 //   分类：    categoryForItem / categoryForPlace / categoryForBooking  从条目 / 地点 / 预订打开时自动选
 //   分摊：    buildSplit(state, ctx) / splitStateFromExpense(e, ctx) / autoShares(...)
-//   预填：    initialState({ mode, id, fields }, ctx)                新建（带预填）/ 编辑
+//   预填：    initialState({ mode, id, fields }, ctx)                新建（带预填）/ 编辑；从条目、地点打开时币种按那个地方
+//                                                                 （ctx.currencyAt，data/dest.js：香港出发前那几条是港币）
 //   校验：    validateState(state, ctx) → { ok, field, message, mismatch }
 //   提交：    toInsert(state, ctx) / toPatch(state, expense, ctx)
 //
@@ -429,6 +430,12 @@ export function initialState(args, ctx) {
     if (f.date !== ctx.today && !item) state.time = '';
   }
   if (f.category && CATEGORIES.includes(f.category)) state.category = f.category;
+  // 从条目 / 地点打开：默认币种是那个地方的（目的地档案：香港出发前那几条、回程在香港机场的是港币）；
+  // 预订按金额填好的、网址点名币种的不改
+  if (!f.currency && (item || place) && !(f.booking && state.amountText) && ctx.currencyAt) {
+    const cur = ctx.currencyAt({ item, place });
+    if (cur) state.currency = normalizeCurrency(cur);
+  }
   if (f.currency) state.currency = normalizeCurrency(f.currency);
   // 地点：那天有一条用这个地点的条目，顺手关联上
   if (!state.itemId && state.placeId && state.date && ctx.itemsOnDate) {

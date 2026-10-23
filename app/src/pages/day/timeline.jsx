@@ -6,13 +6,16 @@
 //   <AltList …/>                 当天通用的备选 / 雨天方案（没挂在哪条主方案下的），时间轴后面单独一组，同样的卡
 //   <TimelineItem …/>            一条：收起 = 时间 + 图标 + 标题 + 地点（怎么过去的一句话）+ 一个标签（进行中 / 已完成 / 待确认 / 有备选）；
 //                                展开 = 说明、怎么过去、费用估算、步行路线、链接、关联预订、相关贴士、相关待办、实际情况，
-//                                动作行：kit/PlaceActions（导航 / 叫 Grab / 给司机看 / 复制地址 / 记一笔）+ 打卡 / 写日记 / 编辑 + 完成 / 跳过
+//                                动作行：kit/PlaceActions 按「这一项怎么去」给按钮（data/dest.js 的 itemHow → 规则包 rules/how.js：
+//                                打车才给叫车 + 给司机看、走路只给导航、同一个地方不给、有人接给司机看 + 打电话、坐飞机给值机……；
+//                                最后一格「⋯」临时用其余动作）+ 记一笔；没写怎么去时下面一行灰字说为什么（HowRow.jsx）+「改」
+//                                + 打卡 / 写日记 / 编辑 + 完成 / 跳过
 //   挂在主条目下的备选 / 雨天方案：展开后顶上一个小分段切换「主方案 · 备选 · 雨天方案」，切到备选显示它的内容和「换成主方案」
 //
 // 纯逻辑（时间显示、“现在”在哪、怎么过去 / 费用的文案、备选换主方案要改哪些行）都在 model.js。
 // =====================================================================
 
-import { useState } from 'preact/hooks';
+import { useState, useMemo } from 'preact/hooks';
 import { ExpandableCard } from '../../ui/ExpandableCard.jsx';
 import { FlipGroup } from '../../ui/FlipGroup.jsx';
 import { SegmentedControl } from '../../ui/SegmentedControl.jsx';
@@ -28,8 +31,11 @@ import { href } from '../../router/index.js';
 import { openItemSheet, openExpenseSheet, openJournalSheet, openReviewSheet } from '../../sheets/index.js';
 import { needsPlace } from '../../sheets/item/form-model.js';
 import { BookingBlock } from './parts.jsx';
+import { HowLine, TransportChips, saveTransport, closesAfter } from './HowRow.jsx';
+import { itemHow } from '../../data/dest.js';
+import { transportOf } from '../../rules/how.js';
 import {
-  VARIANT_LABELS, itemClock, itemSpan, transportView, rideHint, costView, walkRouteView, linksFor, tipsForItem, todosForItem,
+  VARIANT_LABELS, itemClock, itemSpan, transportView, costView, walkRouteView, linksFor, tipsForItem, todosForItem,
   collapsedSubtitle, collapsedMeta, altLabels, remainingText, defaultActualTime, expenseCategoryFor, firstLine, todoHint,
 } from './model.js';
 
@@ -87,11 +93,35 @@ function TimeCell({ clock, dim, nowClock = '', nowZone = null }) {
 // 展开后的内容块
 // ---------------------------------------------------------------------
 
-function TransportBlock({ t }) {
+/**
+ * 怎么过去（写了 transport_in 的）：每种走法一行。App 里点出来的（不是导入的）标题行末尾一个很淡的「改」，点了直接弹芯片；
+ * 规则另有一句话要说（有人接、岛上叫不到车）时写在标题后面。
+ */
+function TransportBlock({ t, item, store, canEdit, how }) {
+  const [open, setOpen] = useState(false);
   if (!t) return null;
+  const editable = canEdit && item && store && !transportOf(item).imported;
+  const hint = how && (how.key === 'transfer' || how.zone) ? how.hint : null;
   return (
     <section class="tl-sec" aria-label="怎么过去" data-testid="tl-transport">
-      <p class="tl-sec__h"><Glyph name="route" size={16} /><span>怎么过去</span>{t.summary && <em>{t.summary}</em>}</p>
+      <p class="tl-sec__h">
+        <Glyph name="route" size={16} /><span>怎么过去</span>{(t.summary || hint) && <em>{[t.summary, hint].filter(Boolean).join(' · ')}</em>}
+        {editable && (
+          <button type="button" class="how-line__edit how-line__edit--head" aria-expanded={open ? 'true' : 'false'} onClick={() => setOpen((o) => !o)} data-press="scale" data-testid="tl-transport-edit">
+            {open ? '收起' : '改'}
+          </button>
+        )}
+      </p>
+      {open && editable && (
+        <TransportChips
+          item={item}
+          testId="tl-transport-chips"
+          onPick={async (choice) => {
+            const ok = await saveTransport(store, item, choice);
+            if (ok && closesAfter(choice)) setOpen(false);
+          }}
+        />
+      )}
       {t.options.length > 0 && (
         <ul class="tl-opts">
           {t.options.map((o) => (
@@ -234,14 +264,15 @@ function ActualBlock({ item }) {
   );
 }
 
-/** 地点本身的几行：地址（点一下复制——动作行一排放四个，「复制地址」挪到这里，视觉评审 P2-13）、营业时间 */
-function PlaceInfo({ place }) {
+/** 地点本身的几行：地址（点一下复制——动作行一排放四个，「复制地址」挪到这里，视觉评审 P2-13）、营业时间。
+ *  lang：当地语言（目的地档案的 lang；读屏、断字用） */
+function PlaceInfo({ place, lang }) {
   if (!place) return null;
   return (
     <>
       {place.address && (
         <InfoRow glyph="pin" data-testid="tl-address">
-          <CopyText text={place.address} label="地址" size="sm" class="tl-address__copy" lang={place.name_local ? 'vi' : undefined} data-testid="tl-address-copy" />
+          <CopyText text={place.address} label="地址" size="sm" class="tl-address__copy" lang={place.name_local && lang ? lang : undefined} data-testid="tl-address-copy" />
         </InfoRow>
       )}
       {place.opening_hours && <InfoRow glyph="clock">{place.opening_hours}</InfoRow>}
@@ -308,7 +339,7 @@ function AltContent({ alt, ctx, parent }) {
   const transport = transportView(alt.transport_in);
   const cost = costView(alt.cost_estimate, partySize);
   const clock = itemClock(alt, { timeZone });
-  const ride = rideHint(transport);
+  const how = useMemo(() => (place ? itemHow(store, alt, { now: ctx.at }) : null), [store, alt, place, ctx.at, store.tables.items.value, store.tables.places.value]);
   return (
     <div class="tl-alt" data-testid={`tl-alt-${alt.id}`}>
       <p class="tl-alt__h">
@@ -320,10 +351,11 @@ function AltContent({ alt, ctx, parent }) {
         <p class="tl-alt__meta t-label">{[clock.main && (clock.end ? `${clock.main}–${clock.end}` : clock.main), place?.name].filter(Boolean).join(' · ')}</p>
       )}
       {alt.description && <Markdown text={alt.description} class="tl-desc" phones onClick={onMarkdownLink} />}
-      <TransportBlock t={transport} />
+      <TransportBlock t={transport} item={alt} store={store} canEdit={canEdit} how={how} />
       <CostBlock cost={cost} />
-      <PlaceInfo place={place} />
-      {place && <PlaceActions place={place} mode={ride.navMode || undefined} readOnly={!canEdit} testId={`item-actions-${alt.id}`} />}
+      <PlaceInfo place={place} lang={how?.profile?.lang} />
+      {place && <PlaceActions place={place} how={how} readOnly={!canEdit} testId={`item-actions-${alt.id}`} />}
+      {place && !transport && <HowLine how={how} item={alt} store={store} canEdit={canEdit} testId={`tl-how-${alt.id}`} />}
       <div class="tl-acts" style={{ '--tl-cols': canEdit ? 2 : 1 }}>
         {canEdit && <Act glyph="swap" label="换成主方案" tone="primary" onClick={() => ctx.onPromote(alt, parent)} testId={`tl-promote-${alt.id}`} />}
         {canEdit && <Act glyph="pen" label="编辑" onClick={(e) => openItemSheet(alt.id, { trigger: e.currentTarget })} testId={`tl-edit-${alt.id}`} />}
@@ -344,7 +376,11 @@ function PrimaryContent({ item, ctx, place, booking, transport, current, remaini
   const links = linksFor(item, place);
   const tips = tipsForItem(ctx.tips, item);
   const todos = todosForItem(ctx.todos, item);
-  const ride = rideHint(transport);
+  // 这一项怎么去 → 动作行（上一站、昨晚住哪、关联的预订都在 data/dest.js 里查）；条目、地点、预订、天变了都重算
+  const how = useMemo(
+    () => (place ? itemHow(store, item, { now: at }) : null),
+    [store, item, place, booking, at, store.tables.items.value, store.tables.places.value, store.tables.days.value, store.tables.bookings.value],
+  );
   const category = expenseCategoryFor(item.kind);
   const planned = item.status === 'planned';
   const quick = phase === 'upcoming';
@@ -368,17 +404,19 @@ function PrimaryContent({ item, ctx, place, booking, transport, current, remaini
   return (
     <>
       {current && remaining && <p class="tl-current"><Glyph name="clock" size={15} /><span>进行中 · {remaining}</span></p>}
-      {/* 动作行放在最前面（整合时调整）：街头单手用，展开以后导航 / 叫 Grab / 给司机看一眼就在手指下面，不用先往下翻过说明、交通、贴士 */}
+      {/* 动作行放在最前面（整合时调整）：街头单手用，展开以后主按钮一眼就在手指下面，不用先往下翻过说明、交通、贴士 */}
       {place ? (
-        <PlaceActions
-          place={place}
-          actions={['nav', 'grab', 'driver']}
-          expense={{ itemId: item.id, date, category: category || undefined }}
-          mode={ride.navMode || undefined}
-          primary={ride.primary || undefined}
-          readOnly={!canEdit}
-          testId={`item-actions-${item.id}`}
-        />
+        <>
+          <PlaceActions
+            place={place}
+            how={how}
+            booking={booking}
+            expense={{ itemId: item.id, date, category: category || undefined }}
+            readOnly={!canEdit}
+            testId={`item-actions-${item.id}`}
+          />
+          {!transport && <HowLine how={how} item={item} store={store} canEdit={canEdit} testId={`tl-how-${item.id}`} />}
+        </>
       ) : needsPlace(item.kind) ? (
         // 只有本来该有地点的（吃饭、景点、住宿、交通……）才提醒；取钱、买水这种「其他」不提醒（10-19 加条目改版）
         <p class="tl-note" data-testid="tl-no-place">
@@ -390,11 +428,11 @@ function PrimaryContent({ item, ctx, place, booking, transport, current, remaini
         </p>
       ) : null}
       {item.description && <Markdown text={item.description} class="tl-desc" data-testid="tl-desc" phones onClick={onMarkdownLink} />}
-      <TransportBlock t={transport} />
+      <TransportBlock t={transport} item={item} store={store} canEdit={canEdit} how={how} />
       <div class="tl-infos">
         {(clock.note || clock.alt) && <InfoRow glyph="clock" data-testid="tl-time-note">{[clock.note, clock.alt].filter(Boolean).join(' · ')}</InfoRow>}
         <CostBlock cost={cost} />
-        <PlaceInfo place={place} />
+        <PlaceInfo place={place} lang={how?.profile?.lang} />
         <ActualBlock item={item} />
       </div>
       <WalkRouteBlock walk={walk} />

@@ -9,8 +9,10 @@
 //   --dry-run           只校验并打印将要写入的表和行数，不读钥匙串、不连网
 //   --ids               和 --dry-run 一起用：再打印每个 key 对应的 uuid
 //   --print-sql         打印将要执行的 SQL（含行程内容，注意别贴到公开的地方），不连网
-//   --only-new          只新增，不更新已存在的行（保护在 App 里改过的内容）
-//   --only-keys <k,k>   只写入这几个 key 的行（整份文件照常校验，行程本身和成员不写）
+//   --only-new          只新增，不更新已存在的行（默认就是这样；和 --only-keys 一起用时才有区别）
+//   --update            连已存在的行也按 JSON 覆盖（以前的默认行为；会冲掉 App 里改过的字段，先想清楚）
+//   --only-keys <k,k>   只写入这几个 key 的行（整份文件照常校验，行程本身和成员不写）；这几行按 JSON 覆盖，
+//                       除非同时写了 --only-new
 //   --yes               不再询问确认，直接写入
 //   --project-ref <ref> 目标项目，默认 vzybjxghnoyubzdhvmsl
 //
@@ -25,8 +27,12 @@
 // 只放在内存里，不打印、不写文件。
 //
 // 字段语义：
-//   * JSON 里写了的字段才会写入/覆盖；没写的字段，新建时用数据库默认值，
+//   * 默认只新增（--only-new）：已经在库里的行一行都不改。第一批平台化上线后 App 才是改动的源头
+//     （「怎么去」、目的地档案、地点……都在 App 里改），重跑导入不能把它们冲掉。
+//   * --update / --only-keys 时：JSON 里写了的字段才会写入/覆盖；没写的字段，新建时用数据库默认值，
 //     更新时保持数据库里现有的值（包括别人在 App 里改过的）。
+//   * extra 一律合并写（库里的 || JSON 里的）：JSON 里写了的键覆盖，App 写进去的键（dest、ledger_*、short_name…）保留。
+//     要删 extra 里的某个键，在 SQL 编辑器里单独删。
 //   * 写成 null 表示清空该字段。
 //   * 内容完全没变的行不会被更新（不会触发 updated_at 和实时推送）。
 //   * 脚本只增改，不删除任何行。
@@ -38,6 +44,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { createInterface } from 'node:readline/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { destOk, segDestOk } from '../app/src/rules/dest.js';
 
 // ---------------------------------------------------------------------
 // 常量
@@ -334,7 +341,8 @@ function lintNested(p, where, table, row) {
     if (isPlainObject(t)) {
       if ('options' in t && !Array.isArray(t.options)) p.warn(where, 'transport_in.options 应为数组');
       (Array.isArray(t.options) ? t.options : []).forEach((o, i) => {
-        const modes = ['walk', 'metro', 'bus', 'taxi', 'grab', 'scooter', 'bicycle', 'ferry', 'train', 'hsr', 'flight', 'car', 'cable_car', 'other'];
+        // 和规则包 rules/how.js 的 MODES、迁移里的 private.wx_transport_check 一样（transfer = 有人接：包车、接送、跟团、酒店接驳）
+        const modes = ['walk', 'metro', 'subway', 'bus', 'taxi', 'grab', 'scooter', 'bicycle', 'ferry', 'train', 'hsr', 'flight', 'car', 'cable_car', 'transfer', 'other'];
         if (!isPlainObject(o) || !modes.includes(o.mode)) p.warn(where, `transport_in.options[${i}].mode 应为 ${modes.join(' / ')}`);
         else if (o.cost) money(o.cost, `transport_in.options[${i}].cost`);
       });
@@ -352,6 +360,9 @@ function lintNested(p, where, table, row) {
       for (const f of ['flight_no', 'from_iata', 'to_iata']) if (!d[f]) p.warn(where, `航班 details 建议写 ${f}`);
     }
     if (row.kind === 'hotel' && d.nights != null && !Number.isInteger(d.nights)) p.warn(where, 'details.nights 应为整数');
+  }
+  if (table === 'segments' && isPlainObject(row.extra) && 'dest' in row.extra && !segDestOk(row.extra.dest)) {
+    p.error(where, 'extra.dest 写法不对：{ region: "VN", city?: "phu-quoc" | { zh, lat, lng }, move?: ride / transit / self_drive / scooter / walk }');
   }
   if (table === 'places' && ('lat' in row || 'lng' in row) && ((row.lat == null) !== (row.lng == null))) {
     p.error(where, 'lat 和 lng 要么都写，要么都不写');
@@ -405,6 +416,9 @@ function buildPlan(doc) {
   }
   if (typeof trip.title !== 'string' || !trip.title.trim()) p.error('trip', 'title 必填');
   if (trip.start_date && trip.end_date && trip.end_date < trip.start_date) p.error('trip', 'end_date 早于 start_date');
+  if (isPlainObject(trip.extra) && 'dest' in trip.extra && !destOk(trip.extra.dest)) {
+    p.error('trip', 'extra.dest 写法不对：{ v: 1, region: "VN", cities?: ["phu-quoc"], move?, ride?, walk_km? }（见 docs/数据结构.md B5.7）');
+  }
 
   // ---- 先收集所有已定义的 key
   const definedKeys = new Set();
@@ -548,8 +562,10 @@ function buildSql(plan, { onlyNew }) {
     if (onlyNew || !updatable.length) {
       conflict = 'ON CONFLICT (id) DO NOTHING';
     } else {
-      conflict = `ON CONFLICT (id) DO UPDATE SET ${updatable.map(c => `${c} = EXCLUDED.${c}`).join(', ')}
-  WHERE ROW(${updatable.map(c => `t.${c}`).join(', ')}) IS DISTINCT FROM ROW(${updatable.map(c => `EXCLUDED.${c}`).join(', ')})`;
+      // extra 合并写：App 写进去的键（dest、ledger_*…）不被冲掉
+      const next = c => (c === 'extra' ? '(t.extra || EXCLUDED.extra)' : `EXCLUDED.${c}`);
+      conflict = `ON CONFLICT (id) DO UPDATE SET ${updatable.map(c => `${c} = ${next(c)}`).join(', ')}
+  WHERE ROW(${updatable.map(c => `t.${c}`).join(', ')}) IS DISTINCT FROM ROW(${updatable.map(next).join(', ')})`;
     }
     ctes.push(`${name} AS (
   INSERT INTO public.${ident(table)} AS t (${colList})
@@ -680,13 +696,14 @@ async function runQuery(projectRef, sql) {
 // ---------------------------------------------------------------------
 
 function parseArgs(argv) {
-  const opts = { file: null, dryRun: false, ids: false, printSql: false, onlyNew: false, yes: false, projectRef: DEFAULT_PROJECT_REF };
+  const opts = { file: null, dryRun: false, ids: false, printSql: false, onlyNew: null, update: false, yes: false, projectRef: DEFAULT_PROJECT_REF };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--dry-run') opts.dryRun = true;
     else if (a === '--ids') opts.ids = true;
     else if (a === '--print-sql') opts.printSql = true;
     else if (a === '--only-new') opts.onlyNew = true;
+    else if (a === '--update') opts.update = true;
     else if (a === '--only-keys') opts.onlyKeys = String(argv[++i] ?? '').split(',').map(s => s.trim()).filter(Boolean);
     else if (a === '--yes' || a === '-y') opts.yes = true;
     else if (a === '--project-ref') opts.projectRef = argv[++i];
@@ -695,6 +712,9 @@ function parseArgs(argv) {
     else if (!opts.file) opts.file = a;
     else throw new Error(`多余的参数 ${a}`);
   }
+  if (opts.update && opts.onlyNew) throw new Error('--update 和 --only-new 不能一起用');
+  // 默认只新增；--update 或 --only-keys（点名要改那几行）才覆盖已有的行
+  if (opts.onlyNew === null) opts.onlyNew = !(opts.update || opts.onlyKeys);
   return opts;
 }
 
@@ -716,6 +736,7 @@ function printSummary(plan, opts) {
   const rows = plan.onlyKeys ? [] : [['trips', 1], ['trip_members', plan.memberRows.length]];
   for (const t of Object.keys(TABLES)) if (plan.tables[t]?.length) rows.push([t, plan.tables[t].length]);
   console.log(`行程 ${plan.tripId}（${plan.tripRow.title ?? ''}）将写入：`);
+  console.log(opts.onlyNew ? '  方式：只新增，库里已有的行一行都不改（要覆盖加 --update）' : '  方式：已有的行按 JSON 覆盖（extra 合并写，App 写进去的键保留）');
   for (const [t, c] of rows) console.log(`  ${t.padEnd(16)} ${String(c).padStart(4)} 行`);
   if (plan.onlyKeys) console.log(`  只写这些 key：${plan.onlyKeys.join(' ')}（行程本身和成员不动）`);
   else if (plan.memberRows.length) console.log(`  成员按邮箱匹配已注册用户：${plan.memberRows.map(m => '@' + m.ref).join(' ')}（没注册的会跳过，"@ref" 写成 null）`);
@@ -728,7 +749,7 @@ function printSummary(plan, opts) {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   if (opts.help || !opts.file) {
-    console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(2, 17).map(l => l.replace(/^\/\/ ?/, '')).join('\n'));
+    console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(2, 20).map(l => l.replace(/^\/\/ ?/, '')).join('\n'));
     process.exit(opts.help ? 0 : 1);
   }
   if (!/^[a-z]{20}$/.test(opts.projectRef || '')) throw new Error('--project-ref 应为 20 位小写字母');
@@ -766,7 +787,7 @@ async function main() {
   if (!opts.yes) {
     if (!process.stdin.isTTY) throw new Error('非交互环境请加 --yes 确认写入');
     const rl = createInterface({ input: process.stdin, output: process.stdout });
-    const answer = await rl.question(`\n写入项目 ${opts.projectRef}${opts.onlyNew ? '（只新增）' : ''}？输入 yes 继续：`);
+    const answer = await rl.question(`\n写入项目 ${opts.projectRef}${opts.onlyNew ? '（只新增，已有的行不动）' : '（已有的行按 JSON 覆盖，extra 合并）'}？输入 yes 继续：`);
     rl.close();
     if (answer.trim() !== 'yes') { console.log('已取消，没有写入。'); return; }
   }
@@ -791,4 +812,4 @@ if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToP
   });
 }
 
-export { buildPlan, buildSql };
+export { buildPlan, buildSql, parseArgs };

@@ -1,0 +1,106 @@
+/* =====================================================================
+   pages/day/how.css：条目展开后「怎么过去」那行灰字 +「改」+ 芯片（HowRow.jsx；改一项面板也用 .how-chips）。
+   「杂志纸本」：一行小字（次要色），「改」是很淡的文字按钮；芯片用 ui/Chip 的细线纸片，细分是一排纯文字。
+   ===================================================================== */
+
+.how-line {
+  margin-top: 10px;
+}
+
+.how-line__text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--color-text-2);
+  font: var(--type-footnote);
+}
+
+.how-line__text > .glyph {
+  flex: none;
+  color: var(--color-text-3);
+}
+
+.how-line__text > span {
+  min-width: 0;
+}
+
+.how-line__edit {
+  position: relative;
+  flex: none;
+  margin-left: auto;
+  padding: 0 2px;
+  color: var(--color-text-3);
+  font: var(--type-footnote);
+  text-decoration: underline;
+  text-decoration-color: var(--color-separator);
+  text-underline-offset: 3px;
+  transition: var(--press-transition);
+}
+
+/* 热区扩到 44px 高 */
+.how-line__edit::after {
+  content: "";
+  position: absolute;
+  inset: -12px -10px;
+}
+
+.how-line__edit[aria-expanded="true"] {
+  color: var(--color-text-2);
+}
+
+.how-line__edit--head {
+  margin-left: auto;
+}
+
+/* 芯片 */
+.how-chips {
+  margin-top: 8px;
+}
+
+.how-chips__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.how-chips__sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin-top: 8px;
+  padding-left: 2px;
+}
+
+.how-chips__subopt {
+  position: relative;
+  min-height: 32px;
+  padding: 0;
+  color: var(--color-text-2);
+  font: var(--type-subhead);
+  transition: var(--press-transition);
+}
+
+.how-chips__subopt::after {
+  content: "";
+  position: absolute;
+  inset: -6px -7px;
+}
+
+.how-chips__subopt[aria-checked="true"] {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.how-chips__subopt:disabled {
+  color: var(--color-text-3);
+}
+
+.how-chips__note {
+  margin: 8px 0 0;
+  color: var(--color-text-3);
+  font: var(--type-caption-1);
+}

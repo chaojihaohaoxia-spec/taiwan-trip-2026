@@ -89,9 +89,14 @@ test('一整天（演示、行程中）：早上打开到今天 → 叫 Grab 去
     await shot(page, '01-morning-today');
 
     // 2. 展开现在这一条 → 动作行 → 叫 Grab：先复制「当地语名 + 地址」，再跳 Grab；1.5 秒没切走 → 提示 +「打开 Grab」
+    //    批 A：浮潜写了步行过去，动作行只给导航；叫车在最后的「⋯」里临时用（动作键 grab 改名 ride）
     const header = `${T(`item-${DIVE.id}`)} .xcard__header`;
     if (await page.$eval(header, (el) => el.getAttribute('aria-expanded')) !== 'true') await page.click(header);
-    const grabSel = `${T(`item-actions-${DIVE.id}`)} [data-action="grab"]`;
+    await page.waitForSelector(T(`item-actions-${DIVE.id}-more`), { visible: true });
+    await waitForAnimationsDone(page, 6000);
+    await page.$eval(T(`item-actions-${DIVE.id}-more`), (el) => el.scrollIntoView({ block: 'center' }));
+    await page.click(T(`item-actions-${DIVE.id}-more`));
+    const grabSel = `${T(`item-actions-${DIVE.id}-more-row`)} [data-action="ride"]`;
     await page.waitForSelector(grabSel, { visible: true });
     await waitForAnimationsDone(page, 6000);
     const dive = placeOf(DIVE.place_id);
@@ -278,7 +283,8 @@ test('SPEC §10 地点叫车提示：海上的桥 → 岸上看台（叫 Grab、
     const acts = await page.$$eval(`${T('sheet-place')} [data-action]`, (els) => Object.fromEntries(els.map((e) => [e.dataset.action, { href: e.getAttribute('href'), text: e.textContent.trim() }])));
     const navDest = new URL(acts.nav.href).searchParams.get('destination');
     assert.equal(navDest, `${bridge.lat},${bridge.lng}`, '导航到桥本身（步行认路）');
-    const dp = decodeURIComponent(new URL(acts.grab.href).searchParams.get('af_dp'));
+    // 批 A：动作键 grab 改名 ride（地点页按目的地档案：越南叫 Grab）
+    const dp = decodeURIComponent(new URL(acts.ride.href).searchParams.get('af_dp'));
     assert.match(dp, new RegExp(`dropOffLatitude=${deck.lat}`), '叫 Grab 去岸上的看台');
     assert.match(await page.$eval(T('sheet-place'), (el) => el.textContent), /在南岸看台下车/);
     await shot(page, '30-bridge-place');
@@ -295,7 +301,7 @@ test('SPEC §10 地点叫车提示：海上的桥 → 岸上看台（叫 Grab、
     await app.go(`#/t/demo-island/places?sheet=place:${isle.id}`);
     await page.waitForFunction(() => /云屿/.test(document.querySelector('[data-testid="sheet-place"] .ov-sheet__title')?.textContent || ''), { timeout: 8000 });
     await waitForAnimationsDone(page, 6000);
-    assert.equal(await page.$eval(`${T('sheet-place')} [data-action="grab"]`, (el) => el.textContent.trim()), '去缆车站');
+    assert.equal(await page.$eval(`${T('sheet-place')} [data-action="ride"]`, (el) => el.textContent.trim()), '去缆车站');
     const text = await page.$eval(T('sheet-place'), (el) => el.textContent);
     assert.match(text, /开车到不了/);
     assert.match(text, /大概位置/);

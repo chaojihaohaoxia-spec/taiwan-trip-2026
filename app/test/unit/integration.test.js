@@ -214,10 +214,11 @@ test('SPEC §10 动作行：叫 Grab / 给司机看 / 复制去下车点，导�
     const model = placeActionModel(place, { getPlace, expense: true });
     const act = Object.fromEntries(model.actions.map((a) => [a.key, a]));
     assert.equal(act.nav.href, googleMapsNavigateUrl(place, { mode: 'driving' }), '导航到地点本身');
-    assert.equal(act.grab.href, grabBookingUrl(place, { getPlace }), '叫 Grab 的链接走 lib/ride-links');
-    const dp = decodeURIComponent(new URL(act.grab.href).searchParams.get('af_dp'));
+    // 批 A：动作键 grab 改名 ride（没传档案时叫车按 Grab）
+    assert.equal(act.ride.href, grabBookingUrl(place, { getPlace }), '叫 Grab 的链接走 lib/ride-links');
+    const dp = decodeURIComponent(new URL(act.ride.href).searchParams.get('af_dp'));
     assert.match(dp, new RegExp(`dropOffLatitude=${via.lat}`), '目的地坐标是下车点');
-    assert.equal(act.grab.label, noRoad ? '去缆车站' : '叫 Grab');
+    assert.equal(act.ride.label, noRoad ? '去缆车站' : '叫 Grab');
     assert.ok(model.note.startsWith(place.extra.ride_note), `说明行先说下车提示：${model.note}`);
     if (noRoad) assert.match(model.note, new RegExp(place.extra.access_note.slice(0, 8)));
     const card = driverCardFields(place, { getPlace });
